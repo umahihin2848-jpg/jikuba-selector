@@ -22,7 +22,7 @@ jobs:
       - name: Install Playwright
         run: |
           npm install --no-save playwright@latest
-          npx playwright install --with-deps chromium
+          npx playwright install --with-deps chromium webkit
       - name: Start local app
         run: |
           python3 -m http.server 4173 > /tmp/jikuba-server.log 2>&1 &
