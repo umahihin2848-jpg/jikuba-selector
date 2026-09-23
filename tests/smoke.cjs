@@ -1,7 +1,45 @@
-const { chromium } = require('playwright');
+const { chromium, webkit } = require('playwright');
 
 function assert(cond, msg) {
   if (!cond) throw new Error(msg);
+}
+
+
+async function safariSmoke() {
+  const browser = await webkit.launch({ headless: true });
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'ja-JP' });
+  const page = await context.newPage();
+  const errors = [];
+  page.on('pageerror', e => errors.push('pageerror: ' + e.message));
+  page.on('console', msg => { if (msg.type() === 'error') errors.push('console: ' + msg.text()); });
+  await page.goto('http://127.0.0.1:4173/', { waitUntil: 'networkidle' });
+  assert(await page.title() === '軸馬選定ツール', 'WebKit: タイトルが不正');
+  await page.fill('#raceName', 'Safari自動テスト');
+  await page.selectOption('#course', { label: '中山' });
+  await page.selectOption('#surface', { label: '芝' });
+  await page.fill('#distance', '1600');
+  await page.waitForTimeout(100);
+  assert(await page.inputValue('#firstTurn') === '短い', 'WebKit: 中山芝1600プリセットが反映されない');
+  await page.selectOption('[data-i="0"][data-k="prevStatus"]', { label: '不利' });
+  assert(await page.locator('#prevTypeWrap0').isVisible(), 'WebKit: 条件表示が動かない');
+  await page.selectOption('#speed', { label: '高速' });
+  await page.check('#insideLead');
+  await page.check('#insideAdv');
+  await page.selectOption('[data-i="0"][data-k="frame"]', { label: '7' });
+  await page.click('#judgeBtn');
+  assert((await page.textContent('#judgeCards')).includes('内枠主導・高速馬場・イン有利で外枠不利'), 'WebKit: 判定理由が出ない');
+  await page.fill('#finish0', '4');
+  await page.fill('#finish1', '1');
+  await page.fill('#finish2', '2');
+  await page.fill('#finish3', '3');
+  page.once('dialog', dialog => dialog.accept());
+  await page.click('#saveBtn');
+  await page.click('[data-tab="stats"]');
+  assert((await page.textContent('#statsBox')).includes('ルール別成績'), 'WebKit: 集計画面が壊れる');
+  if (errors.length) throw new Error('WebKitブラウザエラー: ' + errors.join(' | '));
+  await context.close();
+  await browser.close();
+  console.log('PASS WebKit: iPhone Safari相当の主要フロー');
 }
 
 (async () => {
@@ -120,7 +158,8 @@ function assert(cond, msg) {
 
   await legacy.close();
   await browser.close();
-  console.log('PASS: input -> judgement -> save -> history -> stats -> reload -> legacy compatibility');
+  console.log('PASS Chromium: input -> judgement -> save -> history -> stats -> reload -> legacy compatibility');
+  await safariSmoke();
 })().catch(async err => {
   console.error(err);
   process.exit(1);
