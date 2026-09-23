@@ -40,16 +40,17 @@
 <label class="check"><input id="insideAdv" type="checkbox">イン有利の馬場</label>
 <label class="check"><input id="manyFront" type="checkbox">逃げ・先行馬が多数</label>
 </div>
-<details><summary>コース形態（自動プリセット / 手動修正）</summary>
+<details><summary>コース形態（重賞用プリセット / 手動修正）</summary>
 <div class="grid2">
 <div class="field"><label>1角まで</label><select id="firstTurn"><option>標準</option><option>短い</option><option>長い</option></select></div>
 <div class="field"><label>スタート勾配</label><select id="startSlope"><option>平坦</option><option>上り</option><option>下り</option></select></div>
 <div class="field"><label>スタート地点</label><select id="startSurface"><option>芝</option><option>ダート</option></select></div>
 <div class="field"><label>直線</label><select id="straight"><option>標準</option><option>短い</option><option>長い</option></select></div>
+<div class="field"><label>コース区分</label><select id="courseLayout"><option>通常</option><option>内回り</option><option>外回り</option><option>直線</option></select></div>
 </div>
 <div class="checks"><label class="check"><input id="pocket" type="checkbox">ポケットスタート</label></div>
 <div class="field" style="margin-top:9px"><label>コース形態メモ</label><input id="courseNote" placeholder="自動反映後も変更できます"></div>
-<div id="presetMsg" class="preset"></div>
+<div id="presetMsg" class="preset">重賞で使うコースだけプリセット化。未登録コースは手動入力できます。</div>
 </details>
 </div>
 
@@ -79,11 +80,12 @@
 
 <script>
 (function(){
+var RULE_VERSION='v1.5';
 var DRAFT='jikuba_draft_v3',HIST='jikuba_hist_v3';
 var $=function(id){return document.getElementById(id)};
-var fields=['date','course','raceName','surface','distance','speed','pace','opening','lowClosing','insideDead','outsideLead','insideLead','insideAdv','manyFront','firstTurn','startSlope','startSurface','straight','pocket','courseNote','preAxis'];
+var fields=['date','course','raceName','surface','distance','speed','pace','opening','lowClosing','insideDead','outsideLead','insideLead','insideAdv','manyFront','firstTurn','startSlope','startSurface','straight','courseLayout','pocket','courseNote','preAxis'];
 function horseBase(i){return{pop:i+1,name:'',number:'',frame:'',odds:'',style:'先行',ten:'普通',pos:'好位',innerTrapped:false,prevStatus:'普通',prevType:'特になし',prevOutcome:'特になし',prevLed:false,canLeadNow:'不明',prevRepeat:'普通'}}
-function fresh(){return{race:{date:new Date().toISOString().slice(0,10),course:'',raceName:'',surface:'芝',distance:'',speed:'標準',pace:'M',opening:false,lowClosing:false,insideDead:false,outsideLead:false,insideLead:false,insideAdv:false,manyFront:false,firstTurn:'標準',startSlope:'平坦',startSurface:'芝',straight:'標準',pocket:false,courseNote:'',presetKey:''},preAxis:'',horses:[0,1,2,3].map(horseBase)}}
+function fresh(){return{race:{date:new Date().toISOString().slice(0,10),course:'',raceName:'',surface:'芝',distance:'',speed:'標準',pace:'M',opening:false,lowClosing:false,insideDead:false,outsideLead:false,insideLead:false,insideAdv:false,manyFront:false,firstTurn:'標準',startSlope:'平坦',startSurface:'芝',straight:'標準',courseLayout:'通常',pocket:false,courseNote:'',presetKey:''},preAxis:'',horses:[0,1,2,3].map(horseBase)}}
 var state=fresh();try{var s=JSON.parse(localStorage.getItem(DRAFT));if(s){state={...state,...s,race:{...state.race,...(s.race||{})},horses:Array.isArray(s.horses)?s.horses:state.horses}}}catch(e){}
 function hist(){try{return JSON.parse(localStorage.getItem(HIST))||[]}catch(e){return[]}}
 function saveHist(h){localStorage.setItem(HIST,JSON.stringify(h))}
@@ -94,17 +96,17 @@ function saveDraft(){localStorage.setItem(DRAFT,JSON.stringify(state))}
 function syncRace(){fields.forEach(function(id){if(id==='preAxis'){state.preAxis=getVal(id);return}state.race[id]=getVal(id)});saveDraft()}
 function loadUI(){fields.forEach(function(id){setVal(id,id==='preAxis'?state.preAxis:state.race[id])});renderHorses()}
 var presets={
-'東京|芝|1600':{firstTurn:'長い',startSlope:'平坦',startSurface:'芝',straight:'長い',pocket:false,note:'ユーザー設定：スローになりづらい / 外枠有利方向'},
-'中山|芝|1600':{firstTurn:'短い',startSlope:'平坦',startSurface:'芝',straight:'短い',pocket:true,note:'ユーザー設定：ポケットスタート / 内枠有利方向'},
-'中山|ダート|1200':{firstTurn:'標準',startSlope:'下り',startSurface:'芝',straight:'短い',pocket:false,note:'ユーザー設定：芝スタート / 外枠ほど先行しやすい方向 / 前半速くなりやすい'},
-'阪神|芝|1400':{firstTurn:'長い',startSlope:'下り',startSurface:'芝',straight:'標準',pocket:false,note:'ユーザー設定：スタート後が下り / 前半やや速くなりやすい'},
-'京都|芝|1400':{firstTurn:'標準',startSlope:'平坦',startSurface:'芝',straight:'長い',pocket:false,note:'ユーザー設定：外回り想定 / 差しも届きやすい方向'},
-'京都|芝|1200':{firstTurn:'標準',startSlope:'上り',startSurface:'芝',straight:'短い',pocket:false,note:'ユーザー設定：内回り / 前半上がりにくい / 直線平坦 / 先行有利方向'},
-'阪神|芝|1200':{firstTurn:'標準',startSlope:'下り',startSurface:'芝',straight:'短い',pocket:false,note:'ユーザー設定：スタート下り / 前半速くなりやすい / ゴール前急坂 / 弱い逃げは止まりやすい方向'}
-};
+'東京|芝|1600':{firstTurn:'長い',startSlope:'平坦',startSurface:'芝',straight:'長い',courseLayout:'通常',pocket:false,note:'ユーザー設定：スローになりづらい / 外枠有利方向'},
+'中山|芝|1600':{firstTurn:'短い',startSlope:'平坦',startSurface:'芝',straight:'短い',courseLayout:'通常',pocket:true,note:'ユーザー設定：ポケットスタート / 内枠有利方向'},
+'中山|ダート|1200':{firstTurn:'標準',startSlope:'下り',startSurface:'芝',straight:'短い',courseLayout:'通常',pocket:false,note:'ユーザー設定：芝スタート / 外枠ほど先行しやすい方向 / 前半速くなりやすい'},
+'阪神|芝|1400':{firstTurn:'長い',startSlope:'下り',startSurface:'芝',straight:'標準',courseLayout:'通常',pocket:false,note:'ユーザー設定：スタート後が下り / 前半やや速くなりやすい'},
+'京都|芝|1400':{firstTurn:'標準',startSlope:'平坦',startSurface:'芝',straight:'長い',courseLayout:'外回り',pocket:false,note:'ユーザー設定：重賞は外回り想定 / 差しも届きやすい方向'},
+'京都|芝|1200':{firstTurn:'標準',startSlope:'上り',startSurface:'芝',straight:'短い',courseLayout:'内回り',pocket:false,note:'ユーザー設定：内回り / 前半上がりにくい / 直線平坦 / 先行有利方向'},
+'阪神|芝|1200':{firstTurn:'標準',startSlope:'下り',startSurface:'芝',straight:'短い',courseLayout:'内回り',pocket:false,note:'ユーザー設定：スタート下り / 前半速くなりやすい / ゴール前急坂 / 弱い逃げは止まりやすい方向'}
+}
 function presetKey(){return getVal('course')+'|'+getVal('surface')+'|'+getVal('distance')}
-function applyPreset(){var k=presetKey(),p=presets[k];if(!p){$('presetMsg').textContent='';return}if(state.race.presetKey===k)return;setVal('firstTurn',p.firstTurn);setVal('startSlope',p.startSlope);setVal('startSurface',p.startSurface);setVal('straight',p.straight);setVal('pocket',p.pocket);setVal('courseNote',p.note);state.race.presetKey=k;$('presetMsg').textContent='コース設定を自動反映しました。必要なら手動で変更できます。';syncRace()}
-function horseCard(h,i){return '<div class="panel horse" id="horse'+i+'"><div class="horsehead"><div class="pop">'+(i+1)+'番人気</div><div class="badge" id="badge'+i+'">未判定</div></div><div class="grid2">'+
+function applyPreset(){var k=presetKey(),p=presets[k];if(!p){$('presetMsg').textContent='重賞用プリセット未登録。必要な場合だけ手動入力してください。';return}if(state.race.presetKey===k)return;setVal('firstTurn',p.firstTurn);setVal('startSlope',p.startSlope);setVal('startSurface',p.startSurface);setVal('straight',p.straight);setVal('courseLayout',p.courseLayout||'通常');setVal('pocket',p.pocket);setVal('courseNote',p.note);state.race.presetKey=k;$('presetMsg').textContent='コース設定を自動反映しました。必要なら手動で変更できます。';syncRace()}
+function horseCard(h,i){var showDis=h.prevStatus==='不利',showLead=!!h.prevLed;return '<div class="panel horse" id="horse'+i+'"><div class="horsehead"><div class="pop">'+(i+1)+'番人気</div><div class="badge" id="badge'+i+'">未判定</div></div><div class="grid2">'+
 '<div class="field"><label>馬名</label><input data-i="'+i+'" data-k="name" value="'+esc(h.name)+'"></div>'+
 '<div class="field"><label>馬番</label><input data-i="'+i+'" data-k="number" inputmode="numeric" value="'+esc(h.number)+'"></div>'+
 '<div class="field"><label>枠</label><select data-i="'+i+'" data-k="frame">'+opts(['','1','2','3','4','5','6','7','8'],h.frame)+'</select></div>'+
@@ -113,53 +115,61 @@ function horseCard(h,i){return '<div class="panel horse" id="horse'+i+'"><div cl
 '<div class="field"><label>テンの相対速度</label><select data-i="'+i+'" data-k="ten">'+opts(['かなり速い','速い','普通','遅い','かなり遅い'],h.ten)+'</select></div>'+
 '<div class="field"><label>今回の想定位置</label><select data-i="'+i+'" data-k="pos">'+opts(['前','好位','中団','後方'],h.pos)+'</select></div>'+
 '<div class="field"><label>前走立ち回り</label><select data-i="'+i+'" data-k="prevStatus">'+opts(['恵まれ','普通','不利'],h.prevStatus)+'</select></div>'+
-'<div class="field"><label>前走不利の種類（不利時のみ）</label><select data-i="'+i+'" data-k="prevType">'+opts(['特になし','展開','馬場','枠・位置','進路','ペース','出遅れ','その他'],h.prevType||'特になし')+'</select></div>'+
-'<div class="field"><label>前走不利は今回（不利時のみ）</label><select data-i="'+i+'" data-k="prevOutcome">'+opts(['特になし','解消','一部解消','継続・再発'],h.prevOutcome||'特になし')+'</select></div>'+
+'<div class="field '+(showDis?'':'hidden')+'" id="prevTypeWrap'+i+'"><label>前走不利の種類</label><select data-i="'+i+'" data-k="prevType">'+opts(['特になし','展開','馬場','枠・位置','進路','ペース','出遅れ','その他'],h.prevType||'特になし')+'</select></div>'+
+'<div class="field '+(showDis?'':'hidden')+'" id="prevOutcomeWrap'+i+'"><label>前走不利は今回</label><select data-i="'+i+'" data-k="prevOutcome">'+opts(['特になし','解消','一部解消','継続・再発'],h.prevOutcome||'特になし')+'</select></div>'+
 '<div class="field"><label>前走パターン再現性</label><select data-i="'+i+'" data-k="prevRepeat">'+opts(['低い','普通','高い'],h.prevRepeat)+'</select></div>'+
-'<div class="field"><label>今回は逃げられそう？</label><select data-i="'+i+'" data-k="canLeadNow">'+opts(['不明','はい','いいえ'],h.canLeadNow)+'</select></div></div>'+
+'<div class="field '+(showLead?'':'hidden')+'" id="canLeadWrap'+i+'"><label>今回は逃げられそう？</label><select data-i="'+i+'" data-k="canLeadNow">'+opts(['不明','はい','いいえ'],h.canLeadNow)+'</select></div></div>'+
 '<div class="checks"><label class="check"><input type="checkbox" data-i="'+i+'" data-k="prevLed" '+(h.prevLed?'checked':'')+'>前走逃げた</label><label class="check"><input type="checkbox" data-i="'+i+'" data-k="innerTrapped" '+(h.innerTrapped?'checked':'')+'>内に閉じ込められそう</label></div><div class="reasons" id="reasons'+i+'"></div></div>'}
 function opts(a,v){return a.map(function(x){return '<option '+(String(x)===String(v)?'selected':'')+'>'+esc(x)+'</option>'}).join('')}
-function renderHorses(){$('horseCards').innerHTML=state.horses.map(horseCard).join('');document.querySelectorAll('[data-i]').forEach(function(e){var ev=e.type==='checkbox'?'change':'input';e.addEventListener(ev,function(){var i=+this.dataset.i,k=this.dataset.k;state.horses[i][k]=this.type==='checkbox'?this.checked:this.value;saveDraft();renderLive()});if(e.tagName==='SELECT')e.addEventListener('change',function(){var i=+this.dataset.i,k=this.dataset.k;state.horses[i][k]=this.value;saveDraft();renderLive()})});renderLive()}
-function evaluate(h){var r=state.race,major=[],warn=[],good=[],context=[];var f=+h.frame||0,out=f>=6,inn=f>0&&f<=3,fast=r.speed==='超高速'||r.speed==='高速',front=h.style==='逃げ'||h.style==='先行',back=h.style==='差し'||h.style==='追込';
-if(r.opening&&fast&&out&&back)major.push('馬場×枠：開幕高速馬場で外差し不利');
-if(r.opening&&fast&&r.pace==='H'&&out&&h.style==='先行')major.push('馬場×展開：開幕高速＋Hで外先行不利');
-if(r.speed==='タフ'&&r.lowClosing&&r.pace==='S'&&back)major.push('馬場×展開：タフ＋上がり出ない＋Sで差し不利');
-if(r.insideDead&&r.outsideLead&&inn&&(h.innerTrapped||back||h.ten==='遅い'||h.ten==='かなり遅い'))major.push('馬場×隊列：内伸びず・外枠主導で内に閉じ込めリスク');
-if(r.pace==='H'&&r.manyFront&&front)major.push('展開：Hペース＋逃げ先行多数で前が厳しい');
-if(h.prevLed&&h.canLeadNow==='いいえ')major.push('前走再現性：前走逃げ→今回は逃げ再現困難');
-if(r.insideLead&&fast&&r.insideAdv&&out)major.push('馬場×隊列×枠：内枠主導・高速馬場・イン有利で外枠不利');
-var pr=0;if(h.style==='追込')pr++;if(h.ten==='かなり遅い')pr++;if(h.pos==='後方')pr++;if(pr>=2)warn.push('位置取り：追込・テン・想定位置が重なりリスク高');else if(pr===1)warn.push('位置取り：後方化するリスクあり');
-if(h.prevStatus==='不利'&&h.prevOutcome==='解消')good.push('前走：不利→今回は解消見込み');if(h.prevStatus==='不利'&&h.prevOutcome==='一部解消')warn.push('前走：不利は一部解消');if(h.prevStatus==='不利'&&h.prevOutcome==='継続・再発')major.push('前走：不利の継続・再発リスク');
-if(h.prevStatus==='恵まれ'&&h.prevRepeat==='低い')warn.push('前走再現性：恵まれた好走パターンの再現性が低い');if(h.prevRepeat==='高い')good.push('前走再現性：今回も好走パターンを再現しやすい');
-if(r.firstTurn==='短い'&&out&&front)warn.push('コース形態：1角まで短く外枠先行は位置取り負荷');
-if(r.pocket&&r.firstTurn==='短い'&&out&&front)warn.push('コース形態：ポケット＋短い1角で外枠先行はさらに注意');
-if(r.firstTurn==='長い'&&out)good.push('コース形態：1角まで長く外枠でも位置を取りやすい');
+function updateConditional(i){var h=state.horses[i],a=$('prevTypeWrap'+i),b=$('prevOutcomeWrap'+i),d=$('canLeadWrap'+i);if(a)a.classList.toggle('hidden',h.prevStatus!=='不利');if(b)b.classList.toggle('hidden',h.prevStatus!=='不利');if(d)d.classList.toggle('hidden',!h.prevLed)}
+function renderHorses(){$('horseCards').innerHTML=state.horses.map(horseCard).join('');document.querySelectorAll('[data-i]').forEach(function(e){var ev=e.type==='checkbox'?'change':'input';e.addEventListener(ev,function(){var i=+this.dataset.i,k=this.dataset.k;state.horses[i][k]=this.type==='checkbox'?this.checked:this.value;if(k==='prevStatus'&&this.value!=='不利'){state.horses[i].prevType='特になし';state.horses[i].prevOutcome='特になし'}if(k==='prevLed'&&!this.checked)state.horses[i].canLeadNow='不明';saveDraft();updateConditional(i);renderLive()});if(e.tagName==='SELECT')e.addEventListener('change',function(){var i=+this.dataset.i,k=this.dataset.k;state.horses[i][k]=this.value;if(k==='prevStatus'&&this.value!=='不利'){state.horses[i].prevType='特になし';state.horses[i].prevOutcome='特になし'}saveDraft();updateConditional(i);renderLive()})});state.horses.forEach(function(_,i){updateConditional(i)});renderLive()}
+function evaluate(h){var r=state.race,major=[],warn=[],good=[],context=[],ruleHits=[];var f=+h.frame||0,out=f>=6,inn=f>0&&f<=3,fast=r.speed==='超高速'||r.speed==='高速',front=h.style==='逃げ'||h.style==='先行',back=h.style==='差し'||h.style==='追込';
+function add(arr,id,text,level){if(arr.indexOf(text)<0)arr.push(text);if(!ruleHits.some(function(x){return x.id===id}))ruleHits.push({id:id,label:text,level:level})}
+if(r.opening&&fast&&out&&back)add(major,'opening-fast-outer-closer','馬場×枠：開幕高速馬場で外差し不利','red');
+if(r.opening&&fast&&r.pace==='H'&&out&&h.style==='先行')add(major,'opening-fast-high-outer-front','馬場×展開：開幕高速＋Hで外先行不利','red');
+if(r.speed==='タフ'&&r.lowClosing&&r.pace==='S'&&back)add(major,'tough-lowclosing-slow-back','馬場×展開：タフ＋上がり出ない＋Sで差し不利','red');
+if(r.insideDead&&r.outsideLead&&inn&&(h.innerTrapped||back||h.ten==='遅い'||h.ten==='かなり遅い'))add(major,'inside-dead-outside-led-trap','馬場×隊列：内伸びず・外枠主導で内に閉じ込めリスク','red');
+if(r.pace==='H'&&r.manyFront&&front)add(major,'high-many-front','展開：Hペース＋逃げ先行多数で前が厳しい','red');
+if(h.prevLed&&h.canLeadNow==='いいえ')add(major,'prev-led-cannot-repeat','前走再現性：前走逃げ→今回は逃げ再現困難','red');
+if(r.insideLead&&fast&&r.insideAdv&&out)add(major,'inside-led-fast-inside-adv-outer','馬場×隊列×枠：内枠主導・高速馬場・イン有利で外枠不利','red');
+var pr=0;if(h.style==='追込')pr++;if(h.ten==='かなり遅い')pr++;if(h.pos==='後方')pr++;if(pr>=2)add(warn,'position-risk-high','位置取り：追込・テン・想定位置が重なりリスク高','yellow');else if(pr===1)add(warn,'position-risk','位置取り：後方化するリスクあり','yellow');
+if(h.prevStatus==='不利'&&h.prevOutcome==='解消')add(good,'prev-disadvantage-resolved','前走：不利→今回は解消見込み','green');
+if(h.prevStatus==='不利'&&h.prevOutcome==='一部解消')add(warn,'prev-disadvantage-partly-resolved','前走：不利は一部解消','yellow');
+if(h.prevStatus==='不利'&&h.prevOutcome==='継続・再発')add(major,'prev-disadvantage-recurs','前走：不利の継続・再発リスク','red');
+if(h.prevStatus==='恵まれ'&&h.prevRepeat==='低い')add(warn,'prev-favored-low-repeat','前走再現性：恵まれた好走パターンの再現性が低い','yellow');
+if(h.prevRepeat==='高い')add(good,'prev-pattern-repeat-high','前走再現性：今回も好走パターンを再現しやすい','green');
+if(r.firstTurn==='短い'&&out&&front){if(r.pocket)add(warn,'pocket-short-turn-outer-front','コース形態：ポケット＋1角まで短く、外枠先行は位置取り負荷大','yellow');else add(warn,'short-turn-outer-front','コース形態：1角まで短く外枠先行は位置取り負荷','yellow')}
+if(r.firstTurn==='長い'&&out)add(good,'long-run-to-turn-outer','コース形態：1角まで長く外枠でも位置を取りやすい','green');
 if(r.startSlope==='下り')context.push('コース形態：下りスタートで前半が流れやすい方向');
 if(r.startSlope==='上り')context.push('コース形態：上りスタートで前半が上がりにくい方向');
-if(r.firstTurn==='短い')context.push('コース形態：1角まで短く、枠と先行争いの影響が出やすい');
-if(r.firstTurn==='長い')context.push('コース形態：1角まで長く、位置取りの自由度が高い方向');
-if(r.pocket)context.push('コース形態：ポケットスタートで内外の位置取り差に注意');
+if(r.firstTurn==='短い'&&!(out&&front))context.push('コース形態：1角まで短く、枠と先行争いの影響が出やすい');
+if(r.firstTurn==='長い'&&!out)context.push('コース形態：1角まで長く、位置取りの自由度が高い方向');
+if(r.pocket&&!(r.firstTurn==='短い'&&out&&front))context.push('コース形態：ポケットスタートで内外の位置取り差に注意');
+if(r.courseLayout&&r.courseLayout!=='通常')context.push('コース区分：'+r.courseLayout);
 if(r.straight==='短い')context.push('コース形態：直線が短く、後方馬は位置取り依存が大きい');
 if(r.straight==='長い')context.push('コース形態：直線が長く、差し馬は進路を取る時間がある');
-if(r.course==='中山'&&r.surface==='ダート'&&String(r.distance)==='1200'&&out&&front)good.push('コース設定：外枠から先行しやすい方向');
-if(r.course==='京都'&&r.surface==='芝'&&String(r.distance)==='1200'&&front)good.push('コース設定：先行有利方向');
-if(r.course==='阪神'&&r.surface==='芝'&&String(r.distance)==='1200'&&h.style==='逃げ'&&['普通','遅い','かなり遅い'].includes(h.ten))warn.push('コース設定：弱い逃げは止まりやすい方向');
-var color=major.length?'red':warn.length?'yellow':'green';return{color:color,major:major,warn:warn,good:good,context:context}}
+if(r.course==='中山'&&r.surface==='ダート'&&String(r.distance)==='1200'&&out&&front)add(good,'nakayama-d1200-outer-front','コース設定：外枠から先行しやすい方向','green');
+if(r.course==='京都'&&r.surface==='芝'&&String(r.distance)==='1200'&&front)add(good,'kyoto-t1200-front','コース設定：先行有利方向','green');
+if(r.course==='阪神'&&r.surface==='芝'&&String(r.distance)==='1200'&&h.style==='逃げ'&&['普通','遅い','かなり遅い'].includes(h.ten))add(warn,'hanshin-t1200-weak-leader','コース設定：弱い逃げは止まりやすい方向','yellow');
+var color=major.length?'red':warn.length?'yellow':'green';return{color:color,major:major,warn:warn,good:good,context:context,ruleHits:ruleHits}}
 function reasonHtml(e){var parts=[];if(e.major.length)parts.push('<div class="label" style="margin-top:8px">🔴 明確な不利</div><div class="reasons">'+e.major.map(function(x){return '<span class="reason bad">'+esc(x)+'</span>'}).join('')+'</div>');if(e.warn.length)parts.push('<div class="label" style="margin-top:8px">🟡 注意材料</div><div class="reasons">'+e.warn.map(function(x){return '<span class="reason warn">'+esc(x)+'</span>'}).join('')+'</div>');if(e.good.length)parts.push('<div class="label" style="margin-top:8px">🟢 プラス材料</div><div class="reasons">'+e.good.map(function(x){return '<span class="reason good">'+esc(x)+'</span>'}).join('')+'</div>');if(e.context.length)parts.push('<div class="label" style="margin-top:8px">🏇 コース形態の補足</div><div class="reasons">'+e.context.map(function(x){return '<span class="reason">'+esc(x)+'</span>'}).join('')+'</div>');if(!e.major.length&&!e.warn.length)parts.unshift('<div class="notice" style="margin:8px 0 0">判定理由：今回の馬場・隊列・位置取り・前走条件では、軸を避けるほどの明確な不利条件に該当していません。</div>');return parts.join('')}
 function renderLive(){state.horses.forEach(function(h,i){var e=evaluate(h),box=$('horse'+i),b=$('badge'+i),rs=$('reasons'+i);if(!box)return;box.className='panel horse '+e.color;b.className='badge '+e.color;b.textContent=e.color==='green'?'🟢 明確な不利なし':e.color==='yellow'?'🟡 注意':'🔴 軸非推奨';rs.innerHTML=reasonHtml(e)})}
 function show(tab){document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('active',x.dataset.tab===tab)});document.querySelectorAll('.page').forEach(function(x){x.classList.toggle('active',x.id===tab)});if(tab==='judge')renderJudge();if(tab==='history')renderHistory();if(tab==='stats')renderStats();scrollTo({top:0,behavior:'smooth'})}
 document.querySelectorAll('.tab').forEach(function(x){x.onclick=function(){show(x.dataset.tab)}})
 function renderJudge(){syncRace();var es=state.horses.map(evaluate),g=[];es.forEach(function(e,i){if(e.color==='green')g.push(i)});var head,desc;if(g.length===4){head='🟢 上位人気健全度：高';desc='1〜4番人気すべてに明確な不利なし。人気馬同士決着の検証対象として記録します。'}else if(g.length===1){head='⭐ 軸候補が1頭';desc=(g[0]+1)+'番人気だけが🟢です。'}else if(g.length===2){head='🟢 軸候補は2頭';desc=(g[0]+1)+'・'+(g[1]+1)+'番人気が🟢。位置取り安定性と前走再現性で最終判断。'}else if(g.length===3){head='🟢 上位人気健全度：やや高';desc='🟢が3頭。無理に順位を付けず、赤・黄を避ける使い方。'}else{head='⚪ 軸選定困難';desc='🟢が残っていません。見送りも候補です。'}
 var pre=+state.preAxis||0,match=pre?('事前軸 '+pre+'番人気 → '+(es[pre-1].color==='green'?'🟢候補に残る':es[pre-1].color==='yellow'?'🟡注意':'🔴非推奨')):'事前軸：未選択';
-$('summary').innerHTML='<div class="summary"><div class="big">'+head+'</div><p>'+desc+'</p><p>'+match+'</p></div>';
+$('summary').innerHTML='<div class="summary"><div class="big">'+head+'</div><p>'+desc+'</p><p>'+match+'</p><p class="muted">判定ルール '+RULE_VERSION+'</p></div>';
 $('judgeCards').innerHTML=state.horses.map(function(h,i){var e=es[i];return '<div class="panel horse '+e.color+'"><div class="horsehead"><div><h3>'+(i+1)+'番人気 '+esc(h.name||'馬名未入力')+'</h3><div class="muted">'+(h.frame?h.frame+'枠 / ':'')+h.style+' / テン:'+h.ten+' / 想定:'+h.pos+'</div></div><div class="badge '+e.color+'">'+(e.color==='green'?'🟢 軸候補':e.color==='yellow'?'🟡 注意':'🔴 非推奨')+'</div></div><div class="label">判定理由</div>'+reasonHtml(e)+'</div>'}).join('');
 $('finishes').innerHTML=state.horses.map(function(h,i){return '<div class="field"><label>'+(i+1)+'番人気 '+esc(h.name)+'</label><input id="finish'+i+'" type="number" inputmode="numeric" min="1" placeholder="着順"></div>'}).join('')}
 function reset(){if(!confirm('入力中のレースをリセットしますか？'))return;state=fresh();saveDraft();loadUI();show('input')}
-function saveRace(){syncRace();var es=state.horses.map(evaluate),green=es.filter(function(e){return e.color==='green'}).length,fin=state.horses.map(function(_,i){return Number($('finish'+i).value)||null});var rec={id:Date.now(),savedAt:new Date().toISOString(),state:JSON.parse(JSON.stringify(state)),greenCount:green,allGreen:green===4,autoAxis:green===1?es.findIndex(function(e){return e.color==='green'})+1:null,finalAxis:Number($('finalAxis').value)||null,decision:$('decision').value,stake:Number($('stake').value)||0,payout:Number($('payout').value)||0,quinella:$('quinella').checked,finishes:fin,top4Quinella:fin.filter(function(x){return x===1||x===2}).length===2};var h=hist();h.unshift(rec);saveHist(h);alert('保存しました');show('history')}
-function renderHistory(){var h=hist();$('historyList').innerHTML=h.length?h.map(function(r,i){return '<div class="history"><div class="top"><div><strong>'+esc(r.state.race.raceName||'レース名なし')+'</strong><div class="muted">'+esc(r.state.race.date)+' '+esc(r.state.race.course)+' / 🟢'+r.greenCount+'頭</div></div><button class="btn danger" style="min-height:36px;padding:6px 9px" onclick="delHist('+i+')">削除</button></div><div class="muted" style="margin-top:6px">事前軸:'+(r.state.preAxis||'-')+' / 最終軸:'+(r.finalAxis||'-')+' / '+r.decision+' / 投資¥'+r.stake.toLocaleString()+' / 払戻¥'+r.payout.toLocaleString()+'</div></div>'}).join(''):'<div class="muted">まだ保存データがありません。</div>'}
+function saveRace(){syncRace();var es=state.horses.map(evaluate),green=es.filter(function(e){return e.color==='green'}).length,fin=state.horses.map(function(_,i){return Number($('finish'+i).value)||null});var snap=es.map(function(e){return{color:e.color,major:e.major.slice(),warn:e.warn.slice(),good:e.good.slice(),context:e.context.slice(),ruleHits:e.ruleHits.map(function(x){return{id:x.id,label:x.label,level:x.level}})}});var rec={id:Date.now(),savedAt:new Date().toISOString(),ruleVersion:RULE_VERSION,evaluations:snap,state:JSON.parse(JSON.stringify(state)),greenCount:green,allGreen:green===4,autoAxis:green===1?es.findIndex(function(e){return e.color==='green'})+1:null,finalAxis:Number($('finalAxis').value)||null,decision:$('decision').value,stake:Number($('stake').value)||0,payout:Number($('payout').value)||0,quinella:$('quinella').checked,finishes:fin,top4Quinella:fin.filter(function(x){return x===1||x===2}).length===2};var h=hist();h.unshift(rec);saveHist(h);alert('保存しました（判定ルール '+RULE_VERSION+'）');show('history')}
+function renderHistory(){var h=hist();$('historyList').innerHTML=h.length?h.map(function(r,i){return '<div class="history"><div class="top"><div><strong>'+esc(r.state.race.raceName||'レース名なし')+'</strong><div class="muted">'+esc(r.state.race.date)+' '+esc(r.state.race.course)+' / 🟢'+r.greenCount+'頭 / '+esc(r.ruleVersion||'旧版')+'</div></div><button class="btn danger" style="min-height:36px;padding:6px 9px" onclick="delHist('+i+')">削除</button></div><div class="muted" style="margin-top:6px">事前軸:'+(r.state.preAxis||'-')+' / 最終軸:'+(r.finalAxis||'-')+' / '+r.decision+' / 投資¥'+r.stake.toLocaleString()+' / 払戻¥'+r.payout.toLocaleString()+'</div></div>'}).join(''):'<div class="muted">まだ保存データがありません。</div>'}
 window.delHist=function(i){if(!confirm('このレースを削除しますか？'))return;var h=hist();h.splice(i,1);saveHist(h);renderHistory();renderStats()}
 function rate(n,d){return d?(n/d*100).toFixed(1)+'%':'-'}
 function renderStats(){var h=hist(),pre=h.filter(function(r){return r.state.preAxis&&r.finishes.some(Boolean)}),auto=h.filter(function(r){return r.autoAxis&&r.finishes.some(Boolean)}),pf=pre.map(function(r){return r.finishes[+r.state.preAxis-1]}).filter(Boolean),af=auto.map(function(r){return r.finishes[r.autoAxis-1]}).filter(Boolean),buys=h.filter(function(r){return r.decision==='買う'}),st=buys.reduce(function(a,r){return a+r.stake},0),pa=buys.reduce(function(a,r){return a+r.payout},0),ag=h.filter(function(r){return r.allGreen&&r.finishes.some(Boolean)});
+var ruleMap={};h.forEach(function(r){if(!Array.isArray(r.evaluations)||!Array.isArray(r.finishes))return;r.evaluations.forEach(function(e,i){var fin=r.finishes[i];if(!fin||!e||!Array.isArray(e.ruleHits))return;e.ruleHits.forEach(function(hit){var key=hit.id;if(!ruleMap[key])ruleMap[key]={label:hit.label,level:hit.level,n:0,w:0,t2:0,t3:0};var x=ruleMap[key];x.n++;if(fin===1)x.w++;if(fin<=2)x.t2++;if(fin<=3)x.t3++})})});
+var rules=Object.keys(ruleMap).map(function(k){return ruleMap[k]}).sort(function(a,b){return b.n-a.n});
+var ruleHtml=rules.length?rules.map(function(x){var mark=x.n<10?' <span class="muted">参考値</span>':'';var icon=x.level==='red'?'🔴':x.level==='yellow'?'🟡':'🟢';return '<div class="history"><div><strong>'+icon+' '+esc(x.label)+'</strong>'+mark+'</div><div class="muted">発動 '+x.n+'頭 / 1着 '+rate(x.w,x.n)+' / 連対 '+rate(x.t2,x.n)+' / 複勝 '+rate(x.t3,x.n)+'</div></div>'}).join(''):'<div class="muted">新バージョンで結果を保存すると、ここにルール別成績が出ます。</div>';
 $('statsBox').innerHTML='<div class="panel"><h2>成績集計</h2><div class="stats">'+
 stat(rate(pf.filter(function(x){return x===1}).length,pf.length),'事前軸 1着率')+
 stat(rate(pf.filter(function(x){return x<=2}).length,pf.length),'事前軸 連対率')+
@@ -168,7 +178,7 @@ stat(rate(af.filter(function(x){return x<=2}).length,af.length),'単独🟢 連�
 stat(rate(buys.filter(function(r){return r.quinella}).length,buys.length),'馬連的中率')+
 stat(st?(pa/st*100).toFixed(1)+'%':'-','回収率')+
 stat(rate(ag.filter(function(r){return r.top4Quinella}).length,ag.length),'全頭🟢時 上位4人気同士')+
-stat(String(h.length),'保存レース数')+'</div></div><div class="panel"><h2>🟢頭数別</h2>'+[4,3,2,1,0].map(function(n){var a=h.filter(function(r){return r.greenCount===n&&r.finishes.some(Boolean)});return '<div class="top" style="padding:9px 0;border-bottom:1px solid #2e3d34"><div>🟢 '+n+'頭</div><div class="muted">'+a.length+'R / 上位4人気同士 '+rate(a.filter(function(r){return r.top4Quinella}).length,a.length)+'</div></div>'}).join('')+'</div>'}
+stat(String(h.length),'保存レース数')+'</div></div><div class="panel"><h2>🟢頭数別</h2>'+[4,3,2,1,0].map(function(n){var a=h.filter(function(r){return r.greenCount===n&&r.finishes.some(Boolean)});return '<div class="top" style="padding:9px 0;border-bottom:1px solid #2e3d34"><div>🟢 '+n+'頭</div><div class="muted">'+a.length+'R / 上位4人気同士 '+rate(a.filter(function(r){return r.top4Quinella}).length,a.length)+'</div></div>'}).join('')+'</div><div class="panel"><h2>ルール別成績</h2><div class="notice">発動したルールごとに、その馬の実着順を集計。10件未満は「参考値」と表示します。</div>'+ruleHtml+'</div>'}
 function stat(v,k){return '<div class="stat"><div class="v">'+v+'</div><div class="k">'+k+'</div></div>'}
 fields.forEach(function(id){var e=$(id);if(!e)return;var ev=(e.type==='checkbox'||e.tagName==='SELECT')?'change':'input';e.addEventListener(ev,function(){syncRace();if(id==='course'||id==='surface'||id==='distance')applyPreset();renderLive()})});
 $('judgeBtn').onclick=function(){show('judge')};$('quickJudge').onclick=function(){show('judge')};$('backBtn').onclick=function(){show('input')};$('saveBtn').onclick=saveRace;$('resetBtn').onclick=reset;$('newBtn').onclick=reset;
