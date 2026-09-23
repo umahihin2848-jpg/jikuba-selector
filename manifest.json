@@ -1,0 +1,9 @@
+{
+  "name": "軸馬選定ツール",
+  "short_name": "軸馬選定",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0d1410",
+  "theme_color": "#0d1410",
+  "lang": "ja"
+}
