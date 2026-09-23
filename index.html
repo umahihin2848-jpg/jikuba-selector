@@ -82,7 +82,7 @@
 var DRAFT='jikuba_draft_v3',HIST='jikuba_hist_v3';
 var $=function(id){return document.getElementById(id)};
 var fields=['date','course','raceName','surface','distance','speed','pace','opening','lowClosing','insideDead','outsideLead','insideLead','insideAdv','manyFront','firstTurn','startSlope','startSurface','straight','pocket','courseNote','preAxis'];
-function horseBase(i){return{pop:i+1,name:'',number:'',frame:'',odds:'',style:'先行',ten:'普通',pos:'好位',innerTrapped:false,prevStatus:'普通',prevType:'',prevOutcome:'',prevLed:false,canLeadNow:'不明',prevRepeat:'普通'}}
+function horseBase(i){return{pop:i+1,name:'',number:'',frame:'',odds:'',style:'先行',ten:'普通',pos:'好位',innerTrapped:false,prevStatus:'普通',prevType:'特になし',prevOutcome:'特になし',prevLed:false,canLeadNow:'不明',prevRepeat:'普通'}}
 function fresh(){return{race:{date:new Date().toISOString().slice(0,10),course:'',raceName:'',surface:'芝',distance:'',speed:'標準',pace:'M',opening:false,lowClosing:false,insideDead:false,outsideLead:false,insideLead:false,insideAdv:false,manyFront:false,firstTurn:'標準',startSlope:'平坦',startSurface:'芝',straight:'標準',pocket:false,courseNote:'',presetKey:''},preAxis:'',horses:[0,1,2,3].map(horseBase)}}
 var state=fresh();try{var s=JSON.parse(localStorage.getItem(DRAFT));if(s){state={...state,...s,race:{...state.race,...(s.race||{})},horses:Array.isArray(s.horses)?s.horses:state.horses}}}catch(e){}
 function hist(){try{return JSON.parse(localStorage.getItem(HIST))||[]}catch(e){return[]}}
@@ -113,8 +113,8 @@ function horseCard(h,i){return '<div class="panel horse" id="horse'+i+'"><div cl
 '<div class="field"><label>テンの相対速度</label><select data-i="'+i+'" data-k="ten">'+opts(['かなり速い','速い','普通','遅い','かなり遅い'],h.ten)+'</select></div>'+
 '<div class="field"><label>今回の想定位置</label><select data-i="'+i+'" data-k="pos">'+opts(['前','好位','中団','後方'],h.pos)+'</select></div>'+
 '<div class="field"><label>前走立ち回り</label><select data-i="'+i+'" data-k="prevStatus">'+opts(['恵まれ','普通','不利'],h.prevStatus)+'</select></div>'+
-'<div class="field"><label>前走不利の種類</label><select data-i="'+i+'" data-k="prevType">'+opts(['','展開','馬場','枠・位置','進路','ペース','出遅れ','その他'],h.prevType)+'</select></div>'+
-'<div class="field"><label>前走不利は今回</label><select data-i="'+i+'" data-k="prevOutcome">'+opts(['','解消','一部解消','継続・再発'],h.prevOutcome)+'</select></div>'+
+'<div class="field"><label>前走不利の種類（不利時のみ）</label><select data-i="'+i+'" data-k="prevType">'+opts(['特になし','展開','馬場','枠・位置','進路','ペース','出遅れ','その他'],h.prevType||'特になし')+'</select></div>'+
+'<div class="field"><label>前走不利は今回（不利時のみ）</label><select data-i="'+i+'" data-k="prevOutcome">'+opts(['特になし','解消','一部解消','継続・再発'],h.prevOutcome||'特になし')+'</select></div>'+
 '<div class="field"><label>前走パターン再現性</label><select data-i="'+i+'" data-k="prevRepeat">'+opts(['低い','普通','高い'],h.prevRepeat)+'</select></div>'+
 '<div class="field"><label>今回は逃げられそう？</label><select data-i="'+i+'" data-k="canLeadNow">'+opts(['不明','はい','いいえ'],h.canLeadNow)+'</select></div></div>'+
 '<div class="checks"><label class="check"><input type="checkbox" data-i="'+i+'" data-k="prevLed" '+(h.prevLed?'checked':'')+'>前走逃げた</label><label class="check"><input type="checkbox" data-i="'+i+'" data-k="innerTrapped" '+(h.innerTrapped?'checked':'')+'>内に閉じ込められそう</label></div><div class="reasons" id="reasons'+i+'"></div></div>'}
