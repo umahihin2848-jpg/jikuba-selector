@@ -120,31 +120,39 @@ function horseCard(h,i){return '<div class="panel horse" id="horse'+i+'"><div cl
 '<div class="checks"><label class="check"><input type="checkbox" data-i="'+i+'" data-k="prevLed" '+(h.prevLed?'checked':'')+'>前走逃げた</label><label class="check"><input type="checkbox" data-i="'+i+'" data-k="innerTrapped" '+(h.innerTrapped?'checked':'')+'>内に閉じ込められそう</label></div><div class="reasons" id="reasons'+i+'"></div></div>'}
 function opts(a,v){return a.map(function(x){return '<option '+(String(x)===String(v)?'selected':'')+'>'+esc(x)+'</option>'}).join('')}
 function renderHorses(){$('horseCards').innerHTML=state.horses.map(horseCard).join('');document.querySelectorAll('[data-i]').forEach(function(e){var ev=e.type==='checkbox'?'change':'input';e.addEventListener(ev,function(){var i=+this.dataset.i,k=this.dataset.k;state.horses[i][k]=this.type==='checkbox'?this.checked:this.value;saveDraft();renderLive()});if(e.tagName==='SELECT')e.addEventListener('change',function(){var i=+this.dataset.i,k=this.dataset.k;state.horses[i][k]=this.value;saveDraft();renderLive()})});renderLive()}
-function evaluate(h){var r=state.race,major=[],warn=[],good=[];var f=+h.frame||0,out=f>=6,inn=f>0&&f<=3,fast=r.speed==='超高速'||r.speed==='高速',front=h.style==='逃げ'||h.style==='先行',back=h.style==='差し'||h.style==='追込';
-if(r.opening&&fast&&out&&back)major.push('開幕高速馬場で外差し不利');
-if(r.opening&&fast&&r.pace==='H'&&out&&h.style==='先行')major.push('開幕高速＋Hで外先行不利');
-if(r.speed==='タフ'&&r.lowClosing&&r.pace==='S'&&back)major.push('タフ＋上がり出ない＋Sで差し不利');
-if(r.insideDead&&r.outsideLead&&inn&&(h.innerTrapped||back||h.ten==='遅い'||h.ten==='かなり遅い'))major.push('内伸びず・外枠主導で内に閉じ込めリスク');
-if(r.pace==='H'&&r.manyFront&&front)major.push('Hペース＋逃げ先行多数で前が厳しい');
-if(h.prevLed&&h.canLeadNow==='いいえ')major.push('前走逃げ→今回は逃げ再現困難');
-if(r.insideLead&&fast&&r.insideAdv&&out)major.push('内枠主導・高速馬場・イン有利で外枠不利');
-var pr=0;if(h.style==='追込')pr++;if(h.ten==='かなり遅い')pr++;if(h.pos==='後方')pr++;if(pr>=2)warn.push('位置取りリスク高');else if(pr===1)warn.push('位置取りリスクあり');
-if(h.prevStatus==='不利'&&h.prevOutcome==='解消')good.push('前走不利→今回解消');if(h.prevStatus==='不利'&&h.prevOutcome==='一部解消')warn.push('前走不利は一部解消');if(h.prevStatus==='不利'&&h.prevOutcome==='継続・再発')major.push('前走不利の再発リスク');
-if(h.prevStatus==='恵まれ'&&h.prevRepeat==='低い')warn.push('前走恵まれの再現性低');if(h.prevRepeat==='高い')good.push('前走パターン再現性高');
+function evaluate(h){var r=state.race,major=[],warn=[],good=[],context=[];var f=+h.frame||0,out=f>=6,inn=f>0&&f<=3,fast=r.speed==='超高速'||r.speed==='高速',front=h.style==='逃げ'||h.style==='先行',back=h.style==='差し'||h.style==='追込';
+if(r.opening&&fast&&out&&back)major.push('馬場×枠：開幕高速馬場で外差し不利');
+if(r.opening&&fast&&r.pace==='H'&&out&&h.style==='先行')major.push('馬場×展開：開幕高速＋Hで外先行不利');
+if(r.speed==='タフ'&&r.lowClosing&&r.pace==='S'&&back)major.push('馬場×展開：タフ＋上がり出ない＋Sで差し不利');
+if(r.insideDead&&r.outsideLead&&inn&&(h.innerTrapped||back||h.ten==='遅い'||h.ten==='かなり遅い'))major.push('馬場×隊列：内伸びず・外枠主導で内に閉じ込めリスク');
+if(r.pace==='H'&&r.manyFront&&front)major.push('展開：Hペース＋逃げ先行多数で前が厳しい');
+if(h.prevLed&&h.canLeadNow==='いいえ')major.push('前走再現性：前走逃げ→今回は逃げ再現困難');
+if(r.insideLead&&fast&&r.insideAdv&&out)major.push('馬場×隊列×枠：内枠主導・高速馬場・イン有利で外枠不利');
+var pr=0;if(h.style==='追込')pr++;if(h.ten==='かなり遅い')pr++;if(h.pos==='後方')pr++;if(pr>=2)warn.push('位置取り：追込・テン・想定位置が重なりリスク高');else if(pr===1)warn.push('位置取り：後方化するリスクあり');
+if(h.prevStatus==='不利'&&h.prevOutcome==='解消')good.push('前走：不利→今回は解消見込み');if(h.prevStatus==='不利'&&h.prevOutcome==='一部解消')warn.push('前走：不利は一部解消');if(h.prevStatus==='不利'&&h.prevOutcome==='継続・再発')major.push('前走：不利の継続・再発リスク');
+if(h.prevStatus==='恵まれ'&&h.prevRepeat==='低い')warn.push('前走再現性：恵まれた好走パターンの再現性が低い');if(h.prevRepeat==='高い')good.push('前走再現性：今回も好走パターンを再現しやすい');
 if(r.firstTurn==='短い'&&out&&front)warn.push('コース形態：1角まで短く外枠先行は位置取り負荷');
-if(r.pocket&&r.firstTurn==='短い'&&out&&front)warn.push('コース形態：ポケット＋短い1角で外枠先行注意');
-if(r.firstTurn==='長い'&&out)good.push('コース形態：1角まで長く外枠の位置取り自由度あり');
+if(r.pocket&&r.firstTurn==='短い'&&out&&front)warn.push('コース形態：ポケット＋短い1角で外枠先行はさらに注意');
+if(r.firstTurn==='長い'&&out)good.push('コース形態：1角まで長く外枠でも位置を取りやすい');
+if(r.startSlope==='下り')context.push('コース形態：下りスタートで前半が流れやすい方向');
+if(r.startSlope==='上り')context.push('コース形態：上りスタートで前半が上がりにくい方向');
+if(r.firstTurn==='短い')context.push('コース形態：1角まで短く、枠と先行争いの影響が出やすい');
+if(r.firstTurn==='長い')context.push('コース形態：1角まで長く、位置取りの自由度が高い方向');
+if(r.pocket)context.push('コース形態：ポケットスタートで内外の位置取り差に注意');
+if(r.straight==='短い')context.push('コース形態：直線が短く、後方馬は位置取り依存が大きい');
+if(r.straight==='長い')context.push('コース形態：直線が長く、差し馬は進路を取る時間がある');
 if(r.course==='中山'&&r.surface==='ダート'&&String(r.distance)==='1200'&&out&&front)good.push('コース設定：外枠から先行しやすい方向');
 if(r.course==='京都'&&r.surface==='芝'&&String(r.distance)==='1200'&&front)good.push('コース設定：先行有利方向');
 if(r.course==='阪神'&&r.surface==='芝'&&String(r.distance)==='1200'&&h.style==='逃げ'&&['普通','遅い','かなり遅い'].includes(h.ten))warn.push('コース設定：弱い逃げは止まりやすい方向');
-var color=major.length?'red':warn.length?'yellow':'green';return{color:color,major:major,warn:warn,good:good}}
-function renderLive(){state.horses.forEach(function(h,i){var e=evaluate(h),box=$('horse'+i),b=$('badge'+i),rs=$('reasons'+i);if(!box)return;box.className='panel horse '+e.color;b.className='badge '+e.color;b.textContent=e.color==='green'?'🟢 明確な不利なし':e.color==='yellow'?'🟡 注意':'🔴 軸非推奨';var arr=[];e.major.forEach(function(x){arr.push('<span class="reason bad">'+esc(x)+'</span>')});e.warn.forEach(function(x){arr.push('<span class="reason warn">'+esc(x)+'</span>')});e.good.forEach(function(x){arr.push('<span class="reason good">'+esc(x)+'</span>')});rs.innerHTML=arr.join('')||'<span class="reason good">重大な不利フラグなし</span>'})}
+var color=major.length?'red':warn.length?'yellow':'green';return{color:color,major:major,warn:warn,good:good,context:context}}
+function reasonHtml(e){var parts=[];if(e.major.length)parts.push('<div class="label" style="margin-top:8px">🔴 明確な不利</div><div class="reasons">'+e.major.map(function(x){return '<span class="reason bad">'+esc(x)+'</span>'}).join('')+'</div>');if(e.warn.length)parts.push('<div class="label" style="margin-top:8px">🟡 注意材料</div><div class="reasons">'+e.warn.map(function(x){return '<span class="reason warn">'+esc(x)+'</span>'}).join('')+'</div>');if(e.good.length)parts.push('<div class="label" style="margin-top:8px">🟢 プラス材料</div><div class="reasons">'+e.good.map(function(x){return '<span class="reason good">'+esc(x)+'</span>'}).join('')+'</div>');if(e.context.length)parts.push('<div class="label" style="margin-top:8px">🏇 コース形態の補足</div><div class="reasons">'+e.context.map(function(x){return '<span class="reason">'+esc(x)+'</span>'}).join('')+'</div>');if(!e.major.length&&!e.warn.length)parts.unshift('<div class="notice" style="margin:8px 0 0">判定理由：今回の馬場・隊列・位置取り・前走条件では、軸を避けるほどの明確な不利条件に該当していません。</div>');return parts.join('')}
+function renderLive(){state.horses.forEach(function(h,i){var e=evaluate(h),box=$('horse'+i),b=$('badge'+i),rs=$('reasons'+i);if(!box)return;box.className='panel horse '+e.color;b.className='badge '+e.color;b.textContent=e.color==='green'?'🟢 明確な不利なし':e.color==='yellow'?'🟡 注意':'🔴 軸非推奨';rs.innerHTML=reasonHtml(e)})}
 function show(tab){document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('active',x.dataset.tab===tab)});document.querySelectorAll('.page').forEach(function(x){x.classList.toggle('active',x.id===tab)});if(tab==='judge')renderJudge();if(tab==='history')renderHistory();if(tab==='stats')renderStats();scrollTo({top:0,behavior:'smooth'})}
 document.querySelectorAll('.tab').forEach(function(x){x.onclick=function(){show(x.dataset.tab)}})
 function renderJudge(){syncRace();var es=state.horses.map(evaluate),g=[];es.forEach(function(e,i){if(e.color==='green')g.push(i)});var head,desc;if(g.length===4){head='🟢 上位人気健全度：高';desc='1〜4番人気すべてに明確な不利なし。人気馬同士決着の検証対象として記録します。'}else if(g.length===1){head='⭐ 軸候補が1頭';desc=(g[0]+1)+'番人気だけが🟢です。'}else if(g.length===2){head='🟢 軸候補は2頭';desc=(g[0]+1)+'・'+(g[1]+1)+'番人気が🟢。位置取り安定性と前走再現性で最終判断。'}else if(g.length===3){head='🟢 上位人気健全度：やや高';desc='🟢が3頭。無理に順位を付けず、赤・黄を避ける使い方。'}else{head='⚪ 軸選定困難';desc='🟢が残っていません。見送りも候補です。'}
 var pre=+state.preAxis||0,match=pre?('事前軸 '+pre+'番人気 → '+(es[pre-1].color==='green'?'🟢候補に残る':es[pre-1].color==='yellow'?'🟡注意':'🔴非推奨')):'事前軸：未選択';
 $('summary').innerHTML='<div class="summary"><div class="big">'+head+'</div><p>'+desc+'</p><p>'+match+'</p></div>';
-$('judgeCards').innerHTML=state.horses.map(function(h,i){var e=es[i],re=[];e.major.forEach(function(x){re.push('<span class="reason bad">'+esc(x)+'</span>')});e.warn.forEach(function(x){re.push('<span class="reason warn">'+esc(x)+'</span>')});e.good.forEach(function(x){re.push('<span class="reason good">'+esc(x)+'</span>')});return '<div class="panel horse '+e.color+'"><div class="horsehead"><div><h3>'+(i+1)+'番人気 '+esc(h.name||'馬名未入力')+'</h3><div class="muted">'+(h.frame?h.frame+'枠 / ':'')+h.style+' / テン:'+h.ten+' / 想定:'+h.pos+'</div></div><div class="badge '+e.color+'">'+(e.color==='green'?'🟢 軸候補':e.color==='yellow'?'🟡 注意':'🔴 非推奨')+'</div></div><div class="reasons">'+(re.join('')||'<span class="reason good">重大な不利なし</span>')+'</div></div>'}).join('');
+$('judgeCards').innerHTML=state.horses.map(function(h,i){var e=es[i];return '<div class="panel horse '+e.color+'"><div class="horsehead"><div><h3>'+(i+1)+'番人気 '+esc(h.name||'馬名未入力')+'</h3><div class="muted">'+(h.frame?h.frame+'枠 / ':'')+h.style+' / テン:'+h.ten+' / 想定:'+h.pos+'</div></div><div class="badge '+e.color+'">'+(e.color==='green'?'🟢 軸候補':e.color==='yellow'?'🟡 注意':'🔴 非推奨')+'</div></div><div class="label">判定理由</div>'+reasonHtml(e)+'</div>'}).join('');
 $('finishes').innerHTML=state.horses.map(function(h,i){return '<div class="field"><label>'+(i+1)+'番人気 '+esc(h.name)+'</label><input id="finish'+i+'" type="number" inputmode="numeric" min="1" placeholder="着順"></div>'}).join('')}
 function reset(){if(!confirm('入力中のレースをリセットしますか？'))return;state=fresh();saveDraft();loadUI();show('input')}
 function saveRace(){syncRace();var es=state.horses.map(evaluate),green=es.filter(function(e){return e.color==='green'}).length,fin=state.horses.map(function(_,i){return Number($('finish'+i).value)||null});var rec={id:Date.now(),savedAt:new Date().toISOString(),state:JSON.parse(JSON.stringify(state)),greenCount:green,allGreen:green===4,autoAxis:green===1?es.findIndex(function(e){return e.color==='green'})+1:null,finalAxis:Number($('finalAxis').value)||null,decision:$('decision').value,stake:Number($('stake').value)||0,payout:Number($('payout').value)||0,quinella:$('quinella').checked,finishes:fin,top4Quinella:fin.filter(function(x){return x===1||x===2}).length===2};var h=hist();h.unshift(rec);saveHist(h);alert('保存しました');show('history')}
