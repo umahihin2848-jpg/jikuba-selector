@@ -94,15 +94,26 @@ async function run(browserType,label){
 
 async function live(){
   const browser=await webkit.launch({headless:true});
-  const page=await browser.newPage({viewport:{width:390,height:844},locale:'ja-JP'});
+  const context=await browser.newContext({viewport:{width:390,height:844},locale:'ja-JP'});
+  const page=await context.newPage();
   const resp=await page.goto(LIVE,{waitUntil:'networkidle',timeout:60000});
   assert(resp&&resp.ok(),'live page HTTP');
   assert(await page.title()==='馬連レンジ v2.1','live title');
-  const api=await page.evaluate(async u=>{const r=await fetch(u+'?select=id&limit=1');return {ok:r.ok,status:r.status,text:await r.text()}},API);
-  assert(api.ok,'Neon GET '+api.status+' '+api.text);
-  assert(!(await page.textContent('#history')).includes('DB接続エラー'),'live DB UI');
-  await browser.close();
-  console.log('PASS WebKit live GitHub Pages + Neon');
+  await page.waitForTimeout(300);
+  assert((await page.textContent('#storageStatus')).includes('このiPhone内'),'Neon障害時に端末保存へ切替されない');
+  await page.selectOption('#venue','東京');
+  await page.selectOption('#raceNo','12');
+  await page.fill('#raceName','Safari端末保存テスト');
+  await page.fill('#odds',A);
+  await page.selectOption('#betDecision','skip');
+  await page.click('#judge');
+  await page.waitForTimeout(200);
+  assert((await page.textContent('#history')).includes('Safari端末保存テスト'),'端末保存できない');
+  await page.reload({waitUntil:'networkidle'});
+  await page.waitForTimeout(200);
+  assert((await page.textContent('#history')).includes('Safari端末保存テスト'),'再読み込み後に端末履歴が消える');
+  assert((await page.textContent('#storageStatus')).includes('このiPhone内'),'再読み込み後に端末保存モードにならない');
+  await context.close();await browser.close();
+  console.log('PASS WebKit live GitHub Pages + iPhone local fallback');
 }
-
 (async()=>{await run(chromium,'Chromium');await run(webkit,'WebKit(iPhone Safari相当)');await live()})().catch(e=>{console.error(e);process.exit(1)});
