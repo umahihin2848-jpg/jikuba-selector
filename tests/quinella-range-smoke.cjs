@@ -52,10 +52,15 @@ async function run(browserType,label){
   page.on('pageerror',e=>errs.push('pageerror:'+e.message));
   page.on('console',m=>{if(m.type()==='error')errs.push('console:'+m.text())});
   await page.goto(LOCAL,{waitUntil:'networkidle'});
-  assert(await page.title()==='馬連レンジ v2.3',label+' title');
+  assert(await page.title()==='馬連レンジ v2.4',label+' title');
   assert(await page.locator('link[rel="manifest"]').getAttribute('href')==='./manifest.webmanifest',label+' manifest');
   const codes=await page.evaluate(([a,b,c,d])=>[compute(a).structure.code,compute(b).structure.code,compute(c).structure.code,compute(d).structure.code],[A,B,C,D]);
   assert(JSON.stringify(codes)==='["A","B","C","D"]',label+' A/B/C/D分類 '+JSON.stringify(codes));
+  const riskA=await page.evaluate(s=>compute(s).axisRisk.level,A);
+  const riskD=await page.evaluate(s=>compute(s).axisRisk.level,D);
+  assert(riskA==='low',label+' 上位集中レースは不要な軸警告を出さない');
+  assert(riskD==='high',label+' 分散レースは人気馬軸強警戒');
+
   const wa=await page.evaluate(s=>compute(s).wallAnalysis,WALL_SAMPLE);
   assert(wa.max.from===1&&wa.max.to===2&&Math.abs(wa.max.ratio-2.7895)<0.002,label+' 最大壁1→2');
   assert(wa.aWall.from===4&&wa.aWall.to===5&&Math.abs(wa.aWall.ratio-1.1208)<0.002,label+' 4→5壁');
@@ -104,6 +109,8 @@ async function run(browserType,label){
   assert((await page.textContent('#structure')).startsWith('A：'),label+' A表示');
   assert((await page.textContent('#wallSummary')).includes('最大の壁'),label+' 壁サマリー表示');
   assert((await page.textContent('#wallList')).includes('1→2'),label+' 壁一覧表示');
+  assert((await page.textContent('#axisRisk')).includes('人気馬軸：特別な警告なし'),label+' 軸警告UI');
+
 
   const post=db.getPost();
   assert(post&&post.structure_code==='A',label+' 保存');
@@ -131,7 +138,7 @@ async function live(){
   const page=await context.newPage();
   const resp=await page.goto(LIVE,{waitUntil:'networkidle',timeout:60000});
   assert(resp&&resp.ok(),'live page HTTP');
-  assert(await page.title()==='馬連レンジ v2.3','live title');
+  assert(await page.title()==='馬連レンジ v2.4','live title');
   await page.waitForTimeout(300);
   assert((await page.textContent('#storageStatus')).includes('このiPhone内'),'Neon障害時に端末保存へ切替されない');
   await page.selectOption('#venue','東京');
