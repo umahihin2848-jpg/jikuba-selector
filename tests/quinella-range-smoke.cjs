@@ -135,7 +135,7 @@ async function run(browserType,label){
   await page.fill('#k'+row.id,'1000'); await page.fill('#p'+row.id,'0');
   await page.getByRole('button',{name:'結果保存'}).first().click();
   await page.waitForTimeout(120);
-  assert((await page.textContent('#history')).includes('軸○・相手レンジ外'),label+' 結果レンジ判定');
+  assert((await page.textContent('#history')).includes('軸○・基本レンジ外'),label+' 結果レンジ判定');
   assert(db.getPatch().result_first_horse_no===1&&db.getPatch().result_second_horse_no===5,label+' 結果PATCH');
   assert((await page.textContent('#stats')).includes('A 捕捉率'),label+' 集計');
 
