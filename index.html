@@ -81,11 +81,11 @@
 
 <script>
 (function(){
-var RULE_VERSION='v1.7';
+var RULE_VERSION='v1.8';
 var DRAFT='jikuba_draft_v3',HIST='jikuba_hist_v3';
 var $=function(id){return document.getElementById(id)};
 var fields=['date','course','raceName','surface','distance','runnerCount','speed','pace','opening','lowClosing','insideDead','outsideLead','insideLead','insideAdv','manyFront','firstTurn','startSlope','startSurface','straight','courseLayout','pocket','courseNote','preAxis'];
-function horseBase(i){return{pop:i+1,name:'',number:'',frame:'',odds:'',style:'先行',ten:'普通',pos:'好位',innerTrapped:false,prevDistance:'',prevRunnerCount:'',prevStatus:'普通',prevType:'特になし',prevOutcome:'特になし',prevLed:false,canLeadNow:'不明',prevRepeat:'普通'}}
+function horseBase(i){return{pop:i+1,name:'',number:'',frame:'',odds:'',style:'先行',ten:'普通',pos:'好位',innerTrapped:false,prevDistance:'',prevRunnerCount:'',settlingRisk:'なし',prevStatus:'普通',prevType:'特になし',prevOutcome:'特になし',prevLed:false,canLeadNow:'不明',prevRepeat:'普通'}}
 function fresh(){return{race:{date:new Date().toISOString().slice(0,10),course:'',raceName:'',surface:'芝',distance:'',runnerCount:'',speed:'標準',pace:'M',opening:false,lowClosing:false,insideDead:false,outsideLead:false,insideLead:false,insideAdv:false,manyFront:false,firstTurn:'標準',startSlope:'平坦',startSurface:'芝',straight:'標準',courseLayout:'通常',pocket:false,courseNote:'',presetKey:''},preAxis:'',horses:[0,1,2,3].map(horseBase)}}
 var state=fresh();try{var s=JSON.parse(localStorage.getItem(DRAFT));if(s){state={...state,...s,race:{...state.race,...(s.race||{})},horses:Array.isArray(s.horses)?s.horses.map(function(h,i){return{...horseBase(i),...h}}):state.horses}}}catch(e){}
 function hist(){try{return JSON.parse(localStorage.getItem(HIST))||[]}catch(e){return[]}}
@@ -116,7 +116,8 @@ function horseCard(h,i){var showDis=h.prevStatus==='不利',showLead=!!h.prevLed
 '<div class="field"><label>テンの相対速度</label><select data-i="'+i+'" data-k="ten">'+opts(['かなり速い','速い','普通','遅い','かなり遅い'],h.ten)+'</select></div>'+
 '<div class="field"><label>今回の想定位置</label><select data-i="'+i+'" data-k="pos">'+opts(['前','好位','中団','後方'],h.pos)+'</select></div>'+
 '<div class="field"><label>前走距離（m）</label><input data-i="'+i+'" data-k="prevDistance" type="number" inputmode="numeric" min="800" step="100" placeholder="例：1800" value="'+esc(h.prevDistance||'')+'"></div>'+ 
-'<div class="field"><label>前走頭数</label><input data-i="'+i+'" data-k="prevRunnerCount" type="number" inputmode="numeric" min="1" max="24" placeholder="例：9" value="'+esc(h.prevRunnerCount||'')+'"></div>'+
+'<div class="field"><label>前走頭数</label><input data-i="'+i+'" data-k="prevRunnerCount" type="number" inputmode="numeric" min="1" max="24" placeholder="例：9" value="'+esc(h.prevRunnerCount||'')+'"></div>'+ 
+'<div class="field"><label>折り合い不安</label><select data-i="'+i+'" data-k="settlingRisk">'+opts(['なし','やや不安','強い不安'],h.settlingRisk||'なし')+'</select></div>'+
 '<div class="field"><label>前走立ち回り</label><select data-i="'+i+'" data-k="prevStatus">'+opts(['恵まれ','普通','不利'],h.prevStatus)+'</select></div>'+
 '<div class="field '+(showDis?'':'hidden')+'" id="prevTypeWrap'+i+'"><label>前走不利の種類</label><select data-i="'+i+'" data-k="prevType">'+opts(['特になし','展開','馬場','枠・位置','進路','ペース','出遅れ','その他'],h.prevType||'特になし')+'</select></div>'+
 '<div class="field '+(showDis?'':'hidden')+'" id="prevOutcomeWrap'+i+'"><label>前走不利は今回</label><select data-i="'+i+'" data-k="prevOutcome">'+opts(['特になし','解消','一部解消','継続・再発'],h.prevOutcome||'特になし')+'</select></div>'+
@@ -142,6 +143,11 @@ else if(pr>=2)add(warn,'position-risk-high','位置取り：追込・テン・�
 else if(pr===1)add(warn,'position-risk','位置取り：後方化するリスクあり','yellow');
 if(distDiff<=-400&&!shortCombo)add(warn,distAbs>=600?'distance-shortening-large':'distance-shortening','距離短縮：'+prevDist+'→'+curDist+'m（'+distAbs+'m'+(distAbs>=600?'大幅':'')+'短縮）。前半の追走速度上昇に注意','yellow');
 if(distDiff>=400)add(warn,distAbs>=600?'distance-extension-large':'distance-extension','距離延長：'+prevDist+'→'+curDist+'m（'+distAbs+'m'+(distAbs>=600?'大幅':'')+'延長）。折り合い・持続力への対応を確認','yellow');
+var settle=h.settlingRisk||'なし',settleSome=settle==='やや不安'||settle==='強い不安',settleStrong=settle==='強い不安';
+var settleExtension=settleSome&&distDiff>=400,settleSlow=settleSome&&r.pace==='S';
+if(settleStrong&&(settleExtension||settleSlow))add(major,'settling-combo-strong','折り合い×'+(settleExtension&&settleSlow?'距離延長・Sペース':settleExtension?'距離延長':'Sペース')+'：強い折り合い不安があり、前半のスタミナロス・コントロール難のリスク大','red');
+else if(settleSome&&(settleExtension||settleSlow))add(warn,'settling-combo','折り合い：'+(settleExtension&&settleSlow?'距離延長＋Sペース':settleExtension?'距離延長':'Sペース')+'で掛かる・スタミナを消耗するリスクに注意','yellow');
+else if(settleSome)add(warn,'settling-risk','折り合い：'+settle+'。前半で力む・スタミナを余計に使う可能性','yellow');
 var crowdPositionRisk=smallToLarge&&back&&((h.ten==='遅い'||h.ten==='かなり遅い')||h.pos==='後方');
 if(crowdPositionRisk)add(major,'small-to-large-position','頭数増×位置取り：前走'+prevRunners+'頭→今回'+curRunners+'頭（+'+runnerIncrease+'頭）。小頭数から多頭数になり、馬群密度・位置取り・進路確保リスク大','red');
 else if(smallToLarge)add(warn,'small-to-large-field','頭数増：前走'+prevRunners+'頭→今回'+curRunners+'頭（+'+runnerIncrease+'頭）。小頭数から多頭数で競馬が難しくなる可能性','yellow');
