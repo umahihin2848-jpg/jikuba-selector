@@ -94,9 +94,13 @@ async function live(){
   const r=await p.goto(LIVE,{waitUntil:'networkidle',timeout:60000});
   ok(r&&r.ok(),'live page HTTP');
   ok(await p.title()==='馬連レンジ v2.1','live title');
-  ok(!(await p.textContent('#history')).includes('DB接続エラー'),'live DB load');
-  const api=await p.evaluate(async u=>{const r=await fetch(u+'?select=id&limit=1');return [r.ok,r.status,await r.text()]},API);
-  ok(api[0],'live Data API GET '+api[1]+' '+api[2]);
+  const hist=await p.textContent('#history');
+  const api=await p.evaluate(async u=>{try{const r=await fetch(u+'?select=id&limit=1');return [r.ok,r.status,await r.text(),'']}catch(e){return [false,0,'',String(e)]}},API);
+  console.log('LIVE_HISTORY='+JSON.stringify(hist));
+  console.log('LIVE_API='+JSON.stringify(api));
+  console.log('LIVE_ERRORS='+JSON.stringify(errs));
+  ok(api[0],'live Data API GET '+api[1]+' '+api[2]+' '+api[3]);
+  ok(!hist.includes('DB接続エラー'),'live DB load '+hist);
   if(errs.length) throw new Error('live browser errors: '+errs.join(' | '));
   await ctx.close(); await browser.close();
   console.log('PASS WebKit live GitHub Pages + Neon GET');
