@@ -57,7 +57,7 @@ async function run(browserType,label){
   page.on('pageerror',e=>errs.push('pageerror:'+e.message));
   page.on('console',m=>{if(m.type()==='error')errs.push('console:'+m.text())});
   await page.goto(LOCAL,{waitUntil:'networkidle'});
-  assert(await page.title()==='馬連レンジ v2.5',label+' title');
+  assert(await page.title()==='馬連レンジ v2.6',label+' title');
   assert(await page.locator('link[rel="manifest"]').getAttribute('href')==='./manifest.webmanifest',label+' manifest');
   const codes=await page.evaluate(([a,b,c,d])=>[compute(a).structure.code,compute(b).structure.code,compute(c).structure.code,compute(d).structure.code],[A,B,C,D]);
   assert(JSON.stringify(codes)==='["A","B","C","D"]',label+' A/B/C/D分類 '+JSON.stringify(codes));
@@ -135,9 +135,9 @@ async function run(browserType,label){
   await page.fill('#k'+row.id,'1000'); await page.fill('#p'+row.id,'0');
   await page.getByRole('button',{name:'結果保存'}).first().click();
   await page.waitForTimeout(120);
-  assert((await page.textContent('#history')).includes('軸○・基本レンジ外'),label+' 結果レンジ判定');
+  assert((await page.textContent('#history')).includes('1・2着のどちらかが基本レンジ外'),label+' 結果レンジ判定');
   assert(db.getPatch().result_first_horse_no===1&&db.getPatch().result_second_horse_no===5,label+' 結果PATCH');
-  assert((await page.textContent('#stats')).includes('A 捕捉率'),label+' 集計');
+  assert((await page.textContent('#stats')).includes('基本レンジ内率'),label+' 1・2着集計');assert((await page.textContent('#stats')).includes('A 捕捉率'),label+' A集計');
 
   if(errs.length)throw new Error(label+' browser errors '+errs.join(' | '));
   await browser.close();
@@ -150,7 +150,7 @@ async function live(){
   const page=await context.newPage();
   const resp=await page.goto(LIVE,{waitUntil:'networkidle',timeout:60000});
   assert(resp&&resp.ok(),'live page HTTP');
-  assert(await page.title()==='馬連レンジ v2.5','live title');
+  assert(await page.title()==='馬連レンジ v2.6','live title');
   await page.waitForTimeout(300);
   assert((await page.textContent('#storageStatus')).includes('このiPhone内'),'Neon障害時に端末保存へ切替されない');
   await page.selectOption('#venue','東京');
