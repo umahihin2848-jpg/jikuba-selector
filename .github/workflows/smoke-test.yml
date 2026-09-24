@@ -28,4 +28,6 @@ jobs:
           python3 -m http.server 4173 > /tmp/jikuba-server.log 2>&1 &
           sleep 2
       - name: Run smoke test
-        run: node tests/smoke.cjs
+        run: |
+          node tests/smoke.cjs
+          node tests/quinella-range-smoke.cjs
