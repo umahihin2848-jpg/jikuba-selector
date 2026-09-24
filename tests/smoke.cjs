@@ -28,6 +28,16 @@ async function safariSmoke() {
   await page.selectOption('[data-i="1"][data-k="settlingRisk"]', { label: '強い不安' });
   await page.waitForTimeout(50);
   assert((await page.textContent('#reasons1')).includes('折り合い×距離延長'), 'WebKit: 折り合い複合判定が動かない');
+  await page.fill('[data-i="0"][data-k="prevCarryWeight"]', '55');
+  await page.fill('[data-i="0"][data-k="currentCarryWeight"]', '58');
+  await page.fill('[data-i="1"][data-k="prevCarryWeight"]', '56');
+  await page.fill('[data-i="1"][data-k="currentCarryWeight"]', '56');
+  await page.fill('[data-i="2"][data-k="prevCarryWeight"]', '56');
+  await page.fill('[data-i="2"][data-k="currentCarryWeight"]', '56');
+  await page.fill('[data-i="3"][data-k="prevCarryWeight"]', '56');
+  await page.fill('[data-i="3"][data-k="currentCarryWeight"]', '56');
+  await page.waitForTimeout(50);
+  assert((await page.textContent('#reasons0')).includes('前走比+3kg'), 'WebKit: 斤量判定が動かない');
   await page.fill('#runnerCount', '16');
   await page.fill('[data-i="1"][data-k="prevRunnerCount"]', '9');
   await page.waitForTimeout(50);
@@ -86,6 +96,19 @@ async function safariSmoke() {
   assert((await page.textContent('#badge1')).includes('軸非推奨'), '強い折り合い不安＋距離延長で赤判定にならない');
   assert((await page.textContent('#reasons1')).includes('折り合い×距離延長'), '折り合い複合判定理由が表示されない');
 
+  // 斤量は補助要因：+3kgまたは上位4人気内で相対的に重い場合に黄色
+  await page.fill('[data-i="0"][data-k="prevCarryWeight"]', '55');
+  await page.fill('[data-i="0"][data-k="currentCarryWeight"]', '58');
+  await page.fill('[data-i="1"][data-k="prevCarryWeight"]', '56');
+  await page.fill('[data-i="1"][data-k="currentCarryWeight"]', '56');
+  await page.fill('[data-i="2"][data-k="prevCarryWeight"]', '56');
+  await page.fill('[data-i="2"][data-k="currentCarryWeight"]', '56');
+  await page.fill('[data-i="3"][data-k="prevCarryWeight"]', '56');
+  await page.fill('[data-i="3"][data-k="currentCarryWeight"]', '56');
+  await page.waitForTimeout(50);
+  assert((await page.textContent('#reasons0')).includes('前走比+3kg'), '前走比+3kgの斤量注意が表示されない');
+  assert((await page.textContent('#reasons0')).includes('最軽量馬より+2kg'), '相対斤量差の注意が表示されない');
+
   await page.fill('[data-i="2"][data-k="prevDistance"]', '2000');
   await page.selectOption('[data-i="2"][data-k="style"]', { label: '追込' });
   await page.selectOption('[data-i="2"][data-k="ten"]', { label: 'かなり遅い' });
@@ -128,10 +151,11 @@ async function safariSmoke() {
 
   await page.click('#judgeBtn');
   await page.waitForTimeout(100);
-  assert((await page.textContent('#summary')).includes('判定ルール v1.8'), 'ルールVersionが表示されない');
+  assert((await page.textContent('#summary')).includes('判定ルール v1.9'), 'ルールVersionが表示されない');
   assert((await page.textContent('#judgeCards')).includes('内枠主導・高速馬場・イン有利で外枠不利'), '判定理由が表示されない');
   assert((await page.textContent('#judgeCards')).includes('距離延長：1200→1600m'), '判定画面に距離延長理由が出ない');
   assert((await page.textContent('#judgeCards')).includes('折り合い×距離延長'), '判定画面に折り合い複合理由が出ない');
+  assert((await page.textContent('#judgeCards')).includes('前走比+3kg'), '判定画面に斤量理由が出ない');
   assert((await page.textContent('#judgeCards')).includes('距離短縮×位置取り'), '判定画面に距離短縮複合理由が出ない');
   assert((await page.textContent('#judgeCards')).includes('頭数増：前走9頭→今回16頭'), '判定画面に頭数増理由が出ない');
   assert((await page.textContent('#judgeCards')).includes('頭数増×位置取り：前走8頭→今回16頭'), '判定画面に頭数増複合理由が出ない');
@@ -150,7 +174,7 @@ async function safariSmoke() {
   await page.click('#saveBtn');
   await page.waitForTimeout(100);
   assert((await page.textContent('#historyList')).includes('自動テスト重賞'), '履歴保存に失敗');
-  assert((await page.textContent('#historyList')).includes('v1.8'), '保存Versionが履歴に出ない');
+  assert((await page.textContent('#historyList')).includes('v1.9'), '保存Versionが履歴に出ない');
 
   await page.click('[data-tab="stats"]');
   await page.waitForTimeout(100);
@@ -159,6 +183,7 @@ async function safariSmoke() {
   assert(statsText.includes('内枠主導・高速馬場・イン有利で外枠不利'), '発動ルールが集計されない');
   assert(statsText.includes('距離延長：1200→1600m'), '距離延長ルールが集計されない');
   assert(statsText.includes('折り合い×距離延長'), '折り合い複合ルールが集計されない');
+  assert(statsText.includes('斤量：前走比+3kg'), '斤量ルールが集計されない');
   assert(statsText.includes('距離短縮×位置取り'), '距離短縮複合ルールが集計されない');
   assert(statsText.includes('頭数増：前走9頭→今回16頭'), '頭数増ルールが集計されない');
   assert(statsText.includes('頭数増×位置取り：前走8頭→今回16頭'), '頭数増複合ルールが集計されない');
