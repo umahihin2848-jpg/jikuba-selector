@@ -116,6 +116,7 @@ async function safariSmoke() {
   assert((await page.textContent('#reasons0')).includes('最軽量馬より+2kg'), '相対斤量差の注意が表示されない');
 
   // 出遅れ傾向：2回以上で注意、短距離内枠や多頭数後方型と重なると赤
+  await page.fill('#runnerCount', '16');
   await page.selectOption('[data-i="3"][data-k="startDelayCount"]', { label: '2' });
   await page.selectOption('[data-i="3"][data-k="pos"]', { label: '後方' });
   await page.waitForTimeout(50);
