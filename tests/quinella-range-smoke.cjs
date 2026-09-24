@@ -14,6 +14,11 @@ const B='1=3 2=4 3=5 4=6 5=7 6=8 7=9 8=10 9=12 10=18 11=25 12=35 13=50 14=70 15=
 const C='1=5.6 2=6.5 3=7.7 4=8.7 5=11.8 6=13.6 7=17.4 8=18.4 9=22 10=23.6 11=26.8 12=27.2 13=27.6';
 const D='1=5 2=6 3=7 4=8 5=9 6=10 7=11 8=12 9=13 10=14 11=15 12=16 13=17 14=18 15=19 16=20 17=21 18=22';
 const WALL_SAMPLE='12=1.9 8=5.3 7=8.8 16=14.9 4=16.7 18=19.9 9=22.7 6=23.3 14=26.2 13=35.8 11=39.4 17=39.8 15=49.4 3=83.6 10=87.6 5=97.7 1=127.3 2=149.0';
+const EX18='12=3.6 1=5.6 6=6.4 13=7.3 2=7.7 3=8.7 4=11.9 9=13.5 10=24.8 5=35.0 11=73.5 14=88.9 7=102.5 8=142.3';
+const EX19='12=2.0 2=4.9 13=7.9 10=11.2 4=14.2 16=15.0 14=17.0 15=19.4 11=24.4 6=55.6 3=71.0 7=73.5 8=85.3 5=312.1 9=385.8 1=426.0';
+const EX20='5=5.4 7=5.6 12=5.8 2=7.5 10=8.5 6=9.9 4=10.9 16=23.2 1=24.3 11=25.0 15=25.8 14=28.8 3=31.2 9=32.8 13=97.1 8=99.0';
+const EX22='13=5.4 5=5.6 12=6.3 6=7.8 1=9.0 3=11.1 14=13.8 8=14.0 9=18.6 2=18.6 16=21.7 11=27.2 15=29.1 4=59.5 7=79.2 10=151.8';
+const EX23='5=6.1 14=6.9 12=7.5 4=8.0 11=8.8 8=9.1 10=10.3 15=10.5 3=12.2 2=14.0 1=26.3 13=33.4 6=44.5 7=60.9 9=68.9';
 
 async function installMock(context){
   const rows=[]; let id=9000; let lastPost=null,lastPatch=null;
@@ -52,7 +57,7 @@ async function run(browserType,label){
   page.on('pageerror',e=>errs.push('pageerror:'+e.message));
   page.on('console',m=>{if(m.type()==='error')errs.push('console:'+m.text())});
   await page.goto(LOCAL,{waitUntil:'networkidle'});
-  assert(await page.title()==='馬連レンジ v2.4',label+' title');
+  assert(await page.title()==='馬連レンジ v2.5',label+' title');
   assert(await page.locator('link[rel="manifest"]').getAttribute('href')==='./manifest.webmanifest',label+' manifest');
   const codes=await page.evaluate(([a,b,c,d])=>[compute(a).structure.code,compute(b).structure.code,compute(c).structure.code,compute(d).structure.code],[A,B,C,D]);
   assert(JSON.stringify(codes)==='["A","B","C","D"]',label+' A/B/C/D分類 '+JSON.stringify(codes));
@@ -60,6 +65,10 @@ async function run(browserType,label){
   const riskD=await page.evaluate(s=>compute(s).axisRisk.level,D);
   assert(riskA==='low',label+' 上位集中レースは不要な軸警告を出さない');
   assert(riskD==='high',label+' 分散レースは人気馬軸強警戒');
+  const second=await page.evaluate(([a,b,c,d,e])=>[compute(a),compute(b),compute(c),compute(d),compute(e)].map(x=>({code:x.structure.code,end:x.secondRange.end,center:x.secondRange.centerEnd,relation:x.secondRange.relation})),[EX18,EX19,EX20,EX22,EX23]);
+  assert(JSON.stringify(second.map(x=>[x.code,x.end]))===JSON.stringify([['B',8],['A',9],['C',12],['C',13],['C',10]]),label+' 第二レンジ 18/19/20/22/23 '+JSON.stringify(second));
+  assert(second[0].relation==='基本より狭い'&&second[1].relation==='基本より広い'&&second[2].relation==='基本と同じ',label+' 第二レンジ relation');
+
 
   const wa=await page.evaluate(s=>compute(s).wallAnalysis,WALL_SAMPLE);
   assert(wa.max.from===1&&wa.max.to===2&&Math.abs(wa.max.ratio-2.7895)<0.002,label+' 最大壁1→2');
@@ -110,6 +119,9 @@ async function run(browserType,label){
   assert((await page.textContent('#wallSummary')).includes('最大の壁'),label+' 壁サマリー表示');
   assert((await page.textContent('#wallList')).includes('1→2'),label+' 壁一覧表示');
   assert((await page.textContent('#axisRisk')).includes('人気馬軸：特別な警告なし'),label+' 軸警告UI');
+  assert((await page.textContent('#secondRangeBox')).includes('第二レンジ'),label+' 第二レンジUI');
+  assert((await page.textContent('#secondExplain')).includes('買い目を増やす指示ではなく'),label+' わかりやすい解説UI');
+
 
 
   const post=db.getPost();
@@ -138,7 +150,7 @@ async function live(){
   const page=await context.newPage();
   const resp=await page.goto(LIVE,{waitUntil:'networkidle',timeout:60000});
   assert(resp&&resp.ok(),'live page HTTP');
-  assert(await page.title()==='馬連レンジ v2.4','live title');
+  assert(await page.title()==='馬連レンジ v2.5','live title');
   await page.waitForTimeout(300);
   assert((await page.textContent('#storageStatus')).includes('このiPhone内'),'Neon障害時に端末保存へ切替されない');
   await page.selectOption('#venue','東京');
