@@ -22,6 +22,9 @@ async function safariSmoke() {
   assert(await page.inputValue('#firstTurn') === '短い', 'WebKit: 中山芝1600プリセットが反映されない');
   await page.selectOption('[data-i="0"][data-k="prevStatus"]', { label: '不利' });
   assert(await page.locator('#prevTypeWrap0').isVisible(), 'WebKit: 条件表示が動かない');
+  await page.fill('[data-i="1"][data-k="prevDistance"]', '1200');
+  await page.waitForTimeout(50);
+  assert((await page.textContent('#reasons1')).includes('距離延長：1200→1600m'), 'WebKit: 距離延長判定が動かない');
   await page.selectOption('#speed', { label: '高速' });
   await page.check('#insideLead');
   await page.check('#insideAdv');
@@ -67,6 +70,19 @@ async function safariSmoke() {
   assert(await page.inputValue('#firstTurn') === '長い', '東京芝1600プリセットが反映されない');
   assert(await page.inputValue('#courseLayout') === '通常', 'コース区分が反映されない');
 
+  // 距離延長は単独で注意、距離短縮は位置取りリスクと重なると赤
+  await page.fill('[data-i="1"][data-k="prevDistance"]', '1200');
+  await page.waitForTimeout(50);
+  assert((await page.textContent('#reasons1')).includes('距離延長：1200→1600m'), '400m距離延長が注意判定されない');
+
+  await page.fill('[data-i="2"][data-k="prevDistance"]', '2000');
+  await page.selectOption('[data-i="2"][data-k="style"]', { label: '追込' });
+  await page.selectOption('[data-i="2"][data-k="ten"]', { label: 'かなり遅い' });
+  await page.selectOption('[data-i="2"][data-k="pos"]', { label: '後方' });
+  await page.waitForTimeout(50);
+  assert((await page.textContent('#badge2')).includes('軸非推奨'), '大幅短縮＋位置取りリスクで赤判定にならない');
+  assert((await page.textContent('#reasons2')).includes('距離短縮×位置取り'), '距離短縮の複合判定理由が表示されない');
+
   const prevStatus = page.locator('[data-i="0"][data-k="prevStatus"]');
   await prevStatus.selectOption({ label: '不利' });
   assert(await page.locator('#prevTypeWrap0').isVisible(), '前走不利欄が表示されない');
@@ -88,8 +104,10 @@ async function safariSmoke() {
 
   await page.click('#judgeBtn');
   await page.waitForTimeout(100);
-  assert((await page.textContent('#summary')).includes('判定ルール v1.5'), 'ルールVersionが表示されない');
+  assert((await page.textContent('#summary')).includes('判定ルール v1.6'), 'ルールVersionが表示されない');
   assert((await page.textContent('#judgeCards')).includes('内枠主導・高速馬場・イン有利で外枠不利'), '判定理由が表示されない');
+  assert((await page.textContent('#judgeCards')).includes('距離延長：1200→1600m'), '判定画面に距離延長理由が出ない');
+  assert((await page.textContent('#judgeCards')).includes('距離短縮×位置取り'), '判定画面に距離短縮複合理由が出ない');
 
   await page.selectOption('#finalAxis', { label: '2番人気' });
   await page.selectOption('#decision', { label: '買う' });
@@ -105,13 +123,15 @@ async function safariSmoke() {
   await page.click('#saveBtn');
   await page.waitForTimeout(100);
   assert((await page.textContent('#historyList')).includes('自動テスト重賞'), '履歴保存に失敗');
-  assert((await page.textContent('#historyList')).includes('v1.5'), '保存Versionが履歴に出ない');
+  assert((await page.textContent('#historyList')).includes('v1.6'), '保存Versionが履歴に出ない');
 
   await page.click('[data-tab="stats"]');
   await page.waitForTimeout(100);
   const statsText = await page.textContent('#statsBox');
   assert(statsText.includes('ルール別成績'), 'ルール別成績が表示されない');
   assert(statsText.includes('内枠主導・高速馬場・イン有利で外枠不利'), '発動ルールが集計されない');
+  assert(statsText.includes('距離延長：1200→1600m'), '距離延長ルールが集計されない');
+  assert(statsText.includes('距離短縮×位置取り'), '距離短縮複合ルールが集計されない');
   assert(statsText.includes('発動 1頭'), 'ルール発動件数が不正');
 
   await page.reload({ waitUntil: 'networkidle' });
