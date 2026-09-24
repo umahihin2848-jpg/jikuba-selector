@@ -139,6 +139,9 @@ async function safariSmoke() {
   await page.selectOption('[data-i="3"][data-k="pos"]', { label: '好位' });
   await page.waitForTimeout(50);
   assert((await page.textContent('#reasons3')).includes('頭数増：前走9頭→今回16頭'), '小頭数→多頭数の注意判定が表示されない');
+  await page.selectOption('[data-i="3"][data-k="pos"]', { label: '後方' });
+  await page.waitForTimeout(50);
+  assert((await page.textContent('#reasons3')).includes('出遅れ傾向×位置取り'), '出遅れ複合判定が再適用されない');
 
   await page.fill('[data-i="2"][data-k="prevRunnerCount"]', '8');
   await page.waitForTimeout(50);
