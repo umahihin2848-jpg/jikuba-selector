@@ -107,10 +107,10 @@ async function live(){
   await page.fill('#odds',A);
   await page.selectOption('#betDecision','skip');
   await page.click('#judge');
-  await page.waitForTimeout(200);
+  await page.waitForFunction(()=>document.querySelector('#history')?.textContent.includes('Safari端末保存テスト'),null,{timeout:15000});
   assert((await page.textContent('#history')).includes('Safari端末保存テスト'),'端末保存できない');
   await page.reload({waitUntil:'networkidle'});
-  await page.waitForTimeout(200);
+  await page.waitForFunction(()=>document.querySelector('#history')?.textContent.includes('Safari端末保存テスト'),null,{timeout:15000});
   assert((await page.textContent('#history')).includes('Safari端末保存テスト'),'再読み込み後に端末履歴が消える');
   assert((await page.textContent('#storageStatus')).includes('このiPhone内'),'再読み込み後に端末保存モードにならない');
   await context.close();await browser.close();
