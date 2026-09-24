@@ -3,6 +3,12 @@ function assert(c,m){if(!c)throw new Error(m)}
 const LOCAL='http://127.0.0.1:4173/quinella-range/';
 const LIVE='https://umahihin2848-jpg.github.io/jikuba-selector/quinella-range/';
 const API='https://ep-shy-unit-b54tgtrq.apirest.c-7.us-east-2.aws.neon.tech/neondb/rest/v1/race_assessments';
+function oddsPairs(s){return s.trim().split(/\s+/).map(x=>{const [h,o]=x.split('=');return [h,o]})}
+async function fillOddsGrid(page,s){
+  const pairs=oddsPairs(s);
+  await page.selectOption('#runnerCountSelect',String(pairs.length));
+  for(const [h,o] of pairs) await page.fill(`#oddsGrid input[data-horse="${h}"]`,o);
+}
 const A='1=2 2=3 3=4 4=5 5=8 6=12 7=20 8=30 9=50 10=80 11=100 12=120';
 const B='1=3 2=4 3=5 4=6 5=7 6=8 7=9 8=10 9=12 10=18 11=25 12=35 13=50 14=70 15=90 16=120';
 const C='1=5.6 2=6.5 3=7.7 4=8.7 5=11.8 6=13.6 7=17.4 8=18.4 9=22 10=23.6 11=26.8 12=27.2 13=27.6';
@@ -45,7 +51,7 @@ async function run(browserType,label){
   page.on('pageerror',e=>errs.push('pageerror:'+e.message));
   page.on('console',m=>{if(m.type()==='error')errs.push('console:'+m.text())});
   await page.goto(LOCAL,{waitUntil:'networkidle'});
-  assert(await page.title()==='馬連レンジ v2.1',label+' title');
+  assert(await page.title()==='馬連レンジ v2.2',label+' title');
   assert(await page.locator('link[rel="manifest"]').getAttribute('href')==='./manifest.webmanifest',label+' manifest');
   const codes=await page.evaluate(([a,b,c,d])=>[compute(a).structure.code,compute(b).structure.code,compute(c).structure.code,compute(d).structure.code],[A,B,C,D]);
   assert(JSON.stringify(codes)==='["A","B","C","D"]',label+' A/B/C/D分類 '+JSON.stringify(codes));
@@ -53,7 +59,29 @@ async function run(browserType,label){
   await page.selectOption('#venue','東京');
   await page.selectOption('#raceNo','1');
   await page.fill('#raceName',label+'テスト');
-  await page.fill('#odds',A);
+
+  await page.selectOption('#runnerCountSelect','12');
+  assert(await page.locator('#oddsGrid input[data-horse]').count()===12,label+' 12頭表示');
+  assert(await page.locator('#oddsGrid input[data-horse="13"]').count()===0,label+' 12頭立てで13番を出さない');
+  await page.selectOption('#runnerCountSelect','18');
+  assert(await page.locator('#oddsGrid input[data-horse]').count()===18,label+' 18頭表示');
+  assert(await page.locator('#oddsGrid input[data-horse="18"]').count()===1,label+' 18番表示');
+
+  await page.selectOption('#runnerCountSelect','5');
+  for(const [h,o] of [['1','2'],['2','2'],['3','4'],['4','5'],['5','8']]) await page.fill(`#oddsGrid input[data-horse="${h}"]`,o);
+  await page.waitForTimeout(50);
+  assert((await page.textContent('#oddsPreview')).includes('同一オッズは馬番順の暫定順位'),label+' 同一オッズ自動処理');
+  assert((await page.textContent('#oddsPreview')).includes('1人気：1番 2.0倍'),label+' 同一オッズ順位1');
+  assert((await page.textContent('#oddsPreview')).includes('2人気：2番 2.0倍'),label+' 同一オッズ順位2');
+
+  await fillOddsGrid(page,A);
+  await page.fill('#oddsGrid input[data-horse="12"]','');
+  await page.selectOption('#betDecision','skip');
+  await page.click('#judge');
+  await page.waitForTimeout(50);
+  assert((await page.textContent('#msg')).includes('未入力 1頭'),label+' 全頭入力必須');
+  await page.fill('#oddsGrid input[data-horse="12"]','120');
+
   await page.fill('#axisHorseNo','13');
   await page.waitForTimeout(50);
   assert((await page.textContent('#inputBrake')).includes('13番（事前軸）がオッズ表にありません'),label+' 存在しない軸ブロック');
@@ -64,6 +92,7 @@ async function run(browserType,label){
   await page.waitForTimeout(50);
   assert((await page.textContent('#opponentBrake')).includes('50.0倍'),label+' 40倍ブレーキ');
   await page.fill('#opponents','2 3');
+  await page.selectOption('#betDecision','buy');
   await page.click('#judge');
   await page.waitForTimeout(120);
   assert((await page.textContent('#structure')).startsWith('A：'),label+' A表示');
@@ -82,11 +111,6 @@ async function run(browserType,label){
   assert(db.getPatch().result_first_horse_no===1&&db.getPatch().result_second_horse_no===5,label+' 結果PATCH');
   assert((await page.textContent('#stats')).includes('A 捕捉率'),label+' 集計');
 
-  await page.fill('#odds','1=2.0 2=2.0 3=4 4=5 5=8'); await page.waitForTimeout(30);
-  assert((await page.textContent('#oddsPreview')).includes('同一オッズ'),label+' 同一オッズ警告');
-  await page.fill('#odds','1=1=2.0 2=2=2.0 3=3=4 4=4=5 5=5=8'); await page.waitForTimeout(30);
-  assert((await page.textContent('#oddsPreview')).includes('5頭を認識'),label+' 明示人気入力');
-
   if(errs.length)throw new Error(label+' browser errors '+errs.join(' | '));
   await browser.close();
   console.log('PASS '+label+' 馬連レンジ');
@@ -98,13 +122,13 @@ async function live(){
   const page=await context.newPage();
   const resp=await page.goto(LIVE,{waitUntil:'networkidle',timeout:60000});
   assert(resp&&resp.ok(),'live page HTTP');
-  assert(await page.title()==='馬連レンジ v2.1','live title');
+  assert(await page.title()==='馬連レンジ v2.2','live title');
   await page.waitForTimeout(300);
   assert((await page.textContent('#storageStatus')).includes('このiPhone内'),'Neon障害時に端末保存へ切替されない');
   await page.selectOption('#venue','東京');
   await page.selectOption('#raceNo','12');
   await page.fill('#raceName','Safari端末保存テスト');
-  await page.fill('#odds',A);
+  await fillOddsGrid(page,A);
   await page.selectOption('#betDecision','skip');
   await page.click('#judge');
   await page.waitForFunction(()=>document.querySelector('#history')?.textContent.includes('Safari端末保存テスト'),null,{timeout:15000});
