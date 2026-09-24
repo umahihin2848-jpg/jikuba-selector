@@ -13,6 +13,7 @@ const A='1=2 2=3 3=4 4=5 5=8 6=12 7=20 8=30 9=50 10=80 11=100 12=120';
 const B='1=3 2=4 3=5 4=6 5=7 6=8 7=9 8=10 9=12 10=18 11=25 12=35 13=50 14=70 15=90 16=120';
 const C='1=5.6 2=6.5 3=7.7 4=8.7 5=11.8 6=13.6 7=17.4 8=18.4 9=22 10=23.6 11=26.8 12=27.2 13=27.6';
 const D='1=5 2=6 3=7 4=8 5=9 6=10 7=11 8=12 9=13 10=14 11=15 12=16 13=17 14=18 15=19 16=20 17=21 18=22';
+const WALL_SAMPLE='12=1.9 8=5.3 7=8.8 16=14.9 4=16.7 18=19.9 9=22.7 6=23.3 14=26.2 13=35.8 11=39.4 17=39.8 15=49.4 3=83.6 10=87.6 5=97.7 1=127.3 2=149.0';
 
 async function installMock(context){
   const rows=[]; let id=9000; let lastPost=null,lastPatch=null;
@@ -51,10 +52,15 @@ async function run(browserType,label){
   page.on('pageerror',e=>errs.push('pageerror:'+e.message));
   page.on('console',m=>{if(m.type()==='error')errs.push('console:'+m.text())});
   await page.goto(LOCAL,{waitUntil:'networkidle'});
-  assert(await page.title()==='馬連レンジ v2.2',label+' title');
+  assert(await page.title()==='馬連レンジ v2.3',label+' title');
   assert(await page.locator('link[rel="manifest"]').getAttribute('href')==='./manifest.webmanifest',label+' manifest');
   const codes=await page.evaluate(([a,b,c,d])=>[compute(a).structure.code,compute(b).structure.code,compute(c).structure.code,compute(d).structure.code],[A,B,C,D]);
   assert(JSON.stringify(codes)==='["A","B","C","D"]',label+' A/B/C/D分類 '+JSON.stringify(codes));
+  const wa=await page.evaluate(s=>compute(s).wallAnalysis,WALL_SAMPLE);
+  assert(wa.max.from===1&&wa.max.to===2&&Math.abs(wa.max.ratio-2.7895)<0.002,label+' 最大壁1→2');
+  assert(wa.aWall.from===4&&wa.aWall.to===5&&Math.abs(wa.aWall.ratio-1.1208)<0.002,label+' 4→5壁');
+  assert(wa.middle.from===9&&wa.middle.to===10&&Math.abs(wa.middle.ratio-1.3664)<0.002,label+' 中穴側9→10');
+
 
   await page.selectOption('#venue','東京');
   await page.selectOption('#raceNo','1');
@@ -96,6 +102,9 @@ async function run(browserType,label){
   await page.click('#judge');
   await page.waitForTimeout(120);
   assert((await page.textContent('#structure')).startsWith('A：'),label+' A表示');
+  assert((await page.textContent('#wallSummary')).includes('最大の壁'),label+' 壁サマリー表示');
+  assert((await page.textContent('#wallList')).includes('1→2'),label+' 壁一覧表示');
+
   const post=db.getPost();
   assert(post&&post.structure_code==='A',label+' 保存');
   assert(post.odds_snapshot.length===12&&post.odds_snapshot[0].horse_no===1&&post.odds_snapshot[0].popularity===1&&post.odds_snapshot[0].win_odds===2,label+' T15馬番人気オッズ保存');
@@ -122,7 +131,7 @@ async function live(){
   const page=await context.newPage();
   const resp=await page.goto(LIVE,{waitUntil:'networkidle',timeout:60000});
   assert(resp&&resp.ok(),'live page HTTP');
-  assert(await page.title()==='馬連レンジ v2.2','live title');
+  assert(await page.title()==='馬連レンジ v2.3','live title');
   await page.waitForTimeout(300);
   assert((await page.textContent('#storageStatus')).includes('このiPhone内'),'Neon障害時に端末保存へ切替されない');
   await page.selectOption('#venue','東京');
