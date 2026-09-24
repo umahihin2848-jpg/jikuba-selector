@@ -1,0 +1,11 @@
+{
+  "name": "馬連レンジ v2.1",
+  "short_name": "馬連レンジ",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#07111f",
+  "theme_color": "#07111f",
+  "lang": "ja",
+  "description": "15分前単勝オッズから馬連の推奨相手範囲を判定・検証するアプリ"
+}
