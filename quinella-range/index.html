@@ -16,7 +16,7 @@
 <section class="card"><div class="row"><div><h2 style="margin:0">1・2着レンジ検証DB</h2><div class="muted">1着・2着の2頭が推奨範囲内だったかをA〜D別に検証。3着以下は使いません。</div></div><button class="secondary" id="exportCsv">CSV</button></div><div id="stats" class="stats" style="margin-top:12px"></div></section>
 <section class="card"><div class="row"><h2 style="margin:0">判定履歴</h2><button class="secondary" id="reload">更新</button></div><div id="history"></div></section><div class="muted">1・2着レンジ判定 v2.9。A/B/C/D閾値と壁の強弱ラベルは初期仮説。T-15馬番・人気・オッズと結果を照合し、蓄積データで再調整します。</div></main>
 <script>
-const $=id=>document.getElementById(id);const DATA='https://ep-shy-unit-b54tgtrq.apirest.c-7.us-east-2.aws.neon.tech/neondb/rest/v1';let historyCache=[];
+const $=id=>document.getElementById(id);const DATA='https://ep-shy-unit-b54tgtrq.apirest.c-7.us-east-2.aws.neon.tech/neondb/rest/v1';let historyCache=[],raceFormLoading=false;
 function jpDate(){const d=new Date(Date.now()+9*3600000);return d.toISOString().slice(0,10)}$('raceDate').value=jpDate();
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function pc(x){return(Number(x)*100).toFixed(1)+'%'}function yen(v){return Number(v||0).toLocaleString('ja-JP')+'円'}function roiPct(stake,ret){return stake>0?Number((100*ret/stake).toFixed(1)):null}function pct(x){return`${(x*100).toFixed(1)}%`}function num(v,d=6){return Number(Number(v).toFixed(d))}
 function rangeLabel(code,n){if(code==='A')return`1〜${Math.min(4,n)}番人気`;if(code==='B')return n<9?`1〜${n}番人気（全頭）`:'1〜9番人気';if(code==='C')return n<12?`1〜${n}番人気（全頭）`:'1〜12番人気';return'単勝40倍未満まで広く'}
@@ -24,7 +24,7 @@ function wallBand(r){return r>=1.5?{label:'強い壁',cls:'wallStrong'}:r>=1.3?{
 function analyzeWalls(runners){const walls=[];for(let i=1;i<(runners||[]).length;i++){const prev=runners[i-1],cur=runners[i],ratio=num(cur.win_odds/prev.win_odds,4);walls.push({from:i,to:i+1,ratio,from_odds:prev.win_odds,to_odds:cur.win_odds})}const maxOf=a=>a.length?[...a].sort((x,y)=>y.ratio-x.ratio||x.from-y.from)[0]:null;return{walls,max:maxOf(walls),upper:maxOf(walls.filter(w=>w.from<=4)),middle:maxOf(walls.filter(w=>w.from>=5&&w.from<=9)),aWall:walls.find(w=>w.from===4)||null,top3:[...walls].sort((x,y)=>y.ratio-x.ratio||x.from-y.from).slice(0,3)}}
 function parseRaceOdds(input){const raw=String(input||'').trim();if(!raw)return[];const parts=raw.split(/\s+/).filter(Boolean),rows=[];for(const part of parts){const m=part.match(/^(\d{1,2})=(\d+(?:\.\d+)?)$/);if(!m)throw new Error('オッズ入力を確認してください');rows.push({horse_no:Number(m[1]),win_odds:Number(m[2])})}if(rows.length<5)throw new Error('単勝オッズを5頭以上入力してください');if(rows.some(x=>x.horse_no<1||x.horse_no>18))throw new Error('馬番は1〜18で入力してください');if(rows.some(x=>x.win_odds<1||x.win_odds>=1000))throw new Error('単勝オッズは1.0〜999.9倍で入力してください');if(new Set(rows.map(x=>x.horse_no)).size!==rows.length)throw new Error('同じ馬番が重複しています');return rows.sort((a,b)=>a.win_odds-b.win_odds||a.horse_no-b.horse_no).map((x,i)=>({...x,popularity:i+1}))}
 function renderOddsGrid(){const n=Number($('runnerCountSelect').value),grid=$('oddsGrid'),old={};grid.querySelectorAll('input[data-horse]').forEach(el=>old[el.dataset.horse]=el.value);if(!n){grid.innerHTML='<div class="muted" style="grid-column:1/-1">出走頭数を選択してください。</div>';$('odds').value='';$('oddsPreview').classList.add('hidden');return}grid.innerHTML=Array.from({length:n},(_,i)=>{const h=i+1;return `<div class="oddsRow"><div class="horseNo">${h}番</div><input type="number" min="1" max="999.9" step="0.1" inputmode="decimal" data-horse="${h}" value="${old[h]||''}" placeholder="オッズ"></div>`}).join('');$('axisHorseNo').max=n;grid.querySelectorAll('input[data-horse]').forEach(el=>el.addEventListener('input',syncOddsFromGrid));syncOddsFromGrid()}
-function syncOddsFromGrid(){const n=Number($('runnerCountSelect').value),vals=[];$('oddsGrid').querySelectorAll('input[data-horse]').forEach(el=>{if(el.value!=='')vals.push(`${el.dataset.horse}=${el.value}`)});$('odds').value=vals.join(' ');updateOddsPreview();updateInputBrake();updateOpponentBrake();const k=raceKey($('raceDate').value,$('venue').value,$('raceNo').value);if(raceListRows().some(x=>x.key===k)){try{upsertDraft(formDraft())}catch{}}}
+function syncOddsFromGrid(){const n=Number($('runnerCountSelect').value),vals=[];$('oddsGrid').querySelectorAll('input[data-horse]').forEach(el=>{if(el.value!=='')vals.push(`${el.dataset.horse}=${el.value}`)});$('odds').value=vals.join(' ');updateOddsPreview();updateInputBrake();updateOpponentBrake();if(!raceFormLoading){const k=raceKey($('raceDate').value,$('venue').value,$('raceNo').value);if(raceListRows().some(x=>x.key===k)){try{upsertDraft(formDraft())}catch{}}}}
 function safeSnapshot(input){try{return parseRaceOdds(input)}catch{return[]}}function findRunner(runners,horseNo){return(runners||[]).find(x=>Number(x.horse_no)===Number(horseNo))||null}
 function parseOpponentHorseNos(input){const raw=String(input||'').trim();if(!raw)return[];const parts=raw.replace(/[，、]/g,',').split(/[\s,]+/).filter(Boolean);const nums=parts.map(x=>Number(x));if(nums.some(x=>!Number.isInteger(x)||x<1||x>18))throw new Error('相手馬は1〜18の整数の馬番で入力してください');if(new Set(nums).size!==nums.length)throw new Error('相手馬に同じ馬番が重複しています');return nums}
 function updateOddsPreview(){const box=$('oddsPreview'),n=Number($('runnerCountSelect').value),filled=$('oddsGrid').querySelectorAll('input[data-horse]').length?Array.from($('oddsGrid').querySelectorAll('input[data-horse]')).filter(x=>x.value!=='').length:0;if(!n){box.classList.add('hidden');return}if(filled<n){box.innerHTML=`<b>${n}頭立て</b>：あと${n-filled}頭のオッズを入力してください。`;box.classList.remove('hidden');return}try{const rows=parseRaceOdds($('odds').value),odds=rows.map(x=>x.win_odds),hasTie=new Set(odds).size!==odds.length;box.innerHTML=`<b>${rows.length}頭を認識</b>${hasTie?' <span class="muted">※同一オッズは馬番順の暫定順位</span>':''}<br>`+rows.map(x=>`${x.popularity}人気：${x.horse_no}番 ${x.win_odds.toFixed(1)}倍`).join(' / ');box.classList.remove('hidden')}catch(e){box.textContent=e.message;box.classList.remove('hidden')}}
@@ -35,8 +35,8 @@ $('saveDraft').onclick=()=>{try{const d=upsertDraft(formDraft());$('draftMsg').t
 $('deleteDraft').onclick=()=>{const k=raceKey($('raceDate').value,$('venue').value,$('raceNo').value);const exists=raceListRows().some(x=>x.key===k);if(!exists){$('draftMsg').textContent='このレースの未判定データはありません。';return}removeDraftByKey(k);$('draftMsg').textContent='未判定データを一覧から削除しました。'};
 $('newRace').onclick=()=>{const d=$('raceDate').value||jpDate();clearFormForNew();$('raceDate').value=d;renderRaceList();document.getElementById('inputCard').scrollIntoView({behavior:'smooth',block:'start'})};
 $('raceDate').addEventListener('change',renderRaceList);
-for(const id of ['raceName','axisHorseNo','plannedStake','opponents','distance'])$(id).addEventListener('input',()=>{const k=raceKey($('raceDate').value,$('venue').value,$('raceNo').value);if(raceListRows().some(x=>x.key===k)){try{upsertDraft(formDraft())}catch{}}});
-for(const id of ['venue','raceNo','betDecision','grade','age','weight'])$(id).addEventListener('change',()=>{const k=raceKey($('raceDate').value,$('venue').value,$('raceNo').value);if(raceListRows().some(x=>x.key===k)){try{upsertDraft(formDraft())}catch{}}});
+for(const id of ['raceName','axisHorseNo','plannedStake','opponents','distance'])$(id).addEventListener('input',()=>{const k=raceKey($('raceDate').value,$('venue').value,$('raceNo').value);if(!raceFormLoading&&raceListRows().some(x=>x.key===k)){try{upsertDraft(formDraft())}catch{}}});
+for(const id of ['venue','raceNo','betDecision','grade','age','weight'])$(id).addEventListener('change',()=>{const k=raceKey($('raceDate').value,$('venue').value,$('raceNo').value);if(!raceFormLoading&&raceListRows().some(x=>x.key===k)){try{upsertDraft(formDraft())}catch{}}});
 
 function baseRangeEnd(code,runners){
   const n=runners.length;
@@ -179,21 +179,29 @@ function clearFormForNew(){
   $('result').classList.add('hidden');$('msg').textContent='';$('draftMsg').textContent='';updateInputBrake();updateOpponentBrake();
 }
 function loadDraftToForm(d){
-  $('raceDate').value=d.raceDate||jpDate();$('venue').value=d.venue||'';$('raceNo').value=String(d.raceNo||11);$('raceName').value=d.raceName||'';
-  $('runnerCountSelect').value=d.runnerCount?String(d.runnerCount):'';renderOddsGrid();
-  if(d.runnerCount&&d.odds){for(const[h,o]of Object.entries(d.odds)){const el=$('oddsGrid').querySelector(`input[data-horse="${h}"]`);if(el)el.value=o}syncOddsFromGrid()}
-  $('axisHorseNo').value=d.axisHorseNo||'';$('betDecision').value=d.betDecision||'';$('plannedStake').value=d.plannedStake||'';$('opponents').value=d.opponents||'';
-  $('grade').value=d.grade||'';$('age').value=d.age||'';$('weight').value=d.weight||'';$('distance').value=d.distance||'';
-  $('result').classList.add('hidden');$('draftMsg').textContent='未判定の入力内容を読み込みました。';updateInputBrake();updateOpponentBrake();
+  raceFormLoading=true;
+  try{
+    $('raceDate').value=d.raceDate||jpDate();$('venue').value=d.venue||'';$('raceNo').value=String(d.raceNo||11);$('raceName').value=d.raceName||'';
+    $('runnerCountSelect').value=d.runnerCount?String(d.runnerCount):'';renderOddsGrid();
+    if(d.runnerCount&&d.odds){for(const[h,o]of Object.entries(d.odds)){const el=$('oddsGrid').querySelector(`input[data-horse="${h}"]`);if(el)el.value=o}syncOddsFromGrid()}
+    $('axisHorseNo').value=d.axisHorseNo||'';$('betDecision').value=d.betDecision||'';$('plannedStake').value=d.plannedStake||'';$('opponents').value=d.opponents||'';
+    $('grade').value=d.grade||'';$('age').value=d.age||'';$('weight').value=d.weight||'';$('distance').value=d.distance||'';
+    $('result').classList.add('hidden');$('draftMsg').textContent='未判定の入力内容を読み込みました。';
+  }finally{raceFormLoading=false}
+  updateOddsPreview();updateInputBrake();updateOpponentBrake();renderRaceList()
 }
 function loadAssessmentToForm(r){
-  $('raceDate').value=r.raceDate;$('venue').value=r.venue;$('raceNo').value=String(r.raceNo);$('raceName').value=r.raceName||'';
-  $('runnerCountSelect').value=String(r.n||'');renderOddsGrid();
-  for(const x of r.runners||[]){const el=$('oddsGrid').querySelector(`input[data-horse="${x.horse_no}"]`);if(el)el.value=String(x.win_odds)}syncOddsFromGrid();
-  $('axisHorseNo').value=r.priorAxisHorseNo||'';$('betDecision').value=r.betDecision||'';$('plannedStake').value=r.plannedStake||'';
-  $('opponents').value=(r.opponents||[]).map(x=>x.horseNo).join(' ');
-  $('grade').value=r.context?.grade||'';$('age').value=r.context?.age||'';$('weight').value=r.context?.weight||'';$('distance').value=r.context?.distance||'';
-  $('draftMsg').textContent='判定済みの凍結データを読み込みました。';render(r)
+  raceFormLoading=true;
+  try{
+    $('raceDate').value=r.raceDate;$('venue').value=r.venue;$('raceNo').value=String(r.raceNo);$('raceName').value=r.raceName||'';
+    $('runnerCountSelect').value=String(r.n||'');renderOddsGrid();
+    for(const x of r.runners||[]){const el=$('oddsGrid').querySelector(`input[data-horse="${x.horse_no}"]`);if(el)el.value=String(x.win_odds)}syncOddsFromGrid();
+    $('axisHorseNo').value=r.priorAxisHorseNo||'';$('betDecision').value=r.betDecision||'';$('plannedStake').value=r.plannedStake||'';
+    $('opponents').value=(r.opponents||[]).map(x=>x.horseNo).join(' ');
+    $('grade').value=r.context?.grade||'';$('age').value=r.context?.age||'';$('weight').value=r.context?.weight||'';$('distance').value=r.context?.distance||'';
+    $('draftMsg').textContent='判定済みの凍結データを読み込みました.';
+  }finally{raceFormLoading=false}
+  updateOddsPreview();updateInputBrake();updateOpponentBrake();render(r);renderRaceList()
 }
 function openRaceFromList(key){
   const row=assessedMap().get(key);
