@@ -130,7 +130,7 @@ async function run(browserType,label){
   await ten.click();
   assert(await page.inputValue('#raceNo')==='10'&&await page.inputValue('#raceName')==='十Rオープン',label+' 10Rへ切替');
   assert(await page.inputValue('#axisHorseNo')==='2',label+' 下書き軸復元');
-  assert(await page.inputValue('#oddsGrid input[data-horse="5"]')==='20',label+' 下書きオッズ復元');
+  assert(Number(await page.inputValue('#oddsGrid input[data-horse="5"]'))===20,label+' 下書きオッズ復元');
 
   // 通常テスト用に新規入力へ
   await page.click('#newRace');
