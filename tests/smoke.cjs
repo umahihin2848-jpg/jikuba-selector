@@ -14,7 +14,24 @@ async function safariSmoke() {
   page.on('console', msg => { if (msg.type() === 'error') errors.push('console: ' + msg.text()); });
   await page.goto('http://127.0.0.1:4173/', { waitUntil: 'networkidle' });
   assert(await page.title() === '軸馬選定ツール', 'WebKit: タイトルが不正');
+
+  // 複数レース下書き：作成・一覧・切替
+  await page.fill('#raceNo', '11');
   await page.fill('#raceName', 'Safari自動テスト');
+  await page.fill('[data-i="0"][data-k="name"]', 'Safari馬A');
+  await page.click('#newBtn');
+  await page.fill('#raceNo', '12');
+  await page.fill('#raceName', 'Safari第2レース');
+  await page.fill('[data-i="0"][data-k="name"]', 'Safari馬B');
+  await page.click('[data-tab="races"]');
+  const wkRaceList = await page.textContent('#raceList');
+  assert(wkRaceList.includes('11R Safari自動テスト'), 'WebKit: 1件目の下書きが一覧に出ない');
+  assert(wkRaceList.includes('12R Safari第2レース'), 'WebKit: 2件目の下書きが一覧に出ない');
+  const wkFirst = page.locator('#raceList .history').filter({ hasText: '11R Safari自動テスト' });
+  await wkFirst.getByRole('button', { name: '開く' }).click();
+  assert(await page.inputValue('#raceNo') === '11', 'WebKit: レース番号が復元されない');
+  assert(await page.inputValue('#raceName') === 'Safari自動テスト', 'WebKit: レース切替でレース名が復元されない');
+  assert(await page.inputValue('[data-i="0"][data-k="name"]') === 'Safari馬A', 'WebKit: レース切替で馬入力が復元されない');
   await page.selectOption('#course', { label: '中山' });
   await page.selectOption('#surface', { label: '芝' });
   await page.fill('#distance', '1600');
@@ -95,6 +112,25 @@ async function safariSmoke() {
   assert(await page.title() === '軸馬選定ツール', 'タイトルが不正');
   assert(await page.locator('[id^="horse"]').filter({ has: page.locator('.pop') }).count() >= 4, '馬カードが4頭分表示されない');
 
+  // 複数レース下書き：現在の入力を保持したまま次のレースを作成し、一覧から戻れる
+  await page.fill('#raceNo', '9');
+  await page.fill('#raceName', '下書きA');
+  await page.fill('[data-i="0"][data-k="name"]', '下書き馬A');
+  await page.click('#newBtn');
+  await page.fill('#raceNo', '10');
+  await page.fill('#raceName', '下書きB');
+  await page.fill('[data-i="0"][data-k="name"]', '下書き馬B');
+  await page.click('[data-tab="races"]');
+  const raceListText = await page.textContent('#raceList');
+  assert(raceListText.includes('9R 下書きA'), '1件目の下書きが一覧に表示されない');
+  assert(raceListText.includes('10R 下書きB'), '2件目の下書きが一覧に表示されない');
+  const firstDraft = page.locator('#raceList .history').filter({ hasText: '9R 下書きA' });
+  await firstDraft.getByRole('button', { name: '開く' }).click();
+  assert(await page.inputValue('#raceNo') === '9', '切替後にレース番号が戻らない');
+  assert(await page.inputValue('#raceName') === '下書きA', '切替後にレース名が戻らない');
+  assert(await page.inputValue('[data-i="0"][data-k="name"]') === '下書き馬A', '切替後に馬入力が戻らない');
+
+  await page.fill('#raceNo', '11');
   await page.fill('#raceName', '自動テスト重賞');
   await page.selectOption('#course', { label: '東京' });
   await page.selectOption('#surface', { label: '芝' });
@@ -221,7 +257,7 @@ async function safariSmoke() {
 
   await page.click('#judgeBtn');
   await page.waitForTimeout(100);
-  assert((await page.textContent('#summary')).includes('判定ルール v2.2'), 'ルールVersionが表示されない');
+  assert((await page.textContent('#summary')).includes('判定ルール v2.3'), 'ルールVersionが表示されない');
   assert((await page.textContent('#judgeCards')).includes('内枠主導・高速馬場・イン有利で外枠不利'), '判定理由が表示されない');
   assert((await page.textContent('#judgeCards')).includes('距離延長：1200→1600m'), '判定画面に距離延長理由が出ない');
   assert((await page.textContent('#judgeCards')).includes('折り合い×距離延長'), '判定画面に折り合い複合理由が出ない');
@@ -248,7 +284,7 @@ async function safariSmoke() {
   await page.click('#saveBtn');
   await page.waitForTimeout(100);
   assert((await page.textContent('#historyList')).includes('自動テスト重賞'), '履歴保存に失敗');
-  assert((await page.textContent('#historyList')).includes('v2.2'), '保存Versionが履歴に出ない');
+  assert((await page.textContent('#historyList')).includes('v2.3'), '保存Versionが履歴に出ない');
 
   await page.click('[data-tab="stats"]');
   await page.waitForTimeout(100);
@@ -270,6 +306,10 @@ async function safariSmoke() {
   await page.reload({ waitUntil: 'networkidle' });
   await page.click('[data-tab="history"]');
   assert((await page.textContent('#historyList')).includes('自動テスト重賞'), '再読み込み後に履歴が消える');
+  await page.click('[data-tab="races"]');
+  const persistedDrafts = await page.textContent('#raceList');
+  assert(persistedDrafts.includes('10R 下書きB'), '再読み込み後に別レースの下書きが消える');
+  assert(persistedDrafts.includes('11R 自動テスト重賞'), '再読み込み後に編集中レースが消える');
 
   if (errors.length) throw new Error('ブラウザエラー検出: ' + errors.join(' | '));
 
