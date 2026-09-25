@@ -83,7 +83,7 @@ async function run(browserType,label){
   page.on('pageerror',e=>errs.push('pageerror:'+e.message));
   page.on('console',m=>{if(m.type()==='error')errs.push('console:'+m.text())});
   await page.goto(LOCAL,{waitUntil:'networkidle'});
-  assert(await page.title()==='馬連レンジ v2.8',label+' title');
+  assert(await page.title()==='馬連レンジ v2.9',label+' title');
   assert(await page.locator('link[rel="manifest"]').getAttribute('href')==='./manifest.webmanifest',label+' manifest');
   const codes=await page.evaluate(([a,b,c,d])=>[compute(a).structure.code,compute(b).structure.code,compute(c).structure.code,compute(d).structure.code],[A,B,C,D]);
   assert(JSON.stringify(codes)==='["A","B","C","D"]',label+' A/B/C/D分類 '+JSON.stringify(codes));
@@ -104,6 +104,36 @@ async function run(browserType,label){
   assert(advice.text.includes('明確な1頭が見つからない場合'),label+' 実戦解説：軸馬選定との連携');
   assert(advice.point.includes('穴をたくさん買う'),label+' 実戦解説：穴多点買いブレーキ');
 
+
+  // レース一覧：未判定を複数保存し、タップで入力途中へ戻れる
+  await page.selectOption('#venue','東京');
+  await page.selectOption('#raceNo','9');
+  await page.fill('#raceName','九Rステークス');
+  await page.click('#saveDraft');
+  assert((await page.textContent('#raceList')).includes('9R')&&(await page.textContent('#raceList')).includes('九Rステークス')&&(await page.textContent('#raceList')).includes('未判定'),label+' レース一覧 未判定9R');
+
+  await page.click('#newRace');
+  await page.selectOption('#venue','東京');
+  await page.selectOption('#raceNo','10');
+  await page.fill('#raceName','十Rオープン');
+  await page.selectOption('#runnerCountSelect','5');
+  for(const [h,o] of [['1','3.2'],['2','5.1'],['3','8.0'],['4','12.5'],['5','20.0']]) await page.fill(`#oddsGrid input[data-horse="${h}"]`,o);
+  await page.fill('#axisHorseNo','2');
+  await page.click('#saveDraft');
+  assert((await page.textContent('#raceList')).includes('10R')&&(await page.textContent('#raceList')).includes('十Rオープン'),label+' レース一覧 未判定10R');
+
+  const nine=page.locator('#raceList .raceItem').filter({hasText:'九Rステークス'});
+  await nine.click();
+  assert(await page.inputValue('#raceNo')==='9'&&await page.inputValue('#raceName')==='九Rステークス',label+' 9Rへ切替');
+
+  const ten=page.locator('#raceList .raceItem').filter({hasText:'十Rオープン'});
+  await ten.click();
+  assert(await page.inputValue('#raceNo')==='10'&&await page.inputValue('#raceName')==='十Rオープン',label+' 10Rへ切替');
+  assert(await page.inputValue('#axisHorseNo')==='2',label+' 下書き軸復元');
+  assert(await page.inputValue('#oddsGrid input[data-horse="5"]')==='20',label+' 下書きオッズ復元');
+
+  // 通常テスト用に新規入力へ
+  await page.click('#newRace');
 
   const wa=await page.evaluate(s=>compute(s).wallAnalysis,WALL_SAMPLE);
   assert(wa.max.from===1&&wa.max.to===2&&Math.abs(wa.max.ratio-2.7895)<0.002,label+' 最大壁1→2');
@@ -165,6 +195,12 @@ async function run(browserType,label){
   assert(post.odds_snapshot.length===12&&post.odds_snapshot[0].horse_no===1&&post.odds_snapshot[0].popularity===1&&post.odds_snapshot[0].win_odds===2,label+' T15馬番人気オッズ保存');
   assert(post.prior_axis_popularity===1,label+' 軸人気自動保存');
   assert(post.quinella_opponents.length===2,label+' 相手保存');
+  assert((await page.textContent('#raceList')).includes('入力済み'),label+' 判定後に一覧が入力済み');
+  const doneItem=page.locator('#raceList .raceItem').filter({hasText:label+'テスト'});
+  assert(await doneItem.count()===1,label+' 判定済みレースが一覧に存在');
+  await doneItem.click();
+  assert(await page.inputValue('#raceName')===label+'テスト',label+' 判定済み一覧から入力画面へ復帰');
+
 
   const row=db.rows[0];
   await page.fill('#f'+row.id,'1'); await page.fill('#s'+row.id,'5');
@@ -186,7 +222,7 @@ async function live(){
   const page=await context.newPage();
   const resp=await page.goto(LIVE,{waitUntil:'networkidle',timeout:60000});
   assert(resp&&resp.ok(),'live page HTTP');
-  assert(await page.title()==='馬連レンジ v2.8','live title');
+  assert(await page.title()==='馬連レンジ v2.9','live title');
   await page.waitForTimeout(300);
   assert((await page.textContent('#storageStatus')).includes('このiPhone内'),'Neon障害時に端末保存へ切替されない');
   await page.selectOption('#venue','東京');
