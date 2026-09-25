@@ -44,6 +44,7 @@ const EX19='12=2.0 2=4.9 13=7.9 10=11.2 4=14.2 16=15.0 14=17.0 15=19.4 11=24.4 6
 const EX20='5=5.4 7=5.6 12=5.8 2=7.5 10=8.5 6=9.9 4=10.9 16=23.2 1=24.3 11=25.0 15=25.8 14=28.8 3=31.2 9=32.8 13=97.1 8=99.0';
 const EX22='13=5.4 5=5.6 12=6.3 6=7.8 1=9.0 3=11.1 14=13.8 8=14.0 9=18.6 2=18.6 16=21.7 11=27.2 15=29.1 4=59.5 7=79.2 10=151.8';
 const EX23='5=6.1 14=6.9 12=7.5 4=8.0 11=8.8 8=9.1 10=10.3 15=10.5 3=12.2 2=14.0 1=26.3 13=33.4 6=44.5 7=60.9 9=68.9';
+const BROAD_CAUTION='13=3.3 6=5.6 3=10.2 12=10.8 10=12.9 8=13.1 2=13.8 16=15.1 1=15.3 14=19.6 5=22.4 11=23.2 9=29.4 15=30.5 7=59.0 4=212.9';
 
 async function installMock(context){
   const rows=[]; let id=9000; let lastPost=null,lastPatch=null;
@@ -82,7 +83,7 @@ async function run(browserType,label){
   page.on('pageerror',e=>errs.push('pageerror:'+e.message));
   page.on('console',m=>{if(m.type()==='error')errs.push('console:'+m.text())});
   await page.goto(LOCAL,{waitUntil:'networkidle'});
-  assert(await page.title()==='馬連レンジ v2.7',label+' title');
+  assert(await page.title()==='馬連レンジ v2.8',label+' title');
   assert(await page.locator('link[rel="manifest"]').getAttribute('href')==='./manifest.webmanifest',label+' manifest');
   const codes=await page.evaluate(([a,b,c,d])=>[compute(a).structure.code,compute(b).structure.code,compute(c).structure.code,compute(d).structure.code],[A,B,C,D]);
   assert(JSON.stringify(codes)==='["A","B","C","D"]',label+' A/B/C/D分類 '+JSON.stringify(codes));
@@ -98,6 +99,10 @@ async function run(browserType,label){
   assert(calibHits===22,label+' 23例の1・2着第二レンジ捕捉 22/23 '+JSON.stringify(calib.filter(x=>!x.hit)));
   assert(calib.find(x=>x.ex===11).end>=9,label+' 例11を基本レンジより狭めない');
   assert(calib.find(x=>x.ex===10).hit===false,label+' 例10は市場外れ値として残す');
+  const advice=await page.evaluate(s=>{const x=compute(s);return practicalAdvice(x.runners,x.structure,x.axisRisk,x.secondRange)},BROAD_CAUTION);
+  assert(advice.level==='high'&&advice.title.includes('見送り候補'),label+' 実戦解説：広い市場は見送り候補');
+  assert(advice.text.includes('明確な1頭が見つからない場合'),label+' 実戦解説：軸馬選定との連携');
+  assert(advice.point.includes('穴をたくさん買う'),label+' 実戦解説：穴多点買いブレーキ');
 
 
   const wa=await page.evaluate(s=>compute(s).wallAnalysis,WALL_SAMPLE);
@@ -151,6 +156,7 @@ async function run(browserType,label){
   assert((await page.textContent('#axisRisk')).includes('人気馬軸：特別な警告なし'),label+' 軸警告UI');
   assert((await page.textContent('#secondRangeBox')).includes('第二レンジ'),label+' 第二レンジUI');
   assert((await page.textContent('#secondExplain')).includes('買い目を増やす指示ではなく'),label+' わかりやすい解説UI');
+  assert((await page.textContent('#practicalBox')).length>10,label+' 実戦向け解説UI');
 
 
 
@@ -180,7 +186,7 @@ async function live(){
   const page=await context.newPage();
   const resp=await page.goto(LIVE,{waitUntil:'networkidle',timeout:60000});
   assert(resp&&resp.ok(),'live page HTTP');
-  assert(await page.title()==='馬連レンジ v2.7','live title');
+  assert(await page.title()==='馬連レンジ v2.8','live title');
   await page.waitForTimeout(300);
   assert((await page.textContent('#storageStatus')).includes('このiPhone内'),'Neon障害時に端末保存へ切替されない');
   await page.selectOption('#venue','東京');
