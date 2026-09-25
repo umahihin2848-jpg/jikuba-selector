@@ -44,6 +44,10 @@ async function safariSmoke() {
   await page.fill('[data-i="3"][data-k="currentCarryWeight"]', '56');
   await page.waitForTimeout(50);
   assert((await page.textContent('#reasons0')).includes('前走比+3kg'), 'WebKit: 斤量判定が動かない');
+  await page.selectOption('[data-i="0"][data-k="sex"]', { label: '牝' });
+  await page.waitForTimeout(50);
+  assert((await page.textContent('#reasons0')).includes('牝馬は2kgアローワンスを考慮'), 'WebKit: 牝馬斤量補正が動かない');
+  await page.selectOption('[data-i="0"][data-k="sex"]', { label: '牡' });
   await page.selectOption('[data-i="2"][data-k="startDelayCount"]', { label: '2' });
   await page.selectOption('[data-i="2"][data-k="frame"]', { label: '2' });
   await page.selectOption('[data-i="2"][data-k="pos"]', { label: '後方' });
@@ -119,7 +123,27 @@ async function safariSmoke() {
   await page.fill('[data-i="3"][data-k="currentCarryWeight"]', '56');
   await page.waitForTimeout(50);
   assert((await page.textContent('#reasons0')).includes('前走比+3kg'), '前走比+3kgの斤量注意が表示されない');
-  assert((await page.textContent('#reasons0')).includes('最軽量馬より+2kg'), '相対斤量差の注意が表示されない');
+  assert((await page.textContent('#reasons0')).includes('性別補正後で最軽量馬より+2kg'), '相対斤量差の注意が表示されない');
+
+  // 牝馬は2kgアローワンスを補正して相対斤量を比較
+  await page.selectOption('[data-i="0"][data-k="sex"]', { label: '牝' });
+  await page.fill('[data-i="0"][data-k="prevCarryWeight"]', '56');
+  await page.fill('[data-i="0"][data-k="currentCarryWeight"]', '56');
+  await page.fill('[data-i="1"][data-k="currentCarryWeight"]', '58');
+  await page.fill('[data-i="2"][data-k="currentCarryWeight"]', '58');
+  await page.fill('[data-i="3"][data-k="currentCarryWeight"]', '58');
+  await page.waitForTimeout(50);
+  const mareWeightText = await page.textContent('#reasons0');
+  assert(mareWeightText.includes('牝馬は2kgアローワンスを考慮'), '牝馬の斤量補正説明が表示されない');
+  assert(!mareWeightText.includes('性別補正後で最軽量馬より'), '牝56kgと牡58kgが同等換算になっていない');
+  // 後続テスト用に元へ戻す
+  await page.selectOption('[data-i="0"][data-k="sex"]', { label: '牡' });
+  await page.fill('[data-i="0"][data-k="prevCarryWeight"]', '55');
+  await page.fill('[data-i="0"][data-k="currentCarryWeight"]', '58');
+  await page.fill('[data-i="1"][data-k="currentCarryWeight"]', '56');
+  await page.fill('[data-i="2"][data-k="currentCarryWeight"]', '56');
+  await page.fill('[data-i="3"][data-k="currentCarryWeight"]', '56');
+  await page.waitForTimeout(50);
 
   // 出遅れ傾向：2回以上で注意、短距離内枠や多頭数後方型と重なると赤
   await page.fill('#runnerCount', '16');
@@ -197,7 +221,7 @@ async function safariSmoke() {
 
   await page.click('#judgeBtn');
   await page.waitForTimeout(100);
-  assert((await page.textContent('#summary')).includes('判定ルール v2.1'), 'ルールVersionが表示されない');
+  assert((await page.textContent('#summary')).includes('判定ルール v2.2'), 'ルールVersionが表示されない');
   assert((await page.textContent('#judgeCards')).includes('内枠主導・高速馬場・イン有利で外枠不利'), '判定理由が表示されない');
   assert((await page.textContent('#judgeCards')).includes('距離延長：1200→1600m'), '判定画面に距離延長理由が出ない');
   assert((await page.textContent('#judgeCards')).includes('折り合い×距離延長'), '判定画面に折り合い複合理由が出ない');
@@ -224,7 +248,7 @@ async function safariSmoke() {
   await page.click('#saveBtn');
   await page.waitForTimeout(100);
   assert((await page.textContent('#historyList')).includes('自動テスト重賞'), '履歴保存に失敗');
-  assert((await page.textContent('#historyList')).includes('v2.1'), '保存Versionが履歴に出ない');
+  assert((await page.textContent('#historyList')).includes('v2.2'), '保存Versionが履歴に出ない');
 
   await page.click('[data-tab="stats"]');
   await page.waitForTimeout(100);
