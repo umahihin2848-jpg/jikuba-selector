@@ -44,6 +44,7 @@ const EX19='12=2.0 2=4.9 13=7.9 10=11.2 4=14.2 16=15.0 14=17.0 15=19.4 11=24.4 6
 const EX20='5=5.4 7=5.6 12=5.8 2=7.5 10=8.5 6=9.9 4=10.9 16=23.2 1=24.3 11=25.0 15=25.8 14=28.8 3=31.2 9=32.8 13=97.1 8=99.0';
 const EX22='13=5.4 5=5.6 12=6.3 6=7.8 1=9.0 3=11.1 14=13.8 8=14.0 9=18.6 2=18.6 16=21.7 11=27.2 15=29.1 4=59.5 7=79.2 10=151.8';
 const EX23='5=6.1 14=6.9 12=7.5 4=8.0 11=8.8 8=9.1 10=10.3 15=10.5 3=12.2 2=14.0 1=26.3 13=33.4 6=44.5 7=60.9 9=68.9';
+const PREBASE_GUARD='10=5.5 13=5.5 7=6.9 8=6.9 1=8.7 6=9.6 11=11.1 12=16.2 9=17.7 14=19.1 15=20.0 3=44.8 4=49.6 16=86.6 2=87.2 5=105.8';
 const BROAD_CAUTION='13=3.3 6=5.6 3=10.2 12=10.8 10=12.9 8=13.1 2=13.8 16=15.1 1=15.3 14=19.6 5=22.4 11=23.2 9=29.4 15=30.5 7=59.0 4=212.9';
 
 async function installMock(context){
@@ -83,7 +84,7 @@ async function run(browserType,label){
   page.on('pageerror',e=>errs.push('pageerror:'+e.message));
   page.on('console',m=>{if(m.type()==='error')errs.push('console:'+m.text())});
   await page.goto(LOCAL,{waitUntil:'networkidle'});
-  assert(await page.title()==='馬連レンジ v2.9',label+' title');
+  assert(await page.title()==='馬連レンジ v2.10',label+' title');
   assert(await page.locator('link[rel="manifest"]').getAttribute('href')==='./manifest.webmanifest',label+' manifest');
   const codes=await page.evaluate(([a,b,c,d])=>[compute(a).structure.code,compute(b).structure.code,compute(c).structure.code,compute(d).structure.code],[A,B,C,D]);
   assert(JSON.stringify(codes)==='["A","B","C","D"]',label+' A/B/C/D分類 '+JSON.stringify(codes));
@@ -92,13 +93,17 @@ async function run(browserType,label){
   assert(riskA==='low',label+' 上位集中レースは不要な軸警告を出さない');
   assert(riskD==='high',label+' 分散レースは人気馬軸強警戒');
   const second=await page.evaluate(([a,b,c,d,e])=>[compute(a),compute(b),compute(c),compute(d),compute(e)].map(x=>({code:x.structure.code,end:x.secondRange.end,center:x.secondRange.centerEnd,relation:x.secondRange.relation})),[EX18,EX19,EX20,EX22,EX23]);
-  assert(JSON.stringify(second.map(x=>[x.code,x.end]))===JSON.stringify([['B',10],['A',9],['C',12],['C',13],['C',12]]),label+' 第二レンジ 18/19/20/22/23 '+JSON.stringify(second));
-  assert(second[0].relation==='基本より広い'&&second[1].relation==='基本より広い'&&second[2].relation==='基本と同じ',label+' 第二レンジ relation');
+  assert(JSON.stringify(second.map(x=>[x.code,x.end]))===JSON.stringify([['B',9],['A',9],['C',12],['C',13],['C',12]]),label+' 第二レンジ 18/19/20/22/23 '+JSON.stringify(second));
+  assert(second[0].relation==='基本と同じ'&&second[1].relation==='基本より広い'&&second[2].relation==='基本と同じ',label+' 第二レンジ relation');
   const calib=await page.evaluate(data=>data.map(([odds,required],i)=>{const raw=odds.map((o,j)=>(j+1)+'='+o).join(' '),x=compute(raw);return{ex:i+1,code:x.structure.code,end:x.secondRange.end,required,hit:x.secondRange.end>=required}}),CALIBRATION_23);
   const calibHits=calib.filter(x=>x.hit).length;
   assert(calibHits===22,label+' 23例の1・2着第二レンジ捕捉 22/23 '+JSON.stringify(calib.filter(x=>!x.hit)));
   assert(calib.find(x=>x.ex===11).end>=9,label+' 例11を基本レンジより狭めない');
   assert(calib.find(x=>x.ex===10).hit===false,label+' 例10は市場外れ値として残す');
+  const guard=await page.evaluate(s=>{const x=compute(s);return{code:x.structure.code,end:x.secondRange.end,guard:x.secondRange.guardBoundary,explanation:x.secondRange.explanation}},PREBASE_GUARD);
+  assert(guard.code==='C'&&guard.end===12,label+' 基本レンジ直前壁でC12を維持 '+JSON.stringify(guard));
+  assert(guard.guard&&guard.guard.from===11&&guard.guard.to===12&&guard.guard.ratio>2.2,label+' 11→12拡張停止壁 '+JSON.stringify(guard.guard));
+  assert(guard.explanation.includes('遠い壁を理由に第二レンジを広げず'),label+' 拡張停止の解説');
   const advice=await page.evaluate(s=>{const x=compute(s);return practicalAdvice(x.runners,x.structure,x.axisRisk,x.secondRange)},BROAD_CAUTION);
   assert(advice.level==='high'&&advice.title.includes('見送り候補'),label+' 実戦解説：広い市場は見送り候補');
   assert(advice.text.includes('明確な1頭が見つからない場合'),label+' 実戦解説：軸馬選定との連携');
@@ -222,7 +227,7 @@ async function live(){
   const page=await context.newPage();
   const resp=await page.goto(LIVE,{waitUntil:'networkidle',timeout:60000});
   assert(resp&&resp.ok(),'live page HTTP');
-  assert(await page.title()==='馬連レンジ v2.9','live title');
+  assert(await page.title()==='馬連レンジ v2.10','live title');
   await page.waitForTimeout(300);
   assert((await page.textContent('#storageStatus')).includes('このiPhone内'),'Neon障害時に端末保存へ切替されない');
   await page.selectOption('#venue','東京');
