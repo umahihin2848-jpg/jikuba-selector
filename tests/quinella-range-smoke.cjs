@@ -84,7 +84,7 @@ async function run(browserType,label){
   page.on('pageerror',e=>errs.push('pageerror:'+e.message));
   page.on('console',m=>{if(m.type()==='error')errs.push('console:'+m.text())});
   await page.goto(LOCAL,{waitUntil:'networkidle'});
-  assert(await page.title()==='馬連レンジ v2.10',label+' title');
+  assert(await page.title()==='馬連レンジ v2.11',label+' title');
   assert(await page.locator('link[rel="manifest"]').getAttribute('href')==='./manifest.webmanifest',label+' manifest');
   const codes=await page.evaluate(([a,b,c,d])=>[compute(a).structure.code,compute(b).structure.code,compute(c).structure.code,compute(d).structure.code],[A,B,C,D]);
   assert(JSON.stringify(codes)==='["A","B","C","D"]',label+' A/B/C/D分類 '+JSON.stringify(codes));
@@ -166,7 +166,6 @@ async function run(browserType,label){
 
   await fillOddsGrid(page,A);
   await page.fill('#oddsGrid input[data-horse="12"]','');
-  await page.selectOption('#betDecision','skip');
   await page.click('#judge');
   await page.waitForTimeout(50);
   assert((await page.textContent('#msg')).includes('未入力 1頭'),label+' 全頭入力必須');
@@ -175,6 +174,20 @@ async function run(browserType,label){
   await page.fill('#axisHorseNo','13');
   await page.waitForTimeout(50);
   assert((await page.textContent('#inputBrake')).includes('13番（事前軸）がオッズ表にありません'),label+' 存在しない軸ブロック');
+  await page.fill('#axisHorseNo','');
+
+  // 購入判断なしで先に判定できる
+  await page.selectOption('#betDecision','');
+  await page.fill('#plannedStake','');
+  await page.fill('#opponents','');
+  await page.click('#judge');
+  await page.waitForTimeout(120);
+  assert((await page.textContent('#structure')).startsWith('A：'),label+' A表示');
+  assert((await page.textContent('#lock')).includes('判定プレビュー'),label+' 購入前プレビュー');
+  assert((await page.textContent('#planSummary')).includes('購入判断：未確定'),label+' 購入判断前表示');
+  assert(db.getPost()===null,label+' 判定を見るだけでは保存しない');
+
+  // 判定を見た後で購入判断
   await page.fill('#axisHorseNo','1');
   await page.selectOption('#betDecision','buy');
   await page.fill('#plannedStake','1000');
@@ -182,10 +195,6 @@ async function run(browserType,label){
   await page.waitForTimeout(50);
   assert((await page.textContent('#opponentBrake')).includes('50.0倍'),label+' 40倍ブレーキ');
   await page.fill('#opponents','2 3');
-  await page.selectOption('#betDecision','buy');
-  await page.click('#judge');
-  await page.waitForTimeout(120);
-  assert((await page.textContent('#structure')).startsWith('A：'),label+' A表示');
   assert((await page.textContent('#wallSummary')).includes('最大の壁'),label+' 壁サマリー表示');
   assert((await page.textContent('#wallList')).includes('1→2'),label+' 壁一覧表示');
   assert((await page.textContent('#axisRisk')).includes('人気馬軸：特別な警告なし'),label+' 軸警告UI');
@@ -193,7 +202,8 @@ async function run(browserType,label){
   assert((await page.textContent('#secondExplain')).includes('買い目を増やす指示ではなく'),label+' わかりやすい解説UI');
   assert((await page.textContent('#practicalBox')).length>10,label+' 実戦向け解説UI');
 
-
+  await page.click('#savePlan');
+  await page.waitForTimeout(120);
 
   const post=db.getPost();
   assert(post&&post.structure_code==='A',label+' 保存');
@@ -227,15 +237,18 @@ async function live(){
   const page=await context.newPage();
   const resp=await page.goto(LIVE,{waitUntil:'networkidle',timeout:60000});
   assert(resp&&resp.ok(),'live page HTTP');
-  assert(await page.title()==='馬連レンジ v2.10','live title');
+  assert(await page.title()==='馬連レンジ v2.11','live title');
   await page.waitForTimeout(300);
   assert((await page.textContent('#storageStatus')).includes('このiPhone内'),'Neon障害時に端末保存へ切替されない');
   await page.selectOption('#venue','東京');
   await page.selectOption('#raceNo','12');
   await page.fill('#raceName','Safari端末保存テスト');
   await fillOddsGrid(page,A);
-  await page.selectOption('#betDecision','skip');
   await page.click('#judge');
+  await page.waitForFunction(()=>document.querySelector('#lock')?.textContent.includes('判定プレビュー'),null,{timeout:15000});
+  assert(!(await page.textContent('#history')).includes('Safari端末保存テスト'),'プレビューだけで保存されている');
+  await page.selectOption('#betDecision','skip');
+  await page.click('#savePlan');
   await page.waitForFunction(()=>document.querySelector('#history')?.textContent.includes('Safari端末保存テスト'),null,{timeout:15000});
   assert((await page.textContent('#history')).includes('Safari端末保存テスト'),'端末保存できない');
   await page.reload({waitUntil:'networkidle'});
