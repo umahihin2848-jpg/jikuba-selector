@@ -37,6 +37,12 @@ async function safariSmoke() {
   await page.fill('#distance', '1600');
   await page.waitForTimeout(100);
   assert(await page.inputValue('#firstTurn') === '短い', 'WebKit: 中山芝1600プリセットが反映されない');
+  await page.selectOption('[data-i="3"][data-k="frame"]', { label: '7' });
+  await page.check('#insideAdv');
+  await page.waitForTimeout(50);
+  assert((await page.textContent('#reasons3')).includes('芝バイアス：イン有利の馬場で外枠'), 'WebKit: 芝バイアス強化が動かない');
+  await page.uncheck('#insideAdv');
+  await page.selectOption('[data-i="3"][data-k="frame"]', { label: '' });
   await page.selectOption('[data-i="0"][data-k="prevStatus"]', { label: '不利' });
   assert(await page.locator('#prevTypeWrap0').isVisible(), 'WebKit: 条件表示が動かない');
   assert(await page.locator('#prevType2Wrap0').isVisible(), 'WebKit: 前走不利②が表示されない');
@@ -138,6 +144,24 @@ async function safariSmoke() {
   await page.waitForTimeout(100);
   assert(await page.inputValue('#firstTurn') === '長い', '東京芝1600プリセットが反映されない');
   assert(await page.inputValue('#courseLayout') === '通常', 'コース区分が反映されない');
+
+  // 芝はトラックバイアスの影響を強める：単独一致で黄、追加条件で赤
+  await page.selectOption('[data-i="0"][data-k="frame"]', { label: '7' });
+  await page.check('#insideAdv');
+  await page.waitForTimeout(50);
+  assert((await page.textContent('#reasons0')).includes('芝バイアス：イン有利の馬場で外枠'), '芝の単独バイアス注意が出ない');
+  await page.selectOption('#speed', { label: '高速' });
+  await page.waitForTimeout(50);
+  assert((await page.textContent('#badge0')).includes('軸非推奨'), '芝バイアス＋高速馬場で赤判定にならない');
+  assert((await page.textContent('#reasons0')).includes('芝バイアス強化：イン有利＋外枠'), '芝バイアス強化理由が出ない');
+  await page.selectOption('#surface', { label: 'ダート' });
+  await page.waitForTimeout(50);
+  assert(!(await page.textContent('#reasons0')).includes('芝バイアス'), 'ダートに芝バイアス強化が誤適用される');
+  await page.selectOption('#surface', { label: '芝' });
+  await page.selectOption('#speed', { label: '標準' });
+  await page.uncheck('#insideAdv');
+  await page.selectOption('[data-i="0"][data-k="frame"]', { label: '' });
+  await page.waitForTimeout(50);
 
   // 距離延長は単独で注意、距離短縮は位置取りリスクと重なると赤
   await page.fill('[data-i="1"][data-k="prevDistance"]', '1200');
@@ -257,7 +281,7 @@ async function safariSmoke() {
 
   await page.click('#judgeBtn');
   await page.waitForTimeout(100);
-  assert((await page.textContent('#summary')).includes('判定ルール v2.3'), 'ルールVersionが表示されない');
+  assert((await page.textContent('#summary')).includes('判定ルール v2.4'), 'ルールVersionが表示されない');
   assert((await page.textContent('#judgeCards')).includes('内枠主導・高速馬場・イン有利で外枠不利'), '判定理由が表示されない');
   assert((await page.textContent('#judgeCards')).includes('距離延長：1200→1600m'), '判定画面に距離延長理由が出ない');
   assert((await page.textContent('#judgeCards')).includes('折り合い×距離延長'), '判定画面に折り合い複合理由が出ない');
@@ -284,7 +308,7 @@ async function safariSmoke() {
   await page.click('#saveBtn');
   await page.waitForTimeout(100);
   assert((await page.textContent('#historyList')).includes('自動テスト重賞'), '履歴保存に失敗');
-  assert((await page.textContent('#historyList')).includes('v2.3'), '保存Versionが履歴に出ない');
+  assert((await page.textContent('#historyList')).includes('v2.4'), '保存Versionが履歴に出ない');
 
   await page.click('[data-tab="stats"]');
   await page.waitForTimeout(100);
