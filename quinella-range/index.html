@@ -14,7 +14,7 @@
 <details><summary class="muted">レース属性（任意・検証用／判定には影響しない）</summary><div class="grid"><div><label>格</label><select id="grade"><option value="">未指定</option><option>G1</option><option>G2</option><option>G3</option></select></div><div><label>年齢</label><select id="age"><option value="">未指定</option><option value="2">2歳</option><option value="3">3歳</option><option value="older">古馬含む</option></select></div><div><label>重量条件</label><select id="weight"><option value="">未指定</option><option value="fixed">定量・別定</option><option value="handicap">ハンデ</option></select></div><div><label>距離</label><input id="distance" inputmode="numeric" placeholder="1600"></div></div></details>
 <div class="draftActions"><button class="secondary" id="saveDraft">一覧に保存（未判定）</button><button class="secondary" id="deleteDraft" title="未判定レースを一覧から削除">削除</button></div><div id="draftMsg" class="draftSaved"></div><button class="wide" id="savePlan" style="background:#179b67">購入/見送りを確定して保存</button><div class="muted" style="margin-top:6px">判定を見るだけなら保存不要です。保存すると、その時点のオッズと購入判断を凍結します。</div></section>
 <section id="result" class="card verdict hidden"><div id="lock"></div><div class="vtitle" id="verdict"></div><p id="lead"></p><ul class="reasons" id="reasons"></ul><div class="notice" id="rule"></div><div class="notice hidden" id="axisSummary" style="margin-top:9px"></div><div class="notice hidden" id="planSummary" style="margin-top:9px"></div><div id="winRangeBox" class="winRange hidden"><div class="winRangeHead"><div><div class="winRangeTitle">1着レンジ</div><div class="winRangeValue" id="winRangeValue"></div></div><div class="winRangeStatus" id="winRangeStatus"></div></div><div class="winRangeText" id="winRangeText"></div><div class="winRangeNote">3〜8人気の各境界をすべて比較し、累積支持率・オッズ壁・周辺からの突出度・候補幅を統合した境界スコアで1着上限を決めます。</div></div><div id="axisRisk" class="axisRisk hidden"></div><h3 id="structure"></h3><div class="metricGrid"><div class="metric"><span>C4</span><b id="c4"></b></div><div class="metric"><span>上位9人気 累積シェア</span><b id="c9"></b></div><div class="metric"><span>40倍以上シェア</span><b id="c40"></b></div><div class="metric"><span>上位12人気 累積シェア</span><b id="c12"></b></div><div class="metric"><span>1番人気</span><b id="fav"></b></div><div class="metric"><span>40倍未満</span><b id="u40"></b></div><div class="metric"><span>4→5人気の壁</span><b id="gap"></b></div><div class="metric"><span>市場実質頭数</span><b id="eff"></b></div></div><div id="secondPlaceBox" class="winRange hidden"><div class="winRangeHead"><div><div class="winRangeTitle">2着レンジ</div><div class="winRangeValue" id="secondPlaceValue"></div></div><div class="winRangeStatus" id="secondPlaceStatus"></div></div><div class="winRangeText" id="secondPlaceText"></div><div class="winRangeNote">4〜10人気の各境界をすべて比較し、累積支持率・オッズ壁・周辺からの突出度・候補幅を統合した境界スコアで2着上限を決めます。</div></div><div id="selectionBox" class="winRange hidden"><div class="winRangeHead"><div><div class="winRangeTitle">総合判定</div><div class="winRangeValue" id="selectionValue"></div></div><div class="winRangeStatus" id="selectionStatus"></div></div><div class="winRangeText" id="selectionText"></div><div class="winRangeNote">レンジ外の馬を否定する判定ではありません。そこまで広げないと拾えないレースを買わないためのブレーキです。</div></div><div class="wallBox"><h3>人気間の壁分析</h3><div class="muted" style="margin-bottom:8px">A/B/C/D判定とは別の補助分析。どこで市場評価が分かれているかを確認します。</div><div id="wallSummary" class="wallSummary"></div><div id="wallList" class="wallList"></div></div></section>
-<section class="card"><div><h2 style="margin:0">v2.18以降・1着/2着完全独立ロジック検証</h2><div class="muted">v2.17以前は除外。v2.18以降の1着・2着完全独立ロジックだけで、緑・黄・赤の実績を検証します。</div></div><div id="validationSummary" class="notice" style="margin-top:12px"></div><div id="validationDashboard" class="validationGrid"></div><div style="margin-top:18px"><h3 style="margin:0 0 5px">1着×2着レンジ別</h3><div class="muted">例：1着4 × 2着8。結果入力済Nを基準に信頼度を表示します。</div><div id="comboDashboard" class="comboGrid"></div></div></section><section class="card"><div class="row"><div><h2 style="margin:0">1着・2着レンジ検証DB</h2><div class="muted">実際の1着が1着レンジ内、実際の2着が2着レンジ内だったかを別々に検証します。3着以下は使いません。</div></div><button class="secondary" id="exportCsv">CSV</button></div><div id="stats" class="stats" style="margin-top:12px"></div></section>
+<section class="card"><div><h2 style="margin:0">v2.20以降・境界スコア検証</h2><div class="muted">v2.19以前は除外。固定人気レンジではなく、そのレースごとの最有力境界を使った判定だけを検証します。</div></div><div id="validationSummary" class="notice" style="margin-top:12px"></div><div id="validationDashboard" class="validationGrid"></div></section><section class="card"><div class="row"><div><h2 style="margin:0">1着・2着レンジ検証DB</h2><div class="muted">実際の1着が1着レンジ内、実際の2着が2着レンジ内だったかを別々に検証します。3着以下は使いません。</div></div><button class="secondary" id="exportCsv">CSV</button></div><div id="stats" class="stats" style="margin-top:12px"></div></section>
 <section class="card"><div class="row"><h2 style="margin:0">判定履歴</h2><button class="secondary" id="reload">更新</button></div><div id="history"></div></section><div class="muted">レース選別 v2.20。固定の4/6/8・6/8/10境界を廃止し、全候補境界をスキャンする境界スコア方式へ変更。累積支持率・オッズ壁・周辺からの突出度・候補幅を統合して1着/2着境界を決めます。</div></main>
 <script>
 const $=id=>document.getElementById(id);const DATA='https://ep-shy-unit-b54tgtrq.apirest.c-7.us-east-2.aws.neon.tech/neondb/rest/v1';let historyCache=[],raceFormLoading=false,pendingAssessment=null;
@@ -370,6 +370,13 @@ function renderPlanSummary(r){
     ps.innerHTML='<b>購入判断：未確定</b><br>この判定と解説を見てから、購入/見送りを決めてください。';
   }
 }
+function boundaryDetail(range){
+  const b=range&&range.boundary;if(!b)return '';
+  const conf=b.confidence==='high'?'高':b.confidence==='mid'?'中':'低';
+  const top=(range.boundaryCandidates||[]).filter(x=>x.eligible).sort((a,b)=>b.score-a.score||a.k-b.k).slice(0,3);
+  const cand=top.length?' / 候補上位 '+top.map(x=>x.k+'→'+(x.k+1)+' '+Number(x.score).toFixed(1)).join('・'):'';
+  return '【境界】'+b.k+'→'+(b.k+1)+'人気 / スコア '+Number(b.score).toFixed(1)+' / 信頼度 '+conf+' / 累積 '+pc(b.share)+' / 壁 '+Number(b.wall).toFixed(2)+'x / 周辺比 '+Number(b.prominence).toFixed(2)+'x / 次点差 '+Number(b.margin||0).toFixed(1)+cand;
+}
 function render(r){
   const c=$('result'),code=r.structure.code;
   const market=r.secondRange||secondRangeAnalysis(r.runners,code);
@@ -390,9 +397,9 @@ function render(r){
   }else ax.classList.add('hidden');
   const wrb=$('winRangeBox');
   wrb.className='winRange '+(fr.targetEnd<=6?'go':fr.targetEnd<=8?'caution':fr.targetEnd<=10?'stop':'hardStop');wrb.classList.remove('hidden');
-  $('winRangeValue').textContent=fr.label;$('winRangeStatus').textContent='1着候補';const f1m=fr.c4!=null?' C4 '+pc(fr.c4)+' / C6 '+pc(fr.c6)+' / C8 '+pc(fr.c8)+' / 壁 4→5 '+(fr.wall45==null?'—':Number(fr.wall45).toFixed(2)+'x')+'・6→7 '+(fr.wall67==null?'—':Number(fr.wall67).toFixed(2)+'x')+'・8→9 '+(fr.wall89==null?'—':Number(fr.wall89).toFixed(2)+'x'):'';$('winRangeText').textContent=fr.reason+f1m;
+  $('winRangeValue').textContent=fr.label;$('winRangeStatus').textContent='1着候補';$('winRangeText').textContent=fr.reason+(fr.boundary?' '+boundaryDetail(fr):'');
   const p2b=$('secondPlaceBox');p2b.className='winRange '+pr.level;p2b.classList.remove('hidden');
-  $('secondPlaceValue').textContent=pr.label;$('secondPlaceStatus').textContent='2着候補';const p2m=pr.c6!=null?' C6 '+pc(pr.c6)+' / C8 '+pc(pr.c8)+' / C10 '+pc(pr.c10)+' / 壁 6→7 '+(pr.wall67==null?'—':Number(pr.wall67).toFixed(2)+'x')+'・8→9 '+(pr.wall89==null?'—':Number(pr.wall89).toFixed(2)+'x')+'・10→11 '+(pr.wall1011==null?'—':Number(pr.wall1011).toFixed(2)+'x'):'';$('secondPlaceText').textContent=pr.reason+p2m;
+  $('secondPlaceValue').textContent=pr.label;$('secondPlaceStatus').textContent='2着候補';$('secondPlaceText').textContent=pr.reason+(pr.boundary?' '+boundaryDetail(pr):'');
   const sb=$('selectionBox');sb.className='winRange '+sd.level;sb.classList.remove('hidden');
   $('selectionValue').textContent=sd.status;$('selectionStatus').textContent='1着'+fr.end+' / 2着'+pr.end;$('selectionText').textContent=sd.reason;
   if(r.preview&&sd.locked){$('betDecision').value='skip';$('plannedStake').value='';$('opponents').value='';updateOpponentBrake();updateInputBrake();}
@@ -503,28 +510,16 @@ function summarizeValidationRows(rows){
   const purchased=done.filter(r=>Number(r.quinellaStake)>0&&r.quinellaReturn!=null),stake=purchased.reduce((s,r)=>s+Number(r.quinellaStake||0),0),ret=purchased.reduce((s,r)=>s+Number(r.quinellaReturn||0),0);
   return{total:rows.length,completed:done.length,firstRate:rate(pairs.map(x=>x.firstInRange)),secondRate:rate(pairs.map(x=>x.secondInRange)),bothRate:rate(pairs.map(x=>x.bothInTarget)),purchased:purchased.length,stake,ret,roi:stake?Number((100*ret/stake).toFixed(1)):null,confidence:sampleConfidence(done.length)};
 }
-function calcComboValidation(cohort){
-  const groups=new Map();
-  for(const r of cohort){
-    const fr=r.firstRange||firstPlaceRangeAnalysis(r.runners),pr=r.secondPlaceRange||secondPlaceRangeAnalysis(r.runners);
-    const f=Number(fr.targetEnd||fr.end),s=Number(pr.targetEnd||pr.end),key=f+'x'+s;
-    if(!groups.has(key))groups.set(key,{key,firstEnd:f,secondEnd:s,rows:[]});
-    groups.get(key).rows.push(r);
-  }
-  return[...groups.values()].map(g=>({...g,...summarizeValidationRows(g.rows)})).sort((a,b)=>a.firstEnd-b.firstEnd||a.secondEnd-b.secondEnd);
-}
 function calcValidationDashboard(h){
   const cohort=h.filter(r=>versionAtLeast(r.rangeRuleVer,'2.20'));
   const buckets={green:[],yellow:[],red:[]};for(const r of cohort)buckets[validationBucket(r)].push(r);
-  return{cohort,total:cohort.length,completed:cohort.filter(r=>r.resultFirst!=null&&r.resultSecond!=null).length,green:summarizeValidationRows(buckets.green),yellow:summarizeValidationRows(buckets.yellow),red:summarizeValidationRows(buckets.red),combos:calcComboValidation(cohort)};
+  return{cohort,total:cohort.length,completed:cohort.filter(r=>r.resultFirst!=null&&r.resultSecond!=null).length,green:summarizeValidationRows(buckets.green),yellow:summarizeValidationRows(buckets.yellow),red:summarizeValidationRows(buckets.red)};
 }
 function renderValidationDashboard(h){
-  const d=calcValidationDashboard(h),summary=$('validationSummary'),box=$('validationDashboard'),combo=$('comboDashboard');
-  summary.innerHTML='<b>検証対象 '+d.total+'レース</b> / 結果入力済 '+d.completed+'レース<br><span class="muted">対象条件：保存時ルール v2.18以上。同じ1着/2着レンジロジックを継続集計。信頼度Nは結果入力済件数です。</span>';
+  const d=calcValidationDashboard(h),summary=$('validationSummary'),box=$('validationDashboard');
+  summary.innerHTML='<b>検証対象 '+d.total+'レース</b> / 結果入力済 '+d.completed+'レース<br><span class="muted">対象条件：保存時ルール v2.20以上。境界スコア方式だけを集計。信頼度Nは結果入力済件数です。</span>';
   const card=(key,title,x,note)=>'<div class="validationCard '+key+'"><div class="validationTitle"><b>'+title+'</b><span class="confidence '+x.confidence.cls+'">'+x.confidence.label+' N='+x.completed+'</span></div><div class="validationMetrics"><div><span>保存数</span><b>'+x.total+'</b></div><div><span>結果入力済</span><b>'+x.completed+'</b></div><div><span>1着捕捉率</span><b>'+(x.firstRate==null?'—':x.firstRate+'%')+'</b></div><div><span>2着捕捉率</span><b>'+(x.secondRate==null?'—':x.secondRate+'%')+'</b></div><div><span>両方捕捉率</span><b>'+(x.bothRate==null?'—':x.bothRate+'%')+'</b></div><div><span>実購入回収率</span><b>'+(x.roi==null?'—':x.roi+'%')+'</b></div></div><div class="validationNote">'+note+(x.stake>0?' / 投資 '+yen(x.stake)+' → 払戻 '+yen(x.ret):'')+'</div></div>';
-  box.innerHTML=card('green','🟢 購入候補',d.green,'狭く絞れたレース')+card('yellow','🟡 慎重',d.yellow,'条件付きで残したレース')+card('red','🔴 見送り',d.red,'候補が広く購入対象外にしたレース');
-  if(!d.combos.length){combo.innerHTML='<div class="muted">まだ組み合わせ別データはありません。</div>';return}
-  combo.innerHTML=d.combos.map(x=>'<div class="comboCard"><div class="comboHead"><b>1着'+x.firstEnd+' × 2着'+x.secondEnd+'</b><span class="confidence '+x.confidence.cls+'">'+x.confidence.label+' N='+x.completed+'</span></div><div class="comboMetrics"><div><span>保存数</span><b>'+x.total+'</b></div><div><span>両方捕捉</span><b>'+(x.bothRate==null?'—':x.bothRate+'%')+'</b></div><div><span>回収率</span><b>'+(x.roi==null?'—':x.roi+'%')+'</b></div><div><span>1着捕捉</span><b>'+(x.firstRate==null?'—':x.firstRate+'%')+'</b></div><div><span>2着捕捉</span><b>'+(x.secondRate==null?'—':x.secondRate+'%')+'</b></div><div><span>実購入数</span><b>'+x.purchased+'</b></div></div><div class="comboFoot">信頼度：'+x.confidence.detail+(x.stake>0?' / 投資 '+yen(x.stake)+' → 払戻 '+yen(x.ret):'')+'</div></div>').join('');
+  box.innerHTML=card('green','🟢 購入候補',d.green,'境界スコアで狭く切れたレース')+card('yellow','🟡 慎重',d.yellow,'境界はあるが候補幅が広め')+card('red','🔴 見送り',d.red,'十分に強い境界がない、または候補が広いレース');
 }
 function calcStats(h){
   const plannedBuyCount=h.filter(x=>x.betDecision==='buy').length,plannedSkipCount=h.filter(x=>x.betDecision==='skip').length;
