@@ -300,7 +300,17 @@ async function findRace(date,venue,no){const q=new URLSearchParams({select:'*',r
 async function insertRace(p,calc){const row={race_date:p.raceDate,venue:p.venue,race_no:p.raceNo,race_name:p.raceName||null,prior_axis_horse_no:p.priorAxisHorseNo||null,prior_axis_popularity:p.priorAxisPopularity||null,bet_decision:p.betDecision,planned_stake_yen:p.plannedStake,quinella_opponents:p.opponents,odds_snapshot:calc.runners,runner_count:calc.n,c4:calc.c4,c59:calc.c9,c40:calc.c40,c12:calc.c12,fav_odds:calc.fav,under40_count:calc.under40,gap45:calc.gap45,effective_n:calc.effectiveN,structure_code:calc.structure.code,structure_name:calc.structure.name,brake_level:calc.brake.level,brake_verdict:calc.brake.verdict,risk_score:calc.brake.risk,reasons:calc.brake.reasons,context:{...(p.context||{}),wall_profile:calc.wallAnalysis.walls,max_wall:calc.wallAnalysis.max,upper_wall:calc.wallAnalysis.upper,middle_wall:calc.wallAnalysis.middle,axis_risk:calc.axisRisk,market_spread:calc.secondRange,second_range:calc.secondRange,first_range:calc.firstRange,second_place_range:calc.secondPlaceRange,selection_decision:calc.selectionDecision}};const x=await api('/race_assessments',{method:'POST',headers:{'content-type':'application/json','Prefer':'return=representation'},body:JSON.stringify(row)});return rowToApp(x[0])}
 function runnerText(r,h){const x=findRunner(r.runners,h);return x?`${h}番（入力時点 ${x.popularity}人気・${x.win_odds.toFixed(1)}倍）`:`${h}番（入力時点照合不可）`}
 function inRecommendedRange(r,info){if(!info)return null;if(r.structure.code==='A')return info.popularity<=4;if(r.structure.code==='B')return info.popularity<=9;if(r.structure.code==='C')return info.popularity<=12;return info.win_odds<40}
-function pairOutcome(r){if(r.resultFirst==null||r.resultSecond==null)return null;const first=findRunner(r.runners,r.resultFirst),second=findRunner(r.runners,r.resultSecond);if(!first||!second)return{evaluable:false,first,second};const sr=r.secondRange||secondRangeAnalysis(r.runners,r.structure.code),fr=r.firstRange||firstPlaceRangeAnalysis(r.runners,r.structure,r.c4,sr),deeper=first.popularity>=second.popularity?first:second;return{evaluable:true,first,second,deeper,requiredPopularity:deeper.popularity,firstRange:fr,firstInRange:first.popularity<=fr.end,inRange:inRecommendedRange(r,first)&&inRecommendedRange(r,second),inSecondRange:first.popularity<=sr.end&&second.popularity<=sr.end}}
+function pairOutcome(r){
+  if(r.resultFirst==null||r.resultSecond==null)return null;
+  const first=findRunner(r.runners,r.resultFirst),second=findRunner(r.runners,r.resultSecond);
+  if(!first||!second)return{evaluable:false,first,second};
+  const market=r.secondRange||secondRangeAnalysis(r.runners,r.structure.code);
+  const fr=r.firstRange||firstPlaceRangeAnalysis(r.runners,r.structure,r.c4,market);
+  const pr=r.secondPlaceRange||secondPlaceRangeAnalysis(r.runners,fr,market);
+  const sd=r.selectionDecision||selectionDecisionAnalysis(fr,pr);
+  const firstInRange=first.popularity<=fr.end,secondInRange=second.popularity<=pr.end;
+  return{evaluable:true,first,second,firstRange:fr,secondPlaceRange:pr,selectionDecision:sd,firstInRange,secondInRange,bothInTarget:firstInRange&&secondInRange};
+}
 function renderPlanSummary(r){
   const ps=$('planSummary');if(!ps||!r)return;
   ps.classList.remove('hidden');
@@ -321,7 +331,44 @@ function renderPlanSummary(r){
     ps.innerHTML='<b>購入判断：未確定</b><br>この判定と解説を見てから、購入/見送りを決めてください。';
   }
 }
-function render(r){const c=$('result'),code=r.structure.code,range=rangeLabel(code,r.n);c.className='card verdict range'+code;c.classList.remove('hidden');$('verdict').textContent=`1・2着想定レンジ：${range}`;$('lead').textContent={A:'1着・2着とも上位人気から出る想定が強い。',B:'1着・2着のどちらかに中穴が入る余地がある。',C:'1着・2着に10〜12番人気まで入る可能性を警戒。',D:'1着・2着候補が広く分散。人気順位だけでは切りにくい市場。'}[code];$('reasons').innerHTML=(r.brake.reasons||[]).map(x=>'<li>'+esc(x)+'</li>').join('');$('rule').textContent='軸馬は別アプリで選定。このレンジは1着・2着だけを対象にし、結果入力後は2頭とも範囲内だったかを自動検証します。3着以下は無視します。';$('lock').innerHTML=r.preview?'<span class="lock">👀 判定プレビュー（まだ保存していません）</span>':'<span class="lock">🔒 入力時点の馬番・人気・オッズ／購入計画 凍結済み</span>';const ax=$('axisSummary');if(r.priorAxisHorseNo){const info=findRunner(r.runners,r.priorAxisHorseNo);ax.classList.remove('hidden');ax.innerHTML=info?`<b>事前軸：${info.horse_no}番・入力時点 ${info.popularity}番人気・${info.win_odds.toFixed(1)}倍</b><br>${info.popularity<=4?'✅ 軸馬選定アプリの対象範囲内。':'⚠️ 入力時点では5番人気以下。'}`:`<b>事前軸：${r.priorAxisHorseNo}番</b><br>旧保存形式のため入力時点人気照合不可`}else ax.classList.add('hidden');const sr=r.secondRange||secondRangeAnalysis(r.runners,code),fr=r.firstRange||firstPlaceRangeAnalysis(r.runners,r.structure,r.c4,sr),wrb=$('winRangeBox');wrb.className='winRange '+fr.level;wrb.classList.remove('hidden');$('winRangeValue').textContent=fr.label;$('winRangeStatus').textContent=fr.status;$('winRangeText').textContent=fr.reason+(fr.locked?' 1着候補が広いため、このツールでは購入保存をロックします。':'');if(r.preview&&fr.locked){$('betDecision').value='skip';$('plannedStake').value='';$('opponents').value='';updateOpponentBrake();updateInputBrake()}const ar=r.axisRisk||axisRiskAnalysis(r.runners),arb=$('axisRisk');arb.className='axisRisk '+ar.level;arb.classList.remove('hidden');const axisInfo=r.priorAxisHorseNo?findRunner(r.runners,r.priorAxisHorseNo):null,axisTxt=axisInfo&&axisInfo.popularity<=4?`<br><b>今回の事前軸：${axisInfo.popularity}番人気</b>`:'';arb.innerHTML=`<strong>${ar.level==='high'?'🚨':ar.level==='mid'?'⚠️':'✅'} ${esc(ar.title)}</strong><div>${esc(ar.explanation)}${axisTxt}</div><div class="muted" style="margin-top:6px">C3 ${pc(ar.c3)} / C4 ${pc(ar.c4)} / 実質頭数 ${Number(ar.effectiveN).toFixed(1)}頭</div>`;renderPlanSummary(r);$('structure').textContent=`${code}：${r.structure.name}`;$('c4').textContent=pc(r.c4);$('c9').textContent=pc(r.c9);$('c40').textContent=pc(r.c40);$('c12').textContent=pc(r.c12);$('fav').textContent=Number(r.fav).toFixed(1)+'倍';$('u40').textContent=r.under40+'頭';$('gap').textContent=Number(r.gap45).toFixed(2)+'x';$('eff').textContent=Number(r.effectiveN).toFixed(1)+'頭';$('baseRange2').textContent=rangeLabel(code,r.n);$('secondRangeEnd').textContent=`1〜${sr.end}番人気（${sr.relation}）`;$('centerZone').textContent=sr.centerEnd?`1〜${sr.centerEnd}番人気`:'はっきり分かれず';$('outerWall').textContent=sr.guardBoundary?`拡張停止 ${sr.guardBoundary.from}→${sr.guardBoundary.to}人気 ${Number(sr.guardBoundary.ratio).toFixed(2)}x`:sr.boundary?`${sr.boundary.from}→${sr.boundary.to}人気 ${Number(sr.boundary.ratio).toFixed(2)}x`:'明確な外周壁なし';$('secondExplain').textContent=sr.explanation;const pa=practicalAdvice(r.runners,r.structure,ar,sr),pb=$('practicalBox');pb.className='practicalBox '+pa.level;$('practicalTitle').textContent=pa.title;$('practicalText').textContent=pa.text;$('practicalPoint').textContent=pa.point;const wa=r.wallAnalysis||analyzeWalls(r.runners),fmt=w=>w?`${w.from}→${w.to}人気 ${Number(w.ratio).toFixed(2)}x`:'—';$('wallSummary').innerHTML=`<div><span>最大の壁</span><b>${fmt(wa.max)}</b></div><div><span>上位側最大（1→2〜4→5）</span><b>${fmt(wa.upper)}</b></div><div><span>中穴側最大（5→6〜9→10）</span><b>${fmt(wa.middle)}</b></div><div><span>A判定用 4→5</span><b>${fmt(wa.aWall)}</b></div>`;$('wallList').innerHTML=(wa.walls||[]).map(w=>{const b=wallBand(w.ratio),top=(wa.top3||[]).some(t=>t.from===w.from)?' wallTop':'';return`<span class="wallBadge ${b.cls}${top}">${w.from}→${w.to}　${Number(w.ratio).toFixed(2)}x　${b.label}</span>`}).join('')}
+function render(r){
+  const c=$('result'),code=r.structure.code;
+  const market=r.secondRange||secondRangeAnalysis(r.runners,code);
+  const fr=r.firstRange||firstPlaceRangeAnalysis(r.runners,r.structure,r.c4,market);
+  const pr=r.secondPlaceRange||secondPlaceRangeAnalysis(r.runners,fr,market);
+  const sd=r.selectionDecision||selectionDecisionAnalysis(fr,pr);
+  c.className='card verdict range'+code;c.classList.remove('hidden');
+  $('verdict').textContent=sd.status;
+  $('lead').textContent=sd.reason;
+  $('reasons').innerHTML=(r.brake.reasons||[]).map(x=>'<li>'+esc(x)+'</li>').join('');
+  $('rule').textContent='取りこぼしは許容します。レンジを広げれば拾える馬が増えても、候補が広いレースは買わないのがこのツールのルールです。';
+  $('lock').innerHTML=r.preview?'<span class="lock">👀 判定プレビュー（まだ保存していません）</span>':'<span class="lock">🔒 入力時点の馬番・人気・オッズ／購入計画 凍結済み</span>';
+  const ax=$('axisSummary');
+  if(r.priorAxisHorseNo){
+    const info=findRunner(r.runners,r.priorAxisHorseNo);
+    ax.classList.remove('hidden');
+    ax.innerHTML=info?'<b>事前軸：'+info.horse_no+'番・入力時点 '+info.popularity+'番人気・'+info.win_odds.toFixed(1)+'倍</b><br>'+(info.popularity<=4?'✅ 軸馬選定アプリの対象範囲内。':'⚠️ 入力時点では5番人気以下。'):'<b>事前軸：'+r.priorAxisHorseNo+'番</b><br>旧保存形式のため入力時点人気照合不可';
+  }else ax.classList.add('hidden');
+  const wrb=$('winRangeBox');
+  wrb.className='winRange '+(fr.targetEnd<=6?'go':fr.targetEnd<=8?'caution':fr.targetEnd<=10?'stop':'hardStop');wrb.classList.remove('hidden');
+  $('winRangeValue').textContent=fr.label;$('winRangeStatus').textContent='1着候補';$('winRangeText').textContent=fr.reason;
+  const p2b=$('secondPlaceBox');p2b.className='winRange '+pr.level;p2b.classList.remove('hidden');
+  $('secondPlaceValue').textContent=pr.label;$('secondPlaceStatus').textContent='2着候補';$('secondPlaceText').textContent=pr.reason;
+  const sb=$('selectionBox');sb.className='winRange '+sd.level;sb.classList.remove('hidden');
+  $('selectionValue').textContent=sd.status;$('selectionStatus').textContent='1着'+fr.end+' / 2着'+pr.end;$('selectionText').textContent=sd.reason;
+  if(r.preview&&sd.locked){$('betDecision').value='skip';$('plannedStake').value='';$('opponents').value='';updateOpponentBrake();updateInputBrake();}
+  const ar=r.axisRisk||axisRiskAnalysis(r.runners),arb=$('axisRisk');
+  arb.className='axisRisk '+ar.level;arb.classList.remove('hidden');
+  const axisInfo=r.priorAxisHorseNo?findRunner(r.runners,r.priorAxisHorseNo):null,axisTxt=axisInfo&&axisInfo.popularity<=4?'<br><b>今回の事前軸：'+axisInfo.popularity+'番人気</b>':'';
+  arb.innerHTML='<strong>'+(ar.level==='high'?'🚨':ar.level==='mid'?'⚠️':'✅')+' '+esc(ar.title)+'</strong><div>'+esc(ar.explanation)+axisTxt+'</div><div class="muted" style="margin-top:6px">C3 '+pc(ar.c3)+' / C4 '+pc(ar.c4)+' / 実質頭数 '+Number(ar.effectiveN).toFixed(1)+'頭</div>';
+  renderPlanSummary(r);
+  $('structure').textContent=code+'：'+r.structure.name;
+  $('c4').textContent=pc(r.c4);$('c9').textContent=pc(r.c9);$('c40').textContent=pc(r.c40);$('c12').textContent=pc(r.c12);
+  $('fav').textContent=Number(r.fav).toFixed(1)+'倍';$('u40').textContent=r.under40+'頭';$('gap').textContent=Number(r.gap45).toFixed(2)+'x';$('eff').textContent=Number(r.effectiveN).toFixed(1)+'頭';
+  const wa=r.wallAnalysis||analyzeWalls(r.runners),fmt=w=>w?(w.from+'→'+w.to+'人気 '+Number(w.ratio).toFixed(2)+'x'):'—';
+  $('wallSummary').innerHTML='<div><span>最大の壁</span><b>'+fmt(wa.max)+'</b></div><div><span>上位側最大（1→2〜4→5）</span><b>'+fmt(wa.upper)+'</b></div><div><span>中穴側最大（5→6〜9→10）</span><b>'+fmt(wa.middle)+'</b></div><div><span>A判定用 4→5</span><b>'+fmt(wa.aWall)+'</b></div>';
+  $('wallList').innerHTML=(wa.walls||[]).map(w=>{const b=wallBand(w.ratio),top=(wa.top3||[]).some(t=>t.from===w.from)?' wallTop':'';return '<span class="wallBadge '+b.cls+top+'">'+w.from+'→'+w.to+'　'+Number(w.ratio).toFixed(2)+'x　'+b.label+'</span>'}).join('');
+}
 $('judge').onclick=async()=>{
   const p={raceDate:$('raceDate').value,venue:$('venue').value,raceNo:Number($('raceNo').value),raceName:$('raceName').value.trim(),priorAxisHorseNo:Number($('axisHorseNo').value)||null,oddsRaw:$('odds').value};
   if(!p.raceDate||!p.venue){$('msg').textContent='日付と競馬場を選択してください';return}
