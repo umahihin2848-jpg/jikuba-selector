@@ -415,13 +415,19 @@ function calcWinEv(r,fr,adjustments={}){
 }
 function renderWinEv(r,fr){
   const box=$('winEvBox'),sum=$('winEvSummary'),rowsBox=$('winEvRows');if(!box||!sum||!rowsBox)return;
-  const data=calcWinEv(r,fr,winEvAdjustments(r));if(!data.eligible){box.classList.add('hidden');rowsBox.innerHTML='';return}
+  const frozen=!r.preview&&r.context&&r.context.win_ev&&Array.isArray(r.context.win_ev.rows)?r.context.win_ev:null;
+  let data;
+  if(frozen){data={eligible:frozen.rows.length>0&&frozen.rows.length<=8,rows:frozen.rows.map(x=>({horse_no:Number(x.horse_no),popularity:Number(x.popularity),win_odds:Number(x.win_odds),adj:Number(x.adjustment)||0,estProb:Number(x.estimated_win_prob),fairOdds:x.fair_odds==null?null:Number(x.fair_odds),ev:Number(x.ev),tag:x.tag||'参考'})),poolMass:Number(frozen.pool_mass)||0,outsideMass:1-(Number(frozen.pool_mass)||0)}}
+  else if(r.preview){data=calcWinEv(r,fr,winEvAdjustments(r))}
+  else{box.classList.add('hidden');rowsBox.innerHTML='';return}
+  if(!data.eligible){box.classList.add('hidden');rowsBox.innerHTML='';return}
   box.classList.remove('hidden');
-  const positives=data.rows.filter(x=>x.ev>=1.15).length,best=[...data.rows].sort((a,b)=>b.ev-a.ev)[0];
-  sum.innerHTML='<div><span>1着候補</span><b>'+data.rows.length+'頭</b></div><div><span>レンジ内基準勝率</span><b>'+pc(data.poolMass)+'</b></div><div><span>EV1.15以上</span><b>'+positives+'頭</b></div>';
+  const positives=data.rows.filter(x=>x.ev>=1.15).length;
+  sum.innerHTML='<div><span>1着候補</span><b>'+data.rows.length+'頭</b></div><div><span>レンジ内基準勝率</span><b>'+pc(data.poolMass)+'</b></div><div><span>'+(frozen?'保存時EV候補':'EV1.15以上')+'</span><b>'+positives+'頭</b></div>';
   const opt=(v,cur,label)=>'<option value="'+v+'" '+(Number(cur)===Number(v)?'selected':'')+'>'+label+'</option>';
-  rowsBox.innerHTML=data.rows.map(x=>{const cls=x.ev>=1.15?'evGood':x.ev>=1.05?'evMaybe':'evNo';return '<div class="evRow" data-ev-horse="'+x.horse_no+'"><div class="evHorse">'+x.horse_no+'番<br><span class="muted">'+x.popularity+'人気</span></div><div class="evNum">'+Number(x.win_odds).toFixed(1)+'倍</div><div><select class="evAdj" data-horse="'+x.horse_no+'">'+opt(2,x.adj,'＋2 強く上げ')+opt(1,x.adj,'＋1 上げ')+opt(0,x.adj,'0 据え置き')+opt(-1,x.adj,'−1 下げ')+opt(-2,x.adj,'−2 強く下げ')+'</select></div><div class="evNum">'+pc(x.estProb)+'</div><div class="evNum">'+(x.fairOdds==null?'—':Number(x.fairOdds).toFixed(1)+'倍')+'</div><div class="evTag '+cls+'">'+x.tag+'<br>'+Number(x.ev).toFixed(2)+'</div></div>'}).join('');
-  rowsBox.querySelectorAll('.evAdj').forEach(el=>el.onchange=()=>{saveWinEvAdjustment(r,el.dataset.horse,el.value);renderWinEv(r,fr)});
+  rowsBox.innerHTML=data.rows.map(x=>{const cls=x.ev>=1.15?'evGood':x.ev>=1.05?'evMaybe':'evNo',disabled=frozen?' disabled':'';return '<div class="evRow" data-ev-horse="'+x.horse_no+'"><div class="evHorse">'+x.horse_no+'番<br><span class="muted">'+x.popularity+'人気</span></div><div class="evNum">'+Number(x.win_odds).toFixed(1)+'倍</div><div><select class="evAdj" data-horse="'+x.horse_no+'"'+disabled+'>'+opt(2,x.adj,'＋2 強く上げ')+opt(1,x.adj,'＋1 上げ')+opt(0,x.adj,'0 据え置き')+opt(-1,x.adj,'−1 下げ')+opt(-2,x.adj,'−2 強く下げ')+'</select></div><div class="evNum">'+pc(x.estProb)+'</div><div class="evNum">'+(x.fairOdds==null?'—':Number(x.fairOdds).toFixed(1)+'倍')+'</div><div class="evTag '+cls+'">'+x.tag+'<br>'+Number(x.ev).toFixed(2)+'</div></div>'}).join('');
+  if(!frozen)rowsBox.querySelectorAll('.evAdj').forEach(el=>el.onchange=()=>{saveWinEvAdjustment(r,el.dataset.horse,el.value);renderWinEv(r,fr)});
+  const note=box.querySelector('.evNote');if(note)note.dataset.frozen=frozen?'1':'0';
 }
 function boundaryStrengthText(range){
   const b=range&&range.boundary;
