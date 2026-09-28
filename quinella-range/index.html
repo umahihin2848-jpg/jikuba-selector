@@ -355,7 +355,6 @@ async function api(path,opt={}){
   }catch(e){
     if(method==='POST'){setStorageStatus('local');return tagStorageRows(localApi(path,opt),'local')}
     if(method==='PATCH'){
-      try{const d=localApi(path,opt);setStorageStatus('local');return tagStorageRows(d,'local')}catch{}
       throw new Error('クラウド保存データの更新に失敗しました。通信回復後にもう一度お試しください。');
     }
     setStorageStatus('local');return tagStorageRows(localApi(path,opt),'local');
