@@ -120,9 +120,9 @@ function secondPlaceRangeAnalysis(runners){
   const wall=k=>(k<n&&runners[k-1]&&runners[k])?runners[k].win_odds/runners[k-1].win_odds:null;
   const c6=share(6),c8=share(8),c10=share(10),w67=wall(6),w89=wall(8),w1011=wall(10);
   let targetEnd=12,level='hardStop',reason='';
-  const cut6=n<=6||((c6>=.84&&w67!=null&&w67>=1.30)||(c6>=.88&&w67!=null&&w67>=1.18));
-  const cut8=n<=8||((c8>=.91&&w89!=null&&w89>=1.24)||(c8>=.94&&w89!=null&&w89>=1.12));
-  const cut10=n<=10||((c10>=.96&&w1011!=null&&w1011>=1.18)||(c10>=.975&&w1011!=null&&w1011>=1.08));
+  const cut6=n<=6||((c6>=.82&&w67!=null&&w67>=1.35)||(c6>=.86&&w67!=null&&w67>=1.18));
+  const cut8=n<=8||((c8>=.89&&w89!=null&&w89>=1.30)||(c8>=.92&&w89!=null&&w89>=1.15));
+  const cut10=n<=10||((c10>=.94&&w1011!=null&&w1011>=1.25)||(c10>=.96&&w1011!=null&&w1011>=1.12));
   if(cut6){targetEnd=6;level='go';reason='上位6人気までに支持が強く集まり、6→7人気にも切れ目があります。2着候補を6人気以内まで圧縮します。';}
   else if(cut8){targetEnd=8;level='go';reason='6人気では切れませんが、上位8人気までで支持が十分に集まり、8→9人気に切れ目があります。2着候補は8人気までです。';}
   else if(cut10){targetEnd=10;level='caution';reason='8人気以内には絞れませんが、10人気までで市場の大半を占め、10→11人気に切れ目があります。2着候補は10人気までです。';}
@@ -358,7 +358,7 @@ function render(r){
   wrb.className='winRange '+(fr.targetEnd<=6?'go':fr.targetEnd<=8?'caution':fr.targetEnd<=10?'stop':'hardStop');wrb.classList.remove('hidden');
   $('winRangeValue').textContent=fr.label;$('winRangeStatus').textContent='1着候補';$('winRangeText').textContent=fr.reason;
   const p2b=$('secondPlaceBox');p2b.className='winRange '+pr.level;p2b.classList.remove('hidden');
-  $('secondPlaceValue').textContent=pr.label;$('secondPlaceStatus').textContent='2着候補';$('secondPlaceText').textContent=pr.reason;
+  $('secondPlaceValue').textContent=pr.label;$('secondPlaceStatus').textContent='2着候補';const p2m=pr.c6!=null?' C6 '+pc(pr.c6)+' / C8 '+pc(pr.c8)+' / C10 '+pc(pr.c10)+' / 壁 6→7 '+(pr.wall67==null?'—':Number(pr.wall67).toFixed(2)+'x')+'・8→9 '+(pr.wall89==null?'—':Number(pr.wall89).toFixed(2)+'x')+'・10→11 '+(pr.wall1011==null?'—':Number(pr.wall1011).toFixed(2)+'x'):'';$('secondPlaceText').textContent=pr.reason+p2m;
   const sb=$('selectionBox');sb.className='winRange '+sd.level;sb.classList.remove('hidden');
   $('selectionValue').textContent=sd.status;$('selectionStatus').textContent='1着'+fr.end+' / 2着'+pr.end;$('selectionText').textContent=sd.reason;
   if(r.preview&&sd.locked){$('betDecision').value='skip';$('plannedStake').value='';$('opponents').value='';updateOpponentBrake();updateInputBrake();}
