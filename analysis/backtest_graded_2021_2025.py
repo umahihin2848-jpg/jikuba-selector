@@ -38,6 +38,13 @@ VENUES = {
     "小倉": "10_kokura",
 }
 VENUE_CODES = {k: v[:2] for k, v in VENUES.items()}
+MANUAL_RACE_IDS = {
+    ("2024-11-30","京都","チャレンジC"): "202408070111",
+    ("2024-12-08","京都","阪神ジュベナイルF"): "202408070411",
+    ("2024-12-15","京都","朝日杯フューチュリティS"): "202408070611",
+    ("2024-12-21","京都","阪神C"): "202408070711",
+    ("2025-06-29","福島","ラジオNIKKEI賞"): "202503020211",
+}
 RAW_BASE = "https://raw.githubusercontent.com/keibamar/keiba_ai_ver2.0/master/data/RaceResults"
 JRA_URL = "https://www.jra.go.jp/datafile/seiseki/replay/{year}/jyusyo.html"
 HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124 Safari/537.36"}
@@ -289,6 +296,19 @@ def parse_netkeiba_result(race_id, session):
 
 def fallback_netkeiba(meta, session):
     winner_norms = {norm(w) for w in meta["winners"]}
+    manual = None
+    for (d, v, key), rid in MANUAL_RACE_IDS.items():
+        if meta["race_date"] == d and meta["venue"] == v and key in meta["race_name"]:
+            manual = rid
+            break
+    if manual:
+        try:
+            rr = parse_netkeiba_result(manual, session)
+            if any(x["finish"] == 1 and norm(x["horse_name"]) in winner_norms for x in rr):
+                print("FALLBACK_MANUAL", meta["race_date"], meta["race_name"], manual, len(rr))
+                return manual, rr
+        except Exception as e:
+            print("WARN manual fallback", manual, e)
     try:
         ids = discover_netkeiba_race_ids(meta, session)
     except Exception as e:
@@ -369,8 +389,11 @@ def main():
             continue
         fr = first_range(rr)
         end = fr["end"]
-        cands = rr[:end] if fr["boundary"] else rr[:min(end,len(rr))]
-        sp = market_spread(cands)
+        if fr["boundary"]:
+            cands = rr[:end]
+            sp = market_spread(cands)
+        else:
+            sp = {"effective_n":math.nan,"ratio":math.nan,"label":"判定なし","level":"off"}
         winner = next((x for x in rr if x["finish"] == 1), None)
         if not winner:
             unmatched.append({**meta, "reason":"winner_missing", "race_id":rid})
@@ -417,10 +440,11 @@ def main():
             rec.update(agg(group).to_dict())
             out.append(rec)
         return pd.DataFrame(out)
-    spread_summary = summarize_groups(races, ["spread_label"])
+    boundary_races = races[races["range_boundary"]].copy()
+    spread_summary = summarize_groups(boundary_races, ["spread_label"])
     grade_summary = summarize_groups(races, ["grade"])
     range_summary = summarize_groups(races, ["range_boundary","range_end"])
-    spread_grade = summarize_groups(races, ["spread_label","grade"])
+    spread_grade = summarize_groups(boundary_races, ["spread_label","grade"])
     spread_summary.to_csv(OUT/"summary_by_spread.csv",index=False,encoding="utf-8-sig")
     grade_summary.to_csv(OUT/"summary_by_grade.csv",index=False,encoding="utf-8-sig")
     range_summary.to_csv(OUT/"summary_by_range.csv",index=False,encoding="utf-8-sig")
@@ -428,7 +452,7 @@ def main():
 
     # Equal 100-yen win bet on each popularity rank 1-8, segmented by spread.
     roi_rows = []
-    for spread, g in races.groupby("spread_label", sort=False):
+    for spread, g in boundary_races.groupby("spread_label", sort=False):
         for pop in range(1,9):
             stake = len(g)*100
             returns = g.apply(lambda r: r["winner_odds"]*100 if int(r["winner_app_pop"])==pop else 0, axis=1).sum()
@@ -457,7 +481,8 @@ def main():
         "unmatched_rows":len(unmatched),
         "years":{str(y):int((races["year"]==y).sum()) for y in YEARS},
         "grades":races["grade"].value_counts().to_dict(),
-        "spread_counts":races["spread_label"].value_counts().to_dict(),
+        "spread_counts":boundary_races["spread_label"].value_counts().to_dict(),
+        "no_boundary_count":int((~races["range_boundary"]).sum()),
         "boundary_rate_pct":round(100*races["range_boundary"].mean(),2),
         "capture_when_boundary_pct":round(100*races.loc[races["range_boundary"],"winner_in_range"].mean(),2),
         "winner_top8_pct":round(100*(races["winner_app_pop"]<=8).mean(),2),
