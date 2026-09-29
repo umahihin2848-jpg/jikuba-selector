@@ -37,6 +37,7 @@ VENUES = {
     "阪神": "09_hanshin",
     "小倉": "10_kokura",
 }
+VENUE_CODES = {k: v[:2] for k, v in VENUES.items()}
 RAW_BASE = "https://raw.githubusercontent.com/keibamar/keiba_ai_ver2.0/master/data/RaceResults"
 JRA_URL = "https://www.jra.go.jp/datafile/seiseki/replay/{year}/jyusyo.html"
 HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124 Safari/537.36"}
@@ -225,6 +226,85 @@ def runners_from_race(g):
         x["app_pop"] = i
     return rr
 
+def discover_netkeiba_race_ids(meta, session):
+    ymd = meta["race_date"].replace("-", "")
+    url = f"https://db.netkeiba.com/race/list/{ymd}/"
+    r = get(url, session)
+    ids = sorted(set(re.findall(r"/race/(\\d{12})/", r.text)))
+    code = VENUE_CODES.get(meta["venue"])
+    return [rid for rid in ids if code and rid[4:6] == code]
+
+def parse_netkeiba_result(race_id, session):
+    url = f"https://db.netkeiba.com/race/{race_id}/"
+    r = get(url, session)
+    r.encoding = r.apparent_encoding or "EUC-JP"
+    try:
+        tables = pd.read_html(io.StringIO(r.text))
+    except ValueError:
+        return []
+    target = None
+    for t in tables:
+        cols = []
+        for col in t.columns:
+            if isinstance(col, tuple):
+                parts = [str(x) for x in col if "Unnamed" not in str(x)]
+                name = "".join(parts)
+            else:
+                name = str(col)
+            cols.append(norm(name))
+        t = t.copy()
+        t.columns = cols
+        if any("着順" in x for x in cols) and any("馬名" in x for x in cols) and any("単勝" in x for x in cols) and any("人気" in x for x in cols):
+            target = t
+            break
+    if target is None:
+        return []
+    def col_like(key):
+        return next((x for x in target.columns if key in x), None)
+    c_fin, c_no, c_name, c_odds, c_pop = [col_like(x) for x in ("着順","馬番","馬名","単勝","人気")]
+    if not all([c_fin,c_no,c_name,c_odds,c_pop]):
+        return []
+    rr = []
+    for _, row in target.iterrows():
+        m = re.match(r"\\d+", str(row[c_fin]))
+        if not m:
+            continue
+        fin = int(m.group())
+        try:
+            horse_no = int(float(row[c_no]))
+            odds = float(row[c_odds])
+        except Exception:
+            continue
+        try:
+            pop = int(float(row[c_pop]))
+        except Exception:
+            pop = None
+        if not (odds > 0):
+            continue
+        rr.append({"horse_no":horse_no,"odds":odds,"reported_pop":pop,"finish":fin,"horse_name":str(row[c_name])})
+    rr.sort(key=lambda x:(x["odds"],x["horse_no"]))
+    for i,x in enumerate(rr,1):
+        x["app_pop"] = i
+    return rr
+
+def fallback_netkeiba(meta, session):
+    winner_norms = {norm(w) for w in meta["winners"]}
+    try:
+        ids = discover_netkeiba_race_ids(meta, session)
+    except Exception as e:
+        print("WARN fallback list", meta["race_date"], meta["venue"], e)
+        return None
+    for rid in ids:
+        try:
+            rr = parse_netkeiba_result(rid, session)
+        except Exception as e:
+            print("WARN fallback race", rid, e)
+            continue
+        if any(x["finish"] == 1 and norm(x["horse_name"]) in winner_norms for x in rr):
+            print("FALLBACK", meta["race_date"], meta["race_name"], rid, len(rr))
+            return rid, rr
+    return None
+
 def main():
     sess = requests.Session()
     jra = []
@@ -268,16 +348,22 @@ def main():
             ids2 = list(dict.fromkeys(d2["race_id"].astype(str).tolist()))
             if len(ids2) == 1:
                 ids = ids2
+        source = "public_csv"
         if len(ids) != 1:
-            unmatched.append({**meta, "reason":f"match_count={len(ids)}", "candidate_ids":ids})
-            continue
-        rid = ids[0]
+            fb = fallback_netkeiba(meta, sess)
+            if fb is None:
+                unmatched.append({**meta, "reason":f"match_count={len(ids)}", "candidate_ids":ids})
+                continue
+            rid, rr = fb
+            source = "netkeiba_fallback"
+        else:
+            rid = ids[0]
+            g = df[df["race_id"].astype(str)==rid]
+            rr = runners_from_race(g)
         if rid in used_ids:
             # dead heat produced multiple JRA rows; skip duplicate race.
             continue
         used_ids.add(rid)
-        g = df[df["race_id"].astype(str)==rid]
-        rr = runners_from_race(g)
         if len(rr) < 5:
             unmatched.append({**meta, "reason":"too_few_valid_odds", "race_id":rid})
             continue
@@ -290,7 +376,7 @@ def main():
             unmatched.append({**meta, "reason":"winner_missing", "race_id":rid})
             continue
         race_rows.append({
-            "race_id":rid,"year":meta["year"],"race_date":meta["race_date"],"grade":meta["grade"],
+            "race_id":rid,"source":source,"year":meta["year"],"race_date":meta["race_date"],"grade":meta["grade"],
             "race_name":meta["race_name"],"venue":meta["venue"],"surface":meta["surface"],"distance":meta["distance"],
             "field_size":len(rr),"winner":winner["horse_name"],"winner_app_pop":winner["app_pop"],
             "winner_reported_pop":winner["reported_pop"],"winner_odds":winner["odds"],
@@ -322,10 +408,19 @@ def main():
             "winner_top6_pct":100*(group["winner_app_pop"]<=6).mean(),
             "winner_top8_pct":100*(group["winner_app_pop"]<=8).mean(),
         })
-    spread_summary = races.groupby("spread_label", sort=False).apply(agg, include_groups=False).reset_index()
-    grade_summary = races.groupby("grade", sort=False).apply(agg, include_groups=False).reset_index()
-    range_summary = races.groupby(["range_boundary","range_end"], sort=False).apply(agg, include_groups=False).reset_index()
-    spread_grade = races.groupby(["spread_label","grade"], sort=False).apply(agg, include_groups=False).reset_index()
+    def summarize_groups(frame, cols):
+        out = []
+        for key, group in frame.groupby(cols, sort=False, dropna=False):
+            if not isinstance(key, tuple):
+                key = (key,)
+            rec = {col: val for col, val in zip(cols, key)}
+            rec.update(agg(group).to_dict())
+            out.append(rec)
+        return pd.DataFrame(out)
+    spread_summary = summarize_groups(races, ["spread_label"])
+    grade_summary = summarize_groups(races, ["grade"])
+    range_summary = summarize_groups(races, ["range_boundary","range_end"])
+    spread_grade = summarize_groups(races, ["spread_label","grade"])
     spread_summary.to_csv(OUT/"summary_by_spread.csv",index=False,encoding="utf-8-sig")
     grade_summary.to_csv(OUT/"summary_by_grade.csv",index=False,encoding="utf-8-sig")
     range_summary.to_csv(OUT/"summary_by_range.csv",index=False,encoding="utf-8-sig")
@@ -358,6 +453,7 @@ def main():
         "period":"2021-2025",
         "source_jra_rows":len(jra),
         "matched_flat_graded_races":len(races),
+        "fallback_races":int((races["source"]=="netkeiba_fallback").sum()),
         "unmatched_rows":len(unmatched),
         "years":{str(y):int((races["year"]==y).sum()) for y in YEARS},
         "grades":races["grade"].value_counts().to_dict(),
