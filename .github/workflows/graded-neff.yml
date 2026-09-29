@@ -1,0 +1,29 @@
+name: graded-neff-analysis
+on:
+  push:
+    branches:
+      - analysis-graded-neff
+    paths:
+      - 'analysis/graded_neff.py'
+      - '.github/workflows/graded-neff.yml'
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip pandas requests lxml beautifulsoup4
+      - name: Run analysis
+        run: python analysis/graded_neff.py
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: graded-neff-results
+          path: analysis/output/
+          if-no-files-found: error
