@@ -1,0 +1,33 @@
+name: Research Neff 2021-2025
+on:
+  push:
+    branches:
+      - research-neff-2021-2025
+  workflow_dispatch:
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout analysis branch
+        uses: actions/checkout@v4
+      - name: Checkout public racing data
+        uses: actions/checkout@v4
+        with:
+          repository: kou1046/keiba-arima-2026
+          path: source-data
+          fetch-depth: 1
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install reader
+        run: pip install pandas pyarrow
+      - name: Run backtest
+        run: python research/neff_backtest.py
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: neff-backtest-2021-2025
+          path: research-output/
+          retention-days: 7
