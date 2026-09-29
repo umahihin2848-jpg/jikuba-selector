@@ -156,7 +156,7 @@ def load_venue_year(year, venue, slug, session):
     first = df.columns[0]
     df = df.rename(columns={first:"race_id"})
     df["race_id"] = df["race_id"].astype(str)
-    parts = df["date"].astype(str).str.extract(r"(?P<y>\\d{4})年(?P<m>\\d{1,2})月(?P<d>\\d{1,2})日")
+    parts = df["date"].astype(str).str.extract(r"(?P<y>\d{4})年(?P<m>\d{1,2})月(?P<d>\d{1,2})日")
     df["date_key"] = parts.apply(
         lambda z: f"{int(z['y']):04d}-{int(z['m']):02d}-{int(z['d']):02d}" if z.notna().all() else None,
         axis=1,
