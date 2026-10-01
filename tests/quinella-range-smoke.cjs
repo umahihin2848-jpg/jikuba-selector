@@ -94,6 +94,7 @@ async function run(browserType,label){
   assert(!bodyText.includes('v2.38'),label+' v2.38の旧表記が残っている');
   assert(bodyText.includes('2021〜2026 型再分類')&&bodyText.includes('構造A/Aだけで買う'),label+' 型再分類UI');
   assert(await page.locator('#decisionPipelineBox').count()===1,label+' 7段階判定UIシェル');
+  assert(await page.locator('#availabilityDashboard').count()===1,label+' 買えるレース数UIシェル');
   assert(await page.locator('#grade option[value="L"]').count()===1&&await page.locator('#grade option[value="OP"]').count()===1,label+' L/OP選択肢');
   const opl=await page.evaluate(s=>{
     const x=compute(s,'OP','older',1800);
@@ -135,12 +136,20 @@ async function run(browserType,label){
     const hp=decisionPipelineAnalysis({context:{grade:'G1',surface:'turf',age:'older',weight:'handicap',distance:2400},runners:x.runners,structure:x.structure},x.firstRange,x.secondPlaceRange,x.firstRangeSpread,x.v229Filter,x.selectionDecision);
     const neff=v229FilterAnalysis('G3','older',1800,{boundary:{}},{boundary:{},end:6},{ratio:.90});
     const broad=selectionDecisionAnalysis({targetEnd:8,end:8},{targetEnd:10,end:10});
-    return{final:p.finalCode,label:p.finalLabel,win:p.winFit,q:p.quinellaFit,stages:p.stages.length,pairStage:p.stages.find(z=>z.id==='quinella')?.value,opFinal:po.finalCode,hard,hardPipe:hp.hardLocked,neffLocked:neff.locked,neffLevel:neff.level,broadLocked:broad.locked};
+    const z=compute(s,'G3','older',1200);
+    const zr={context:{grade:'G3',surface:'turf',age:'older',weight:'fixed',distance:1200},runners:z.runners,structure:z.structure};
+    const zp=decisionPipelineAnalysis(zr,z.firstRange,z.secondPlaceRange,z.firstRangeSpread,z.v229Filter,z.selectionDecision);
+    const noisy=compute(BROAD_CAUTION,'G3','older',1200);
+    const nr={context:{grade:'G3',surface:'turf',age:'older',weight:'fixed',distance:1200},runners:noisy.runners,structure:noisy.structure};
+    const np=decisionPipelineAnalysis(nr,noisy.firstRange,noisy.secondPlaceRange,noisy.firstRangeSpread,noisy.v229Filter,noisy.selectionDecision);
+    return{final:p.finalCode,label:p.finalLabel,four:p.fourLevelCode,risk:p.riskCount,win:p.winFit,q:p.quinellaFit,stages:p.stages.length,pairStage:p.stages.find(z=>z.id==='quinella')?.value,opFinal:po.finalCode,opFour:po.fourLevelCode,hard,hardPipe:hp.hardLocked,hardFour:hp.fourLevelCode,neffLocked:neff.locked,neffLevel:neff.level,broadLocked:broad.locked,g3Risk:zp.riskCount,g3Four:zp.fourLevelCode,noisyRisk:np.riskCount,noisyFour:np.fourLevelCode,noisySignals:np.riskSignals.map(x=>x.id)};
   },PATTERN_GO);
-  assert(pipelineCheck.final==='win'&&pipelineCheck.label.includes('単勝候補')&&pipelineCheck.win==='candidate',label+' G1中長距離は強い単勝候補 '+JSON.stringify(pipelineCheck));
+  },PATTERN_GO);
+  assert(pipelineCheck.final==='win'&&pipelineCheck.label.includes('単勝候補')&&pipelineCheck.win==='candidate'&&pipelineCheck.four==='strong'&&pipelineCheck.risk<=1,label+' G1中長距離は4段階で強候補 '+JSON.stringify(pipelineCheck));
   assert(pipelineCheck.q!=='candidate'&&pipelineCheck.pairStage.includes('条件付き'),label+' G1中長距離の馬連は89.4%で条件付き '+JSON.stringify(pipelineCheck));
-  assert(pipelineCheck.stages===7&&pipelineCheck.opFinal==='conditional',label+' OP/Lは条件付き・非ロック '+JSON.stringify(pipelineCheck));
-  assert(pipelineCheck.hard.excluded&&pipelineCheck.hard.code==='handicap'&&pipelineCheck.hardPipe,label+' ハンデは固定ロック '+JSON.stringify(pipelineCheck));
+  assert(pipelineCheck.stages===7&&pipelineCheck.opFinal==='conditional'&&pipelineCheck.opFour==='conditional',label+' OP/Lは条件付き・非ロック '+JSON.stringify(pipelineCheck));
+  assert(pipelineCheck.hard.excluded&&pipelineCheck.hard.code==='handicap'&&pipelineCheck.hardPipe&&pipelineCheck.hardFour==='hard_lock',label+' ハンデは固定ロック '+JSON.stringify(pipelineCheck));
+  assert(pipelineCheck.noisyRisk>=3&&pipelineCheck.noisyFour==='recommend_skip',label+' 注意3個以上で見送り推奨 '+JSON.stringify(pipelineCheck));
   assert(!pipelineCheck.neffLocked&&pipelineCheck.neffLevel==='caution',label+' Neff注意帯は非ロック '+JSON.stringify(pipelineCheck));
   assert(!pipelineCheck.broadLocked,label+' 広いレンジも推奨見送り止まり '+JSON.stringify(pipelineCheck));
   const codes=await page.evaluate(([a,b,c,d])=>[compute(a).structure.code,compute(b).structure.code,compute(c).structure.code,compute(d).structure.code],[A,B,C,D]);
@@ -250,8 +259,9 @@ async function run(browserType,label){
   const patternText=await page.textContent('#marketPatternBox');
   assert(patternText.includes('A・明確')&&patternText.includes('B・まずまず')&&patternText.includes('馬連適性')&&patternText.includes('慎重'),label+' A/B構造表示 '+patternText);
   const pipelineText=await page.textContent('#decisionPipelineBox');
-  assert(pipelineText.includes('単勝候補')&&pipelineText.includes('N≥30')&&pipelineText.includes('馬連は条件付き'),label+' 7段階の強候補＋条件付き判定 '+pipelineText);
-  assert((await page.textContent('#strategyBox')).includes('単勝候補')&&(await page.textContent('#strategyBox')).includes('条件付き'),label+' 戦略も強候補＋条件付きへ同期');
+  assert(pipelineText.includes('強候補')&&pipelineText.includes('N≥30')&&pipelineText.includes('馬連は条件付き'),label+' 7段階＋4段階の強候補判定 '+pipelineText);
+  assert(pipelineText.includes('注意点')&&pipelineText.includes('個'),label+' 注意項目表示 '+pipelineText);
+  assert((await page.textContent('#strategyBox')).includes('強候補')&&(await page.textContent('#strategyBox')).includes('条件付き'),label+' 戦略も強候補＋条件付きへ同期');
   assert(db.getPost()===null,label+' 判定を見るだけでは保存しない');
 
   // 判定を見た後で購入判断
@@ -281,6 +291,8 @@ async function run(browserType,label){
   assert(post.context?.decision_snapshot?.app_version==='2.39'&&post.context?.decision_snapshot?.market_pattern_key,label+' v2.39型ログ保存 '+JSON.stringify(post.context?.decision_snapshot));
   assert(post.context?.decision_snapshot?.decision_pipeline_final==='win'&&post.context?.decision_snapshot?.decision_pipeline_stages?.length===7,label+' 7段階ログ保存 '+JSON.stringify(post.context?.decision_snapshot));
   assert(post.context?.decision_snapshot?.hard_lock===false,label+' 非固定条件はhard lock false');
+  assert(post.context?.decision_snapshot?.four_level_code==='strong',label+' 4段階判定ログ保存 '+JSON.stringify(post.context?.decision_snapshot));
+  assert(Number.isInteger(post.context?.decision_snapshot?.risk_signal_count)&&Array.isArray(post.context?.decision_snapshot?.risk_signals),label+' 注意項目ログ保存');
   assert(post.context?.bet_type==='quinella',label+' 条件付き馬連も保存可能');
   assert(post.prior_axis_popularity===1,label+' 軸人気自動保存');
   assert(post.quinella_opponents.length===2,label+' 条件付き馬連の相手保存');
@@ -303,6 +315,9 @@ async function run(browserType,label){
   const statsText=await page.textContent('#stats');
   assert(statsText.includes('1着レンジ内率')&&statsText.includes('両方レンジ内率'),label+' 1着・2着集計');
   assert((await page.textContent('#patternValidationSummary')).includes('v2.39型ログ'),label+' 型別前向き検証UI');
+  const availabilityText=await page.textContent('#availabilityDashboard');
+  assert(availabilityText.includes('強候補')&&availabilityText.includes('条件付き')&&availabilityText.includes('見送り推奨')&&availabilityText.includes('固定ロック'),label+' 4段階レース数ダッシュボード '+availabilityText);
+  assert((await page.textContent('#availabilitySummary')).includes('検討対象'),label+' 買えるレース数サマリー');
 
   if(errs.length)throw new Error(label+' browser errors '+errs.join(' | '));
   await browser.close();
