@@ -85,14 +85,17 @@ async function run(browserType,label){
   page.on('pageerror',e=>errs.push('pageerror:'+e.message));
   page.on('console',m=>{if(m.type()==='error')errs.push('console:'+m.text())});
   await page.goto(LOCAL,{waitUntil:'networkidle'});
-  assert(await page.title()==='レース戦略 v2.39',label+' title');
+  assert(await page.title()==='レース戦略 v2.40',label+' title');
   assert(await page.locator('link[rel="manifest"]').getAttribute('href')==='./manifest.webmanifest',label+' manifest');
   const bodyText=await page.locator('body').innerText();
   assert(bodyText.includes('入力時刻に制限はありません'),label+' 時間制限なし表示');
   assert(!bodyText.includes('15分前'),label+' 15分前の旧表示が残っている');
   assert(!bodyText.includes('T-15'),label+' T-15の旧表示が残っている');
   assert(!bodyText.includes('v2.38'),label+' v2.38の旧表記が残っている');
-  assert(bodyText.includes('2021〜2026 型再分類')&&bodyText.includes('構造A/Aだけで買う'),label+' 型再分類UI');
+  const fullText=await page.locator('body').textContent();
+  assert(fullText.includes('2021〜2026 型再分類')&&fullText.includes('構造A/Aだけで買う'),label+' 型再分類UI');
+  assert(bodyText.includes('基本は単勝。馬連は条件が揃ったレースだけ追加する。'),label+' 単勝主戦メッセージ');
+  assert(await page.locator('#betPriority').count()===1,label+' 単勝主戦・馬連追加UIシェル');
   assert(await page.locator('#decisionPipelineBox').count()===1,label+' 7段階判定UIシェル');
   assert(await page.locator('#availabilityDashboard').count()===1,label+' 買えるレース数UIシェル');
   assert(await page.locator('#tierForwardDashboard').count()===1,label+' 4段階前向き成績UIシェル');
@@ -263,6 +266,10 @@ async function run(browserType,label){
   assert(pipelineText.includes('強候補')&&pipelineText.includes('N≥30')&&pipelineText.includes('馬連は条件付き'),label+' 7段階＋4段階の強候補判定 '+pipelineText);
   assert(pipelineText.includes('注意点')&&pipelineText.includes('個'),label+' 注意項目表示 '+pipelineText);
   assert((await page.textContent('#strategyBox')).includes('強候補')&&(await page.textContent('#strategyBox')).includes('条件付き'),label+' 戦略も強候補＋条件付きへ同期');
+  const priorityText=await page.textContent('#betPriority');
+  assert(priorityText.includes('主戦・単勝')&&priorityText.includes('単勝候補'),label+' 単勝を主戦表示 '+priorityText);
+  assert(priorityText.includes('追加・馬連')&&priorityText.includes('単勝のみ優先'),label+' 馬連は追加条件未達を明示 '+priorityText);
+  assert((await page.textContent('#warningStrip')).includes('注意')||(await page.textContent('#warningStrip')).includes('大きな注意点なし'),label+' 注意要約を上段表示');
   assert(db.getPost()===null,label+' 判定を見るだけでは保存しない');
 
   // 判定を見た後で購入判断
@@ -289,7 +296,7 @@ async function run(browserType,label){
   const post=db.getPost();
   assert(post&&post.structure_code==='A',label+' 保存');
   assert(post.odds_snapshot.length===12&&post.odds_snapshot[0].horse_no===1&&post.odds_snapshot[0].popularity===1&&post.odds_snapshot[0].win_odds===3.7,label+' 入力時点の馬番人気オッズ保存');
-  assert(post.context?.decision_snapshot?.app_version==='2.39'&&post.context?.decision_snapshot?.market_pattern_key,label+' v2.39型ログ保存 '+JSON.stringify(post.context?.decision_snapshot));
+  assert(post.context?.decision_snapshot?.app_version==='2.40'&&post.context?.decision_snapshot?.market_pattern_key,label+' v2.40アプリ型ログ保存 '+JSON.stringify(post.context?.decision_snapshot));
   assert(post.context?.decision_snapshot?.decision_pipeline_final==='win'&&post.context?.decision_snapshot?.decision_pipeline_stages?.length===7,label+' 7段階ログ保存 '+JSON.stringify(post.context?.decision_snapshot));
   assert(post.context?.decision_snapshot?.hard_lock===false,label+' 非固定条件はhard lock false');
   assert(post.context?.decision_snapshot?.four_level_code==='strong',label+' 4段階判定ログ保存 '+JSON.stringify(post.context?.decision_snapshot));
