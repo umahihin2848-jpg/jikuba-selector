@@ -141,7 +141,7 @@
   <div class="validationCard yellow"><div class="validationTitle"><b>G2芝1800m</b><span class="confidence testing">N不足</span></div><div class="validationMetrics"><div><span>2026 1着</span><b>2/2</b></div><div><span>2026 2着</span><b>2/2</b></div><div><span>21〜26 1着</span><b>18/18</b></div><div><span>捕捉率</span><b>100%</b></div></div><div class="validationNote">良好だが2026追加は2例なので検証継続。</div></div>
 </div>
 <div class="notice" style="margin-top:12px"><b>運用メモ：</b>1着ロジックは維持。G3芝1800mの「2着安全幅1〜9」は仮説として表示するだけで、購入制限・保存判定にはまだ適用しません。</div></section>
-<section class="card"><div><h2 style="margin:0">買えるレース数・4段階バランス</h2><div class="muted">保存済みの直近100レースを現在のv2.40ロジックで再判定し、強候補 / 条件付き / 見送り推奨 / 固定ロックの比率を表示します。ロジックが厳しすぎないかを見る指標です。</div></div><div id="availabilitySummary" class="notice" style="margin-top:12px"></div><div id="availabilityDashboard" class="validationGrid"></div></section>
+<section class="card"><div><h2 style="margin:0">買えるレース数・4段階バランス</h2><div class="muted">保存済みの直近100レースを現在のv2.40ロジックで再判定し、強候補 / 条件付き / 見送り推奨 / 固定ロックの比率を表示します。ロジックが厳しすぎないかを見る指標です。</div></div><div id="availabilitySummary" class="notice" style="margin-top:12px"></div><div id="availabilityDashboard" class="validationGrid"></div><h3 style="margin:18px 0 6px">保存時4段階の前向き成績</h3><div class="muted">v2.40-balance-2以降に保存した分類は後から動かさず、その時点の「強候補 / 条件付き / 見送り推奨」ごとに実成績を比較します。</div><div id="tierForwardSummary" class="notice" style="margin-top:10px"></div><div id="tierForwardDashboard" class="validationGrid"></div><h3 style="margin:18px 0 6px">固定ロック監査</h3><div class="muted">過去保存データに固定ロック該当条件が残っている場合だけ、結果を監査します。ロック解除・維持の判断材料で、現在の購入禁止は自動解除しません。</div><div id="hardLockAudit" class="validationGrid"></div></section>
 <section class="card"><div><h2 style="margin:0">単勝・馬連 実戦成績</h2><div class="muted">単勝と馬連を別会計で集計。両方とも単体で回収率100%超えを目標に確認できます。</div></div><div id="performanceStats" class="performanceGrid"></div></section><section class="card"><div><h2 style="margin:0">v2.39 型別・前向き検証</h2><div class="muted">保存時点の「条件×オッズ構造」型キーごとに、1着・2着・同時捕捉と実購入成績を集計します。結果を見て型キーや閾値を後から動かさず、v2.39以降の記録だけで再現性を確認します。</div></div><div id="patternValidationSummary" class="notice" style="margin-top:12px"></div><div id="patternValidationDashboard" class="comboGrid"></div></section><section class="card"><div><h2 style="margin:0">v2.20以降・境界スコア検証</h2><div class="muted">v2.19以前は除外。固定人気レンジではなく、そのレースごとの最有力境界を使った判定だけを検証します。</div></div><div id="validationSummary" class="notice" style="margin-top:12px"></div><div id="validationDashboard" class="validationGrid"></div></section><section class="card"><div class="row"><div><h2 style="margin:0">1着・2着レンジ検証DB</h2><div class="muted">実際の1着が1着レンジ内、実際の2着が2着レンジ内だったかを別々に検証します。3着以下は使いません。</div></div><button class="secondary" id="exportCsv">CSV</button></div><div id="stats" class="stats" style="margin-top:12px"></div></section>
 <section class="card"><div class="row"><h2 style="margin:0">判定履歴</h2><button class="secondary" id="reload">更新</button></div><div id="history"></div></section><div class="muted">レース戦略 v2.39。既存レンジの上に「条件×オッズ構造」の型判定を追加。1着・2着を別評価し、狭く絞れる型だけを前向き検証します。OP/Lは固定除外後の型ログを蓄積中です。</div></main>
 <script>
@@ -1394,6 +1394,38 @@ function renderAvailabilityBalance(h){
   const card=(cls,title,n,p,note)=>'<div class="validationCard '+cls+'"><div class="validationTitle"><b>'+title+'</b><span class="confidence material">'+p+'%</span></div><div class="validationMetrics"><div><span>レース数</span><b>'+n+'</b></div><div><span>構成比</span><b>'+p+'%</b></div></div><div class="validationNote">'+note+'</div></div>';
   box.innerHTML=card('green','🟢 強候補',c.strong,s.strong,'主要条件を通過し注意0〜1個')+card('yellow','🟡 条件付き',c.conditional,s.conditional,'注意0〜2個または強候補基準未達。購入判断は残す')+card('yellow','🟠 見送り推奨',c.recommend_skip,s.recommend_skip,'注意3個以上。購入禁止ではない')+card('red','🔴 固定ロック',c.hard_lock,s.hard_lock,'ハンデ・2歳OP以上・3歳1600m以下G3/L/OP');
 }
+function forwardTierSnapshot(r){
+  const s=r?.context?.decision_snapshot||null;
+  if(!s||!s.four_level_code||!String(s.decision_pipeline_version||'').includes('v2.40-balance-2'))return null;
+  return s;
+}
+function tierPerformanceRows(rows){
+  const completed=rows.filter(r=>r.resultFirst!=null&&r.resultSecond!=null),pairs=completed.map(pairOutcome).filter(x=>x&&x.evaluable);
+  const bought=completed.filter(r=>Number(r.winStake||0)+Number(r.quinellaStake||0)>0);
+  const stake=bought.reduce((a,r)=>a+Number(r.winStake||0)+Number(r.quinellaStake||0),0);
+  const ret=bought.reduce((a,r)=>a+Number(r.winReturn||0)+Number(r.quinellaReturn||0),0);
+  const hits=bought.filter(r=>Number(r.winReturn||0)>0||Number(r.quinellaReturn||0)>0).length;
+  return{saved:rows.length,completed:completed.length,firstRate:rate(pairs.map(x=>x.firstInRange)),bothRate:rate(pairs.map(x=>x.bothInTarget)),purchases:bought.length,hits,hitRate:bought.length?Number((100*hits/bought.length).toFixed(1)):null,stake,ret,roi:stake?Number((100*ret/stake).toFixed(1)):null};
+}
+function renderTierForwardPerformance(h){
+  const summary=$('tierForwardSummary'),box=$('tierForwardDashboard');if(!summary||!box)return;
+  const rows=(h||[]).filter(r=>forwardTierSnapshot(r)),groups={strong:[],conditional:[],recommend_skip:[],hard_lock:[]};
+  for(const r of rows){const code=forwardTierSnapshot(r)?.four_level_code;if(groups[code])groups[code].push(r)}
+  summary.innerHTML='<b>前向き分類ログ '+rows.length+'レース</b><br><span class="muted">分類後に結果を見てラベルを変更しません。特に「条件付き」のROI・的中率を育てます。</span>';
+  const spec=[['green','強候補','strong'],['yellow','条件付き','conditional'],['yellow','見送り推奨','recommend_skip'],['red','固定ロック','hard_lock']];
+  const fmt=x=>x==null?'—':x+'%';
+  box.innerHTML=spec.map(([cls,title,key])=>{const x=tierPerformanceRows(groups[key]);return '<div class="validationCard '+cls+'"><div class="validationTitle"><b>'+title+'</b><span class="confidence material">保存 '+x.saved+'</span></div><div class="validationMetrics"><div><span>結果入力</span><b>'+x.completed+'</b></div><div><span>購入数</span><b>'+x.purchases+'</b></div><div><span>的中率</span><b>'+fmt(x.hitRate)+'</b></div><div><span>回収率</span><b>'+fmt(x.roi)+'</b></div><div><span>1着捕捉</span><b>'+fmt(x.firstRate)+'</b></div><div><span>両方捕捉</span><b>'+fmt(x.bothRate)+'</b></div></div><div class="validationNote">'+(x.stake?'投資 '+yen(x.stake)+' → 払戻 '+yen(x.ret):'実購入データなし')+'</div></div>'}).join('');
+}
+function renderHardLockAudit(h){
+  const box=$('hardLockAudit');if(!box)return;
+  const groups=new Map();
+  for(const r of h||[]){
+    const ex=fixedExclusionAnalysis(r.context||{});if(!ex.excluded)continue;
+    if(!groups.has(ex.code))groups.set(ex.code,{title:ex.title,rows:[]});groups.get(ex.code).rows.push(r);
+  }
+  if(!groups.size){box.innerHTML='<div class="validationCard green"><div class="validationNote">現在の保存履歴には監査できる固定ロック該当レースがありません。</div></div>';return}
+  box.innerHTML=[...groups.entries()].map(([code,g])=>{const x=tierPerformanceRows(g.rows),fmt=v=>v==null?'—':v+'%';return '<div class="validationCard red"><div class="validationTitle"><b>'+esc(g.title)+'</b><span class="confidence testing">履歴 '+g.rows.length+'</span></div><div class="validationMetrics"><div><span>結果入力</span><b>'+x.completed+'</b></div><div><span>1着捕捉</span><b>'+fmt(x.firstRate)+'</b></div><div><span>両方捕捉</span><b>'+fmt(x.bothRate)+'</b></div><div><span>実購入ROI</span><b>'+fmt(x.roi)+'</b></div></div><div class="validationNote">監査コード '+esc(code)+'。十分なNが貯まるまでロック条件は自動変更しません。</div></div>'}).join('');
+}
 function calcStats(h){
   const plannedBuyCount=h.filter(x=>x.betDecision==='buy').length,plannedSkipCount=h.filter(x=>x.betDecision==='skip').length;
   const done=h.filter(x=>x.resultFirst!=null&&x.resultSecond!=null),pairs=done.map(pairOutcome).filter(x=>x&&x.evaluable),firstHits=pairs.filter(x=>x.firstInRange),secondHits=pairs.filter(x=>x.secondInRange),bothHits=pairs.filter(x=>x.bothInTarget);
@@ -1408,7 +1440,7 @@ function calcStats(h){
 }
 async function loadAll(){
   try{
-    historyCache=await getHistory();renderRaceList();const s=calcStats(historyCache);renderValidationDashboard(historyCache);renderPatternValidation(historyCache);renderAvailabilityBalance(historyCache);
+    historyCache=await getHistory();renderRaceList();const s=calcStats(historyCache);renderValidationDashboard(historyCache);renderPatternValidation(historyCache);renderAvailabilityBalance(historyCache);renderTierForwardPerformance(historyCache);renderHardLockAudit(historyCache);
     $('history').innerHTML=historyCache.length?historyCache.map(histItem).join(''):'<p class="muted">まだ判定履歴はありません。</p>';
     const perfCard=(cls,title,x,hitLabel)=>'<div class="performanceCard '+cls+'"><h3>'+title+'</h3><div class="performanceMetrics"><div><span>購入回数</span><b>'+x.count+'</b></div><div><span>的中回数</span><b>'+x.hits+'</b></div><div><span>'+hitLabel+'</span><b>'+(x.hitRate==null?'—':x.hitRate+'%')+'</b></div><div><span>回収率</span><b>'+(x.roi==null?'—':x.roi+'%')+'</b></div><div><span>購入金額</span><b>'+yen(x.stake)+'</b></div><div><span>払戻金額</span><b>'+yen(x.ret)+'</b></div></div></div>';
     $('performanceStats').innerHTML=perfCard('win','🎯 単勝',s.win,'的中率')+perfCard('quinella','🔗 馬連',s.quinella,'的中率')+perfCard('total','📊 合計',s.totalPerf,'どちらか的中率');
