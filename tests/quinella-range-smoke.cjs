@@ -125,7 +125,7 @@ async function run(browserType,label){
   assert(historicalGate.shortLevel!=='stop'&&historicalGate.shortTitle.includes('G3芝1400m以下'),label+' G3芝短距離は注意・非ロック '+JSON.stringify(historicalGate));
   assert(historicalGate.midLevel!=='stop'&&historicalGate.midTitle.includes('G3芝2000m'),label+' G3芝2000は注意・非ロック '+JSON.stringify(historicalGate));
   assert(historicalGate.opQ!=='候補'&&historicalGate.opClass==='検証継続',label+' OP/Lは前向き検証 '+JSON.stringify(historicalGate));
-  const pipelineCheck=await page.evaluate(s=>{
+  const pipelineCheck=await page.evaluate(([s,broadOdds])=>{
     const x=compute(s,'G1','older',2400);
     const r={context:{grade:'G1',surface:'turf',age:'older',weight:'fixed',distance:2400},runners:x.runners,structure:x.structure};
     const p=decisionPipelineAnalysis(r,x.firstRange,x.secondPlaceRange,x.firstRangeSpread,x.v229Filter,x.selectionDecision);
@@ -139,11 +139,11 @@ async function run(browserType,label){
     const z=compute(s,'G3','older',1200);
     const zr={context:{grade:'G3',surface:'turf',age:'older',weight:'fixed',distance:1200},runners:z.runners,structure:z.structure};
     const zp=decisionPipelineAnalysis(zr,z.firstRange,z.secondPlaceRange,z.firstRangeSpread,z.v229Filter,z.selectionDecision);
-    const noisy=compute(BROAD_CAUTION,'G3','older',1200);
+    const noisy=compute(broadOdds,'G3','older',1200);
     const nr={context:{grade:'G3',surface:'turf',age:'older',weight:'fixed',distance:1200},runners:noisy.runners,structure:noisy.structure};
     const np=decisionPipelineAnalysis(nr,noisy.firstRange,noisy.secondPlaceRange,noisy.firstRangeSpread,noisy.v229Filter,noisy.selectionDecision);
     return{final:p.finalCode,label:p.finalLabel,four:p.fourLevelCode,risk:p.riskCount,win:p.winFit,q:p.quinellaFit,stages:p.stages.length,pairStage:p.stages.find(z=>z.id==='quinella')?.value,opFinal:po.finalCode,opFour:po.fourLevelCode,hard,hardPipe:hp.hardLocked,hardFour:hp.fourLevelCode,neffLocked:neff.locked,neffLevel:neff.level,broadLocked:broad.locked,g3Risk:zp.riskCount,g3Four:zp.fourLevelCode,noisyRisk:np.riskCount,noisyFour:np.fourLevelCode,noisySignals:np.riskSignals.map(x=>x.id)};
-  },PATTERN_GO);
+  },[PATTERN_GO,BROAD_CAUTION]);
   },PATTERN_GO);
   assert(pipelineCheck.final==='win'&&pipelineCheck.label.includes('単勝候補')&&pipelineCheck.win==='candidate'&&pipelineCheck.four==='strong'&&pipelineCheck.risk<=1,label+' G1中長距離は4段階で強候補 '+JSON.stringify(pipelineCheck));
   assert(pipelineCheck.q!=='candidate'&&pipelineCheck.pairStage.includes('条件付き'),label+' G1中長距離の馬連は89.4%で条件付き '+JSON.stringify(pipelineCheck));
