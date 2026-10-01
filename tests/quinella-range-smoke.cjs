@@ -112,12 +112,16 @@ async function run(browserType,label){
     const x=compute(s,'G3','older',1200);
     const shortR={context:{grade:'G3',surface:'turf',age:'older',weight:'fixed',distance:1200},runners:x.runners,structure:x.structure};
     const shortMp=marketPatternAnalysis(shortR,x.firstRange,x.secondPlaceRange,x.firstRangeSpread,x.v229Filter);
+    const mid=compute(s,'G3','older',2000);
+    const midR={context:{grade:'G3',surface:'turf',age:'older',weight:'fixed',distance:2000},runners:mid.runners,structure:mid.structure};
+    const midMp=marketPatternAnalysis(midR,mid.firstRange,mid.secondPlaceRange,mid.firstRangeSpread,mid.v229Filter);
     const y=compute(s,'OP','older',1800);
     const opR={context:{grade:'OP',surface:'turf',age:'older',weight:'fixed',distance:1800},runners:y.runners,structure:y.structure};
     const opMp=marketPatternAnalysis(opR,y.firstRange,y.secondPlaceRange,y.firstRangeSpread,y.v229Filter);
-    return{shortLevel:shortMp.level,shortTitle:shortMp.title,opQ:opMp.quinellaFit,opClass:opMp.historyClass};
+    return{shortLevel:shortMp.level,shortTitle:shortMp.title,midLevel:midMp.level,midTitle:midMp.title,opQ:opMp.quinellaFit,opClass:opMp.historyClass};
   },PATTERN_GO);
   assert(historicalGate.shortLevel==='stop'&&historicalGate.shortTitle.includes('G3芝1400m以下'),label+' G3芝短距離却下 '+JSON.stringify(historicalGate));
+  assert(historicalGate.midLevel==='stop'&&historicalGate.midTitle.includes('G3芝2000m'),label+' G3芝2000却下 '+JSON.stringify(historicalGate));
   assert(historicalGate.opQ!=='候補'&&historicalGate.opClass==='検証継続',label+' OP/Lは前向き検証 '+JSON.stringify(historicalGate));
   const codes=await page.evaluate(([a,b,c,d])=>[compute(a).structure.code,compute(b).structure.code,compute(c).structure.code,compute(d).structure.code],[A,B,C,D]);
   assert(JSON.stringify(codes)==='["A","B","C","D"]',label+' A/B/C/D分類 '+JSON.stringify(codes));
