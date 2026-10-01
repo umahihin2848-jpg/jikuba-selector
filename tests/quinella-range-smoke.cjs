@@ -252,7 +252,7 @@ async function run(browserType,label){
   await page.fill('#wk'+row.id,'0'); await page.fill('#wp'+row.id,'0');
   await page.fill('#qk'+row.id,'1000'); await page.fill('#qp'+row.id,'0');
   await page.getByRole('button',{name:'結果保存'}).first().click();
-  await page.waitForTimeout(120);
+  await page.waitForFunction(()=>document.querySelector('#history')?.textContent.includes('1着は1着レンジ内'),null,{timeout:5000});
   const histText=await page.textContent('#history');
   assert(histText.includes('1着は1着レンジ内')&&histText.includes('2着は2着レンジ内'),label+' 1着・2着レンジ判定');
   assert(db.getPatch().result_first_horse_no===1&&db.getPatch().result_second_horse_no===3,label+' 結果PATCH');
