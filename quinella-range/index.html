@@ -73,6 +73,7 @@
   <div class="patternTop"><div><div class="muted">7段階判定</div><div id="decisionPipelineTitle" class="patternTitle"></div></div><div id="decisionPipelineBadge" class="patternBadge"></div></div>
   <div id="decisionPipelinePolicy" class="patternKey"></div>
   <div id="decisionPipelineStages" class="opinionSummary"></div>
+  <div id="decisionWarningList" class="patternNote"></div>
   <div id="decisionPipelineNote" class="patternNote"></div>
 </div>
 
@@ -139,7 +140,9 @@
   <div class="validationCard yellow"><div class="validationTitle"><b>G3芝1800m</b><span class="confidence testing">2着要検証</span></div><div class="validationMetrics"><div><span>2026 1着</span><b>4/4</b></div><div><span>現行2着</span><b>2/4</b></div><div><span>21〜26 1着</span><b>28/29</b></div><div><span>捕捉率</span><b>96.6%</b></div></div><div class="validationNote">2着を最低1〜9人気まで取れば2026は4/4。ただしN=4のため正式ルールには未採用。</div></div>
   <div class="validationCard yellow"><div class="validationTitle"><b>G2芝1800m</b><span class="confidence testing">N不足</span></div><div class="validationMetrics"><div><span>2026 1着</span><b>2/2</b></div><div><span>2026 2着</span><b>2/2</b></div><div><span>21〜26 1着</span><b>18/18</b></div><div><span>捕捉率</span><b>100%</b></div></div><div class="validationNote">良好だが2026追加は2例なので検証継続。</div></div>
 </div>
-<div class="notice" style="margin-top:12px"><b>運用メモ：</b>1着ロジックは維持。G3芝1800mの「2着安全幅1〜9」は仮説として表示するだけで、購入制限・保存判定にはまだ適用しません。</div></section><section class="card"><div><h2 style="margin:0">単勝・馬連 実戦成績</h2><div class="muted">単勝と馬連を別会計で集計。両方とも単体で回収率100%超えを目標に確認できます。</div></div><div id="performanceStats" class="performanceGrid"></div></section><section class="card"><div><h2 style="margin:0">v2.39 型別・前向き検証</h2><div class="muted">保存時点の「条件×オッズ構造」型キーごとに、1着・2着・同時捕捉と実購入成績を集計します。結果を見て型キーや閾値を後から動かさず、v2.39以降の記録だけで再現性を確認します。</div></div><div id="patternValidationSummary" class="notice" style="margin-top:12px"></div><div id="patternValidationDashboard" class="comboGrid"></div></section><section class="card"><div><h2 style="margin:0">v2.20以降・境界スコア検証</h2><div class="muted">v2.19以前は除外。固定人気レンジではなく、そのレースごとの最有力境界を使った判定だけを検証します。</div></div><div id="validationSummary" class="notice" style="margin-top:12px"></div><div id="validationDashboard" class="validationGrid"></div></section><section class="card"><div class="row"><div><h2 style="margin:0">1着・2着レンジ検証DB</h2><div class="muted">実際の1着が1着レンジ内、実際の2着が2着レンジ内だったかを別々に検証します。3着以下は使いません。</div></div><button class="secondary" id="exportCsv">CSV</button></div><div id="stats" class="stats" style="margin-top:12px"></div></section>
+<div class="notice" style="margin-top:12px"><b>運用メモ：</b>1着ロジックは維持。G3芝1800mの「2着安全幅1〜9」は仮説として表示するだけで、購入制限・保存判定にはまだ適用しません。</div></section>
+<section class="card"><div><h2 style="margin:0">買えるレース数・4段階バランス</h2><div class="muted">保存済みの直近100レースを現在のv2.40ロジックで再判定し、強候補 / 条件付き / 見送り推奨 / 固定ロックの比率を表示します。ロジックが厳しすぎないかを見る指標です。</div></div><div id="availabilitySummary" class="notice" style="margin-top:12px"></div><div id="availabilityDashboard" class="validationGrid"></div></section>
+<section class="card"><div><h2 style="margin:0">単勝・馬連 実戦成績</h2><div class="muted">単勝と馬連を別会計で集計。両方とも単体で回収率100%超えを目標に確認できます。</div></div><div id="performanceStats" class="performanceGrid"></div></section><section class="card"><div><h2 style="margin:0">v2.39 型別・前向き検証</h2><div class="muted">保存時点の「条件×オッズ構造」型キーごとに、1着・2着・同時捕捉と実購入成績を集計します。結果を見て型キーや閾値を後から動かさず、v2.39以降の記録だけで再現性を確認します。</div></div><div id="patternValidationSummary" class="notice" style="margin-top:12px"></div><div id="patternValidationDashboard" class="comboGrid"></div></section><section class="card"><div><h2 style="margin:0">v2.20以降・境界スコア検証</h2><div class="muted">v2.19以前は除外。固定人気レンジではなく、そのレースごとの最有力境界を使った判定だけを検証します。</div></div><div id="validationSummary" class="notice" style="margin-top:12px"></div><div id="validationDashboard" class="validationGrid"></div></section><section class="card"><div class="row"><div><h2 style="margin:0">1着・2着レンジ検証DB</h2><div class="muted">実際の1着が1着レンジ内、実際の2着が2着レンジ内だったかを別々に検証します。3着以下は使いません。</div></div><button class="secondary" id="exportCsv">CSV</button></div><div id="stats" class="stats" style="margin-top:12px"></div></section>
 <section class="card"><div class="row"><h2 style="margin:0">判定履歴</h2><button class="secondary" id="reload">更新</button></div><div id="history"></div></section><div class="muted">レース戦略 v2.39。既存レンジの上に「条件×オッズ構造」の型判定を追加。1着・2着を別評価し、狭く絞れる型だけを前向き検証します。OP/Lは固定除外後の型ログを蓄積中です。</div></main>
 <script>
 const $=id=>document.getElementById(id);const DATA='https://ep-shy-unit-b54tgtrq.apirest.c-7.us-east-2.aws.neon.tech/neondb/rest/v1';let historyCache=[],raceFormLoading=false,pendingAssessment=null;
@@ -804,6 +807,35 @@ function stabilityEvaluation(e,role='first'){
     ?{status:'pass',value:pipelineRateText(a)+' / '+pipelineRateText(b),note:'前期・後期とも90%以上。'}
     :{status:'hold',value:pipelineRateText(a)+' / '+pipelineRateText(b),note:'どちらかの期間が90%未満。強候補にはしませんが固定ロックではありません。'};
 }
+function decisionRiskSignals(r,fr,pr,spread,v229,e,history){
+  const ctx=r&&r.context||{},g=String(ctx.grade||'').toUpperCase(),signals=[];
+  const add=(id,label,detail,severity='mid')=>{if(!signals.some(x=>x.id===id))signals.push({id,label,detail,severity})};
+  const ratio=Number(spread&&spread.ratio),firstEnd=Number(fr&&fr.end||0),secondEnd=Number(pr&&pr.end||0);
+  const firstSignal=structuralSignal(fr,spread,'first',g),secondSignal=structuralSignal(pr,spread,'second',g);
+  if(e&&Number.isFinite(Number(e.firstRate))){
+    if(Number(e.firstRate)<.80)add('history_very_weak','過去条件がかなり弱い','1着捕捉 '+pipelineRateText(e.firstRate),'high');
+    else if(Number(e.firstRate)<.90)add('history_weak','過去条件が弱め','1着捕捉 '+pipelineRateText(e.firstRate),'mid');
+  }
+  if((g==='G2'||g==='G3')&&Number.isFinite(ratio)&&ratio>=.85&&ratio<=.95)add('neff_danger','Neff注意帯','Neff比 '+pipelineRateText(ratio)+'（過去注意帯）','mid');
+  if(firstSignal.grade==='STOP'||!fr?.boundary)add('first_boundary_weak','1着境界が不明瞭','勝ち馬候補を狭く切る境界が弱い','high');
+  else if(firstSignal.grade==='C'||firstEnd>=9)add('first_range_wide','1着レンジが広め','1着 '+(fr?.label||('1〜'+firstEnd+'人気')),'mid');
+  if(secondSignal.grade==='STOP'||!pr?.boundary||secondEnd>=10)add('second_range_wide','2着レンジが広い','2着 '+(pr?.label||('1〜'+secondEnd+'人気'))+'：馬連点数が増えやすい','mid');
+  const ar=axisRiskAnalysis(r&&r.runners||[]);
+  if(ar.level==='high')add('axis_market_risk','軸市場が強警戒','上位人気への支持が分散','mid');
+  if(e&&e.verifiedN!==false&&Number.isFinite(Number(e.n))&&Number(e.n)<10)add('tiny_sample','サンプル極小','N='+e.n+'のため過去率が不安定','mid');
+  const early=Number(e&&e.earlyRate),late=Number(e&&e.lateRate);
+  if(Number.isFinite(early)&&Number.isFinite(late)&&Math.min(early,late)<.90)add('year_instability','年度安定性が弱い','前期 '+pipelineRateText(early)+' / 後期 '+pipelineRateText(late),'mid');
+  return signals;
+}
+function fourLevelDecision(pipe,signals){
+  if(pipe.hardLocked)return{code:'hard_lock',label:'固定ロック',level:'stop',buyable:false};
+  const n=(signals||[]).length;
+  if(n>=3)return{code:'recommend_skip',label:'見送り推奨',level:'caution',buyable:false};
+  if(pipe.finalCode==='win'||pipe.finalCode==='win_quinella'){
+    if(n<=1)return{code:'strong',label:'強候補',level:'go',buyable:true};
+  }
+  return{code:'conditional',label:'条件付き',level:'caution',buyable:true};
+}
 function decisionPipelineAnalysis(r,fr,pr,spread,v229,sd){
   const ctx=r&&r.context||{},g=String(ctx.grade||'').toUpperCase();
   const fixed=fixedExclusionAnalysis(ctx),hardLocked=!!fixed.excluded,history=historicalPatternGate(ctx,v229,fr,pr,spread),e=historicalEvidenceProfile(ctx,v229,fr,pr,spread);
@@ -841,37 +873,41 @@ function decisionPipelineAnalysis(r,fr,pr,spread,v229,sd){
   let finalCode=hardLocked?'skip':'conditional',finalLabel=hardLocked?'固定ロック':'条件付き検討';
   if(!hardLocked&&winPass&&pairPass){finalCode='win_quinella';finalLabel='強い単勝＋馬連候補';}
   else if(!hardLocked&&winPass){finalCode='win';finalLabel='強い単勝候補';}
+  const riskSignals=decisionRiskSignals(r,fr,pr,spread,v229,e,history);
+  const four=fourLevelDecision({hardLocked,finalCode},riskSignals);
   const stages=[
     {id:'condition',label:'1 条件実績',status:conditionStatus,value:conditionValue,note:history.evidence},
-    {id:'odds',label:'2 当日オッズ構造',status:oddsStatus,value:'1着 '+fg+' / 2着 '+sg,note:'1着はB以上を正式候補の入口にします。'},
+    {id:'odds',label:'2 当日オッズ構造',status:oddsStatus,value:'1着 '+fg+' / 2着 '+sg,note:'1着はB以上を強候補の入口にします。'},
     {id:'stability',label:'3 年度安定性',status:stability.status,value:stability.value,note:stability.note},
     {id:'sample',label:'4 N数',status:nStatus,value:nValue,note:nNote},
     {id:'win',label:'5 単勝適性',status:winStatus,value:winValue,note:winNote},
     {id:'quinella',label:'6 馬連適性',status:pairStatus,value:pairValue,note:pairNote},
-    {id:'final',label:'7 買う / 見送る',status:hardLocked?'stop':(finalCode==='conditional'?'hold':'pass'),value:finalLabel,note:hardLocked?fixed.reason:finalCode==='conditional'?'強候補基準には未達ですが固定除外ではありません。最終判断を残します。':finalCode==='win'?'単勝側が強候補基準通過。馬連は条件付きです。':'単勝・馬連とも強候補基準通過。'}
+    {id:'final',label:'7 買う / 見送る',status:four.code==='hard_lock'?'stop':four.code==='strong'?'pass':'hold',value:four.label,note:four.code==='hard_lock'?fixed.reason:four.code==='recommend_skip'?'注意項目が3個以上重なっています。購入禁止ではありませんが見送り推奨です。':four.code==='conditional'?'固定除外ではありません。注意点を確認して最終判断します。':'強候補基準を満たし、注意項目も0〜1個です。'}
   ];
-  const summary=hardLocked
+  const summary=four.code==='hard_lock'
     ?'固定ロック：'+fixed.reason
-    :finalCode==='win_quinella'
-      ?'強候補：条件実績・当日構造・安定性・Nが揃っています。'
-      :finalCode==='win'
-        ?'単勝は強候補。馬連は条件付きですが購入禁止ではありません。'
-        :'固定除外には該当しません。強候補基準には未達のため慎重評価ですが、赤ロックはしません。';
-  return{ruleVersion:'v2.40-balance-1',policy:FORMAL_PROMOTION_POLICY,hardLocked,hardLockCode:fixed.code||'',hardLockReason:fixed.reason||'',history,evidence:e,firstGrade:fg,secondGrade:sg,winFit:winPass?'candidate':hardLocked?'hard_reject':'observe',quinellaFit:pairPass?'candidate':hardLocked?'hard_reject':'observe',finalCode,finalLabel,summary,stages};
+    :four.code==='recommend_skip'
+      ?'見送り推奨：注意項目が'+riskSignals.length+'個重なっています。赤ロックではありません。'
+      :four.code==='conditional'
+        ?'条件付き：注意項目 '+riskSignals.length+'個。弱点を確認して購入判断を残します。'
+        :'強候補：主要条件を通過し、注意項目は'+riskSignals.length+'個です。';
+  return{ruleVersion:'v2.40-balance-2',policy:FORMAL_PROMOTION_POLICY,hardLocked,hardLockCode:fixed.code||'',hardLockReason:fixed.reason||'',history,evidence:e,firstGrade:fg,secondGrade:sg,winFit:winPass?'candidate':hardLocked?'hard_reject':'observe',quinellaFit:pairPass?'candidate':hardLocked?'hard_reject':'observe',finalCode,finalLabel,fourLevelCode:four.code,fourLevelLabel:four.label,riskSignals,riskCount:riskSignals.length,summary,stages};
 }
 function applyPipelineToStrategy(base,pipe,fr){
-  if(pipe.hardLocked)return{level:'stop',title:'固定ロック',badge:'買わない条件',main:'購入不可',quinella:'購入不可',first:'1〜'+Number(fr?.end||0)+'人気',action:'次のレースへ',next:pipe.summary};
-  if(pipe.finalCode==='win_quinella')return{...base,level:'go',title:'強い単勝＋馬連候補',badge:'強候補',main:'単勝1頭（最大2頭）',quinella:'強候補',action:'軸・相手を最終確認',next:pipe.summary+' '+(base?.next||'')};
-  if(pipe.finalCode==='win')return{...base,level:'go',title:'強い単勝候補',badge:'強候補',main:'単勝1頭（最大2頭）',quinella:'条件付き',action:'軸馬選定で1〜2頭へ',next:pipe.summary+' '+(base?.next||'')};
-  return{...base,level:'caution',title:'条件付き検討',badge:'ロックなし',main:'明確な軸がある時だけ',quinella:'慎重',action:'買うなら根拠を確認',next:pipe.summary+' '+(base?.next||'')};
+  if(pipe.fourLevelCode==='hard_lock')return{level:'stop',title:'固定ロック',badge:'買わない条件',main:'購入不可',quinella:'購入不可',first:'1〜'+Number(fr?.end||0)+'人気',action:'次のレースへ',next:pipe.summary};
+  if(pipe.fourLevelCode==='recommend_skip')return{...base,level:'caution',title:'見送り推奨',badge:'注意'+pipe.riskCount+'項目',main:'基本見送り',quinella:'基本見送り',action:'買うなら弱点を再確認',next:pipe.summary+' '+(base?.next||'')};
+  if(pipe.fourLevelCode==='strong')return{...base,level:'go',title:'強候補',badge:'注意'+pipe.riskCount+'項目',main:pipe.finalCode==='win_quinella'?'単勝＋馬連':'単勝中心',quinella:pipe.finalCode==='win_quinella'?'強候補':'条件付き',action:'軸・相手を最終確認',next:pipe.summary+' '+(base?.next||'')};
+  return{...base,level:'caution',title:'条件付き',badge:'注意'+pipe.riskCount+'項目',main:'明確な軸がある時に検討',quinella:'慎重',action:'注意点を確認',next:pipe.summary+' '+(base?.next||'')};
 }
 function renderDecisionPipeline(pipe){
   const box=$('decisionPipelineBox');if(!box||!pipe)return;
-  box.className='patternBox '+(pipe.hardLocked?'stop':pipe.finalCode==='conditional'?'caution':'go');box.classList.remove('hidden');
-  $('decisionPipelineTitle').textContent=pipe.finalLabel;
-  $('decisionPipelineBadge').textContent=pipe.ruleVersion;
+  box.className='patternBox '+(pipe.fourLevelCode==='hard_lock'?'stop':pipe.fourLevelCode==='strong'?'go':'caution');box.classList.remove('hidden');
+  $('decisionPipelineTitle').textContent=pipe.fourLevelLabel;
+  $('decisionPipelineBadge').textContent=pipe.ruleVersion+' / 注意'+pipe.riskCount+'項目';
   $('decisionPipelinePolicy').textContent='昇格基準：N≥'+pipe.policy.minN+' / 1着≥'+Math.round(pipe.policy.minFirstRate*100)+'% / 前期・後期≥'+Math.round(pipe.policy.minBlockRate*100)+'% / 馬連同時≥'+Math.round(pipe.policy.minPairRate*100)+'%・N≥'+pipe.policy.minPairN;
   $('decisionPipelineStages').innerHTML=pipe.stages.map(x=>'<div class="opinionRow"><span>'+esc(x.label)+'</span><b>'+pipelineStageStatusLabel(x.status)+'　'+esc(x.value)+'</b><div class="muted" style="grid-column:2">'+esc(x.note)+'</div></div>').join('');
+  const wl=$('decisionWarningList');
+  wl.innerHTML=pipe.riskSignals.length?'<b>注意点 '+pipe.riskCount+'個</b><br>'+pipe.riskSignals.map(x=>'⚠️ '+esc(x.label)+'：'+esc(x.detail)).join('<br>'):'<b>注意点なし</b>：大きな弱点は検出されませんでした。';
   $('decisionPipelineNote').textContent=pipe.summary;
 }
 const HISTORICAL_PATTERN_REVIEW=[
@@ -1021,6 +1057,10 @@ function buildDecisionSnapshot(p,calc){
     hard_lock:pipe.hardLocked,
     hard_lock_code:pipe.hardLockCode,
     hard_lock_reason:pipe.hardLockReason,
+    four_level_code:pipe.fourLevelCode,
+    four_level_label:pipe.fourLevelLabel,
+    risk_signal_count:pipe.riskCount,
+    risk_signals:pipe.riskSignals.map(x=>({id:x.id,label:x.label,detail:x.detail,severity:x.severity})),
     decision_pipeline_win_fit:pipe.winFit,
     decision_pipeline_quinella_fit:pipe.quinellaFit,
     decision_pipeline_stages:pipe.stages.map(x=>({id:x.id,status:x.status,value:x.value})),
@@ -1331,6 +1371,29 @@ function renderPatternValidation(h){
     return '<div class="comboCard"><div class="comboHead"><b>'+esc(title)+'</b><span class="confidence '+cf.cls+'">'+cf.label+' N='+g.completed+'</span></div><div class="comboMetrics"><div><span>保存数</span><b>'+g.rows.length+'</b></div><div><span>1着捕捉</span><b>'+fmt(m.firstRate)+'</b></div><div><span>2着捕捉</span><b>'+fmt(m.secondRate)+'</b></div><div><span>両方捕捉</span><b>'+fmt(m.bothRate)+'</b></div><div><span>構造</span><b>'+esc(grades)+'</b></div><div><span>馬連適性</span><b>'+esc(q)+'</b></div></div><div class="comboFoot">'+esc(g.key)+(m.roi==null?'':' / 実購入馬連ROI '+m.roi+'%')+'<br>正式化はN数・年度安定性・将来データでの再現を確認してから。</div></div>';
   }).join('');
 }
+function currentPipelineForRow(r){
+  const fr=r.firstRange||firstPlaceRangeAnalysis(r.runners),pr=r.secondPlaceRange||secondPlaceRangeAnalysis(r.runners);
+  const rawFr=r.baseFirstRange||firstPlaceRangeAnalysis(r.runners),spread=r.firstRangeSpread||firstRangeSpreadAnalysis(r.runners,fr);
+  const v229=r.v229Filter||v229FilterAnalysis(r.context?.grade||'',r.context?.age||'',r.context?.distance||'',rawFr,fr,spread);
+  const sd=r.selectionDecision||selectionDecisionV230(selectionDecisionAnalysis(fr,pr),v229,pr);
+  return decisionPipelineAnalysis(r,fr,pr,spread,v229,sd);
+}
+function calcAvailabilityBalance(h){
+  const rows=(h||[]).slice(0,100),counts={strong:0,conditional:0,recommend_skip:0,hard_lock:0},items=[];
+  for(const r of rows){
+    let p;try{p=currentPipelineForRow(r)}catch{continue}
+    const code=p.fourLevelCode||'conditional';if(counts[code]!=null)counts[code]++;items.push({r,p});
+  }
+  const total=items.length,pct=n=>total?Number((100*n/total).toFixed(1)):0,buyable=counts.strong+counts.conditional;
+  return{total,counts,buyable,buyablePct:pct(buyable),shares:{strong:pct(counts.strong),conditional:pct(counts.conditional),recommend_skip:pct(counts.recommend_skip),hard_lock:pct(counts.hard_lock)},items};
+}
+function renderAvailabilityBalance(h){
+  const summary=$('availabilitySummary'),box=$('availabilityDashboard');if(!summary||!box)return;
+  const d=calcAvailabilityBalance(h),c=d.counts,s=d.shares;
+  summary.innerHTML='<b>直近 '+d.total+'レース</b> / 検討対象（強候補＋条件付き） <b>'+d.buyable+'レース・'+d.buyablePct+'%</b><br><span class="muted">見送り推奨は購入禁止ではありません。固定ロックだけが購入不可です。</span>';
+  const card=(cls,title,n,p,note)=>'<div class="validationCard '+cls+'"><div class="validationTitle"><b>'+title+'</b><span class="confidence material">'+p+'%</span></div><div class="validationMetrics"><div><span>レース数</span><b>'+n+'</b></div><div><span>構成比</span><b>'+p+'%</b></div></div><div class="validationNote">'+note+'</div></div>';
+  box.innerHTML=card('green','🟢 強候補',c.strong,s.strong,'主要条件を通過し注意0〜1個')+card('yellow','🟡 条件付き',c.conditional,s.conditional,'注意0〜2個または強候補基準未達。購入判断は残す')+card('yellow','🟠 見送り推奨',c.recommend_skip,s.recommend_skip,'注意3個以上。購入禁止ではない')+card('red','🔴 固定ロック',c.hard_lock,s.hard_lock,'ハンデ・2歳OP以上・3歳1600m以下G3/L/OP');
+}
 function calcStats(h){
   const plannedBuyCount=h.filter(x=>x.betDecision==='buy').length,plannedSkipCount=h.filter(x=>x.betDecision==='skip').length;
   const done=h.filter(x=>x.resultFirst!=null&&x.resultSecond!=null),pairs=done.map(pairOutcome).filter(x=>x&&x.evaluable),firstHits=pairs.filter(x=>x.firstInRange),secondHits=pairs.filter(x=>x.secondInRange),bothHits=pairs.filter(x=>x.bothInTarget);
@@ -1345,7 +1408,7 @@ function calcStats(h){
 }
 async function loadAll(){
   try{
-    historyCache=await getHistory();renderRaceList();const s=calcStats(historyCache);renderValidationDashboard(historyCache);renderPatternValidation(historyCache);
+    historyCache=await getHistory();renderRaceList();const s=calcStats(historyCache);renderValidationDashboard(historyCache);renderPatternValidation(historyCache);renderAvailabilityBalance(historyCache);
     $('history').innerHTML=historyCache.length?historyCache.map(histItem).join(''):'<p class="muted">まだ判定履歴はありません。</p>';
     const perfCard=(cls,title,x,hitLabel)=>'<div class="performanceCard '+cls+'"><h3>'+title+'</h3><div class="performanceMetrics"><div><span>購入回数</span><b>'+x.count+'</b></div><div><span>的中回数</span><b>'+x.hits+'</b></div><div><span>'+hitLabel+'</span><b>'+(x.hitRate==null?'—':x.hitRate+'%')+'</b></div><div><span>回収率</span><b>'+(x.roi==null?'—':x.roi+'%')+'</b></div><div><span>購入金額</span><b>'+yen(x.stake)+'</b></div><div><span>払戻金額</span><b>'+yen(x.ret)+'</b></div></div></div>';
     $('performanceStats').innerHTML=perfCard('win','🎯 単勝',s.win,'的中率')+perfCard('quinella','🔗 馬連',s.quinella,'的中率')+perfCard('total','📊 合計',s.totalPerf,'どちらか的中率');
@@ -1354,11 +1417,11 @@ async function loadAll(){
 }
 function csvQuote(v){return'"'+String(v??'').replaceAll('"','""')+'"'}$('exportCsv').onclick=async()=>{try{
   const h=historyCache.length?historyCache:await getHistory();
-  const cols=['race_date','venue','race_no','race_name','odds_snapshot','range_code','condition_category','condition_sample_n','market_pattern_key','market_pattern_status','first_structure_grade','second_structure_grade','quinella_pattern_fit','pattern_locked','decision_reason','high_confidence_pass','exclusion_reason','neff','neff_ratio','first_place_range_end','second_place_range_end','selection_status','selection_locked','result_first_horse_no','result_first_popularity','first_in_range','result_second_horse_no','result_second_popularity','second_in_range','both_in_target_ranges','bet_decision','bet_type','planned_stake_yen','opponents','win_stake_yen','win_return_yen','win_roi_pct','quinella_stake_yen','quinella_return_yen','quinella_roi_pct'];
+  const cols=['race_date','venue','race_no','race_name','odds_snapshot','range_code','condition_category','condition_sample_n','market_pattern_key','market_pattern_status','first_structure_grade','second_structure_grade','quinella_pattern_fit','pattern_locked','four_level_code','four_level_label','risk_signal_count','risk_signals','hard_lock','hard_lock_code','decision_reason','high_confidence_pass','exclusion_reason','neff','neff_ratio','first_place_range_end','second_place_range_end','selection_status','selection_locked','result_first_horse_no','result_first_popularity','first_in_range','result_second_horse_no','result_second_popularity','second_in_range','both_in_target_ranges','bet_decision','bet_type','planned_stake_yen','opponents','win_stake_yen','win_return_yen','win_roi_pct','quinella_stake_yen','quinella_return_yen','quinella_roi_pct'];
   let csv='\ufeff'+cols.join(',')+'\n';
   csv+=h.map(r=>{
     const market=r.secondRange||secondRangeAnalysis(r.runners,r.structure.code),fr=r.firstRange||firstPlaceRangeAnalysis(r.runners),pr=r.secondPlaceRange||secondPlaceRangeAnalysis(r.runners),sd=r.selectionDecision||selectionDecisionAnalysis(fr,pr),o=pairOutcome(r),f=findRunner(r.runners,r.resultFirst),s=findRunner(r.runners,r.resultSecond);
-    const ds=r.context?.decision_snapshot||{};return[r.raceDate,r.venue,r.raceNo,r.raceName,r.runners.map(x=>x.horse_no+'='+x.popularity+'='+x.win_odds).join('|'),r.structure.code,ds.condition_category||'',ds.condition_sample_n??'',ds.market_pattern_key||'',ds.market_pattern_status||'',ds.first_structure_grade||'',ds.second_structure_grade||'',ds.quinella_pattern_fit||'',ds.pattern_locked??'',ds.decision_reason||'',ds.high_confidence_pass??'',ds.exclusion_reason||'',ds.neff??'',ds.neff_ratio??'',fr.end,pr.end,sd.status,sd.locked,r.resultFirst,f?f.popularity:'',o?o.firstInRange:'',r.resultSecond,s?s.popularity:'',o?o.secondInRange:'',o?o.bothInTarget:'',r.betDecision,r.context?.bet_type||'',r.plannedStake,(r.opponents||[]).map(x=>x.horseNo+'='+(x.popularity||'')+'='+x.winOdds).join('|'),r.winStake,r.winReturn,r.winStake>0?roiPct(r.winStake,r.winReturn):'',r.quinellaStake,r.quinellaReturn,r.quinellaStake>0?roiPct(r.quinellaStake,r.quinellaReturn):''];
+    const ds=r.context?.decision_snapshot||{};return[r.raceDate,r.venue,r.raceNo,r.raceName,r.runners.map(x=>x.horse_no+'='+x.popularity+'='+x.win_odds).join('|'),r.structure.code,ds.condition_category||'',ds.condition_sample_n??'',ds.market_pattern_key||'',ds.market_pattern_status||'',ds.first_structure_grade||'',ds.second_structure_grade||'',ds.quinella_pattern_fit||'',ds.pattern_locked??'',ds.four_level_code||'',ds.four_level_label||'',ds.risk_signal_count??'',Array.isArray(ds.risk_signals)?ds.risk_signals.map(x=>x.id||x.label).join('|'):'',ds.hard_lock??'',ds.hard_lock_code||'',ds.decision_reason||'',ds.high_confidence_pass??'',ds.exclusion_reason||'',ds.neff??'',ds.neff_ratio??'',fr.end,pr.end,sd.status,sd.locked,r.resultFirst,f?f.popularity:'',o?o.firstInRange:'',r.resultSecond,s?s.popularity:'',o?o.secondInRange:'',o?o.bothInTarget:'',r.betDecision,r.context?.bet_type||'',r.plannedStake,(r.opponents||[]).map(x=>x.horseNo+'='+(x.popularity||'')+'='+x.winOdds).join('|'),r.winStake,r.winReturn,r.winStake>0?roiPct(r.winStake,r.winReturn):'',r.quinellaStake,r.quinellaReturn,r.quinellaStake>0?roiPct(r.quinellaStake,r.quinellaReturn):''];
   }).map(row=>row.map(csvQuote).join(',')).join('\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='race-strategy-v2.39-history.csv';a.click();URL.revokeObjectURL(a.href);
 }catch(e){alert(e.message)}};
