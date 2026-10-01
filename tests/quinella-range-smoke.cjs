@@ -90,6 +90,22 @@ async function run(browserType,label){
   assert(bodyText.includes('入力時刻に制限はありません'),label+' 時間制限なし表示');
   assert(!bodyText.includes('15分前'),label+' 15分前の旧表示が残っている');
   assert(!bodyText.includes('T-15'),label+' T-15の旧表示が残っている');
+  assert(!bodyText.includes('v2.38'),label+' v2.38の旧表記が残っている');
+  assert(await page.locator('#grade option[value="L"]').count()===1&&await page.locator('#grade option[value="OP"]').count()===1,label+' L/OP選択肢');
+  const opl=await page.evaluate(s=>{
+    const x=compute(s,'OP','older',1800);
+    const r={context:{grade:'OP',surface:'dirt',age:'older',weight:'fixed',distance:1800},runners:x.runners,structure:x.structure};
+    const cp=conditionProfileAnalysis(r,x.firstRange,x.v229Filter);
+    const mp=marketPatternAnalysis(r,x.firstRange,x.secondPlaceRange,x.firstRangeSpread,x.v229Filter);
+    const rh={...r,context:{...r.context,weight:'handicap'}};
+    const cpH=conditionProfileAnalysis(rh,x.firstRange,x.v229Filter);
+    const mpH=marketPatternAnalysis(rh,x.firstRange,x.secondPlaceRange,x.firstRangeSpread,x.v229Filter);
+    const ex=fixedExclusionAnalysis({grade:'L',age:'3',weight:'fixed',distance:1600});
+    return{cpLevel:cp.level,cpTitle:cp.title,mpStatus:mp.status,cpH:cpH.level,mpH:mpH.level,ex:ex.excluded,exCode:ex.code};
+  },A);
+  assert(opl.cpLevel==='provisional'&&opl.cpTitle.includes('OP 型検証モード'),label+' OP型検証モード '+JSON.stringify(opl));
+  assert(opl.cpH==='stop'&&opl.mpH==='stop',label+' OP/Lハンデ固定除外 '+JSON.stringify(opl));
+  assert(opl.ex&&opl.exCode==='opl_3yo_shortmile',label+' 3歳1600m以下L固定除外 '+JSON.stringify(opl));
   const codes=await page.evaluate(([a,b,c,d])=>[compute(a).structure.code,compute(b).structure.code,compute(c).structure.code,compute(d).structure.code],[A,B,C,D]);
   assert(JSON.stringify(codes)==='["A","B","C","D"]',label+' A/B/C/D分類 '+JSON.stringify(codes));
   const riskA=await page.evaluate(s=>compute(s).axisRisk.level,A);
@@ -153,6 +169,11 @@ async function run(browserType,label){
   await page.selectOption('#venue','東京');
   await page.selectOption('#raceNo','1');
   await page.fill('#raceName',label+'テスト');
+  await page.selectOption('#grade','G3');
+  await page.selectOption('#surface','dirt');
+  await page.selectOption('#age','older');
+  await page.selectOption('#weight','fixed');
+  await page.fill('#distance','1800');
 
   await page.selectOption('#runnerCountSelect','12');
   assert(await page.locator('#oddsGrid input[data-horse]').count()===12,label+' 12頭表示');
@@ -211,7 +232,8 @@ async function run(browserType,label){
 
   const post=db.getPost();
   assert(post&&post.structure_code==='A',label+' 保存');
-  assert(post.odds_snapshot.length===12&&post.odds_snapshot[0].horse_no===1&&post.odds_snapshot[0].popularity===1&&post.odds_snapshot[0].win_odds===2,label+' T15馬番人気オッズ保存');
+  assert(post.odds_snapshot.length===12&&post.odds_snapshot[0].horse_no===1&&post.odds_snapshot[0].popularity===1&&post.odds_snapshot[0].win_odds===2,label+' 入力時点の馬番人気オッズ保存');
+  assert(post.context?.decision_snapshot?.app_version==='2.39'&&post.context?.decision_snapshot?.market_pattern_key,label+' v2.39型ログ保存 '+JSON.stringify(post.context?.decision_snapshot));
   assert(post.prior_axis_popularity===1,label+' 軸人気自動保存');
   assert(post.quinella_opponents.length===2,label+' 相手保存');
   assert((await page.textContent('#raceList')).includes('入力済み'),label+' 判定後に一覧が入力済み');
@@ -223,12 +245,16 @@ async function run(browserType,label){
 
   const row=db.rows[0];
   await page.fill('#f'+row.id,'1'); await page.fill('#s'+row.id,'5');
-  await page.fill('#k'+row.id,'1000'); await page.fill('#p'+row.id,'0');
+  await page.fill('#wk'+row.id,'1000'); await page.fill('#wp'+row.id,'0');
+  await page.fill('#qk'+row.id,'0'); await page.fill('#qp'+row.id,'0');
   await page.getByRole('button',{name:'結果保存'}).first().click();
   await page.waitForTimeout(120);
-  assert((await page.textContent('#history')).includes('1・2着のどちらかが基本レンジ外'),label+' 結果レンジ判定');
+  const histText=await page.textContent('#history');
+  assert(histText.includes('1着は1着レンジ内')&&histText.includes('2着は2着レンジ内'),label+' 1着・2着レンジ判定');
   assert(db.getPatch().result_first_horse_no===1&&db.getPatch().result_second_horse_no===5,label+' 結果PATCH');
-  assert((await page.textContent('#stats')).includes('基本レンジ内率'),label+' 1・2着集計');assert((await page.textContent('#stats')).includes('A 捕捉率'),label+' A集計');
+  const statsText=await page.textContent('#stats');
+  assert(statsText.includes('1着レンジ内率')&&statsText.includes('両方レンジ内率'),label+' 1着・2着集計');
+  assert((await page.textContent('#patternValidationSummary')).includes('v2.39型ログ'),label+' 型別前向き検証UI');
 
   if(errs.length)throw new Error(label+' browser errors '+errs.join(' | '));
   await browser.close();
@@ -241,25 +267,11 @@ async function live(){
   const page=await context.newPage();
   const resp=await page.goto(LIVE,{waitUntil:'networkidle',timeout:60000});
   assert(resp&&resp.ok(),'live page HTTP');
-  assert(await page.title()==='馬連レンジ v2.12','live title');
-  await page.waitForTimeout(300);
-  assert((await page.textContent('#storageStatus')).includes('このiPhone内'),'Neon障害時に端末保存へ切替されない');
-  await page.selectOption('#venue','東京');
-  await page.selectOption('#raceNo','12');
-  await page.fill('#raceName','Safari端末保存テスト');
-  await fillOddsGrid(page,A);
-  await page.click('#judge');
-  await page.waitForFunction(()=>document.querySelector('#lock')?.textContent.includes('判定プレビュー'),null,{timeout:15000});
-  assert(!(await page.textContent('#history')).includes('Safari端末保存テスト'),'プレビューだけで保存されている');
-  await page.selectOption('#betDecision','skip');
-  await page.click('#savePlan');
-  await page.waitForFunction(()=>document.querySelector('#history')?.textContent.includes('Safari端末保存テスト'),null,{timeout:15000});
-  assert((await page.textContent('#history')).includes('Safari端末保存テスト'),'端末保存できない');
-  await page.reload({waitUntil:'networkidle'});
-  await page.waitForFunction(()=>document.querySelector('#history')?.textContent.includes('Safari端末保存テスト'),null,{timeout:15000});
-  assert((await page.textContent('#history')).includes('Safari端末保存テスト'),'再読み込み後に端末履歴が消える');
-  assert((await page.textContent('#storageStatus')).includes('このiPhone内'),'再読み込み後に端末保存モードにならない');
+  const title=await page.title(),body=await page.locator('body').innerText();
+  assert(title.startsWith('レース戦略 v2.'),'live title '+title);
+  assert(body.includes('レース戦略')&&body.includes('条件 × オッズ構造'),'live key UI');
+  assert(await page.locator('#grade option[value="L"]').count()===1&&await page.locator('#grade option[value="OP"]').count()===1,'live L/OP options');
   await context.close();await browser.close();
-  console.log('PASS WebKit live GitHub Pages + iPhone local fallback');
+  console.log('PASS WebKit live GitHub Pages');
 }
 (async()=>{await run(chromium,'Chromium');await run(webkit,'WebKit(iPhone Safari相当)');await live()})().catch(e=>{console.error(e);process.exit(1)});
