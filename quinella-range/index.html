@@ -902,6 +902,7 @@ function renderHistoricalPatternReview(){
   }).join('');
 }
 const RULE_REGISTRY=[
+  {id:'v239_promotion_policy',status:'formal',title:'正式昇格基準',detail:'単勝：N≥30・1着捕捉率≥92%・前期/後期とも≥90%・当日1着構造B以上。馬連：さらに1・2着同時捕捉率≥90%・N≥30・2着構造B以上。',evidence:'v2.39-pipeline-1 固定'},
   {id:'v239_pattern_layer',status:'formal',title:'v2.39 型判定レイヤー',detail:'条件×オッズ構造を型として保存し、1着・2着を別々に構造評価。構造A/B/C単独では購入候補へ昇格しない。',evidence:'2021〜2026再分類反映済み'},
   {id:'opl_pattern_observation',status:'hypothesis',title:'OP/L 型別判定',detail:'2歳・3歳1600m以下・ハンデを除外し、境界とNeffの組合せを型として蓄積。',evidence:'正式閾値は未固定'},
   {id:'exclude_2yo',status:'formal',title:'2歳OP以上は除外',detail:'実運用では購入対象外。高信頼フィルターより先にSTOP。',evidence:'正式ルール'},
