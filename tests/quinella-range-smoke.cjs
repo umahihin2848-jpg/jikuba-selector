@@ -10,7 +10,7 @@ async function fillOddsGrid(page,s){
   for(const [h,o] of pairs) await page.fill(`#oddsGrid input[data-horse="${h}"]`,o);
 }
 const A='1=2 2=3 3=4 4=5 5=8 6=12 7=20 8=30 9=50 10=80 11=100 12=120';
-const PATTERN_GO='1=3.8 2=6.2 3=7.0 4=8.5 5=12.4 6=14.9 7=21.1 8=33.9 9=41.7 10=68.2 11=79.3 12=88.5';
+const PATTERN_GO='1=3.7 2=6.8 3=11.2 4=11.9 5=22.4 6=25.7 7=28.0 8=34.7 9=35.8 10=37.2 11=43.6 12=48.0';
 const B='1=3 2=4 3=5 4=6 5=7 6=8 7=9 8=10 9=12 10=18 11=25 12=35 13=50 14=70 15=90 16=120';
 const C='1=5.6 2=6.5 3=7.7 4=8.7 5=11.8 6=13.6 7=17.4 8=18.4 9=22 10=23.6 11=26.8 12=27.2 13=27.6';
 const D='1=5 2=6 3=7 4=8 5=9 6=10 7=11 8=12 9=13 10=14 11=15 12=16 13=17 14=18 15=19 16=20 17=21 18=22';
@@ -195,7 +195,7 @@ async function run(browserType,label){
   await page.click('#judge');
   await page.waitForTimeout(50);
   assert((await page.textContent('#msg')).includes('未入力 1頭'),label+' 全頭入力必須');
-  await page.fill('#oddsGrid input[data-horse="12"]','88.5');
+  await page.fill('#oddsGrid input[data-horse="12"]','48.0');
 
   await page.fill('#axisHorseNo','13');
   await page.waitForTimeout(50);
@@ -212,7 +212,7 @@ async function run(browserType,label){
   assert((await page.textContent('#lock')).includes('判定プレビュー'),label+' 購入前プレビュー');
   assert((await page.textContent('#planSummary')).includes('購入判断：未確定'),label+' 購入判断前表示');
   const patternText=await page.textContent('#marketPatternBox');
-  assert(patternText.includes('A・明確')&&patternText.includes('馬連適性')&&patternText.includes('候補'),label+' 1着2着とも明確な型 '+patternText);
+  assert(patternText.includes('A・明確')&&patternText.includes('B・まずまず')&&patternText.includes('馬連適性')&&patternText.includes('慎重'),label+' 購入可能なA/B型 '+patternText);
   assert(db.getPost()===null,label+' 判定を見るだけでは保存しない');
 
   // 判定を見た後で購入判断
@@ -220,7 +220,7 @@ async function run(browserType,label){
   await page.selectOption('#betDecision','buy');
   await page.selectOption('#betType','quinella');
   await page.fill('#plannedStake','1000');
-  await page.fill('#opponents','9');
+  await page.fill('#opponents','11');
   await page.waitForTimeout(50);
   assert((await page.textContent('#opponentBrake')).includes('40.0倍以上'),label+' 40倍ブレーキ');
   await page.fill('#opponents','2 3');
@@ -236,7 +236,7 @@ async function run(browserType,label){
 
   const post=db.getPost();
   assert(post&&post.structure_code==='A',label+' 保存');
-  assert(post.odds_snapshot.length===12&&post.odds_snapshot[0].horse_no===1&&post.odds_snapshot[0].popularity===1&&post.odds_snapshot[0].win_odds===3.8,label+' 入力時点の馬番人気オッズ保存');
+  assert(post.odds_snapshot.length===12&&post.odds_snapshot[0].horse_no===1&&post.odds_snapshot[0].popularity===1&&post.odds_snapshot[0].win_odds===3.7,label+' 入力時点の馬番人気オッズ保存');
   assert(post.context?.decision_snapshot?.app_version==='2.39'&&post.context?.decision_snapshot?.market_pattern_key,label+' v2.39型ログ保存 '+JSON.stringify(post.context?.decision_snapshot));
   assert(post.prior_axis_popularity===1,label+' 軸人気自動保存');
   assert(post.quinella_opponents.length===2,label+' 相手保存');
@@ -248,14 +248,14 @@ async function run(browserType,label){
 
 
   const row=db.rows[0];
-  await page.fill('#f'+row.id,'1'); await page.fill('#s'+row.id,'5');
+  await page.fill('#f'+row.id,'1'); await page.fill('#s'+row.id,'3');
   await page.fill('#wk'+row.id,'1000'); await page.fill('#wp'+row.id,'0');
   await page.fill('#qk'+row.id,'0'); await page.fill('#qp'+row.id,'0');
   await page.getByRole('button',{name:'結果保存'}).first().click();
   await page.waitForTimeout(120);
   const histText=await page.textContent('#history');
   assert(histText.includes('1着は1着レンジ内')&&histText.includes('2着は2着レンジ内'),label+' 1着・2着レンジ判定');
-  assert(db.getPatch().result_first_horse_no===1&&db.getPatch().result_second_horse_no===5,label+' 結果PATCH');
+  assert(db.getPatch().result_first_horse_no===1&&db.getPatch().result_second_horse_no===3,label+' 結果PATCH');
   const statsText=await page.textContent('#stats');
   assert(statsText.includes('1着レンジ内率')&&statsText.includes('両方レンジ内率'),label+' 1着・2着集計');
   assert((await page.textContent('#patternValidationSummary')).includes('v2.39型ログ'),label+' 型別前向き検証UI');
