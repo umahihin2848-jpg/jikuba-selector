@@ -144,7 +144,6 @@ async function run(browserType,label){
     const np=decisionPipelineAnalysis(nr,noisy.firstRange,noisy.secondPlaceRange,noisy.firstRangeSpread,noisy.v229Filter,noisy.selectionDecision);
     return{final:p.finalCode,label:p.finalLabel,four:p.fourLevelCode,risk:p.riskCount,win:p.winFit,q:p.quinellaFit,stages:p.stages.length,pairStage:p.stages.find(z=>z.id==='quinella')?.value,opFinal:po.finalCode,opFour:po.fourLevelCode,hard,hardPipe:hp.hardLocked,hardFour:hp.fourLevelCode,neffLocked:neff.locked,neffLevel:neff.level,broadLocked:broad.locked,g3Risk:zp.riskCount,g3Four:zp.fourLevelCode,noisyRisk:np.riskCount,noisyFour:np.fourLevelCode,noisySignals:np.riskSignals.map(x=>x.id)};
   },[PATTERN_GO,BROAD_CAUTION]);
-  },PATTERN_GO);
   assert(pipelineCheck.final==='win'&&pipelineCheck.label.includes('単勝候補')&&pipelineCheck.win==='candidate'&&pipelineCheck.four==='strong'&&pipelineCheck.risk<=1,label+' G1中長距離は4段階で強候補 '+JSON.stringify(pipelineCheck));
   assert(pipelineCheck.q!=='candidate'&&pipelineCheck.pairStage.includes('条件付き'),label+' G1中長距離の馬連は89.4%で条件付き '+JSON.stringify(pipelineCheck));
   assert(pipelineCheck.stages===7&&pipelineCheck.opFinal==='conditional'&&pipelineCheck.opFour==='conditional',label+' OP/Lは条件付き・非ロック '+JSON.stringify(pipelineCheck));
