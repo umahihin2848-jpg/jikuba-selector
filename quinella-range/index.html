@@ -704,9 +704,11 @@ function historicalPatternGate(ctx={},v229,fr,pr,spread){
   const out=(classification,title,evidence,firstFit='検証継続',quinellaFit='検証継続')=>({classification,title,evidence,firstFit,quinellaFit});
   if(fixed.excluded)return out('rejected',fixed.title,fixed.reason,'却下','却下');
   if(g==='G1'&&a!=='2'&&Number.isFinite(d)&&d>=2000)return out('candidate','G1中長距離・正式候補','専用1着ルールは2021〜2026で63/66＝95.5%。2着安全幅は62/66＝93.9%だが、1・2着同時は59/66＝89.4%。','正式候補','検証継続');
+  // 条件自体の長期成績が弱い群は、当日の境界スコアより先に却下する。
+  if(g==='G3'&&surface==='turf'&&Number.isFinite(d)&&d<=1400)return out('rejected','G3芝1400m以下・却下','2021〜2025の高信頼ゲート相当で27/34＝79.4%。高信頼型としては不足。','却下','却下');
+  if(g==='G3'&&surface==='turf'&&d===2000)return out('rejected','G3芝2000m・却下','2021〜2025の高信頼ゲート相当で32/36＝88.9%。2025年は4/6で、正式候補として残すには不足。','却下','却下');
+  if(g==='G2'&&surface==='turf'&&Number.isFinite(d)&&d>=2200)return out('rejected','G2芝2200m以上・却下','2021〜2025で43/49＝87.8%。安定はしているが「狭く絞れる正式型」の基準には不足。','却下','却下');
   if((g==='G2'||g==='G3')&&v229&&v229.level==='go'){
-    if(g==='G3'&&surface==='turf'&&Number.isFinite(d)&&d<=1400)return out('rejected','G3芝1400m以下・却下','2021〜2025の高信頼ゲート相当で27/34＝79.4%。高信頼型としては不足。','却下','却下');
-    if(g==='G2'&&surface==='turf'&&Number.isFinite(d)&&d>=2200)return out('rejected','G2芝2200m以上・却下','2021〜2025で43/49＝87.8%。安定はしているが「狭く絞れる正式型」の基準には不足。','却下','却下');
     if(g==='G3'&&surface==='dirt')return out('candidate','G3ダート・正式候補','2021〜2025の広い高信頼母集団は37/37、2026追加4/4で1着取りこぼしなし。現行除外を再タグ付けするとNは減るため候補扱い。','正式候補','検証継続');
     if(g==='G3'&&surface==='turf'&&d===1800)return out('observe','G3芝1800・検証継続','2021〜2025は1着26/27＝96.3%。ただし2026の非2歳4例で2着は2/4のため、馬連へは昇格させない。','正式候補','検証継続');
     if(g==='G2'&&surface==='turf'&&d===1800)return out('observe','G2芝1800・検証継続','2021〜2025の広い母集団は19/19だが、2歳戦の再タグ付け後はNが減るため追加昇格は保留。','正式候補','検証継続');
@@ -762,6 +764,7 @@ const HISTORICAL_PATTERN_REVIEW=[
   {status:'rejected',title:'構造A/Aだけで買う',detail:'全馬オッズ再計算393RではA/Aでも1着捕捉はG1 88.2%、G2 87.5%、G3 83.3%、OP/L 90.0%。',evidence:'単独買いシグナルとして却下'},
   {status:'rejected',title:'G2/G3・Neff 0.85〜0.95',detail:'94例で77/94＝81.9%。安全帯298例の92.3%を大きく下回る。',evidence:'赤ロック維持'},
   {status:'rejected',title:'G3芝1400m以下',detail:'34例で27/34＝79.4%。',evidence:'高信頼型として却下'},
+  {status:'rejected',title:'G3芝2000m',detail:'36例で32/36＝88.9%。2025年は4/6。',evidence:'正式候補から除外'},
   {status:'rejected',title:'G2芝2200m以上',detail:'49例で43/49＝87.8%。',evidence:'高信頼型として却下'},
   {status:'rejected',title:'OP/L旧高信頼を一括購入',detail:'2021〜24の166例で同時132/166＝79.5%。2024の1着は37/46＝80.4%。',evidence:'一括買い型として却下'}
 ];
