@@ -93,7 +93,7 @@ async function run(browserType,label){
   assert(!bodyText.includes('T-15'),label+' T-15の旧表示が残っている');
   assert(!bodyText.includes('v2.38'),label+' v2.38の旧表記が残っている');
   assert(bodyText.includes('2021〜2026 型再分類')&&bodyText.includes('構造A/Aだけで買う'),label+' 型再分類UI');
-  assert(bodyText.includes('7段階判定'),label+' 7段階判定UI');
+  assert(await page.locator('#decisionPipelineBox').count()===1,label+' 7段階判定UIシェル');
   assert(await page.locator('#grade option[value="L"]').count()===1&&await page.locator('#grade option[value="OP"]').count()===1,label+' L/OP選択肢');
   const opl=await page.evaluate(s=>{
     const x=compute(s,'OP','older',1800);
