@@ -95,6 +95,8 @@ async function run(browserType,label){
   assert(bodyText.includes('2021〜2026 型再分類')&&bodyText.includes('構造A/Aだけで買う'),label+' 型再分類UI');
   assert(await page.locator('#decisionPipelineBox').count()===1,label+' 7段階判定UIシェル');
   assert(await page.locator('#availabilityDashboard').count()===1,label+' 買えるレース数UIシェル');
+  assert(await page.locator('#tierForwardDashboard').count()===1,label+' 4段階前向き成績UIシェル');
+  assert(await page.locator('#hardLockAudit').count()===1,label+' 固定ロック監査UIシェル');
   assert(await page.locator('#grade option[value="L"]').count()===1&&await page.locator('#grade option[value="OP"]').count()===1,label+' L/OP選択肢');
   const opl=await page.evaluate(s=>{
     const x=compute(s,'OP','older',1800);
@@ -317,6 +319,10 @@ async function run(browserType,label){
   const availabilityText=await page.textContent('#availabilityDashboard');
   assert(availabilityText.includes('強候補')&&availabilityText.includes('条件付き')&&availabilityText.includes('見送り推奨')&&availabilityText.includes('固定ロック'),label+' 4段階レース数ダッシュボード '+availabilityText);
   assert((await page.textContent('#availabilitySummary')).includes('検討対象'),label+' 買えるレース数サマリー');
+  assert((await page.textContent('#tierForwardSummary')).includes('前向き分類ログ'),label+' 4段階前向き成績サマリー');
+  const tierText=await page.textContent('#tierForwardDashboard');
+  assert(tierText.includes('強候補')&&tierText.includes('条件付き')&&tierText.includes('回収率'),label+' 4段階別前向き成績 '+tierText);
+  assert((await page.textContent('#hardLockAudit')).length>0,label+' 固定ロック監査表示');
 
   if(errs.length)throw new Error(label+' browser errors '+errs.join(' | '));
   await browser.close();
