@@ -123,6 +123,7 @@
 </details>
 </section>
 <section class="card"><div><h2 style="margin:0">ルール管理</h2><div class="muted">正式ルール・検証中の仮説・却下した案を分離。仮説は表示だけで判定ロジックには入りません。</div></div><div id="ruleRegistry" class="ruleRegistryGrid"></div></section>
+<section class="card"><div><h2 style="margin:0">2021〜2026 型再分類</h2><div class="muted">母数・捕捉率・時系列安定性を優先。構造A/B/Cは境界の明瞭さを表すだけで、単独では買いシグナルにしません。</div></div><div id="historicalPatternReview" class="ruleRegistryGrid"></div></section>
 <section class="card"><div><h2 style="margin:0">2026年9月まで・実運用除外後の前向き検証</h2><div class="muted">最終単勝オッズ → 現行1着高信頼フィルター → 現行2着レンジで再計算。2歳OP以上、3歳の短距離〜マイルG3を実運用どおり除外しています。</div></div>
 <div class="validationGrid">
   <div class="validationCard green"><div class="validationTitle"><b>全体</b><span class="confidence strong">2026施行済み</span></div><div class="validationMetrics"><div><span>対象</span><b>30</b></div><div><span>高信頼通過</span><b>11</b></div><div><span>1着捕捉</span><b>11/11</b></div><div><span>2着捕捉</span><b>9/11</b></div></div><div class="validationNote">1・2着同時 9/11 = 81.8%。1着側は全捕捉。</div></div>
@@ -697,18 +698,42 @@ function structuralSignal(range,spread,role,grade){
   }
   return{grade:level,label:level==='A'?'明確':level==='B'?'まずまず':'弱い',reason:note};
 }
+function historicalPatternGate(ctx={},v229,fr,pr,spread){
+  const g=String(ctx.grade||'').toUpperCase(),surface=String(ctx.surface||''),a=String(ctx.age||''),d=Number(ctx.distance);
+  const fixed=fixedExclusionAnalysis(ctx);
+  const out=(classification,title,evidence,firstFit='検証継続',quinellaFit='検証継続')=>({classification,title,evidence,firstFit,quinellaFit});
+  if(fixed.excluded)return out('rejected',fixed.title,fixed.reason,'却下','却下');
+  if(g==='G1'&&a!=='2'&&Number.isFinite(d)&&d>=2000)return out('candidate','G1中長距離・正式候補','専用1着ルールは2021〜2026で63/66＝95.5%。2着安全幅は62/66＝93.9%だが、1・2着同時は59/66＝89.4%。','正式候補','検証継続');
+  if((g==='G2'||g==='G3')&&v229&&v229.level==='go'){
+    if(g==='G3'&&surface==='turf'&&Number.isFinite(d)&&d<=1400)return out('rejected','G3芝1400m以下・却下','2021〜2025の高信頼ゲート相当で27/34＝79.4%。高信頼型としては不足。','却下','却下');
+    if(g==='G2'&&surface==='turf'&&Number.isFinite(d)&&d>=2200)return out('rejected','G2芝2200m以上・却下','2021〜2025で43/49＝87.8%。安定はしているが「狭く絞れる正式型」の基準には不足。','却下','却下');
+    if(g==='G3'&&surface==='dirt')return out('candidate','G3ダート・正式候補','2021〜2025の広い高信頼母集団は37/37、2026追加4/4で1着取りこぼしなし。現行除外を再タグ付けするとNは減るため候補扱い。','正式候補','検証継続');
+    if(g==='G3'&&surface==='turf'&&d===1800)return out('observe','G3芝1800・検証継続','2021〜2025は1着26/27＝96.3%。ただし2026の非2歳4例で2着は2/4のため、馬連へは昇格させない。','正式候補','検証継続');
+    if(g==='G2'&&surface==='turf'&&d===1800)return out('observe','G2芝1800・検証継続','2021〜2025の広い母集団は19/19だが、2歳戦の再タグ付け後はNが減るため追加昇格は保留。','正式候補','検証継続');
+    return out('candidate','G2/G3高信頼・正式候補','1着レンジ5〜8・Neff 0.85〜0.95外は298例で275/298＝92.3%。2021〜23は92.3%、2024〜25は92.2%。','正式候補','検証継続');
+  }
+  if(g==='L'||g==='OP'){
+    const ratio=Number(spread&&spread.ratio),f=Number(fr&&fr.end||0),s=Number(pr&&pr.end||0);
+    if(f===8&&s===8&&Number.isFinite(ratio)&&ratio<.82)return out('observe','OP/L 8-8型・検証継続','2022年はNeff<0.82の1着8/2着8型が10/10同時捕捉。ただし単年N=10のため正式化しない。','検証継続','検証継続');
+    return out('observe','OP/L・前向き検証','旧高信頼166例は1着88.6%、2着89.2%、同時79.5%。一括買い型は却下し、型キー単位で前向き検証する。','検証継続','検証継続');
+  }
+  return out('observe','条件別データ不足','構造A/B/Cだけでは購入候補に昇格しません。条件別の時系列実績を優先します。','検証継続','検証継続');
+}
 function marketPatternAnalysis(r,fr,pr,spread,v229){
   const ctx=r&&r.context||{},g=String(ctx.grade||'').toUpperCase(),a=String(ctx.age||''),w=String(ctx.weight||''),d=Number(ctx.distance),surface=String(ctx.surface||'');
-  const first=structuralSignal(fr,spread,'first',g),second=structuralSignal(pr,spread,'second',g);
-  const stop=(title,note)=>({level:'stop',status:'見送り',badge:'型条件外',title,key:conditionCategory(r)||g,firstGrade:'STOP',firstLabel:'STOP',secondGrade:'STOP',secondLabel:'STOP',quinellaFit:'見送り',note});
+  const first=structuralSignal(fr,spread,'first',g),second=structuralSignal(pr,spread,'second',g),history=historicalPatternGate(ctx,v229,fr,pr,spread);
+  const stop=(title,note)=>({level:'stop',status:'見送り',badge:'型条件外',title,key:conditionCategory(r)||g,firstGrade:'STOP',firstLabel:'STOP',secondGrade:'STOP',secondLabel:'STOP',quinellaFit:'見送り',historyClass:'却下',historyEvidence:note,note});
   const fixedEx=fixedExclusionAnalysis(ctx);
   if(fixedEx.excluded)return stop(fixedEx.title,fixedEx.reason);
   if(v229&&v229.locked)return stop(v229.status||'既存ルールで見送り',v229.reason||'既存の赤ロック条件に該当します。');
+  if(history.classification==='rejected')return stop(history.title,history.evidence);
   let fg=first.grade,sg=second.grade;
   if(g==='G1'&&v229&&v229.level==='go'&&fg==='C')fg='B';
   if((g==='G2'||g==='G3')&&v229&&v229.level==='go'&&fg==='C')fg='B';
   const rank=x=>x==='A'?3:x==='B'?2:x==='C'?1:0,fa=rank(fg),sa=rank(sg);
-  let quinella='見送り'; if(fa>=3&&sa>=3)quinella='候補'; else if(fa>=2&&sa>=2)quinella='慎重';
+  let quinella='見送り';
+  if(history.quinellaFit==='正式候補'&&fa>=3&&sa>=3)quinella='候補';
+  else if(history.quinellaFit==='検証継続'&&fa>=2&&sa>=2)quinella='慎重';
   const b1=fr&&fr.boundary?fr.boundary.k+'→'+(fr.boundary.k+1):'境界なし';
   const b2=pr&&pr.boundary?pr.boundary.k+'→'+(pr.boundary.k+1):'境界なし';
   const neffBand=Number.isFinite(Number(spread&&spread.ratio))?(Number(spread.ratio)<.65?'集中':Number(spread.ratio)<.82?'やや分散':Number(spread.ratio)<=.95?'注意帯':'横並び'):'不明';
@@ -717,18 +742,43 @@ function marketPatternAnalysis(r,fr,pr,spread,v229){
   const weightLabel=w==='handicap'?'ハンデ':w==='fixed'?'定量・別定':'重量未指定';
   const key=[g||'格未指定',ageLabel,weightLabel,surf,d?d+'m':'距離未指定','1着壁'+b1,'2着壁'+b2,'Neff '+neffBand].join(' × ');
   const opl=(g==='L'||g==='OP');
-  let level=quinella==='候補'?'go':quinella==='慎重'?'caution':'stop';
-  let status=opl?'型検証中':quinella==='候補'?'型一致候補':quinella==='慎重'?'条件付き':'見送り';
-  let badge=opl?'前向き検証':'v2.39';
-  let title=opl?(g+'・型別ログ対象'):(g?g+'・構造型判定':'構造型判定');
-  let note='1着：'+first.reason+' / 2着：'+second.reason+'。';
-  if(opl)note+=' OP/Lは集計全体では実績がありますが、型別の正式採用条件はまだ固定しません。今回の型を保存し、将来データで再現性を確認します。';
-  else note+=' 過去検証済みルールを土台に、境界の強さを別レイヤーで記録します。';
-  if(fg==='STOP'||sg==='STOP'){level='stop';quinella='見送り';status=opl?'型不明・見送り':'見送り';}
-  return{level,status,badge,title,key,firstGrade:fg,firstLabel:fg==='A'?'A・明確':fg==='B'?'B・まずまず':fg==='C'?'C・弱い':'STOP',secondGrade:sg,secondLabel:sg==='A'?'A・明確':sg==='B'?'B・まずまず':sg==='C'?'C・弱い':'STOP',quinellaFit:quinella,note};
+  let level='caution',status=history.firstFit==='正式候補'?'1着正式候補・馬連'+quinella:'型検証中',badge=history.classification==='candidate'?'過去検証候補':'前向き検証';
+  let title=history.title;
+  let note='過去分類：'+history.evidence+' / 1着構造：'+first.reason+' / 2着構造：'+second.reason+'。';
+  if(fg==='STOP'){level='stop';quinella='見送り';status='1着構造不明・見送り';}
+  else if(history.firstFit==='正式候補'&&fa>=2){level='go';}
+  if(sg==='STOP')quinella='見送り';
+  if(opl&&level==='go')level='caution';
+  return{level,status,badge,title,key,firstGrade:fg,firstLabel:fg==='A'?'A・明確':fg==='B'?'B・まずまず':fg==='C'?'C・弱い':'STOP',secondGrade:sg,secondLabel:sg==='A'?'A・明確':sg==='B'?'B・まずまず':sg==='C'?'C・弱い':'STOP',quinellaFit:quinella,historyClass:history.firstFit,historyEvidence:history.evidence,note};
+}
+const HISTORICAL_PATTERN_REVIEW=[
+  {status:'candidate',title:'G2/G3・1着5〜8＋Neff安全帯',detail:'298例で275/298＝92.3%。2021〜23 92.3%、2024〜25 92.2%。',evidence:'1着/単勝の正式候補'},
+  {status:'candidate',title:'G1・2000m以上・専用1着ルール',detail:'2021〜2026で63/66＝95.5%。',evidence:'1着/単勝の正式候補'},
+  {status:'candidate',title:'G3ダート・高信頼ゲート',detail:'2021〜25の広い母集団37/37、2026追加4/4。現行除外後の適格Nは再タグ付け中。',evidence:'正式候補'},
+  {status:'observe',title:'G1・2000m以上・2着安全幅',detail:'2着62/66＝93.9%、1・2着同時59/66＝89.4%。',evidence:'馬連は検証継続'},
+  {status:'observe',title:'G3芝1800',detail:'2021〜25の1着26/27＝96.3%。2026非2歳4例は1着4/4、2着2/4。',evidence:'1着強い・2着継続検証'},
+  {status:'observe',title:'G2芝1800',detail:'2021〜25の広い母集団19/19。2歳戦を現行除外で再タグ付けするとNが減る。',evidence:'N不足で検証継続'},
+  {status:'observe',title:'OP/L・8-8・Neff<0.82',detail:'2022年は10/10同時捕捉。単年N=10。',evidence:'前向き検証のみ'},
+  {status:'rejected',title:'構造A/Aだけで買う',detail:'全馬オッズ再計算393RではA/Aでも1着捕捉はG1 88.2%、G2 87.5%、G3 83.3%、OP/L 90.0%。',evidence:'単独買いシグナルとして却下'},
+  {status:'rejected',title:'G2/G3・Neff 0.85〜0.95',detail:'94例で77/94＝81.9%。安全帯298例の92.3%を大きく下回る。',evidence:'赤ロック維持'},
+  {status:'rejected',title:'G3芝1400m以下',detail:'34例で27/34＝79.4%。',evidence:'高信頼型として却下'},
+  {status:'rejected',title:'G2芝2200m以上',detail:'49例で43/49＝87.8%。',evidence:'高信頼型として却下'},
+  {status:'rejected',title:'OP/L旧高信頼を一括購入',detail:'2021〜24の166例で同時132/166＝79.5%。2024の1着は37/46＝80.4%。',evidence:'一括買い型として却下'}
+];
+function renderHistoricalPatternReview(){
+  const box=$('historicalPatternReview');if(!box)return;
+  const groups=[
+    {key:'candidate',title:'✅ 正式候補型',cls:'ruleStatusFormal'},
+    {key:'observe',title:'🧪 検証継続型',cls:'ruleStatusHypothesis'},
+    {key:'rejected',title:'✖ 却下型',cls:'ruleStatusRejected'}
+  ];
+  box.innerHTML=groups.map(g=>{
+    const rows=HISTORICAL_PATTERN_REVIEW.filter(x=>x.status===g.key);
+    return '<div class="ruleColumn"><h3 class="'+g.cls+'">'+g.title+'</h3>'+rows.map(x=>'<div class="ruleItem"><b>'+esc(x.title)+'</b><span>'+esc(x.detail)+'</span><span>'+esc(x.evidence)+'</span></div>').join('')+'</div>';
+  }).join('');
 }
 const RULE_REGISTRY=[
-  {id:'v239_pattern_layer',status:'formal',title:'v2.39 型判定レイヤー',detail:'条件×オッズ構造を型として保存し、1着・2着を別々に構造評価。',evidence:'ロジック固定・前向き検証用'},
+  {id:'v239_pattern_layer',status:'formal',title:'v2.39 型判定レイヤー',detail:'条件×オッズ構造を型として保存し、1着・2着を別々に構造評価。構造A/B/C単独では購入候補へ昇格しない。',evidence:'2021〜2026再分類反映済み'},
   {id:'opl_pattern_observation',status:'hypothesis',title:'OP/L 型別判定',detail:'2歳・3歳1600m以下・ハンデを除外し、境界とNeffの組合せを型として蓄積。',evidence:'正式閾値は未固定'},
   {id:'exclude_2yo',status:'formal',title:'2歳OP以上は除外',detail:'実運用では購入対象外。高信頼フィルターより先にSTOP。',evidence:'正式ルール'},
   {id:'exclude_3yo_shortmile_g3',status:'formal',title:'3歳・短距離〜マイルG3は除外',detail:'1600m以下の3歳G3を購入対象外。',evidence:'正式ルール'},
@@ -834,6 +884,8 @@ function buildDecisionSnapshot(p,calc){
     first_structure_grade:mp.firstGrade,
     second_structure_grade:mp.secondGrade,
     quinella_pattern_fit:mp.quinellaFit,
+    historical_pattern_class:mp.historyClass||'',
+    historical_pattern_evidence:mp.historyEvidence||'',
     pattern_locked:mp.level==='stop',
     pattern_rule_version:'2.39',
     selection_status:calc.selectionDecision?.status||'',
@@ -1013,6 +1065,7 @@ $('savePlan').onclick=async()=>{
     const calc=pendingAssessment.calc;
     const mp=marketPatternAnalysis({context:p.context,runners:calc.runners,structure:calc.structure},calc.firstRange,calc.secondPlaceRange,calc.firstRangeSpread,calc.v229Filter);
     if(p.betDecision==='buy'&&mp.level==='stop')throw new Error('🔴 型ロック：'+mp.note);
+    if(p.betDecision==='buy'&&(p.betType==='quinella'||p.betType==='both')&&mp.quinellaFit==='見送り')throw new Error('🔴 馬連ロック：この型は2着側の再現性が不足しています。単勝のみ、または見送りにしてください。');
     if(p.betDecision==='buy'&&(p.betType==='quinella'||p.betType==='both')&&mp.quinellaFit==='見送り')throw new Error('🔴 馬連見送り：1着・2着の構造が同時に明確ではありません。');
     if(p.priorAxisHorseNo){const ai=findRunner(calc.runners,p.priorAxisHorseNo);if(!ai)throw new Error(`事前軸${p.priorAxisHorseNo}番が入力時点オッズ表にありません`);p.priorAxisPopularity=ai.popularity}else p.priorAxisPopularity=null;
     if(!p.betDecision)throw new Error('判定を確認したあと「購入」か「見送り」を選択してください');if(calc.selectionDecision&&calc.selectionDecision.locked&&p.betDecision==='buy')throw new Error('🔴 赤ロック：'+calc.selectionDecision.status+'。1着'+calc.firstRange.label+' / 2着'+calc.secondPlaceRange.label+'のため購入では保存できません');
@@ -1172,5 +1225,5 @@ function csvQuote(v){return'"'+String(v??'').replaceAll('"','""')+'"'}$('exportC
   }).map(row=>row.map(csvQuote).join(',')).join('\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='race-strategy-v2.39-history.csv';a.click();URL.revokeObjectURL(a.href);
 }catch(e){alert(e.message)}};
-$('reload').onclick=()=>{loadAll();renderRaceList()};renderRuleRegistry();renderOddsGrid();renderRaceList();loadAll();
+$('reload').onclick=()=>{loadAll();renderRaceList()};renderRuleRegistry();renderHistoricalPatternReview();renderOddsGrid();renderRaceList();loadAll();
 </script></body></html>
