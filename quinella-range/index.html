@@ -19,7 +19,7 @@
 <div class="grid"><div><label>買う / 見送り</label><select id="betDecision"><option value="">判定後に選択</option><option value="buy">購入</option><option value="skip">見送り</option></select></div><div><label>購入券種</label><select id="betType"><option value="">判定後に選択</option><option value="win">単勝</option><option value="quinella">馬連</option><option value="both">単勝＋馬連</option></select></div></div>
 <label>予定投資額（合計）</label><input id="plannedStake" type="number" min="0" step="100" inputmode="numeric" placeholder="例：1000">
 <label>相手馬（馬連を買う時だけ）</label><textarea id="opponents" style="min-height:80px" placeholder="例：3 8 12"></textarea><div class="muted">単勝のみなら空欄でOK。馬連・単勝＋馬連では、2着レンジ内の相手馬だけ入力できます。</div><div id="opponentBrake" class="oddsBrake hidden"></div><div id="inputBrake" class="oddsBrake hidden"></div>
-<details open><summary class="muted">レース属性（v2.38では格・芝/ダート・年齢・距離を実運用判定に使用）</summary><div class="grid"><div><label>格（必須）</label><select id="grade"><option value="">未指定</option><option>G1</option><option>G2</option><option>G3</option><option value="L">L</option><option value="OP">OP</option></select></div><div><label>芝 / ダート（必須）</label><select id="surface"><option value="">未指定</option><option value="turf">芝</option><option value="dirt">ダート</option></select></div><div><label>年齢（必須：実運用除外判定に使用）</label><select id="age"><option value="">未指定</option><option value="2">2歳</option><option value="3">3歳</option><option value="older">古馬含む</option></select></div><div><label>重量条件</label><select id="weight"><option value="">未指定</option><option value="fixed">定量・別定</option><option value="handicap">ハンデ</option></select></div><div><label>距離（必須）</label><input id="distance" inputmode="numeric" placeholder="1600"></div></div></details>
+<details open><summary class="muted">レース属性（v2.39では格・芝/ダート・年齢・重量・距離を型判定に使用）</summary><div class="grid"><div><label>格（必須）</label><select id="grade"><option value="">未指定</option><option>G1</option><option>G2</option><option>G3</option><option value="L">L</option><option value="OP">OP</option></select></div><div><label>芝 / ダート（必須）</label><select id="surface"><option value="">未指定</option><option value="turf">芝</option><option value="dirt">ダート</option></select></div><div><label>年齢（必須：実運用除外判定に使用）</label><select id="age"><option value="">未指定</option><option value="2">2歳</option><option value="3">3歳</option><option value="older">古馬含む</option></select></div><div><label>重量条件</label><select id="weight"><option value="">未指定</option><option value="fixed">定量・別定</option><option value="handicap">ハンデ</option></select></div><div><label>距離（必須）</label><input id="distance" inputmode="numeric" placeholder="1600"></div></div></details>
 <div class="draftActions"><button class="secondary" id="saveDraft">一覧に保存（未判定）</button><button class="secondary" id="deleteDraft" title="未判定レースを一覧から削除">削除</button></div><div id="draftMsg" class="draftSaved"></div><button class="wide" id="savePlan" style="background:#179b67">購入/見送りを確定して保存</button><div class="muted" style="margin-top:6px">判定を見るだけなら保存不要です。保存すると、その時点のオッズと購入判断を凍結します。</div></section>
 <section id="result" class="card verdict hidden">
 <div id="lock"></div>
@@ -91,7 +91,7 @@
       <div class="notice" id="rule"></div>
     </div>
     <div id="v229Box" class="winRange hidden">
-      <div class="winRangeHead"><div><div class="winRangeTitle">v2.38 G1/G2/G3フィルター</div><div class="winRangeValue" id="v229Value"></div></div><div class="winRangeStatus" id="v229Status"></div></div>
+      <div class="winRangeHead"><div><div class="winRangeTitle">G1/G2/G3 高信頼フィルター</div><div class="winRangeValue" id="v229Value"></div></div><div class="winRangeStatus" id="v229Status"></div></div>
       <div class="winRangeText" id="v229Text"></div>
       <div class="winRangeNote">2歳OP以上と3歳短距離〜マイルG3を実運用除外。G2/G3はNeff危険帯も除外します。</div>
     </div>
@@ -131,8 +131,8 @@
   <div class="validationCard yellow"><div class="validationTitle"><b>G3芝1800m</b><span class="confidence testing">2着要検証</span></div><div class="validationMetrics"><div><span>2026 1着</span><b>4/4</b></div><div><span>現行2着</span><b>2/4</b></div><div><span>21〜26 1着</span><b>28/29</b></div><div><span>捕捉率</span><b>96.6%</b></div></div><div class="validationNote">2着を最低1〜9人気まで取れば2026は4/4。ただしN=4のため正式ルールには未採用。</div></div>
   <div class="validationCard yellow"><div class="validationTitle"><b>G2芝1800m</b><span class="confidence testing">N不足</span></div><div class="validationMetrics"><div><span>2026 1着</span><b>2/2</b></div><div><span>2026 2着</span><b>2/2</b></div><div><span>21〜26 1着</span><b>18/18</b></div><div><span>捕捉率</span><b>100%</b></div></div><div class="validationNote">良好だが2026追加は2例なので検証継続。</div></div>
 </div>
-<div class="notice" style="margin-top:12px"><b>運用メモ：</b>1着ロジックは維持。G3芝1800mの「2着安全幅1〜9」は仮説として表示するだけで、購入制限・保存判定にはまだ適用しません。</div></section><section class="card"><div><h2 style="margin:0">単勝・馬連 実戦成績</h2><div class="muted">単勝と馬連を別会計で集計。両方とも単体で回収率100%超えを目標に確認できます。</div></div><div id="performanceStats" class="performanceGrid"></div></section><section class="card"><div><h2 style="margin:0">v2.20以降・境界スコア検証</h2><div class="muted">v2.19以前は除外。固定人気レンジではなく、そのレースごとの最有力境界を使った判定だけを検証します。</div></div><div id="validationSummary" class="notice" style="margin-top:12px"></div><div id="validationDashboard" class="validationGrid"></div></section><section class="card"><div class="row"><div><h2 style="margin:0">1着・2着レンジ検証DB</h2><div class="muted">実際の1着が1着レンジ内、実際の2着が2着レンジ内だったかを別々に検証します。3着以下は使いません。</div></div><button class="secondary" id="exportCsv">CSV</button></div><div id="stats" class="stats" style="margin-top:12px"></div></section>
-<section class="card"><div class="row"><h2 style="margin:0">判定履歴</h2><button class="secondary" id="reload">更新</button></div><div id="history"></div></section><div class="muted">レース戦略 v2.38。主戦は単勝。実運用除外を先に適用し、G2/G3は1着高信頼を主評価。G3芝1800mの2着1〜9は検証中の仮説で、正式ルールには未採用です。</div></main>
+<div class="notice" style="margin-top:12px"><b>運用メモ：</b>1着ロジックは維持。G3芝1800mの「2着安全幅1〜9」は仮説として表示するだけで、購入制限・保存判定にはまだ適用しません。</div></section><section class="card"><div><h2 style="margin:0">単勝・馬連 実戦成績</h2><div class="muted">単勝と馬連を別会計で集計。両方とも単体で回収率100%超えを目標に確認できます。</div></div><div id="performanceStats" class="performanceGrid"></div></section><section class="card"><div><h2 style="margin:0">v2.39 型別・前向き検証</h2><div class="muted">保存時点の「条件×オッズ構造」型キーごとに、1着・2着・同時捕捉と実購入成績を集計します。結果を見て型キーや閾値を後から動かさず、v2.39以降の記録だけで再現性を確認します。</div></div><div id="patternValidationSummary" class="notice" style="margin-top:12px"></div><div id="patternValidationDashboard" class="comboGrid"></div></section><section class="card"><div><h2 style="margin:0">v2.20以降・境界スコア検証</h2><div class="muted">v2.19以前は除外。固定人気レンジではなく、そのレースごとの最有力境界を使った判定だけを検証します。</div></div><div id="validationSummary" class="notice" style="margin-top:12px"></div><div id="validationDashboard" class="validationGrid"></div></section><section class="card"><div class="row"><div><h2 style="margin:0">1着・2着レンジ検証DB</h2><div class="muted">実際の1着が1着レンジ内、実際の2着が2着レンジ内だったかを別々に検証します。3着以下は使いません。</div></div><button class="secondary" id="exportCsv">CSV</button></div><div id="stats" class="stats" style="margin-top:12px"></div></section>
+<section class="card"><div class="row"><h2 style="margin:0">判定履歴</h2><button class="secondary" id="reload">更新</button></div><div id="history"></div></section><div class="muted">レース戦略 v2.39。既存レンジの上に「条件×オッズ構造」の型判定を追加。1着・2着を別評価し、狭く絞れる型だけを前向き検証します。OP/Lは固定除外後の型ログを蓄積中です。</div></main>
 <script>
 const $=id=>document.getElementById(id);const DATA='https://ep-shy-unit-b54tgtrq.apirest.c-7.us-east-2.aws.neon.tech/neondb/rest/v1';let historyCache=[],raceFormLoading=false,pendingAssessment=null;
 function jpDate(){const d=new Date(Date.now()+9*3600000);return d.toISOString().slice(0,10)}$('raceDate').value=jpDate();
@@ -674,6 +674,14 @@ function boundaryStrengthText(range){
   return b.k+'→'+(b.k+1)+'人気に'+conf+'境界（'+Number(b.score).toFixed(0)+'点）';
 }
 
+function fixedExclusionAnalysis(ctx={}){
+  const g=String(ctx.grade||'').toUpperCase(),a=String(ctx.age||''),w=String(ctx.weight||''),d=Number(ctx.distance);
+  if(a==='2')return{excluded:true,code:'two_year_old',title:'2歳OP以上は実運用除外',reason:'実運用では2歳OP以上を購入対象から除外します。'};
+  if(g==='G3'&&a==='3'&&Number.isFinite(d)&&d<=1600)return{excluded:true,code:'g3_3yo_shortmile',title:'3歳短距離〜マイルG3は実運用除外',reason:'実運用では3歳の1600m以下G3を購入対象から除外します。'};
+  if((g==='L'||g==='OP')&&a==='3'&&Number.isFinite(d)&&d<=1600)return{excluded:true,code:'opl_3yo_shortmile',title:'3歳1600m以下OP/Lは実運用除外',reason:'OP/L検証の固定条件として、3歳1600m以下は購入対象から除外します。'};
+  if((g==='L'||g==='OP')&&w==='handicap')return{excluded:true,code:'opl_handicap',title:'OP/Lハンデ戦は実運用除外',reason:'OP/L検証の固定条件として、ハンデ戦は購入対象から除外します。'};
+  return{excluded:false,code:'',title:'',reason:''};
+}
 function structuralSignal(range,spread,role,grade){
   const b=range&&range.boundary,end=Number(range&&range.end||0),g=String(grade||'').toUpperCase(),ratio=Number(spread&&spread.ratio);
   if(!b)return{grade:'STOP',label:'境界なし',reason:'候補を明確に切る境界がありません。'};
@@ -693,9 +701,8 @@ function marketPatternAnalysis(r,fr,pr,spread,v229){
   const ctx=r&&r.context||{},g=String(ctx.grade||'').toUpperCase(),a=String(ctx.age||''),w=String(ctx.weight||''),d=Number(ctx.distance),surface=String(ctx.surface||'');
   const first=structuralSignal(fr,spread,'first',g),second=structuralSignal(pr,spread,'second',g);
   const stop=(title,note)=>({level:'stop',status:'見送り',badge:'型条件外',title,key:conditionCategory(r)||g,firstGrade:'STOP',firstLabel:'STOP',secondGrade:'STOP',secondLabel:'STOP',quinellaFit:'見送り',note});
-  if(a==='2')return stop('2歳戦は型判定対象外','現行方針どおり2歳OP以上は購入対象から除外します。');
-  if((g==='L'||g==='OP')&&a==='3'&&Number.isFinite(d)&&d<=1600)return stop('3歳1600m以下は型判定対象外','OP/L検証の固定除外条件です。');
-  if((g==='L'||g==='OP')&&w==='handicap')return stop('ハンデ戦は型判定対象外','OP/L検証の固定除外条件です。');
+  const fixedEx=fixedExclusionAnalysis(ctx);
+  if(fixedEx.excluded)return stop(fixedEx.title,fixedEx.reason);
   if(v229&&v229.locked)return stop(v229.status||'既存ルールで見送り',v229.reason||'既存の赤ロック条件に該当します。');
   let fg=first.grade,sg=second.grade;
   if(g==='G1'&&v229&&v229.level==='go'&&fg==='C')fg='B';
@@ -743,6 +750,8 @@ function renderRuleRegistry(){
 }
 function conditionSampleMeta(r,fr){
   const g=String(r.context?.grade||'').toUpperCase(),surface=String(r.context?.surface||''),a=String(r.context?.age||''),weight=String(r.context?.weight||''),d=Number(r.context?.distance),f=Number(fr?.end||0);
+  const fixedEx=fixedExclusionAnalysis(r.context||{});
+  if(fixedEx.excluded)return{label:'N=—（実運用除外）',n:null};
   if(a==='2')return{label:'N=—（実運用除外）',n:null};
   if(g==='G3'&&a==='3'&&d<=1600)return{label:'N=—（実運用除外）',n:null};
   if(g==='G1'){
@@ -785,6 +794,8 @@ function exclusionText(v229){
   return v229?.locked?(v229.short||'高信頼条件外'):'';
 }
 function fixedDecisionReason(r,fr,pr,v229,cp,st,sd){
+  const fixedEx=fixedExclusionAnalysis(r.context||{});
+  if(fixedEx.excluded)return '見送り：'+fixedEx.reason;
   const excluded=exclusionText(v229);
   if(excluded)return '見送り：'+excluded;
   if(sd?.locked||v229?.locked)return '見送り：'+(v229?.short&&v229.short!=='見送り'?v229.short:'1着・2着候補を十分に圧縮できない');
@@ -797,9 +808,10 @@ function buildDecisionSnapshot(p,calc){
   const r={context:p.context||{},runners:calc.runners,structure:calc.structure,axisRisk:calc.axisRisk};
   const cp=conditionProfileAnalysis(r,calc.firstRange,calc.v229Filter);
   const st=raceStrategyAnalysis(r,calc.firstRange,calc.secondPlaceRange,calc.selectionDecision,calc.v229Filter,calc.axisRisk,cp);
-  const reason=fixedDecisionReason(r,calc.firstRange,calc.secondPlaceRange,calc.v229Filter,cp,st,calc.selectionDecision);
   const sample=conditionSampleMeta(r,calc.firstRange);
   const mp=marketPatternAnalysis(r,calc.firstRange,calc.secondPlaceRange,calc.firstRangeSpread,calc.v229Filter);
+  const fixedEx=fixedExclusionAnalysis(r.context||{}),legacyEx=exclusionText(calc.v229Filter);
+  const reason=mp.level==='stop'?('見送り：'+mp.note):fixedDecisionReason(r,calc.firstRange,calc.secondPlaceRange,calc.v229Filter,cp,st,calc.selectionDecision);
   return{
     app_version:'2.39',
     captured_at:new Date().toISOString(),
@@ -813,8 +825,8 @@ function buildDecisionSnapshot(p,calc){
     high_confidence_pass:calc.v229Filter?.level==='go',
     filter_mode:calc.v229Filter?.mode||'',
     filter_status:calc.v229Filter?.status||'',
-    excluded:!!exclusionText(calc.v229Filter),
-    exclusion_reason:exclusionText(calc.v229Filter),
+    excluded:fixedEx.excluded||!!legacyEx,
+    exclusion_reason:fixedEx.excluded?fixedEx.reason:legacyEx,
     condition_sample_n:sample.n,
     condition_sample_label:sample.label,
     market_pattern_key:mp.key,
@@ -822,6 +834,8 @@ function buildDecisionSnapshot(p,calc){
     first_structure_grade:mp.firstGrade,
     second_structure_grade:mp.secondGrade,
     quinella_pattern_fit:mp.quinellaFit,
+    pattern_locked:mp.level==='stop',
+    pattern_rule_version:'2.39',
     selection_status:calc.selectionDecision?.status||'',
     selection_locked:!!calc.selectionDecision?.locked,
     structure_code:calc.structure?.code||'',
@@ -832,11 +846,13 @@ function buildDecisionSnapshot(p,calc){
   };
 }
 function conditionProfileAnalysis(r,fr,v229){
-  const g=String(r.context?.grade||'').toUpperCase(),surface=String(r.context?.surface||''),a=String(r.context?.age||''),d=Number(r.context?.distance),f=Number(fr?.end||0);
+  const g=String(r.context?.grade||'').toUpperCase(),surface=String(r.context?.surface||''),a=String(r.context?.age||''),weight=String(r.context?.weight||''),d=Number(r.context?.distance),f=Number(fr?.end||0);
   const surf=surface==='turf'?'芝':surface==='dirt'?'ダート':'芝/ダート未指定';
   const highG23=(g==='G2'||g==='G3')&&v229?.mode==='g2g3'&&v229?.level==='go';
   const out=(level,title,badge,evidence,note,secondEvidence='',quinella='慎重')=>({level,title,badge,evidence,note,secondEvidence,quinella});
   if(!g||!surface||!Number.isFinite(d)||d<=0)return out('caution','条件データ不足','属性確認','格・芝/ダート・距離を入力すると条件別成績を表示します。','この評価は原則2021〜2025年、G1中長距離は2026年9月までの最終オッズを使った事後検証です。');
+  const fixedEx=fixedExclusionAnalysis({grade:g,surface,age:a,weight,distance:d});
+  if(fixedEx.excluded)return out('stop',fixedEx.title,'見送り','固定除外条件',fixedEx.reason);
   if(g==='G1'){
     if(a==='2')return out('caution','2歳G1は別扱い','慎重','2歳G1は現在の高信頼条件から除外。','世代戦は別枠で検証します。');
     if(d>=2000)return out('go','G1中長距離','高信頼','63/66 = 95.5%','2000m以上・2歳除外。現行の主力条件。');
@@ -878,6 +894,8 @@ function conditionProfileAnalysis(r,fr,v229){
 function raceStrategyAnalysis(r,fr,pr,sd,v229,ar,cp){
   const g=String(r.context?.grade||'').toUpperCase(),a=String(r.context?.age||''),d=Number(r.context?.distance),f=Number(fr?.end||0),p=Number(pr?.end||0);
   const axisWarn=ar?.level==='high'?'軸選びは強警戒。1頭に決め切れないなら見送り。':ar?.level==='mid'?'軸は慎重に選ぶ。':'軸選びに大きな市場警告なし。';
+  const fixedEx=fixedExclusionAnalysis(r.context||{});
+  if(fixedEx.excluded)return{level:'stop',title:'見送り',badge:'固定除外',main:'—',quinella:'見送り',first:'1〜'+f+'人気',action:'次のレースへ',next:fixedEx.reason};
   if(sd?.locked||v229?.locked)return{level:'stop',title:'見送り',badge:'買わない',main:'—',quinella:'—',first:'1〜'+f+'人気',action:'次のレースへ',next:'候補構造が購入条件を満たしません。無理に券種を探さず見送ります。'};
   if(cp?.level==='stop')return{level:'caution',title:'見送り寄り',badge:cp.badge,main:'基本見送り',quinella:'基本見送り',first:'1〜'+f+'人気',action:'強い根拠がなければ終了',next:cp.title+'。'+cp.evidence+'。 '+cp.note+' '+axisWarn};
   const g1Long=g==='G1'&&a&&a!=='2'&&Number.isFinite(d)&&d>=2000;
@@ -1059,7 +1077,7 @@ function histItem(r){
     bet='<br><b>単勝：</b>'+(ws>0?yen(ws)+' → '+yen(wr)+'（'+roiPct(ws,wr)+'%）':'購入なし')+'<br><b>馬連：</b>'+(qs>0?yen(qs)+' → '+yen(qr)+'（'+roiPct(qs,qr)+'%）':'購入なし');
   }
   const badge='<span class="pill range'+r.structure.code+'">'+esc(r.structure.code)+' '+esc(sd.short)+'</span>';
-  const snap=r.context?.decision_snapshot||null;const snapInfo=snap?'<br><b>判定理由：</b>'+esc(snap.decision_reason||'')+'<br><b>保存ログ：</b>'+esc(snap.condition_category||'')+' / '+esc(snap.condition_sample_label||'N=—')+' / Neff '+(snap.neff?Number(snap.neff).toFixed(1):'—'):'<br><span class="muted">旧データ：v2.38判定ログなし</span>';const meta=esc(r.structure.name)+'<br>'+ax+'<br>'+esc(plan)+'<br>C4 '+pc(r.c4)+' / 上位9 '+pc(r.c9)+' / 上位12 '+pc(r.c12)+'<br>1着レンジ '+fr.label+' / 2着レンジ '+pr.label+'<br>総合：'+esc(sd.status)+snapInfo;
+  const snap=r.context?.decision_snapshot||null;const snapInfo=snap?'<br><b>判定理由：</b>'+esc(snap.decision_reason||'')+'<br><b>保存ログ：</b>'+esc(snap.condition_category||'')+' / '+esc(snap.condition_sample_label||'N=—')+' / Neff '+(snap.neff?Number(snap.neff).toFixed(1):'—'):'<br><span class="muted">旧データ：v2.39型ログなし</span>';const meta=esc(r.structure.name)+'<br>'+ax+'<br>'+esc(plan)+'<br>C4 '+pc(r.c4)+' / 上位9 '+pc(r.c9)+' / 上位12 '+pc(r.c12)+'<br>1着レンジ '+fr.label+' / 2着レンジ '+pr.label+'<br>総合：'+esc(sd.status)+snapInfo;
   const form=done?'':'<div class="resultForm"><input id="f'+r.id+'" type="number" min="1" max="18" inputmode="numeric" placeholder="1着馬番" oninput="updateResultRangeBrake('+r.id+')"><input id="s'+r.id+'" type="number" min="1" max="18" inputmode="numeric" placeholder="2着馬番" oninput="updateResultRangeBrake('+r.id+')"><input id="wk'+r.id+'" type="number" min="0" step="100" inputmode="numeric" value="0" placeholder="単勝投資"><input id="wp'+r.id+'" type="number" min="0" step="10" inputmode="numeric" value="0" placeholder="単勝払戻"><input id="qk'+r.id+'" type="number" min="0" step="100" inputmode="numeric" value="0" placeholder="馬連投資"><input id="qp'+r.id+'" type="number" min="0" step="10" inputmode="numeric" value="0" placeholder="馬連払戻"><button onclick="saveResult('+r.id+')">結果保存</button><div id="rb'+r.id+'" class="oddsBrake hidden full"></div></div>';
   return '<div class="history"><div class="row"><div>'+badge+' <b>'+esc(r.raceDate)+' '+esc(r.venue)+r.raceNo+'R '+esc(r.raceName||'')+'</b><div class="muted">'+meta+'</div></div><div class="muted">'+result+bet+'</div></div>'+form+'</div>';
 }
@@ -1096,6 +1114,33 @@ function renderValidationDashboard(h){
   const card=(key,title,x,note)=>'<div class="validationCard '+key+'"><div class="validationTitle"><b>'+title+'</b><span class="confidence '+x.confidence.cls+'">'+x.confidence.label+' N='+x.completed+'</span></div><div class="validationMetrics"><div><span>保存数</span><b>'+x.total+'</b></div><div><span>結果入力済</span><b>'+x.completed+'</b></div><div><span>1着捕捉率</span><b>'+(x.firstRate==null?'—':x.firstRate+'%')+'</b></div><div><span>2着捕捉率</span><b>'+(x.secondRate==null?'—':x.secondRate+'%')+'</b></div><div><span>両方捕捉率</span><b>'+(x.bothRate==null?'—':x.bothRate+'%')+'</b></div><div><span>実購入回収率</span><b>'+(x.roi==null?'—':x.roi+'%')+'</b></div></div><div class="validationNote">'+note+(x.stake>0?' / 投資 '+yen(x.stake)+' → 払戻 '+yen(x.ret):'')+'</div></div>';
   box.innerHTML=card('green','🟢 購入候補',d.green,'境界スコアで狭く切れたレース')+card('yellow','🟡 慎重',d.yellow,'境界はあるが候補幅が広め')+card('red','🔴 見送り',d.red,'十分に強い境界がない、または候補が広いレース');
 }
+function patternSnapshot(r){
+  const s=r&&r.context&&r.context.decision_snapshot?r.context.decision_snapshot:null;
+  if(!s||!s.market_pattern_key||!versionAtLeast(s.app_version||r.rangeRuleVer,'2.39'))return null;
+  return s;
+}
+function calcPatternValidation(h){
+  const rows=(h||[]).filter(r=>patternSnapshot(r)),groups=new Map();
+  for(const r of rows){
+    const s=patternSnapshot(r),key=s.market_pattern_key;
+    if(!groups.has(key))groups.set(key,{key,rows:[],snapshot:s});
+    groups.get(key).rows.push(r);
+  }
+  const items=[...groups.values()].map(g=>({...g,summary:summarizeValidationRows(g.rows),completed:g.rows.filter(r=>r.resultFirst!=null&&r.resultSecond!=null).length}));
+  items.sort((a,b)=>b.completed-a.completed||b.rows.length-a.rows.length||a.key.localeCompare(b.key,'ja'));
+  return{rows,completed:rows.filter(r=>r.resultFirst!=null&&r.resultSecond!=null).length,items};
+}
+function renderPatternValidation(h){
+  const summary=$('patternValidationSummary'),box=$('patternValidationDashboard');if(!summary||!box)return;
+  const d=calcPatternValidation(h);
+  summary.innerHTML='<b>v2.39型ログ '+d.rows.length+'レース</b> / 結果入力済 '+d.completed+'レース<br><span class="muted">同じ型キーを固定して積み上げます。Nが少ない型は自動で正式ルールへ昇格させません。</span>';
+  if(!d.items.length){box.innerHTML='<div class="comboCard"><div class="comboFoot">まだv2.39の型ログがありません。判定を保存すると、ここに型別の前向き成績が蓄積されます。</div></div>';return}
+  const fmt=x=>x==null?'—':x+'%';
+  box.innerHTML=d.items.slice(0,12).map(g=>{
+    const s=g.snapshot||{},m=g.summary,cf=sampleConfidence(g.completed),title=s.condition_category||'条件未分類',grades='1着 '+(s.first_structure_grade||'—')+' / 2着 '+(s.second_structure_grade||'—'),q=s.quinella_pattern_fit||'—';
+    return '<div class="comboCard"><div class="comboHead"><b>'+esc(title)+'</b><span class="confidence '+cf.cls+'">'+cf.label+' N='+g.completed+'</span></div><div class="comboMetrics"><div><span>保存数</span><b>'+g.rows.length+'</b></div><div><span>1着捕捉</span><b>'+fmt(m.firstRate)+'</b></div><div><span>2着捕捉</span><b>'+fmt(m.secondRate)+'</b></div><div><span>両方捕捉</span><b>'+fmt(m.bothRate)+'</b></div><div><span>構造</span><b>'+esc(grades)+'</b></div><div><span>馬連適性</span><b>'+esc(q)+'</b></div></div><div class="comboFoot">'+esc(g.key)+(m.roi==null?'':' / 実購入馬連ROI '+m.roi+'%')+'<br>正式化はN数・年度安定性・将来データでの再現を確認してから。</div></div>';
+  }).join('');
+}
 function calcStats(h){
   const plannedBuyCount=h.filter(x=>x.betDecision==='buy').length,plannedSkipCount=h.filter(x=>x.betDecision==='skip').length;
   const done=h.filter(x=>x.resultFirst!=null&&x.resultSecond!=null),pairs=done.map(pairOutcome).filter(x=>x&&x.evaluable),firstHits=pairs.filter(x=>x.firstInRange),secondHits=pairs.filter(x=>x.secondInRange),bothHits=pairs.filter(x=>x.bothInTarget);
@@ -1110,7 +1155,7 @@ function calcStats(h){
 }
 async function loadAll(){
   try{
-    historyCache=await getHistory();renderRaceList();const s=calcStats(historyCache);renderValidationDashboard(historyCache);
+    historyCache=await getHistory();renderRaceList();const s=calcStats(historyCache);renderValidationDashboard(historyCache);renderPatternValidation(historyCache);
     $('history').innerHTML=historyCache.length?historyCache.map(histItem).join(''):'<p class="muted">まだ判定履歴はありません。</p>';
     const perfCard=(cls,title,x,hitLabel)=>'<div class="performanceCard '+cls+'"><h3>'+title+'</h3><div class="performanceMetrics"><div><span>購入回数</span><b>'+x.count+'</b></div><div><span>的中回数</span><b>'+x.hits+'</b></div><div><span>'+hitLabel+'</span><b>'+(x.hitRate==null?'—':x.hitRate+'%')+'</b></div><div><span>回収率</span><b>'+(x.roi==null?'—':x.roi+'%')+'</b></div><div><span>購入金額</span><b>'+yen(x.stake)+'</b></div><div><span>払戻金額</span><b>'+yen(x.ret)+'</b></div></div></div>';
     $('performanceStats').innerHTML=perfCard('win','🎯 単勝',s.win,'的中率')+perfCard('quinella','🔗 馬連',s.quinella,'的中率')+perfCard('total','📊 合計',s.totalPerf,'どちらか的中率');
@@ -1119,13 +1164,13 @@ async function loadAll(){
 }
 function csvQuote(v){return'"'+String(v??'').replaceAll('"','""')+'"'}$('exportCsv').onclick=async()=>{try{
   const h=historyCache.length?historyCache:await getHistory();
-  const cols=['race_date','venue','race_no','race_name','odds_snapshot','range_code','condition_category','condition_sample_n','decision_reason','high_confidence_pass','exclusion_reason','neff','neff_ratio','first_place_range_end','second_place_range_end','selection_status','selection_locked','result_first_horse_no','result_first_popularity','first_in_range','result_second_horse_no','result_second_popularity','second_in_range','both_in_target_ranges','bet_decision','bet_type','planned_stake_yen','opponents','win_stake_yen','win_return_yen','win_roi_pct','quinella_stake_yen','quinella_return_yen','quinella_roi_pct'];
+  const cols=['race_date','venue','race_no','race_name','odds_snapshot','range_code','condition_category','condition_sample_n','market_pattern_key','market_pattern_status','first_structure_grade','second_structure_grade','quinella_pattern_fit','pattern_locked','decision_reason','high_confidence_pass','exclusion_reason','neff','neff_ratio','first_place_range_end','second_place_range_end','selection_status','selection_locked','result_first_horse_no','result_first_popularity','first_in_range','result_second_horse_no','result_second_popularity','second_in_range','both_in_target_ranges','bet_decision','bet_type','planned_stake_yen','opponents','win_stake_yen','win_return_yen','win_roi_pct','quinella_stake_yen','quinella_return_yen','quinella_roi_pct'];
   let csv='\ufeff'+cols.join(',')+'\n';
   csv+=h.map(r=>{
     const market=r.secondRange||secondRangeAnalysis(r.runners,r.structure.code),fr=r.firstRange||firstPlaceRangeAnalysis(r.runners),pr=r.secondPlaceRange||secondPlaceRangeAnalysis(r.runners),sd=r.selectionDecision||selectionDecisionAnalysis(fr,pr),o=pairOutcome(r),f=findRunner(r.runners,r.resultFirst),s=findRunner(r.runners,r.resultSecond);
-    const ds=r.context?.decision_snapshot||{};return[r.raceDate,r.venue,r.raceNo,r.raceName,r.runners.map(x=>x.horse_no+'='+x.popularity+'='+x.win_odds).join('|'),r.structure.code,ds.condition_category||'',ds.condition_sample_n??'',ds.decision_reason||'',ds.high_confidence_pass??'',ds.exclusion_reason||'',ds.neff??'',ds.neff_ratio??'',fr.end,pr.end,sd.status,sd.locked,r.resultFirst,f?f.popularity:'',o?o.firstInRange:'',r.resultSecond,s?s.popularity:'',o?o.secondInRange:'',o?o.bothInTarget:'',r.betDecision,r.context?.bet_type||'',r.plannedStake,(r.opponents||[]).map(x=>x.horseNo+'='+(x.popularity||'')+'='+x.winOdds).join('|'),r.winStake,r.winReturn,r.winStake>0?roiPct(r.winStake,r.winReturn):'',r.quinellaStake,r.quinellaReturn,r.quinellaStake>0?roiPct(r.quinellaStake,r.quinellaReturn):''];
+    const ds=r.context?.decision_snapshot||{};return[r.raceDate,r.venue,r.raceNo,r.raceName,r.runners.map(x=>x.horse_no+'='+x.popularity+'='+x.win_odds).join('|'),r.structure.code,ds.condition_category||'',ds.condition_sample_n??'',ds.market_pattern_key||'',ds.market_pattern_status||'',ds.first_structure_grade||'',ds.second_structure_grade||'',ds.quinella_pattern_fit||'',ds.pattern_locked??'',ds.decision_reason||'',ds.high_confidence_pass??'',ds.exclusion_reason||'',ds.neff??'',ds.neff_ratio??'',fr.end,pr.end,sd.status,sd.locked,r.resultFirst,f?f.popularity:'',o?o.firstInRange:'',r.resultSecond,s?s.popularity:'',o?o.secondInRange:'',o?o.bothInTarget:'',r.betDecision,r.context?.bet_type||'',r.plannedStake,(r.opponents||[]).map(x=>x.horseNo+'='+(x.popularity||'')+'='+x.winOdds).join('|'),r.winStake,r.winReturn,r.winStake>0?roiPct(r.winStake,r.winReturn):'',r.quinellaStake,r.quinellaReturn,r.quinellaStake>0?roiPct(r.quinellaStake,r.quinellaReturn):''];
   }).map(row=>row.map(csvQuote).join(',')).join('\n');
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='race-strategy-v2.38-history.csv';a.click();URL.revokeObjectURL(a.href);
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='race-strategy-v2.39-history.csv';a.click();URL.revokeObjectURL(a.href);
 }catch(e){alert(e.message)}};
 $('reload').onclick=()=>{loadAll();renderRaceList()};renderRuleRegistry();renderOddsGrid();renderRaceList();loadAll();
 </script></body></html>
