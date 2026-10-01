@@ -240,7 +240,7 @@ async function run(browserType,label){
   assert(post.context?.decision_snapshot?.app_version==='2.39'&&post.context?.decision_snapshot?.market_pattern_key,label+' v2.39型ログ保存 '+JSON.stringify(post.context?.decision_snapshot));
   assert(post.prior_axis_popularity===1,label+' 軸人気自動保存');
   assert(post.quinella_opponents.length===2,label+' 相手保存');
-  assert((await page.textContent('#raceList')).includes('入力済み'),label+' 判定後に一覧が入力済み');
+  assert((await page.textContent('#raceList')).includes('購入'),label+' 判定後に一覧が購入表示');
   const doneItem=page.locator('#raceList .raceItem').filter({hasText:label+'テスト'});
   assert(await doneItem.count()===1,label+' 判定済みレースが一覧に存在');
   await doneItem.click();
