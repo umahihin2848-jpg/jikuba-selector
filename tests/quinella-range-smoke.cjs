@@ -84,7 +84,7 @@ async function run(browserType,label){
   page.on('pageerror',e=>errs.push('pageerror:'+e.message));
   page.on('console',m=>{if(m.type()==='error')errs.push('console:'+m.text())});
   await page.goto(LOCAL,{waitUntil:'networkidle'});
-  assert(await page.title()==='馬連レンジ v2.12',label+' title');
+  assert(await page.title()==='レース戦略 v2.39',label+' title');
   assert(await page.locator('link[rel="manifest"]').getAttribute('href')==='./manifest.webmanifest',label+' manifest');
   const bodyText=await page.locator('body').innerText();
   assert(bodyText.includes('入力時刻に制限はありません'),label+' 時間制限なし表示');
