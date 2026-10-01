@@ -93,6 +93,7 @@ async function run(browserType,label){
   assert(!bodyText.includes('T-15'),label+' T-15の旧表示が残っている');
   assert(!bodyText.includes('v2.38'),label+' v2.38の旧表記が残っている');
   assert(bodyText.includes('2021〜2026 型再分類')&&bodyText.includes('構造A/Aだけで買う'),label+' 型再分類UI');
+  assert(bodyText.includes('7段階判定'),label+' 7段階判定UI');
   assert(await page.locator('#grade option[value="L"]').count()===1&&await page.locator('#grade option[value="OP"]').count()===1,label+' L/OP選択肢');
   const opl=await page.evaluate(s=>{
     const x=compute(s,'OP','older',1800);
@@ -123,6 +124,18 @@ async function run(browserType,label){
   assert(historicalGate.shortLevel==='stop'&&historicalGate.shortTitle.includes('G3芝1400m以下'),label+' G3芝短距離却下 '+JSON.stringify(historicalGate));
   assert(historicalGate.midLevel==='stop'&&historicalGate.midTitle.includes('G3芝2000m'),label+' G3芝2000却下 '+JSON.stringify(historicalGate));
   assert(historicalGate.opQ!=='候補'&&historicalGate.opClass==='検証継続',label+' OP/Lは前向き検証 '+JSON.stringify(historicalGate));
+  const pipelineCheck=await page.evaluate(s=>{
+    const x=compute(s,'G1','older',2400);
+    const r={context:{grade:'G1',surface:'turf',age:'older',weight:'fixed',distance:2400},runners:x.runners,structure:x.structure};
+    const p=decisionPipelineAnalysis(r,x.firstRange,x.secondPlaceRange,x.firstRangeSpread,x.v229Filter,x.selectionDecision);
+    const y=compute(s,'OP','older',1800);
+    const ro={context:{grade:'OP',surface:'turf',age:'older',weight:'fixed',distance:1800},runners:y.runners,structure:y.structure};
+    const po=decisionPipelineAnalysis(ro,y.firstRange,y.secondPlaceRange,y.firstRangeSpread,y.v229Filter,y.selectionDecision);
+    return{final:p.finalCode,label:p.finalLabel,win:p.winFit,q:p.quinellaFit,stages:p.stages.length,pairStage:p.stages.find(z=>z.id==='quinella')?.value,opFinal:po.finalCode};
+  },PATTERN_GO);
+  assert(pipelineCheck.final==='win'&&pipelineCheck.label==='単勝候補'&&pipelineCheck.win==='candidate',label+' G1中長距離は単勝候補 '+JSON.stringify(pipelineCheck));
+  assert(pipelineCheck.q!=='candidate'&&pipelineCheck.pairStage.includes('馬連見送り'),label+' G1中長距離の馬連は89.4%で未昇格 '+JSON.stringify(pipelineCheck));
+  assert(pipelineCheck.stages===7&&pipelineCheck.opFinal==='skip',label+' 7段階とOP/L見送り '+JSON.stringify(pipelineCheck));
   const codes=await page.evaluate(([a,b,c,d])=>[compute(a).structure.code,compute(b).structure.code,compute(c).structure.code,compute(d).structure.code],[A,B,C,D]);
   assert(JSON.stringify(codes)==='["A","B","C","D"]',label+' A/B/C/D分類 '+JSON.stringify(codes));
   const riskA=await page.evaluate(s=>compute(s).axisRisk.level,A);
@@ -186,11 +199,11 @@ async function run(browserType,label){
   await page.selectOption('#venue','東京');
   await page.selectOption('#raceNo','1');
   await page.fill('#raceName',label+'テスト');
-  await page.selectOption('#grade','G3');
-  await page.selectOption('#surface','dirt');
+  await page.selectOption('#grade','G1');
+  await page.selectOption('#surface','turf');
   await page.selectOption('#age','older');
   await page.selectOption('#weight','fixed');
-  await page.fill('#distance','1800');
+  await page.fill('#distance','2400');
 
   await page.selectOption('#runnerCountSelect','12');
   assert(await page.locator('#oddsGrid input[data-horse]').count()===12,label+' 12頭表示');
@@ -228,7 +241,10 @@ async function run(browserType,label){
   assert((await page.textContent('#lock')).includes('判定プレビュー'),label+' 購入前プレビュー');
   assert((await page.textContent('#planSummary')).includes('購入判断：未確定'),label+' 購入判断前表示');
   const patternText=await page.textContent('#marketPatternBox');
-  assert(patternText.includes('A・明確')&&patternText.includes('B・まずまず')&&patternText.includes('馬連適性')&&patternText.includes('慎重'),label+' 購入可能なA/B型 '+patternText);
+  assert(patternText.includes('A・明確')&&patternText.includes('B・まずまず')&&patternText.includes('馬連適性')&&patternText.includes('慎重'),label+' A/B構造表示 '+patternText);
+  const pipelineText=await page.textContent('#decisionPipelineBox');
+  assert(pipelineText.includes('単勝候補')&&pipelineText.includes('N≥30')&&pipelineText.includes('馬連見送り'),label+' 7段階の単勝のみ判定 '+pipelineText);
+  assert((await page.textContent('#strategyBox')).includes('単勝候補')&&(await page.textContent('#strategyBox')).includes('見送り'),label+' 戦略も単勝のみへ同期');
   assert(db.getPost()===null,label+' 判定を見るだけでは保存しない');
 
   // 判定を見た後で購入判断
@@ -245,8 +261,18 @@ async function run(browserType,label){
   assert((await page.textContent('#axisRisk')).includes('市場警告なし'),label+' 軸警告UI');
   assert((await page.textContent('#secondPlaceBox')).includes('2着レンジ'),label+' 2着レンジUI');
   assert((await page.textContent('#marketPatternBox')).includes('条件 × オッズ構造'),label+' 型判定UI');
+  assert((await page.textContent('#decisionPipelineBox')).includes('7段階判定'),label+' 7段階UI');
   assert((await page.textContent('#strategyBox')).length>10,label+' 実戦戦略UI');
 
+  // G1中長距離は単勝63/66=95.5%だが、1・2着同時59/66=89.4%なので馬連をロック
+  await page.click('#savePlan');
+  await page.waitForTimeout(120);
+  assert((await page.textContent('#msg')).includes('馬連ロック'),label+' 馬連正式基準未達ロック');
+  assert(db.getPost()===null,label+' 馬連ロック時は保存しない');
+
+  // 単勝へ切り替えると正式条件を通過して保存できる
+  await page.selectOption('#betType','win');
+  await page.fill('#opponents','');
   await page.click('#savePlan');
   await page.waitForTimeout(120);
 
@@ -254,8 +280,10 @@ async function run(browserType,label){
   assert(post&&post.structure_code==='A',label+' 保存');
   assert(post.odds_snapshot.length===12&&post.odds_snapshot[0].horse_no===1&&post.odds_snapshot[0].popularity===1&&post.odds_snapshot[0].win_odds===3.7,label+' 入力時点の馬番人気オッズ保存');
   assert(post.context?.decision_snapshot?.app_version==='2.39'&&post.context?.decision_snapshot?.market_pattern_key,label+' v2.39型ログ保存 '+JSON.stringify(post.context?.decision_snapshot));
+  assert(post.context?.decision_snapshot?.decision_pipeline_final==='win'&&post.context?.decision_snapshot?.decision_pipeline_stages?.length===7,label+' 7段階ログ保存 '+JSON.stringify(post.context?.decision_snapshot));
+  assert(post.context?.bet_type==='win',label+' 単勝のみ保存');
   assert(post.prior_axis_popularity===1,label+' 軸人気自動保存');
-  assert(post.quinella_opponents.length===2,label+' 相手保存');
+  assert(post.quinella_opponents.length===0,label+' 単勝なので相手なし');
   assert((await page.textContent('#raceList')).includes('購入'),label+' 判定後に一覧が購入表示');
   const doneItem=page.locator('#raceList .raceItem').filter({hasText:label+'テスト'});
   assert(await doneItem.count()===1,label+' 判定済みレースが一覧に存在');
@@ -265,8 +293,8 @@ async function run(browserType,label){
 
   const row=db.rows[0];
   await page.fill('#f'+row.id,'1'); await page.fill('#s'+row.id,'3');
-  await page.fill('#wk'+row.id,'0'); await page.fill('#wp'+row.id,'0');
-  await page.fill('#qk'+row.id,'1000'); await page.fill('#qp'+row.id,'0');
+  await page.fill('#wk'+row.id,'1000'); await page.fill('#wp'+row.id,'0');
+  await page.fill('#qk'+row.id,'0'); await page.fill('#qp'+row.id,'0');
   await page.getByRole('button',{name:'結果保存'}).first().click();
   await page.waitForFunction(()=>document.querySelector('#history')?.textContent.includes('1着は1着レンジ内'),null,{timeout:5000});
   const histText=await page.textContent('#history');
