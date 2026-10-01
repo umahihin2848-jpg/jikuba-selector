@@ -883,10 +883,10 @@ const HISTORICAL_PATTERN_REVIEW=[
   {status:'observe',title:'G2芝1800',detail:'2021〜25の広い母集団19/19。2歳戦を現行除外で再タグ付けするとNが減る。',evidence:'N不足で検証継続'},
   {status:'observe',title:'OP/L・8-8・Neff<0.82',detail:'2022年は10/10同時捕捉。単年N=10。',evidence:'前向き検証のみ'},
   {status:'rejected',title:'構造A/Aだけで買う',detail:'全馬オッズ再計算393RではA/Aでも1着捕捉はG1 88.2%、G2 87.5%、G3 83.3%、OP/L 90.0%。',evidence:'単独買いシグナルとして却下'},
-  {status:'rejected',title:'G2/G3・Neff 0.85〜0.95',detail:'94例で77/94＝81.9%。安全帯298例の92.3%を大きく下回る。',evidence:'赤ロック維持'},
-  {status:'rejected',title:'G3芝1400m以下',detail:'34例で27/34＝79.4%。',evidence:'高信頼型として却下'},
-  {status:'rejected',title:'G3芝2000m',detail:'36例で32/36＝88.9%。2025年は4/6。',evidence:'正式候補から除外'},
-  {status:'rejected',title:'G2芝2200m以上',detail:'49例で43/49＝87.8%。',evidence:'高信頼型として却下'},
+  {status:'observe',title:'G2/G3・Neff 0.85〜0.95',detail:'94例で77/94＝81.9%。安全帯298例の92.3%より弱い。',evidence:'強注意・赤ロックなし'},
+  {status:'observe',title:'G3芝1400m以下',detail:'広い母集団34例で27/34＝79.4%。固定年齢除外後の再集計が必要。',evidence:'強注意・赤ロックなし'},
+  {status:'observe',title:'G3芝2000m',detail:'36例で32/36＝88.9%。2025年は4/6。',evidence:'注意・赤ロックなし'},
+  {status:'observe',title:'G2芝2200m以上',detail:'49例で43/49＝87.8%。',evidence:'注意・赤ロックなし'},
   {status:'rejected',title:'OP/L旧高信頼を一括購入',detail:'2021〜24の166例で同時132/166＝79.5%。2024の1着は37/46＝80.4%。',evidence:'一括買い型として却下'}
 ];
 function renderHistoricalPatternReview(){
@@ -894,7 +894,7 @@ function renderHistoricalPatternReview(){
   const groups=[
     {key:'candidate',title:'✅ 正式候補型',cls:'ruleStatusFormal'},
     {key:'observe',title:'🧪 検証継続型',cls:'ruleStatusHypothesis'},
-    {key:'rejected',title:'✖ 却下型',cls:'ruleStatusRejected'}
+    {key:'rejected',title:'✖ 判定ルール不採用（レース赤ロックではない）',cls:'ruleStatusRejected'}
   ];
   box.innerHTML=groups.map(g=>{
     const rows=HISTORICAL_PATTERN_REVIEW.filter(x=>x.status===g.key);
@@ -905,7 +905,7 @@ const RULE_REGISTRY=[
   {id:'v240_hard_lock',status:'formal',title:'固定ロック条件',detail:'ハンデ戦 / 2歳OP以上 / 3歳1600m以下のG3・L・OPだけを購入禁止。その他の弱い条件は注意表示に留める。',evidence:'v2.40-balance-1'},
   {id:'v239_promotion_policy',status:'formal',title:'強候補の目安',detail:'単勝：N≥30・1着捕捉率≥92%・前期/後期とも≥90%・当日1着構造B以上。馬連：さらに1・2着同時捕捉率≥90%・N≥30・2着構造B以上。未達でも固定除外でなければ条件付き検討。',evidence:'強候補とロックを分離'},
   {id:'v239_pattern_layer',status:'formal',title:'v2.39 型判定レイヤー',detail:'条件×オッズ構造を型として保存し、1着・2着を別々に構造評価。構造A/B/C単独では購入候補へ昇格しない。',evidence:'2021〜2026再分類反映済み'},
-  {id:'opl_pattern_observation',status:'hypothesis',title:'OP/L 型別判定',detail:'2歳・3歳1600m以下・ハンデを除外し、境界とNeffの組合せを型として蓄積。',evidence:'正式閾値は未固定'},
+  {id:'opl_pattern_observation',status:'hypothesis',title:'OP/L 型別判定',detail:'固定ロック条件を除外し、境界とNeffの組合せを型として蓄積。弱い型は注意表示に留める。',evidence:'正式閾値は未固定'},
   {id:'exclude_2yo',status:'formal',title:'2歳OP以上は除外',detail:'実運用では購入対象外。高信頼フィルターより先にSTOP。',evidence:'正式ルール'},
   {id:'exclude_3yo_shortmile_g3',status:'formal',title:'3歳・短距離〜マイルG3は除外',detail:'1600m以下の3歳G3を購入対象外。',evidence:'正式ルール'},
   {id:'g23_high_confidence',status:'formal',title:'G2/G3 1着高信頼フィルター',detail:'1着レンジ1〜5〜8人気＋Neff 85〜95%危険帯を除外。',evidence:'正式ルール'},
@@ -1047,9 +1047,9 @@ function conditionProfileAnalysis(r,fr,v229){
     if(d===1800)return out('provisional','G1 1800m','仮高信頼','5/5 = 100%','サンプル5レースのみ。数字は強いが件数不足なので仮扱い。');
     if(d===1600){
       if(f>0&&f<=6)return out('provisional','G1マイル・レンジ≤6','仮高信頼','15/16 = 93.8%','2歳除外。今回の1着レンジが6人気以内に絞れた時だけ強かった条件。事後発見なので仮扱い。');
-      return out('stop','G1マイル・レンジ広め','見送り寄り','レンジ≥7では 8/14 = 57.1%','1600mでも1着レンジが7人気以上まで広がる年は無理に買わない。');
+      return out('caution','G1マイル・レンジ広め','強注意','レンジ≥7では 8/14 = 57.1%','過去捕捉は弱いため強い注意。ただし固定除外ではないので赤ロックしません。');
     }
-    if(d===1200)return out('stop','G1スプリント','見送り寄り','5/10 = 50.0%','高松宮記念・スプリンターズSでは現在の1着レンジ捕捉が弱い。');
+    if(d===1200)return out('caution','G1スプリント','強注意','5/10 = 50.0%','現在の1着レンジ捕捉は弱いため強い注意。ただし固定除外ではありません。');
     return out('caution','G1その他距離','慎重','専用集計なし','現行レンジを参考にするが高信頼条件ではない。');
   }
   if((g==='L'||g==='OP')&&a==='2')return out('stop','2歳OP/Lは実運用除外','見送り','2歳OP以上は購入対象外','型別検証にも入れません。');
@@ -1063,14 +1063,14 @@ function conditionProfileAnalysis(r,fr,v229){
     if(surface==='dirt')return out('provisional','G2ダート','仮高信頼','5/5 = 100%','サンプルが5レースのみなので仮扱い。');
     if(surface==='turf'&&d===1800)return out('go','G2芝1800m','高信頼候補','1着 18/18 = 100%','実運用の2歳除外後。2021〜2025年16/16に、2026年9月までの高信頼2/2を追加。1着側は継続して強い。','2着レンジ：2026年 2/2 = 100%（N=2）','検証中候補');
     if(surface==='turf'&&(d===1400||d===2000))return out('provisional','G2芝'+d+'m','強め','1400m 15/16 = 93.8% / 2000m 15/16 = 93.8%','高信頼群の中でも比較的強かった距離。');
-    if(surface==='turf'&&d===2400)return out('stop','G2芝2400m','見送り寄り','6/8 = 75.0%','高信頼判定を通っても過去捕捉率が低め。');
+    if(surface==='turf'&&d===2400)return out('caution','G2芝2400m','強注意','6/8 = 75.0%','過去捕捉率は低めですがN=8のため固定ロックにはしません。');
     if(surface==='turf'&&d===1600)return out('caution','G2芝1600m','慎重','17/19 = 89.5%','悪くないが主力条件より一段下。');
     if(surface==='turf'&&d===2200)return out('caution','G2芝2200m','慎重','21/23 = 91.3%','主力条件ほどではないため通常の高信頼扱い。');
     return out('caution','G2 '+surf+d+'m','通常高信頼','G2高信頼全体 116/126 = 92.1%','距離別の特別な上乗せ条件には該当しません。');
   }
   if(g==='G3'){
     if(surface==='dirt')return out('go','G3ダート','高信頼候補','1着 41/41 = 100%','2021〜2025年37/37に、2026年9月までの高信頼4/4を追加。1着側は前向き検証でも全捕捉。','2着レンジ：2026年 4/4 = 100%（N=4）','検証中候補');
-    if(surface==='turf'&&d===1200)return out('stop','G3芝1200m','見送り寄り','16/22 = 72.7%','高信頼フィルター通過後でも取りこぼしが多い。');
+    if(surface==='turf'&&d===1200)return out('caution','G3芝1200m','強注意','16/22 = 72.7%','取りこぼしが多いため強い注意。ただし年齢固定除外との重なりを再集計するまで赤ロックにはしません。');
     if(surface==='turf'&&d===1400)return out('provisional','G3芝1400m','仮高信頼','9/9 = 100%','件数9なので仮扱い。');
     if(surface==='turf'&&d===1600)return out('go','G3芝1600m','高信頼候補','1着 15/16 = 93.8%','実運用の年齢除外後。2021〜2025年14/15＋2026年1/1。3歳マイルG3を除外すると1着側は高水準を維持。','2着レンジ：2026年 1/1 = 100%（N=1・判断不能）','基本なし');
     if(surface==='turf'&&d===1800)return out('go','G3芝1800m','高信頼候補','1着 28/29 = 96.6%','実運用の2歳除外後。2021〜2025年24/25＋2026年4/4。1着側は高水準を維持。','現行2着レンジ：2026年 2/4 = 50.0%。仮に最低1〜9人気まで安全幅を取ると4/4だが、N=4のため正式ルール未採用。','慎重');
