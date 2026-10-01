@@ -10,6 +10,7 @@ async function fillOddsGrid(page,s){
   for(const [h,o] of pairs) await page.fill(`#oddsGrid input[data-horse="${h}"]`,o);
 }
 const A='1=2 2=3 3=4 4=5 5=8 6=12 7=20 8=30 9=50 10=80 11=100 12=120';
+const PATTERN_GO='1=3.8 2=6.2 3=7.0 4=8.5 5=12.4 6=14.9 7=21.1 8=33.9 9=41.7 10=68.2 11=79.3 12=88.5';
 const B='1=3 2=4 3=5 4=6 5=7 6=8 7=9 8=10 9=12 10=18 11=25 12=35 13=50 14=70 15=90 16=120';
 const C='1=5.6 2=6.5 3=7.7 4=8.7 5=11.8 6=13.6 7=17.4 8=18.4 9=22 10=23.6 11=26.8 12=27.2 13=27.6';
 const D='1=5 2=6 3=7 4=8 5=9 6=10 7=11 8=12 9=13 10=14 11=15 12=16 13=17 14=18 15=19 16=20 17=21 18=22';
@@ -189,12 +190,12 @@ async function run(browserType,label){
   assert((await page.textContent('#oddsPreview')).includes('1人気：1番 2.0倍'),label+' 同一オッズ順位1');
   assert((await page.textContent('#oddsPreview')).includes('2人気：2番 2.0倍'),label+' 同一オッズ順位2');
 
-  await fillOddsGrid(page,A);
+  await fillOddsGrid(page,PATTERN_GO);
   await page.fill('#oddsGrid input[data-horse="12"]','');
   await page.click('#judge');
   await page.waitForTimeout(50);
   assert((await page.textContent('#msg')).includes('未入力 1頭'),label+' 全頭入力必須');
-  await page.fill('#oddsGrid input[data-horse="12"]','120');
+  await page.fill('#oddsGrid input[data-horse="12"]','88.5');
 
   await page.fill('#axisHorseNo','13');
   await page.waitForTimeout(50);
@@ -210,29 +211,32 @@ async function run(browserType,label){
   assert((await page.textContent('#structure')).startsWith('A：'),label+' A表示');
   assert((await page.textContent('#lock')).includes('判定プレビュー'),label+' 購入前プレビュー');
   assert((await page.textContent('#planSummary')).includes('購入判断：未確定'),label+' 購入判断前表示');
+  const patternText=await page.textContent('#marketPatternBox');
+  assert(patternText.includes('A・明確')&&patternText.includes('馬連適性')&&patternText.includes('候補'),label+' 1着2着とも明確な型 '+patternText);
   assert(db.getPost()===null,label+' 判定を見るだけでは保存しない');
 
   // 判定を見た後で購入判断
   await page.fill('#axisHorseNo','1');
   await page.selectOption('#betDecision','buy');
+  await page.selectOption('#betType','quinella');
   await page.fill('#plannedStake','1000');
   await page.fill('#opponents','9');
   await page.waitForTimeout(50);
-  assert((await page.textContent('#opponentBrake')).includes('50.0倍'),label+' 40倍ブレーキ');
+  assert((await page.textContent('#opponentBrake')).includes('40.0倍以上'),label+' 40倍ブレーキ');
   await page.fill('#opponents','2 3');
   assert((await page.textContent('#wallSummary')).includes('最大の壁'),label+' 壁サマリー表示');
   assert((await page.textContent('#wallList')).includes('1→2'),label+' 壁一覧表示');
-  assert((await page.textContent('#axisRisk')).includes('人気馬軸：特別な警告なし'),label+' 軸警告UI');
-  assert((await page.textContent('#secondRangeBox')).includes('第二レンジ'),label+' 第二レンジUI');
-  assert((await page.textContent('#secondExplain')).includes('買い目を増やす指示ではなく'),label+' わかりやすい解説UI');
-  assert((await page.textContent('#practicalBox')).length>10,label+' 実戦向け解説UI');
+  assert((await page.textContent('#axisRisk')).includes('市場警告なし'),label+' 軸警告UI');
+  assert((await page.textContent('#secondPlaceBox')).includes('2着レンジ'),label+' 2着レンジUI');
+  assert((await page.textContent('#marketPatternBox')).includes('条件 × オッズ構造'),label+' 型判定UI');
+  assert((await page.textContent('#strategyBox')).length>10,label+' 実戦戦略UI');
 
   await page.click('#savePlan');
   await page.waitForTimeout(120);
 
   const post=db.getPost();
   assert(post&&post.structure_code==='A',label+' 保存');
-  assert(post.odds_snapshot.length===12&&post.odds_snapshot[0].horse_no===1&&post.odds_snapshot[0].popularity===1&&post.odds_snapshot[0].win_odds===2,label+' 入力時点の馬番人気オッズ保存');
+  assert(post.odds_snapshot.length===12&&post.odds_snapshot[0].horse_no===1&&post.odds_snapshot[0].popularity===1&&post.odds_snapshot[0].win_odds===3.8,label+' 入力時点の馬番人気オッズ保存');
   assert(post.context?.decision_snapshot?.app_version==='2.39'&&post.context?.decision_snapshot?.market_pattern_key,label+' v2.39型ログ保存 '+JSON.stringify(post.context?.decision_snapshot));
   assert(post.prior_axis_popularity===1,label+' 軸人気自動保存');
   assert(post.quinella_opponents.length===2,label+' 相手保存');
