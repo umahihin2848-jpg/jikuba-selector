@@ -273,8 +273,9 @@ async function live(){
   assert(resp&&resp.ok(),'live page HTTP');
   const title=await page.title(),body=await page.locator('body').innerText();
   assert(title.startsWith('レース戦略 v2.'),'live title '+title);
-  assert(body.includes('レース戦略')&&body.includes('条件 × オッズ構造'),'live key UI');
-  assert(await page.locator('#grade option[value="L"]').count()===1&&await page.locator('#grade option[value="OP"]').count()===1,'live L/OP options');
+  assert(body.includes('レース戦略'),'live app shell');
+  // GitHub PagesのデプロイはこのCIと並列で走るため、最新コミット固有UIはローカルChromium/WebKitで検証する。
+  // liveではCDN伝播に左右されない「公開ページが正常に応答し、アプリ本体が描画される」ことだけを確認する。
   await context.close();await browser.close();
   console.log('PASS WebKit live GitHub Pages');
 }
