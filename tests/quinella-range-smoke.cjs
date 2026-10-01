@@ -249,8 +249,8 @@ async function run(browserType,label){
 
   const row=db.rows[0];
   await page.fill('#f'+row.id,'1'); await page.fill('#s'+row.id,'3');
-  await page.fill('#wk'+row.id,'1000'); await page.fill('#wp'+row.id,'0');
-  await page.fill('#qk'+row.id,'0'); await page.fill('#qp'+row.id,'0');
+  await page.fill('#wk'+row.id,'0'); await page.fill('#wp'+row.id,'0');
+  await page.fill('#qk'+row.id,'1000'); await page.fill('#qp'+row.id,'0');
   await page.getByRole('button',{name:'結果保存'}).first().click();
   await page.waitForTimeout(120);
   const histText=await page.textContent('#history');
