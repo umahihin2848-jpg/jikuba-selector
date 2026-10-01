@@ -92,6 +92,7 @@ async function run(browserType,label){
   assert(!bodyText.includes('15分前'),label+' 15分前の旧表示が残っている');
   assert(!bodyText.includes('T-15'),label+' T-15の旧表示が残っている');
   assert(!bodyText.includes('v2.38'),label+' v2.38の旧表記が残っている');
+  assert(bodyText.includes('2021〜2026 型再分類')&&bodyText.includes('構造A/Aだけで買う'),label+' 型再分類UI');
   assert(await page.locator('#grade option[value="L"]').count()===1&&await page.locator('#grade option[value="OP"]').count()===1,label+' L/OP選択肢');
   const opl=await page.evaluate(s=>{
     const x=compute(s,'OP','older',1800);
@@ -107,6 +108,17 @@ async function run(browserType,label){
   assert(opl.cpLevel==='provisional'&&opl.cpTitle.includes('OP 型検証モード'),label+' OP型検証モード '+JSON.stringify(opl));
   assert(opl.cpH==='stop'&&opl.mpH==='stop',label+' OP/Lハンデ固定除外 '+JSON.stringify(opl));
   assert(opl.ex&&opl.exCode==='opl_3yo_shortmile',label+' 3歳1600m以下L固定除外 '+JSON.stringify(opl));
+  const historicalGate=await page.evaluate(s=>{
+    const x=compute(s,'G3','older',1200);
+    const shortR={context:{grade:'G3',surface:'turf',age:'older',weight:'fixed',distance:1200},runners:x.runners,structure:x.structure};
+    const shortMp=marketPatternAnalysis(shortR,x.firstRange,x.secondPlaceRange,x.firstRangeSpread,x.v229Filter);
+    const y=compute(s,'OP','older',1800);
+    const opR={context:{grade:'OP',surface:'turf',age:'older',weight:'fixed',distance:1800},runners:y.runners,structure:y.structure};
+    const opMp=marketPatternAnalysis(opR,y.firstRange,y.secondPlaceRange,y.firstRangeSpread,y.v229Filter);
+    return{shortLevel:shortMp.level,shortTitle:shortMp.title,opQ:opMp.quinellaFit,opClass:opMp.historyClass};
+  },PATTERN_GO);
+  assert(historicalGate.shortLevel==='stop'&&historicalGate.shortTitle.includes('G3芝1400m以下'),label+' G3芝短距離却下 '+JSON.stringify(historicalGate));
+  assert(historicalGate.opQ!=='候補'&&historicalGate.opClass==='検証継続',label+' OP/Lは前向き検証 '+JSON.stringify(historicalGate));
   const codes=await page.evaluate(([a,b,c,d])=>[compute(a).structure.code,compute(b).structure.code,compute(c).structure.code,compute(d).structure.code],[A,B,C,D]);
   assert(JSON.stringify(codes)==='["A","B","C","D"]',label+' A/B/C/D分類 '+JSON.stringify(codes));
   const riskA=await page.evaluate(s=>compute(s).axisRisk.level,A);
