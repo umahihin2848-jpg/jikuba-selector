@@ -1,0 +1,126 @@
+{
+  "version": "v2.40-handicap-second-range-checkpoint",
+  "scope": "JRA flat OP/L handicap races; 2023-2024; final win odds; current v2.40 boundary logic",
+  "high_conf_rule": {
+    "first_boundary_required": true,
+    "first_range_end_min": 5,
+    "first_range_end_max": 8,
+    "neff_ratio_excluded_inclusive": [
+      0.85,
+      0.95
+    ]
+  },
+  "validation": {
+    "expected_prior_first_result": "36/39",
+    "reproduced_first_result": "36/39",
+    "status": "matched"
+  },
+  "years": {
+    "2023": {
+      "handicap_total": 37,
+      "high_conf_n": 20,
+      "first_hit": 20,
+      "second_hit": 16,
+      "both_hit": 16
+    },
+    "2024": {
+      "handicap_total": 38,
+      "high_conf_n": 19,
+      "first_hit": 16,
+      "second_hit": 16,
+      "both_hit": 14
+    }
+  },
+  "combined": {
+    "handicap_total": 75,
+    "high_conf_n": 39,
+    "first_hit": 36,
+    "first_rate_pct": 92.3,
+    "second_hit": 32,
+    "second_rate_pct": 82.1,
+    "both_hit": 30,
+    "both_rate_pct": 76.9
+  },
+  "by_second_range_end": {
+    "5": {
+      "n": 2,
+      "first_hit": 2,
+      "second_hit": 1,
+      "both_hit": 1,
+      "both_rate_pct": 50
+    },
+    "6": {
+      "n": 4,
+      "first_hit": 4,
+      "second_hit": 3,
+      "both_hit": 3,
+      "both_rate_pct": 75
+    },
+    "7": {
+      "n": 8,
+      "first_hit": 7,
+      "second_hit": 5,
+      "both_hit": 4,
+      "both_rate_pct": 50
+    },
+    "8": {
+      "n": 11,
+      "first_hit": 11,
+      "second_hit": 10,
+      "both_hit": 10,
+      "both_rate_pct": 90.9
+    },
+    "9": {
+      "n": 5,
+      "first_hit": 3,
+      "second_hit": 4,
+      "both_hit": 3,
+      "both_rate_pct": 60
+    },
+    "10": {
+      "n": 8,
+      "first_hit": 8,
+      "second_hit": 8,
+      "both_hit": 8,
+      "both_rate_pct": 100
+    },
+    "12": {
+      "n": 1,
+      "first_hit": 1,
+      "second_hit": 1,
+      "both_hit": 1,
+      "both_rate_pct": 100
+    }
+  },
+  "candidate_patterns": {
+    "second_end_8_or_10": {
+      "n": 19,
+      "both_hit": 18,
+      "both_rate_pct": 94.7,
+      "note": "candidate only; requires more years"
+    },
+    "dirt_second_end_8_or_10": {
+      "n": 10,
+      "both_hit": 10,
+      "both_rate_pct": 100,
+      "note": "small N; candidate only"
+    }
+  },
+  "surface": {
+    "turf": {
+      "n": 21,
+      "first_hit": 20,
+      "second_hit": 15,
+      "both_hit": 14,
+      "both_rate_pct": 66.7
+    },
+    "dirt": {
+      "n": 18,
+      "first_hit": 16,
+      "second_hit": 17,
+      "both_hit": 16,
+      "both_rate_pct": 88.9
+    }
+  },
+  "conclusion": "Do not promote to formal quinella rule yet. Continue other years. Current evidence suggests second-range end 8 or 10 is much stronger than narrow 5-7 or end 9, especially on dirt."
+}
