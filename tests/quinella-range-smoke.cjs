@@ -103,6 +103,8 @@ async function run(browserType,label){
   assert(await page.locator('#tierForwardDashboard').count()===1,label+' 4段階前向き成績UIシェル');
   assert(await page.locator('#hardLockAudit').count()===1,label+' 固定ロック監査UIシェル');
   assert(await page.locator('#eligibilityGuard').count()===1,label+' 入力時対象判定ガードUIシェル');
+  const inputOrder=await page.evaluate(()=>{const pos=id=>{const el=document.getElementById(id);return el?Array.from(document.querySelectorAll('#inputCard *')).indexOf(el):-1};return{grade:pos('grade'),surface:pos('surface'),age:pos('age'),weight:pos('weight'),distance:pos('distance'),runner:pos('runnerCountSelect'),judge:pos('judge')}}); 
+  assert(inputOrder.grade>=0&&inputOrder.grade<inputOrder.runner&&inputOrder.distance<inputOrder.runner&&inputOrder.runner<inputOrder.judge,label+' レース条件を上部入力フローへ移動 '+JSON.stringify(inputOrder));
   await page.selectOption('#grade','G3');await page.selectOption('#age','3');await page.selectOption('#weight','fixed');await page.fill('#distance','1600');await page.waitForTimeout(20);
   assert((await page.textContent('#eligibilityGuard')).includes('購入対象外'),label+' 3歳1600m以下G3を入力時に赤ロック');
   assert(await page.locator('#betDecision').isDisabled()&&await page.locator('#betType').isDisabled()&&await page.locator('#plannedStake').isDisabled()&&await page.locator('#opponents').isDisabled(),label+' 対象外は購入操作を無効化');
