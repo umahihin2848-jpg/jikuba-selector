@@ -181,6 +181,20 @@ async function run(browserType,label){
   });
   assert(tenFullField.fullCount===6&&tenFullField.fullTotal===6&&tenFullField.fullComplete&&tenFullField.fast==='fast'&&tenFullField.slow==='slow',label+' テン1Fは全頭母集団で相対評価 '+JSON.stringify(tenFullField));
   assert(tenFullField.incompleteCount===5&&!tenFullField.incompleteComplete&&tenFullField.incompleteMap===0,label+' 全頭未入力ならテン補正しない '+JSON.stringify(tenFullField));
+  const deductionCheck=await page.evaluate(()=>{
+    const favorable=autoWinEvAdjustment('先行','内',.20,'inner_front','none','none',1,'');
+    const crowded=autoWinEvAdjustment('先行','内',.60,'neutral','none','none',0,'');
+    const adverse=autoWinEvAdjustment('先行','内',.60,'outer_close','mild','mild',-1,'');
+    const closerSlow=autoWinEvAdjustment('差し','中',.30,'neutral','none','none',-1,'');
+    const strongRisks=autoWinEvAdjustment('差し','中',.30,'neutral','strong','strong',0,'');
+    return{favorable,crowded,adverse,closerSlow,strongRisks};
+  });
+  assert(deductionCheck.favorable.score===0&&deductionCheck.favorable.reasons.includes('減点なし'),label+' 好材料では加点しない '+JSON.stringify(deductionCheck));
+  assert(deductionCheck.crowded.score===-2,label+' 先行馬過多の逃げ先行型は−2 '+JSON.stringify(deductionCheck));
+  assert(deductionCheck.adverse.score<=-6&&deductionCheck.adverse.reasons.some(x=>x.includes('テン1F')),label+' マイナス要素を積み上げて削る '+JSON.stringify(deductionCheck));
+  assert(deductionCheck.closerSlow.score===0,label+' 差し馬のテン遅さだけでは減点しない '+JSON.stringify(deductionCheck));
+  assert(deductionCheck.strongRisks.score===-4,label+' 出遅れ強＋折り合い強は−4 '+JSON.stringify(deductionCheck));
+  assert(winEvMultiplier(2)===1&&winEvMultiplier(0)===1&&winEvMultiplier(-2)<1,label+' 加点倍率を廃止し減点だけ確率に反映');
   const codes=await page.evaluate(([a,b,c,d])=>[compute(a).structure.code,compute(b).structure.code,compute(c).structure.code,compute(d).structure.code],[A,B,C,D]);
   assert(JSON.stringify(codes)==='["A","B","C","D"]',label+' A/B/C/D分類 '+JSON.stringify(codes));
   const riskA=await page.evaluate(s=>compute(s).axisRisk.level,A);
@@ -294,6 +308,7 @@ async function run(browserType,label){
   const heroText=await page.textContent('#ticketDecisionHero');
   assert(heroText.includes('単勝判定')&&heroText.includes('単勝候補'),label+' 最上部に単勝判定を大型表示 '+heroText);
   assert(heroText.includes('馬連判定')&&heroText.includes('単勝のみ優先'),label+' 最上部に馬連判定を大型表示 '+heroText);
+  assert((await page.textContent('#winEvBox')).includes('全馬0点スタート')&&(await page.textContent('#winEvBox')).includes('0〜−1は残す'),label+' 単勝候補UIを減点方式へ変更');
   const priorityText=await page.textContent('#betPriority');
   assert(priorityText.includes('主戦・単勝')&&priorityText.includes('単勝候補'),label+' 単勝を主戦表示 '+priorityText);
   assert(priorityText.includes('追加・馬連')&&priorityText.includes('単勝のみ優先'),label+' 馬連は追加条件未達を明示 '+priorityText);
