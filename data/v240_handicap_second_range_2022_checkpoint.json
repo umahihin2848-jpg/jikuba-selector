@@ -1,0 +1,23 @@
+{
+  "version": "v2.40-handicap-second-range-2022-batch1",
+  "scope": "JRA flat OP/L handicap races, 2022 reconstruction",
+  "completed": 5,
+  "planned_total": 35,
+  "rule": "current v2.40 boundary logic; high-confidence = first boundary exists, first_end 5-8, first-range Neff ratio outside 0.85-0.95",
+  "rows": [
+    {"race":"仁川S","surface":"dirt","distance":2000,"first_end":7,"second_end":9,"neff_ratio":0.703,"first_pop":3,"second_pop":2,"high_confidence":true,"first_hit":true,"second_hit":true,"both_hit":true},
+    {"race":"大阪城S","surface":"turf","distance":1800,"first_end":6,"second_end":6,"neff_ratio":0.785,"first_pop":5,"second_pop":1,"high_confidence":true,"first_hit":true,"second_hit":true,"both_hit":true},
+    {"race":"コーラルS","surface":"dirt","distance":1400,"first_end":5,"second_end":10,"neff_ratio":0.839,"first_pop":4,"second_pop":16,"high_confidence":true,"first_hit":true,"second_hit":false,"both_hit":false},
+    {"race":"春雷S","surface":"turf","distance":1200,"first_end":10,"second_end":12,"neff_ratio":null,"first_pop":1,"second_pop":2,"high_confidence":false,"first_hit":true,"second_hit":true,"both_hit":true},
+    {"race":"福島民報杯","surface":"turf","distance":2000,"first_end":10,"second_end":12,"neff_ratio":null,"first_pop":5,"second_pop":2,"high_confidence":false,"first_hit":true,"second_hit":true,"both_hit":true}
+  ],
+  "batch_summary": {
+    "high_confidence_n": 3,
+    "first_hit": 3,
+    "second_hit": 2,
+    "both_hit": 2,
+    "dirt_second_end_8_or_10_n": 1,
+    "dirt_second_end_8_or_10_both_hit": 0
+  },
+  "note": "Batch checkpoint only. Do not infer final 2022 rates until all 35 handicap OP/L races are reconstructed."
+}
