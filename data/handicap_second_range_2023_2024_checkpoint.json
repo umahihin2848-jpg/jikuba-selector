@@ -1,5 +1,5 @@
 {
-  "version": "v2.40-handicap-second-range-checkpoint-2025-early",
+  "version": "v2.40-handicap-second-range-checkpoint-2021-2025-dirt-extension",
   "scope": "JRA flat OP/L handicap races; 2023-2024 complete + 2025 through 2025-02-10; final win odds; current v2.40 boundary logic",
   "high_conf_rule": {
     "first_boundary_required": true,
@@ -108,10 +108,10 @@
       "note": "weakened by 2025 turf sprint failure; do not use alone"
     },
     "dirt_second_end_8_or_10": {
-      "n": 10,
-      "both_hit": 10,
-      "both_rate_pct": 100,
-      "note": "unchanged after 2025 early check; still small N and provisional"
+      "n": 14,
+      "both_hit": 12,
+      "both_rate_pct": 85.7,
+      "note": "Extended 2021-2025 validation failed the 90% target. Do not auto-promote quinella."
     }
   },
   "surface": {
@@ -130,7 +130,7 @@
       "both_rate_pct": 89.5
     }
   },
-  "conclusion": "Second-range end 8/10 alone is not sufficient after a 2025 turf-sprint failure. Turf handicap races remain weak on both-hit. Dirt is much stronger; dirt + second-range end 8 or 10 is 10/10 in 2023-2024 but still small-N and must remain provisional until more years are reconstructed.",
+  "conclusion": "Extended dirt validation across 2021-2025 rejects automatic quinella promotion based only on high-confidence + second-range end 8/10: 12/14=85.7%. End=8 remains 7/7 but N=7; end=10 falls to 5/7. A post-hoc end=10 + Neff<=0.80 split is 12/12 combined with end=8, but is exploratory and must be tested on unseen data before any production rule change.",
   "out_of_sample_2025_early": [
     {
       "race_id": "202507010211",
@@ -171,5 +171,106 @@
       "second_hit": true,
       "both_hit": true
     }
-  ]
+  ],
+  "extended_dirt_validation_2021_2025": {
+    "scope": "JRA flat OP/L handicap races on dirt; current v2.40 high-confidence rule; final win odds",
+    "high_conf_all": {
+      "n": 39,
+      "both_hit": 30,
+      "both_rate_pct": 76.9,
+      "by_year": {
+        "2021": {
+          "n": 6,
+          "both_hit": 4,
+          "both_rate_pct": 66.7
+        },
+        "2022": {
+          "n": 7,
+          "both_hit": 6,
+          "both_rate_pct": 85.7
+        },
+        "2023": {
+          "n": 9,
+          "both_hit": 9,
+          "both_rate_pct": 100
+        },
+        "2024": {
+          "n": 9,
+          "both_hit": 7,
+          "both_rate_pct": 77.8
+        },
+        "2025": {
+          "n": 8,
+          "both_hit": 4,
+          "both_rate_pct": 50
+        }
+      }
+    },
+    "second_end_8_or_10": {
+      "n": 14,
+      "both_hit": 12,
+      "both_rate_pct": 85.7,
+      "by_year": {
+        "2021": {
+          "n": 2,
+          "both_hit": 2
+        },
+        "2022": {
+          "n": 1,
+          "both_hit": 0
+        },
+        "2023": {
+          "n": 6,
+          "both_hit": 6
+        },
+        "2024": {
+          "n": 4,
+          "both_hit": 4
+        },
+        "2025": {
+          "n": 1,
+          "both_hit": 0
+        }
+      },
+      "by_second_end": {
+        "8": {
+          "n": 7,
+          "both_hit": 7,
+          "both_rate_pct": 100
+        },
+        "10": {
+          "n": 7,
+          "both_hit": 5,
+          "both_rate_pct": 71.4
+        }
+      },
+      "failures": [
+        {
+          "year": 2022,
+          "race_id": "202209020311",
+          "second_end": 10,
+          "neff_ratio": 0.839,
+          "first_pop": 4,
+          "second_pop": 16
+        },
+        {
+          "year": 2025,
+          "race_id": "202504020807",
+          "second_end": 10,
+          "neff_ratio": 0.832,
+          "first_pop": 1,
+          "second_pop": 11
+        }
+      ],
+      "production_decision": "reject_auto_promotion"
+    },
+    "exploratory_post_hoc": {
+      "rule": "second_end == 8 OR (second_end == 10 AND neff_ratio <= 0.80)",
+      "n": 12,
+      "both_hit": 12,
+      "both_rate_pct": 100,
+      "status": "exploratory_only",
+      "warning": "Threshold was discovered after inspecting these results. Do not promote to production until validated on unseen data."
+    }
+  }
 }
