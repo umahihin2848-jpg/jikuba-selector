@@ -919,7 +919,7 @@ function decisionPipelineAnalysis(r,fr,pr,spread,v229,sd){
       :four.code==='conditional'
         ?'条件付き：注意項目 '+riskSignals.length+'個。弱点を確認して購入判断を残します。'
         :'強候補：主要条件を通過し、注意項目は'+riskSignals.length+'個です。';
-  return{ruleVersion:'v2.40-balance-2',policy:FORMAL_PROMOTION_POLICY,hardLocked,hardLockCode:fixed.code||'',hardLockReason:fixed.reason||'',history,evidence:e,firstGrade:fg,secondGrade:sg,winFit:winPass?'candidate':hardLocked?'hard_reject':'observe',quinellaFit:pairPass?'candidate':hardLocked?'hard_reject':'observe',finalCode,finalLabel,fourLevelCode:four.code,fourLevelLabel:four.label,riskSignals,riskCount:riskSignals.length,summary,stages};
+  return{ruleVersion:'v2.40-balance-3',policy:FORMAL_PROMOTION_POLICY,hardLocked,hardLockCode:fixed.code||'',hardLockReason:fixed.reason||'',history,evidence:e,firstGrade:fg,secondGrade:sg,winFit:winPass?'candidate':hardLocked?'hard_reject':'observe',quinellaFit:pairPass?'candidate':hardLocked?'hard_reject':'observe',finalCode,finalLabel,fourLevelCode:four.code,fourLevelLabel:four.label,riskSignals,riskCount:riskSignals.length,summary,stages};
 }
 function applyPipelineToStrategy(base,pipe,fr){
   if(pipe.fourLevelCode==='hard_lock')return{level:'stop',title:'固定ロック',badge:'買わない条件',main:'購入不可',quinella:'購入不可',first:'1〜'+Number(fr?.end||0)+'人気',action:'次のレースへ',next:pipe.summary};
@@ -1454,7 +1454,7 @@ function renderAvailabilityBalance(h){
 }
 function forwardTierSnapshot(r){
   const s=r?.context?.decision_snapshot||null;
-  if(!s||!s.four_level_code||!String(s.decision_pipeline_version||'').includes('v2.40-balance-2'))return null;
+  if(!s||!s.four_level_code||!String(s.decision_pipeline_version||'').startsWith('v2.40-balance-'))return null;
   return s;
 }
 function tierPerformanceRows(rows){
