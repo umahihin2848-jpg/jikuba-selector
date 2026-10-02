@@ -194,7 +194,8 @@ async function run(browserType,label){
   assert(deductionCheck.adverse.score<=-6&&deductionCheck.adverse.reasons.some(x=>x.includes('テン1F')),label+' マイナス要素を積み上げて削る '+JSON.stringify(deductionCheck));
   assert(deductionCheck.closerSlow.score===0,label+' 差し馬のテン遅さだけでは減点しない '+JSON.stringify(deductionCheck));
   assert(deductionCheck.strongRisks.score===-4,label+' 出遅れ強＋折り合い強は−4 '+JSON.stringify(deductionCheck));
-  assert(winEvMultiplier(2)===1&&winEvMultiplier(0)===1&&winEvMultiplier(-2)<1,label+' 加点倍率を廃止し減点だけ確率に反映');
+  const multiplierCheck=await page.evaluate(()=>({positive:winEvMultiplier(2),zero:winEvMultiplier(0),minus2:winEvMultiplier(-2)}));
+  assert(multiplierCheck.positive===1&&multiplierCheck.zero===1&&multiplierCheck.minus2<1,label+' 加点倍率を廃止し減点だけ確率に反映 '+JSON.stringify(multiplierCheck));
   const codes=await page.evaluate(([a,b,c,d])=>[compute(a).structure.code,compute(b).structure.code,compute(c).structure.code,compute(d).structure.code],[A,B,C,D]);
   assert(JSON.stringify(codes)==='["A","B","C","D"]',label+' A/B/C/D分類 '+JSON.stringify(codes));
   const riskA=await page.evaluate(s=>compute(s).axisRisk.level,A);
