@@ -1,0 +1,22 @@
+{
+  "version": "v2.40-handicap-second-range-2022-rebuild",
+  "scope": "JRA flat OP/L handicap races only",
+  "status": "in_progress",
+  "completed_races": 3,
+  "target_handicap_races_2022": 35,
+  "rule": "current v2.40 boundary logic; high confidence = first boundary 5-8 and Neff ratio outside 0.85-0.95 inclusive",
+  "races": [
+    {"date":"2022-01-05","race":"万葉S","race_id":"202207010110","surface":"turf","distance":3000,"first_end":4,"second_end":10,"neff_ratio":0.747,"high_confidence":false,"first_pop":1,"second_pop":3,"first_hit":true,"second_hit":true,"both_hit":true},
+    {"date":"2022-02-12","race":"洛陽S","race_id":"202209010111","surface":"turf","distance":1600,"first_end":5,"second_end":5,"neff_ratio":0.949,"high_confidence":false,"first_pop":2,"second_pop":4,"first_hit":true,"second_hit":true,"both_hit":true},
+    {"date":"2022-03-06","race":"大阪城S","race_id":"202209010811","surface":"turf","distance":1800,"first_end":6,"second_end":6,"neff_ratio":0.785,"high_confidence":true,"first_pop":5,"second_pop":1,"first_hit":true,"second_hit":true,"both_hit":true}
+  ],
+  "checkpoint_summary": {
+    "processed":3,
+    "high_confidence_n":1,
+    "high_confidence_first_hit":1,
+    "high_confidence_second_hit":1,
+    "high_confidence_both_hit":1,
+    "dirt_second_end_8_or_10_n":0
+  },
+  "note":"Partial checkpoint. Do not use as final 2022 aggregate. Remaining handicap OP/L races are being reconstructed in small batches."
+}
