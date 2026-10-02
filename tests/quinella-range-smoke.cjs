@@ -96,6 +96,8 @@ async function run(browserType,label){
   assert(fullText.includes('2021〜2026 型再分類')&&fullText.includes('構造A/Aだけで買う'),label+' 型再分類UI');
   assert(bodyText.includes('基本は単勝。馬連は条件が揃ったレースだけ追加する。'),label+' 単勝主戦メッセージ');
   assert(await page.locator('#betPriority').count()===1,label+' 単勝主戦・馬連追加UIシェル');
+  assert(await page.locator('#ticketDecisionHero').count()===1,label+' 単勝・馬連大型判定UIシェル');
+  assert(await page.locator('#evTenFieldGrid').count()===1,label+' 全頭テン1F入力UIシェル');
   assert(await page.locator('#decisionPipelineBox').count()===1,label+' 7段階判定UIシェル');
   assert(await page.locator('#availabilityDashboard').count()===1,label+' 買えるレース数UIシェル');
   assert(await page.locator('#tierForwardDashboard').count()===1,label+' 4段階前向き成績UIシェル');
@@ -168,6 +170,17 @@ async function run(browserType,label){
   assert(pipelineCheck.noisyRisk>=3&&pipelineCheck.noisyFour==='recommend_skip',label+' 注意3個以上で見送り推奨 '+JSON.stringify(pipelineCheck));
   assert(!pipelineCheck.neffLocked&&pipelineCheck.neffLevel==='caution',label+' Neff注意帯は非ロック '+JSON.stringify(pipelineCheck));
   assert(!pipelineCheck.broadLocked,label+' 広いレンジも推奨見送り止まり '+JSON.stringify(pipelineCheck));
+  const tenFullField=await page.evaluate(()=>{
+    const field=Array.from({length:6},(_,i)=>({horse_no:i+1}));
+    const horses={};
+    [10.0,10.2,10.4,10.6,10.8,11.0].forEach((v,i)=>horses[String(i+1)]={ten1f:v,tenSource:'prev'});
+    const full=ten1FRelative(field,horses);
+    const partial=JSON.parse(JSON.stringify(horses));partial['6'].tenSource='';
+    const incomplete=ten1FRelative(field,partial);
+    return{fullCount:full.count,fullTotal:full.total,fullComplete:full.complete,fast:full.map['1']?.band,slow:full.map['6']?.band,incompleteCount:incomplete.count,incompleteComplete:incomplete.complete,incompleteMap:Object.keys(incomplete.map).length};
+  });
+  assert(tenFullField.fullCount===6&&tenFullField.fullTotal===6&&tenFullField.fullComplete&&tenFullField.fast==='fast'&&tenFullField.slow==='slow',label+' テン1Fは全頭母集団で相対評価 '+JSON.stringify(tenFullField));
+  assert(tenFullField.incompleteCount===5&&!tenFullField.incompleteComplete&&tenFullField.incompleteMap===0,label+' 全頭未入力ならテン補正しない '+JSON.stringify(tenFullField));
   const codes=await page.evaluate(([a,b,c,d])=>[compute(a).structure.code,compute(b).structure.code,compute(c).structure.code,compute(d).structure.code],[A,B,C,D]);
   assert(JSON.stringify(codes)==='["A","B","C","D"]',label+' A/B/C/D分類 '+JSON.stringify(codes));
   const riskA=await page.evaluate(s=>compute(s).axisRisk.level,A);
@@ -278,6 +291,9 @@ async function run(browserType,label){
   assert(pipelineText.includes('強候補')&&pipelineText.includes('N≥30')&&pipelineText.includes('馬連は条件付き'),label+' 7段階＋4段階の強候補判定 '+pipelineText);
   assert(pipelineText.includes('注意点')&&pipelineText.includes('個'),label+' 注意項目表示 '+pipelineText);
   assert((await page.textContent('#strategyBox')).includes('強候補')&&(await page.textContent('#strategyBox')).includes('条件付き'),label+' 戦略も強候補＋条件付きへ同期');
+  const heroText=await page.textContent('#ticketDecisionHero');
+  assert(heroText.includes('単勝判定')&&heroText.includes('単勝候補'),label+' 最上部に単勝判定を大型表示 '+heroText);
+  assert(heroText.includes('馬連判定')&&heroText.includes('単勝のみ優先'),label+' 最上部に馬連判定を大型表示 '+heroText);
   const priorityText=await page.textContent('#betPriority');
   assert(priorityText.includes('主戦・単勝')&&priorityText.includes('単勝候補'),label+' 単勝を主戦表示 '+priorityText);
   assert(priorityText.includes('追加・馬連')&&priorityText.includes('単勝のみ優先'),label+' 馬連は追加条件未達を明示 '+priorityText);
