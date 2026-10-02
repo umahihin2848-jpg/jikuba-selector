@@ -113,7 +113,7 @@ async function run(browserType,label){
     return{cpLevel:cp.level,cpTitle:cp.title,mpStatus:mp.status,cpH:cpH.level,mpH:mpH.level,ex:ex.excluded,exCode:ex.code};
   },A);
   assert(opl.cpLevel==='provisional'&&opl.cpTitle.includes('OP 型検証モード'),label+' OP型検証モード '+JSON.stringify(opl));
-  assert(opl.cpH==='stop'&&opl.mpH==='stop',label+' OP/Lハンデ固定除外 '+JSON.stringify(opl));
+  assert(opl.cpH!=='stop'&&opl.mpH!=='stop',label+' OP/Lハンデは条件付き・非ロック '+JSON.stringify(opl));
   assert(opl.ex&&opl.exCode==='opl_3yo_shortmile',label+' 3歳1600m以下L固定除外 '+JSON.stringify(opl));
   const historicalGate=await page.evaluate(s=>{
     const x=compute(s,'G3','older',1200);
@@ -137,7 +137,7 @@ async function run(browserType,label){
     const y=compute(s,'OP','older',1800);
     const ro={context:{grade:'OP',surface:'turf',age:'older',weight:'fixed',distance:1800},runners:y.runners,structure:y.structure};
     const po=decisionPipelineAnalysis(ro,y.firstRange,y.secondPlaceRange,y.firstRangeSpread,y.v229Filter,y.selectionDecision);
-    const hard=fixedExclusionAnalysis({grade:'G1',surface:'turf',age:'older',weight:'handicap',distance:2400});
+    const handicap=fixedExclusionAnalysis({grade:'G1',surface:'turf',age:'older',weight:'handicap',distance:2400});
     const hp=decisionPipelineAnalysis({context:{grade:'G1',surface:'turf',age:'older',weight:'handicap',distance:2400},runners:x.runners,structure:x.structure},x.firstRange,x.secondPlaceRange,x.firstRangeSpread,x.v229Filter,x.selectionDecision);
     const neff=v229FilterAnalysis('G3','older',1800,{boundary:{}},{boundary:{},end:6},{ratio:.90});
     const broad=selectionDecisionAnalysis({targetEnd:8,end:8},{targetEnd:10,end:10});
@@ -147,12 +147,12 @@ async function run(browserType,label){
     const noisy=compute(broadOdds,'G3','older',1200);
     const nr={context:{grade:'G3',surface:'turf',age:'older',weight:'fixed',distance:1200},runners:noisy.runners,structure:noisy.structure};
     const np=decisionPipelineAnalysis(nr,noisy.firstRange,noisy.secondPlaceRange,noisy.firstRangeSpread,noisy.v229Filter,noisy.selectionDecision);
-    return{final:p.finalCode,label:p.finalLabel,four:p.fourLevelCode,risk:p.riskCount,win:p.winFit,q:p.quinellaFit,stages:p.stages.length,pairStage:p.stages.find(z=>z.id==='quinella')?.value,opFinal:po.finalCode,opFour:po.fourLevelCode,hard,hardPipe:hp.hardLocked,hardFour:hp.fourLevelCode,neffLocked:neff.locked,neffLevel:neff.level,broadLocked:broad.locked,g3Risk:zp.riskCount,g3Four:zp.fourLevelCode,noisyRisk:np.riskCount,noisyFour:np.fourLevelCode,noisySignals:np.riskSignals.map(x=>x.id)};
+    return{final:p.finalCode,label:p.finalLabel,four:p.fourLevelCode,risk:p.riskCount,win:p.winFit,q:p.quinellaFit,stages:p.stages.length,pairStage:p.stages.find(z=>z.id==='quinella')?.value,opFinal:po.finalCode,opFour:po.fourLevelCode,handicap,handicapPipe:hp.hardLocked,handicapFour:hp.fourLevelCode,handicapSignals:hp.riskSignals.map(x=>x.id),neffLocked:neff.locked,neffLevel:neff.level,broadLocked:broad.locked,g3Risk:zp.riskCount,g3Four:zp.fourLevelCode,noisyRisk:np.riskCount,noisyFour:np.fourLevelCode,noisySignals:np.riskSignals.map(x=>x.id)};
   },[PATTERN_GO,BROAD_CAUTION]);
   assert(pipelineCheck.final==='win'&&pipelineCheck.label.includes('単勝候補')&&pipelineCheck.win==='candidate'&&pipelineCheck.four==='strong'&&pipelineCheck.risk<=1,label+' G1中長距離は4段階で強候補 '+JSON.stringify(pipelineCheck));
   assert(pipelineCheck.q!=='candidate'&&pipelineCheck.pairStage.includes('条件付き'),label+' G1中長距離の馬連は89.4%で条件付き '+JSON.stringify(pipelineCheck));
   assert(pipelineCheck.stages===7&&pipelineCheck.opFinal==='conditional'&&pipelineCheck.opFour==='conditional',label+' OP/Lは条件付き・非ロック '+JSON.stringify(pipelineCheck));
-  assert(pipelineCheck.hard.excluded&&pipelineCheck.hard.code==='handicap'&&pipelineCheck.hardPipe&&pipelineCheck.hardFour==='hard_lock',label+' ハンデは固定ロック '+JSON.stringify(pipelineCheck));
+  assert(!pipelineCheck.handicap.excluded&&!pipelineCheck.handicapPipe&&pipelineCheck.handicapFour==='conditional'&&pipelineCheck.handicapSignals.includes('handicap_under_validation'),label+' ハンデは赤ロック解除・条件付き上限 '+JSON.stringify(pipelineCheck));
   assert(pipelineCheck.noisyRisk>=3&&pipelineCheck.noisyFour==='recommend_skip',label+' 注意3個以上で見送り推奨 '+JSON.stringify(pipelineCheck));
   assert(!pipelineCheck.neffLocked&&pipelineCheck.neffLevel==='caution',label+' Neff注意帯は非ロック '+JSON.stringify(pipelineCheck));
   assert(!pipelineCheck.broadLocked,label+' 広いレンジも推奨見送り止まり '+JSON.stringify(pipelineCheck));
