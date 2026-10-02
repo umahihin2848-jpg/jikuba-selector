@@ -1,6 +1,6 @@
 {
-  "version": "v2.40-handicap-second-range-checkpoint",
-  "scope": "JRA flat OP/L handicap races; 2023-2024; final win odds; current v2.40 boundary logic",
+  "version": "v2.40-handicap-second-range-checkpoint-2025-early",
+  "scope": "JRA flat OP/L handicap races; 2023-2024 complete + 2025 through 2025-02-10; final win odds; current v2.40 boundary logic",
   "high_conf_rule": {
     "first_boundary_required": true,
     "first_range_end_min": 5,
@@ -29,17 +29,25 @@
       "first_hit": 16,
       "second_hit": 16,
       "both_hit": 14
+    },
+    "2025_early": {
+      "handicap_total": 3,
+      "high_conf_n": 3,
+      "first_hit": 2,
+      "second_hit": 3,
+      "both_hit": 2,
+      "completed_through": "2025-02-10"
     }
   },
   "combined": {
-    "handicap_total": 75,
-    "high_conf_n": 39,
-    "first_hit": 36,
-    "first_rate_pct": 92.3,
-    "second_hit": 32,
-    "second_rate_pct": 82.1,
-    "both_hit": 30,
-    "both_rate_pct": 76.9
+    "handicap_total": 78,
+    "high_conf_n": 42,
+    "first_hit": 38,
+    "first_rate_pct": 90.5,
+    "second_hit": 35,
+    "second_rate_pct": 83.3,
+    "both_hit": 32,
+    "both_rate_pct": 76.2
   },
   "by_second_range_end": {
     "5": {
@@ -57,25 +65,25 @@
       "both_rate_pct": 75
     },
     "7": {
-      "n": 8,
-      "first_hit": 7,
-      "second_hit": 5,
-      "both_hit": 4,
-      "both_rate_pct": 50
+      "n": 9,
+      "first_hit": 8,
+      "second_hit": 6,
+      "both_hit": 5,
+      "both_rate_pct": 55.6
     },
     "8": {
-      "n": 11,
+      "n": 12,
       "first_hit": 11,
-      "second_hit": 10,
+      "second_hit": 11,
       "both_hit": 10,
-      "both_rate_pct": 90.9
+      "both_rate_pct": 83.3
     },
     "9": {
-      "n": 5,
-      "first_hit": 3,
-      "second_hit": 4,
-      "both_hit": 3,
-      "both_rate_pct": 60
+      "n": 6,
+      "first_hit": 4,
+      "second_hit": 5,
+      "both_hit": 4,
+      "both_rate_pct": 66.7
     },
     "10": {
       "n": 8,
@@ -94,33 +102,74 @@
   },
   "candidate_patterns": {
     "second_end_8_or_10": {
-      "n": 19,
+      "n": 20,
       "both_hit": 18,
-      "both_rate_pct": 94.7,
-      "note": "candidate only; requires more years"
+      "both_rate_pct": 90,
+      "note": "weakened by 2025 turf sprint failure; do not use alone"
     },
     "dirt_second_end_8_or_10": {
       "n": 10,
       "both_hit": 10,
       "both_rate_pct": 100,
-      "note": "small N; candidate only"
+      "note": "unchanged after 2025 early check; still small N and provisional"
     }
   },
   "surface": {
     "turf": {
-      "n": 21,
-      "first_hit": 20,
-      "second_hit": 15,
-      "both_hit": 14,
-      "both_rate_pct": 66.7
+      "n": 23,
+      "first_hit": 21,
+      "second_hit": 17,
+      "both_hit": 15,
+      "both_rate_pct": 65.2
     },
     "dirt": {
-      "n": 18,
-      "first_hit": 16,
-      "second_hit": 17,
-      "both_hit": 16,
-      "both_rate_pct": 88.9
+      "n": 19,
+      "first_hit": 17,
+      "second_hit": 18,
+      "both_hit": 17,
+      "both_rate_pct": 89.5
     }
   },
-  "conclusion": "Do not promote to formal quinella rule yet. Continue other years. Current evidence suggests second-range end 8 or 10 is much stronger than narrow 5-7 or end 9, especially on dirt."
+  "conclusion": "Second-range end 8/10 alone is not sufficient after a 2025 turf-sprint failure. Turf handicap races remain weak on both-hit. Dirt is much stronger; dirt + second-range end 8 or 10 is 10/10 in 2023-2024 but still small-N and must remain provisional until more years are reconstructed.",
+  "out_of_sample_2025_early": [
+    {
+      "race_id": "202507010211",
+      "surface": "turf",
+      "distance": 3000,
+      "first_end": 7,
+      "second_end": 7,
+      "neff_ratio": 0.773,
+      "first_pop": 1,
+      "second_pop": 2,
+      "first_hit": true,
+      "second_hit": true,
+      "both_hit": true
+    },
+    {
+      "race_id": "202506010611",
+      "surface": "turf",
+      "distance": 1200,
+      "first_end": 8,
+      "second_end": 8,
+      "neff_ratio": 0.735,
+      "first_pop": 11,
+      "second_pop": 1,
+      "first_hit": false,
+      "second_hit": true,
+      "both_hit": false
+    },
+    {
+      "race_id": "202508010410",
+      "surface": "dirt",
+      "distance": 1200,
+      "first_end": 8,
+      "second_end": 9,
+      "neff_ratio": 0.633,
+      "first_pop": 3,
+      "second_pop": 1,
+      "first_hit": true,
+      "second_hit": true,
+      "both_hit": true
+    }
+  ]
 }
