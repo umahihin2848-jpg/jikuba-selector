@@ -713,7 +713,7 @@ function boundaryStrengthText(range){
 
 function fixedExclusionAnalysis(ctx={}){
   const g=String(ctx.grade||'').toUpperCase(),a=String(ctx.age||''),w=String(ctx.weight||''),d=Number(ctx.distance);
-  if(w==='handicap')return{excluded:true,code:'handicap',title:'ハンデ戦は固定ロック',reason:'ハンデ戦は事前に買わない固定条件として赤ロックします。格に関係なく購入対象から除外します。'};
+  // ハンデ戦はv2.40-balance-3で固定ロック解除。再検証完了までは条件付き上限として扱う。
   if(a==='2')return{excluded:true,code:'two_year_old',title:'2歳OP以上は固定ロック',reason:'2歳OP以上は能力比較と成長変動が大きいため、事前に買わない固定条件として赤ロックします。'};
   if(g==='G3'&&a==='3'&&Number.isFinite(d)&&d<=1600)return{excluded:true,code:'g3_3yo_shortmile',title:'3歳短距離〜マイルG3は固定ロック',reason:'3歳1600m以下G3は過去検証と実運用方針から固定除外します。'};
   if((g==='L'||g==='OP')&&a==='3'&&Number.isFinite(d)&&d<=1600)return{excluded:true,code:'opl_3yo_shortmile',title:'3歳1600m以下OP/Lは固定ロック',reason:'3歳1600m以下OP/Lは過去検証の固定除外条件として赤ロックします。'};
@@ -838,6 +838,7 @@ function decisionRiskSignals(r,fr,pr,spread,v229,e,history){
   const add=(id,label,detail,severity='mid')=>{if(!signals.some(x=>x.id===id))signals.push({id,label,detail,severity})};
   const ratio=Number(spread&&spread.ratio),firstEnd=Number(fr&&fr.end||0),secondEnd=Number(pr&&pr.end||0);
   const firstSignal=structuralSignal(fr,spread,'first',g),secondSignal=structuralSignal(pr,spread,'second',g);
+  if(String(ctx.weight||'')==='handicap')add('handicap_under_validation','ハンデ戦・再検証中','赤ロック解除済み。全年度検証完了までは条件付き上限で、単勝中心・馬連慎重。','mid');
   if(e&&Number.isFinite(Number(e.firstRate))){
     if(Number(e.firstRate)<.80)add('history_very_weak','過去条件がかなり弱い','1着捕捉 '+pipelineRateText(e.firstRate),'high');
     else if(Number(e.firstRate)<.90)add('history_weak','過去条件が弱め','1着捕捉 '+pipelineRateText(e.firstRate),'mid');
@@ -855,8 +856,9 @@ function decisionRiskSignals(r,fr,pr,spread,v229,e,history){
 }
 function fourLevelDecision(pipe,signals){
   if(pipe.hardLocked)return{code:'hard_lock',label:'固定ロック',level:'stop',buyable:false};
-  const n=(signals||[]).length;
+  const list=signals||[],n=list.length,handicap=list.some(x=>x.id==='handicap_under_validation');
   if(n>=3)return{code:'recommend_skip',label:'見送り推奨',level:'caution',buyable:false};
+  if(handicap)return{code:'conditional',label:'条件付き',level:'caution',buyable:true};
   if(pipe.finalCode==='win'||pipe.finalCode==='win_quinella'){
     if(n<=1)return{code:'strong',label:'強候補',level:'go',buyable:true};
   }
@@ -964,7 +966,7 @@ function renderHistoricalPatternReview(){
   }).join('');
 }
 const RULE_REGISTRY=[
-  {id:'v240_hard_lock',status:'formal',title:'固定ロック条件',detail:'ハンデ戦 / 2歳OP以上 / 3歳1600m以下のG3・L・OPだけを購入禁止。その他の弱い条件は注意表示に留める。',evidence:'v2.40-balance-1'},
+  {id:'v240_hard_lock',status:'formal',title:'固定ロック条件',detail:'2歳OP以上 / 3歳1600m以下のG3・L・OPだけを購入禁止。ハンデ戦は赤ロックを解除し、再検証完了までは条件付き上限。',evidence:'v2.40-balance-3'},
   {id:'v239_promotion_policy',status:'formal',title:'強候補の目安',detail:'単勝：N≥30・1着捕捉率≥92%・前期/後期とも≥90%・当日1着構造B以上。馬連：さらに1・2着同時捕捉率≥90%・N≥30・2着構造B以上。未達でも固定除外でなければ条件付き検討。',evidence:'強候補とロックを分離'},
   {id:'v239_pattern_layer',status:'formal',title:'v2.39 型判定レイヤー',detail:'条件×オッズ構造を型として保存し、1着・2着を別々に構造評価。構造A/B/C単独では購入候補へ昇格しない。',evidence:'2021〜2026再分類反映済み'},
   {id:'opl_pattern_observation',status:'hypothesis',title:'OP/L 型別判定',detail:'固定ロック条件を除外し、境界とNeffの組合せを型として蓄積。弱い型は注意表示に留める。',evidence:'正式閾値は未固定'},
@@ -1120,7 +1122,7 @@ function conditionProfileAnalysis(r,fr,v229){
   }
   if((g==='L'||g==='OP')&&a==='2')return out('stop','2歳OP/Lは実運用除外','見送り','2歳OP以上は購入対象外','型別検証にも入れません。');
   if((g==='L'||g==='OP')&&a==='3'&&d<=1600)return out('stop','3歳1600m以下OP/Lは実運用除外','見送り','固定除外条件','OP/Lの過去検証と同じ条件で除外します。');
-  if((g==='L'||g==='OP')&&weight==='handicap')return out('stop','OP/Lハンデ戦は実運用除外','見送り','固定除外条件','OP/Lの過去検証と同じ条件で除外します。');
+  if((g==='L'||g==='OP')&&weight==='handicap')return out('provisional','OP/Lハンデ・条件付き検証','条件付き','2023〜2024高信頼型の1着 36/39 = 92.3%','一律赤ロックは解除。全年度再検証が完了するまでは強候補へ上げず、1着高信頼条件を通る場合のみ単勝中心で検討します。馬連は別判定で慎重に扱います。','2着・馬連は検証継続','慎重');
   if(g==='L'||g==='OP')return out('provisional',g+' 型検証モード','型記録','1着・2着を別評価','全体捕捉率ではなく、条件×オッズ構造の型を保存して将来データで再現性を確認します。','2着も境界強度を独立評価','検証中');
   if(a==='2')return out('stop','2歳重賞は実運用除外','見送り','2歳OP以上は購入対象外','現行の高信頼成績集計からも除外して扱います。');
   if(g==='G3'&&a==='3'&&d<=1600)return out('stop','3歳短距離〜マイルG3は実運用除外','見送り','3歳・1600m以下のG3は購入対象外','2026年の芝1600mで見られた大きな2着外れは、この除外群に集中。');
@@ -1146,7 +1148,7 @@ function conditionProfileAnalysis(r,fr,v229){
   return out('caution','条件評価対象外','慎重','—','');
 }
 function raceStrategyAnalysis(r,fr,pr,sd,v229,ar,cp){
-  const g=String(r.context?.grade||'').toUpperCase(),a=String(r.context?.age||''),d=Number(r.context?.distance),f=Number(fr?.end||0),p=Number(pr?.end||0);
+  const g=String(r.context?.grade||'').toUpperCase(),a=String(r.context?.age||''),w=String(r.context?.weight||''),d=Number(r.context?.distance),f=Number(fr?.end||0),p=Number(pr?.end||0);
   const axisWarn=ar?.level==='high'?'軸選びは強警戒。1頭に決め切れないなら見送り。':ar?.level==='mid'?'軸は慎重に選ぶ。':'軸選びに大きな市場警告なし。';
   const fixedEx=fixedExclusionAnalysis(r.context||{});
   if(fixedEx.excluded)return{level:'stop',title:'見送り',badge:'固定除外',main:'—',quinella:'見送り',first:'1〜'+f+'人気',action:'次のレースへ',next:fixedEx.reason};
@@ -1160,10 +1162,16 @@ function raceStrategyAnalysis(r,fr,pr,sd,v229,ar,cp){
   const high=(g==='G2'||g==='G3')&&v229?.mode==='g2g3'&&v229?.level==='go';
   if(high){
     const strong=cp?.level==='go'||cp?.level==='provisional';
+    if(w==='handicap')return{level:'caution',title:'ハンデ条件付き・単勝中心',badge:'赤ロック解除 / 検証中',main:'1着高信頼通過時だけ単勝1〜2頭',quinella:'慎重・追加条件必須',first:'1〜'+f+'人気',action:'単勝候補を厳選',next:'ハンデ戦は一律赤ロックを解除しました。ただし全年度検証完了までは強候補へ上げません。1着レンジ5〜8＋Neff危険帯外を満たす時だけ単勝中心で検討し、馬連は2着条件まで明確な時だけ追加します。 '+axisWarn};
     return{level:strong?'go':'caution',title:strong?'単勝メイン':'単勝は慎重',badge:cp?.badge||g+' 高信頼',main:strong?'単勝1頭（難しければ2頭）':'明確な1頭がいる時だけ',quinella:cp?.quinella||'基本サブ',first:'1〜'+f+'人気',action:strong?'レンジから1〜2頭へ':'軸根拠を厳しく確認',next:(cp?cp.title+'。'+cp.evidence+'。 '+(cp.secondEvidence?cp.secondEvidence+'。 ':'')+cp.note+' ':'')+'1着レンジ全頭は買わず、最終1〜2頭に絞ります。馬連は2着側の条件別実績を別評価します。 '+axisWarn};
   }
   if(g==='L'||g==='OP'){
     const mp=marketPatternAnalysis(r,fr,pr,firstRangeSpreadAnalysis(r.runners,fr),v229);
+    if(w==='handicap'&&fr?.boundary&&f>=5&&f<=8){
+      const ratio=Number(firstRangeSpreadAnalysis(r.runners,fr)?.ratio);
+      const safe=!(Number.isFinite(ratio)&&ratio>=.85&&ratio<=.95);
+      if(safe)return{level:'caution',title:'ハンデ条件付き・単勝中心',badge:g+' ハンデ再検証',main:'単勝1〜2頭を検討',quinella:'慎重',first:'1〜'+f+'人気',action:'軸馬選定で1〜2頭へ',next:'1着高信頼条件を通過。ハンデ一律赤ロックは解除しましたが、全年度検証完了までは条件付き扱いです。馬連は2着側まで明確な時だけ追加します。 '+axisWarn};
+    }
     if(mp.level==='stop')return{level:'stop',title:'見送り',badge:mp.badge,main:'—',quinella:'見送り',first:'1〜'+f+'人気',action:'次のレースへ',next:mp.note};
     if(mp.firstGrade==='A'&&mp.secondGrade==='A')return{level:'caution',title:'型候補（検証中）',badge:g+' 前向き検証',main:'単勝候補は軸選定へ',quinella:'検証中候補',first:'1〜'+f+'人気',action:'型を保存して実戦記録',next:mp.note+' 正式ルール化するまでは過去成績だけで買い条件を強めません。'};
     return{level:'caution',title:'見送り寄り',badge:g+' 型弱め',main:'基本見送り',quinella:'見送り',first:'1〜'+f+'人気',action:'型を記録して終了',next:mp.note};
@@ -1230,7 +1238,7 @@ function render(r){
   const dr=$('decisionReason');dr.textContent=pipe.summary;dr.className='decisionReason'+(pipe.finalCode==='skip'?' stop':'');dr.classList.remove('hidden');
   $('opinionSummary').innerHTML='<div class="opinionRow"><span>結論</span><b>'+esc(op.conclusion)+'</b></div><div class="opinionRow"><span>1着</span><b>'+esc(op.first)+'</b></div><div class="opinionRow"><span>2着</span><b>'+esc(op.second)+'</b></div><div class="opinionRow"><span>注意</span><b>'+esc(op.caution)+'</b></div>';
   $('reasons').innerHTML=(r.brake.reasons||[]).map(x=>'<li>'+esc(x)+'</li>').join('');
-  $('rule').textContent='v2.40実戦型：基本は単勝。固定ロックを除外し、条件実績 → 当日オッズ構造 → 年度安定性 → N数 → 単勝適性を先に評価。馬連はさらに1・2着同時捕捉と2着構造まで揃った時だけ追加候補にします。';
+  $('rule').textContent='v2.40実戦型：基本は単勝。固定ロックは2歳OP以上・3歳1600m以下G3/L/OP。ハンデ戦は赤ロック解除済みで、全年度再検証が終わるまでは条件付き上限。馬連は1・2着同時捕捉と2着構造まで揃った時だけ追加候補にします。';
   $('lock').innerHTML=r.preview?'<span class="lock">👀 判定プレビュー（まだ保存していません）</span>':'<span class="lock">🔒 入力時点の馬番・人気・オッズ／購入計画 凍結済み</span>';
   const ax=$('axisSummary');
   if(r.priorAxisHorseNo){
@@ -1442,7 +1450,7 @@ function renderAvailabilityBalance(h){
   const d=calcAvailabilityBalance(h),c=d.counts,s=d.shares;
   summary.innerHTML='<b>直近 '+d.total+'レース</b> / 検討対象（強候補＋条件付き） <b>'+d.buyable+'レース・'+d.buyablePct+'%</b><br><span class="muted">見送り推奨は購入禁止ではありません。固定ロックだけが購入不可です。</span>';
   const card=(cls,title,n,p,note)=>'<div class="validationCard '+cls+'"><div class="validationTitle"><b>'+title+'</b><span class="confidence material">'+p+'%</span></div><div class="validationMetrics"><div><span>レース数</span><b>'+n+'</b></div><div><span>構成比</span><b>'+p+'%</b></div></div><div class="validationNote">'+note+'</div></div>';
-  box.innerHTML=card('green','🟢 強候補',c.strong,s.strong,'主要条件を通過し注意0〜1個')+card('yellow','🟡 条件付き',c.conditional,s.conditional,'注意0〜2個または強候補基準未達。購入判断は残す')+card('yellow','🟠 見送り推奨',c.recommend_skip,s.recommend_skip,'注意3個以上。購入禁止ではない')+card('red','🔴 固定ロック',c.hard_lock,s.hard_lock,'ハンデ・2歳OP以上・3歳1600m以下G3/L/OP');
+  box.innerHTML=card('green','🟢 強候補',c.strong,s.strong,'主要条件を通過し注意0〜1個')+card('yellow','🟡 条件付き',c.conditional,s.conditional,'注意0〜2個または強候補基準未達。ハンデ戦は検証完了までここが上限')+card('yellow','🟠 見送り推奨',c.recommend_skip,s.recommend_skip,'注意3個以上。購入禁止ではない')+card('red','🔴 固定ロック',c.hard_lock,s.hard_lock,'2歳OP以上・3歳1600m以下G3/L/OP');
 }
 function forwardTierSnapshot(r){
   const s=r?.context?.decision_snapshot||null;
