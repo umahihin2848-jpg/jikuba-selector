@@ -100,6 +100,18 @@ async function run(browserType,label){
   assert(await page.locator('#availabilityDashboard').count()===1,label+' 買えるレース数UIシェル');
   assert(await page.locator('#tierForwardDashboard').count()===1,label+' 4段階前向き成績UIシェル');
   assert(await page.locator('#hardLockAudit').count()===1,label+' 固定ロック監査UIシェル');
+  assert(await page.locator('#eligibilityGuard').count()===1,label+' 入力時対象判定ガードUIシェル');
+  await page.selectOption('#grade','G3');await page.selectOption('#age','3');await page.selectOption('#weight','fixed');await page.fill('#distance','1600');await page.waitForTimeout(20);
+  assert((await page.textContent('#eligibilityGuard')).includes('購入対象外'),label+' 3歳1600m以下G3を入力時に赤ロック');
+  assert(await page.locator('#betDecision').isDisabled()&&await page.locator('#betType').isDisabled()&&await page.locator('#plannedStake').isDisabled()&&await page.locator('#opponents').isDisabled(),label+' 対象外は購入操作を無効化');
+  assert(await page.inputValue('#betDecision')==='skip',label+' 対象外は見送りへ強制');
+  await page.selectOption('#grade','G1');await page.waitForTimeout(20);
+  assert((await page.textContent('#eligibilityGuard')).includes('対象レース'),label+' 3歳G1は1600mでも対象');
+  assert(!(await page.locator('#betDecision').isDisabled()),label+' 3歳G1は購入操作を解放');
+  await page.selectOption('#age','older');await page.selectOption('#weight','handicap');await page.fill('#distance','2000');await page.waitForTimeout(20);
+  assert((await page.textContent('#eligibilityGuard')).includes('条件付き：ハンデ戦'),label+' ハンデは黄色注意');
+  assert(!(await page.locator('#betDecision').isDisabled()),label+' ハンデは固定ロックしない');
+  await page.selectOption('#grade','');await page.selectOption('#age','');await page.selectOption('#weight','');await page.fill('#distance','');
   assert(await page.locator('#grade option[value="L"]').count()===1&&await page.locator('#grade option[value="OP"]').count()===1,label+' L/OP選択肢');
   const opl=await page.evaluate(s=>{
     const x=compute(s,'OP','older',1800);
