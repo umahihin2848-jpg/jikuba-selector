@@ -104,13 +104,13 @@
 
 <div id="winEvBox" class="winEvBox hidden">
   <div class="sectionEyebrow">単勝が主戦</div><h3>単勝候補を1〜2頭へ絞る</h3>
-  <div class="winEvIntro">1着候補が8頭以内の時だけ表示。展開・トラックバイアス・テン1F・出遅れ・折り合いを使って、レンジ内から最終候補を比較します。テン1Fは人気馬同士ではなく、出走全頭との相対比較です。</div>
+  <div class="winEvIntro">1着候補が8頭以内の時だけ表示。全馬0点スタートで、展開・トラックバイアス・テン1F・出遅れ・折り合いのマイナス要素だけを減点し、危ない候補を削ります。テン1Fは人気馬同士ではなく、出走全頭との相対比較です。</div>
   <div class="evControls"><label>前走で一度でも3番手以内だった馬数<input id="evFrontCount" type="number" min="0" max="18" step="1" inputmode="numeric" placeholder="例：5"></label><label>トラックバイアス<select id="evTrackBias"><option value="neutral">中立 / 不明</option><option value="inner_front">内枠・先行有利</option><option value="inner_close">内枠・差し有利</option><option value="outer_front">外枠・先行有利</option><option value="outer_close">外枠・差し有利</option></select></label><div id="evPaceMsg" class="evPaceMsg"></div></div>
   <div class="evTenFieldBox"><div class="evTenFieldHead"><b>全頭テン1F比較</b><span id="evTenProgress" class="evTenProgress"></span></div><div id="evTenFieldGrid" class="evTenGrid"></div><div class="muted" style="margin-top:7px">全頭分の「テン1F」と値の種類が揃った時だけ、全頭内の上位25%／下位25%を判定して単勝補正に使います。</div></div>
   <div id="winEvSummary" class="evSummary"></div><div id="winEvSpread" class="evSpreadBox"></div>
-  <div class="evRow header"><div>馬</div><div>オッズ</div><div>自動補正</div><div>推定勝率</div><div>適正</div><div>EV</div></div>
+  <div class="evRow header"><div>馬</div><div>オッズ</div><div>減点</div><div>推定勝率</div><div>適正</div><div>判定</div></div>
   <div id="winEvRows" class="evTable"></div>
-  <div class="evNote">自動補正：逃げ・先行は基礎+1。前走3番手内馬率30%未満なら逃げ・先行にさらに+1、50%以上なら−2。バイアス一致+1、正反対−2。出遅れ癖・折り合い不安を減点。テン1Fは出走全頭の入力が揃った時だけ、全頭比の上位25%／下位25%として評価します。EVは未校正の参考値です。</div>
+  <div class="evNote">減点方式：全馬0点スタート。好材料では加点しません。先行馬が多い中の逃げ・先行型−2、バイアス正反対−2、出遅れ癖−1〜−2、折り合い不安−1〜−2。テン1Fは全頭入力が揃った時だけ評価し、逃げ・先行型なのに全頭比下位25%なら−0.5〜−1。0〜−1は残す、−2は注意、−3以下は削る候補です。推定勝率・EVは減点後の参考値です。</div>
 </div>
 
 <details class="analysisDetails">
@@ -553,7 +553,7 @@ function saveWinEvStore(x){localStorage.setItem(WIN_EV_KEY,JSON.stringify(x||{})
 function winEvRaceKey(r){return raceKey(r.raceDate,r.venue,r.raceNo)}
 function winEvConfig(r){const s=winEvStore(),x=s[winEvRaceKey(r)];return x&&typeof x==='object'?x:{frontCount:'',trackBias:'neutral',horses:{}}}
 function saveWinEvConfig(r,cfg){const s=winEvStore();s[winEvRaceKey(r)]={frontCount:cfg.frontCount===''?'':Number(cfg.frontCount),trackBias:cfg.trackBias||'neutral',horses:cfg.horses||{}};saveWinEvStore(s)}
-function winEvMultiplier(v){v=Math.max(-3,Math.min(2,Number(v)||0));return num(1+0.15*v,3)}
+function winEvMultiplier(v){v=Math.max(-4,Math.min(0,Number(v)||0));return num(Math.max(.55,1+0.12*v),3)}
 function isFrontStyle(style){return style==='逃げ'||style==='先行'}
 function isCloseStyle(style){return style==='差し'||style==='追込'}
 function trackBiasMatch(bias,zone,style){
@@ -581,18 +581,20 @@ function ten1FRelative(field,horses){
 function autoWinEvAdjustment(style,zone,frontShare,bias,startRisk='none',settlingRisk='none',tenAdj=0,tenReason=''){
   let score=0,reasons=[];
   const front=isFrontStyle(style),close=isCloseStyle(style);
-  if(front){score+=1;reasons.push('先行基礎 +1')}
-  if(front&&frontShare!=null&&frontShare<.30){score+=1;reasons.push('前走3番手内馬率30%未満 +1')}
-  else if(front&&frontShare!=null&&frontShare>=.50){score-=2;reasons.push('前走3番手内馬率50%以上 −2')}
-  const tb=trackBiasMatch(bias,zone,style);if(tb){score+=tb;reasons.push('バイアス'+(tb>0?'一致 +1':'正反対 −2'))}
+  if(front&&frontShare!=null&&frontShare>=.50){score-=2;reasons.push('先行馬が多い展開で逃げ・先行型 −2')}
+  const tb=trackBiasMatch(bias,zone,style);
+  if(tb<0){score-=2;reasons.push('トラックバイアスと脚質・枠位置が正反対 −2')}
   if(startRisk==='mild'){score-=1;reasons.push('出遅れ癖 やや −1')}
   else if(startRisk==='strong'){score-=2;reasons.push('出遅れ癖 強い −2')}
   if(settlingRisk==='mild'){score-=1;reasons.push('折り合い不安 やや −1')}
   else if(settlingRisk==='strong'){score-=2;reasons.push('折り合い不安 強い −2')}
-  if(tenAdj){score+=Number(tenAdj);reasons.push(tenReason||('テン1F '+(tenAdj>0?'+':'')+tenAdj))}
-  score=Math.max(-3,Math.min(2,score));
-  if(!style&&startRisk==='none'&&settlingRisk==='none')reasons=['脚質未入力'];else if(!reasons.length)reasons=['補正なし'];
-  return{score,reasons,front,close};
+  if(front&&Number(tenAdj)<0){
+    const pen=Number(tenAdj)<=-.75?-1:-.5;score+=pen;
+    reasons.push('逃げ・先行型なのにテン1Fが全頭比下位25% '+(pen===-1?'−1':'−0.5'));
+  }
+  if(!style&&startRisk==='none'&&settlingRisk==='none')reasons=['脚質未入力'];
+  else if(!reasons.length)reasons=['減点なし'];
+  return{score:num(score,1),reasons,front,close};
 }
 function winMarketSpread(cand){
   const probs=(cand||[]).map(x=>Number(x.marketProb)||0),mass=probs.reduce((s,p)=>s+p,0),n=probs.length;
@@ -681,8 +683,8 @@ function calcWinEv(r,fr,cfg={}){
   const inv=runners.map(x=>1/Number(x.win_odds)),total=inv.reduce((a,b)=>a+b,0);if(!(total>0))return{eligible:false,rows:[],poolMass:0,outsideMass:1,frontShare:null};
   const n=runners.length,fc=cfg.frontCount===''||cfg.frontCount==null?null:Number(cfg.frontCount),frontShare=Number.isInteger(fc)&&fc>=0&&fc<=n?fc/n:null,bias=cfg.trackBias||'neutral',horses=cfg.horses||{};
   const base=runners.map((x,i)=>({...x,marketProb:inv[i]/total})),cand=base.slice(0,limit),poolMass=cand.reduce((s,x)=>s+x.marketProb,0),spread=winMarketSpread(cand),ten=ten1FRelative(base,horses);
-  const weighted=cand.map(x=>{const hc=horses[String(x.horse_no)]||{},style=hc.style||'',zone=hc.zone||'',startRisk=hc.startRisk||'none',settlingRisk=hc.settlingRisk||'none',tenInfo=ten.map[String(x.horse_no)]||null,ten1f=Number(hc.ten1f)>0?Number(hc.ten1f):null,tenSource=hc.tenSource||'',tenAdj=tenInfo?tenInfo.adj:0,tenReason=tenInfo&&tenInfo.band!=='mid'?'テン1F 全頭比'+(tenInfo.band==='fast'?'上位25% ':'下位25% ')+(tenSource==='best'?'【過去最速】':'【前走】')+' '+(tenAdj>0?'+':'')+tenAdj:'',auto=autoWinEvAdjustment(style,zone,frontShare,bias,startRisk,settlingRisk,tenAdj,tenReason),adj=auto.score,mult=winEvMultiplier(adj);return{...x,style,zone,startRisk,settlingRisk,ten1f,tenSource,tenBand:tenInfo?tenInfo.band:'none',tenAdj,adj,reasons:auto.reasons,mult,w:x.marketProb*mult}}),sumW=weighted.reduce((s,x)=>s+x.w,0);
-  const rows=weighted.map(x=>{const estProb=sumW>0?poolMass*x.w/sumW:0,fairOdds=estProb>0?1/estProb:null,ev=estProb*Number(x.win_odds);return{...x,estProb:num(estProb),fairOdds:fairOdds==null?null:num(fairOdds,2),ev:num(ev,3),tag:ev>=1.15?'EV候補':ev>=1.05?'様子見':'見送り'}});
+  const weighted=cand.map(x=>{const hc=horses[String(x.horse_no)]||{},style=hc.style||'',zone=hc.zone||'',startRisk=hc.startRisk||'none',settlingRisk=hc.settlingRisk||'none',tenInfo=ten.map[String(x.horse_no)]||null,ten1f=Number(hc.ten1f)>0?Number(hc.ten1f):null,tenSource=hc.tenSource||'',tenAdj=tenInfo?tenInfo.adj:0,auto=autoWinEvAdjustment(style,zone,frontShare,bias,startRisk,settlingRisk,tenAdj,''),adj=auto.score,mult=winEvMultiplier(adj);return{...x,style,zone,startRisk,settlingRisk,ten1f,tenSource,tenBand:tenInfo?tenInfo.band:'none',tenAdj,adj,reasons:auto.reasons,mult,w:x.marketProb*mult}}),sumW=weighted.reduce((s,x)=>s+x.w,0);
+  const rows=weighted.map(x=>{const estProb=sumW>0?poolMass*x.w/sumW:0,fairOdds=estProb>0?1/estProb:null,ev=estProb*Number(x.win_odds),tag=x.adj<=-4?'原則削る':x.adj<=-3?'削る候補':x.adj<=-2?'注意':'残す';return{...x,estProb:num(estProb),fairOdds:fairOdds==null?null:num(fairOdds,2),ev:num(ev,3),tag}});
   const tenField=base.map(x=>{const hc=horses[String(x.horse_no)]||{},ti=ten.map[String(x.horse_no)]||null,v=Number(hc.ten1f);return{horse_no:x.horse_no,popularity:x.popularity,ten1f:Number.isFinite(v)&&v>0?v:null,tenSource:hc.tenSource||'',tenBand:ti?ti.band:'none',tenAdj:ti?ti.adj:0}});return{eligible:true,rows,poolMass:num(poolMass),outsideMass:num(1-poolMass),frontShare:frontShare==null?null:num(frontShare),frontCount:fc,trackBias:bias,tenCount:ten.count,tenTotal:ten.total,tenComplete:ten.complete,tenQ1:ten.q1,tenQ3:ten.q3,tenField,tenComparisonMode:'full_field',spread};
 }
 function renderWinEv(r,fr){
@@ -695,17 +697,17 @@ function renderWinEv(r,fr){
   if(!data.eligible){box.classList.add('hidden');rowsBox.innerHTML='';return}
   box.classList.remove('hidden');
   frontEl.disabled=!!frozen;biasEl.disabled=!!frozen;frontEl.max=r.runners.length;frontEl.value=data.frontCount==null?'':String(data.frontCount);biasEl.value=data.trackBias||'neutral';
-  const pace=data.frontShare==null?'前走で一度でも3番手以内だった馬数を入力すると展開補正を開始します。':data.frontShare<.30?'前走3番手内馬率 '+pc(data.frontShare)+'：逃げ・先行を上げる局面':data.frontShare>=.50?'前走3番手内馬率 '+pc(data.frontShare)+'：逃げ・先行を下げる局面':'前走3番手内馬率 '+pc(data.frontShare)+'：展開補正は中立';paceMsg.textContent=pace;
+  const pace=data.frontShare==null?'前走で一度でも3番手以内だった馬数を入力すると展開減点を開始します。':data.frontShare>=.50?'前走3番手内馬率 '+pc(data.frontShare)+'：逃げ・先行型は展開不利で−2':data.frontShare<.30?'前走3番手内馬率 '+pc(data.frontShare)+'：先行有利でも加点せず減点なし':'前走3番手内馬率 '+pc(data.frontShare)+'：展開による減点なし';paceMsg.textContent=pace;
   const fieldRows=(data.tenField&&data.tenField.length?data.tenField:r.runners.map(x=>({horse_no:x.horse_no,popularity:x.popularity,ten1f:null,tenSource:'',tenBand:'none',tenAdj:0}))),fullMode=data.tenComparisonMode==='full_field';
   tenProgress.textContent=fullMode?(data.tenComplete?'✅ 全頭 '+data.tenCount+'/'+r.runners.length+'頭・比較有効':'入力 '+data.tenCount+'/'+r.runners.length+'頭・全頭揃うまで補正0'):'旧保存：候補内比較';
   const tenSop=(v,cur,label)=>'<option value="'+v+'" '+(cur===v?'selected':'')+'>'+label+'</option>';
   tenGrid.innerHTML=fieldRows.map(x=>'<div class="evTenHorse"><div class="evTenHorseNo">'+x.horse_no+'番<small>'+x.popularity+'人気</small></div><div class="evTenHorseInputs"><input class="evFieldTen" data-horse="'+x.horse_no+'" type="number" min="8" max="20" step="0.1" inputmode="decimal" placeholder="秒" value="'+(x.ten1f==null?'':x.ten1f)+'"'+(frozen?' disabled':'')+'><select class="evFieldTenSource" data-horse="'+x.horse_no+'"'+(frozen?' disabled':'')+'>'+tenSop('',x.tenSource,'種類')+tenSop('prev',x.tenSource,'前走')+tenSop('best',x.tenSource,'過去最速')+'</select></div></div>').join('');
-  const positives=data.rows.filter(x=>x.ev>=1.15).length;sum.innerHTML='<div><span>1着候補</span><b>'+data.rows.length+'頭</b></div><div><span>レンジ内基準勝率</span><b>'+pc(data.poolMass)+'</b></div><div><span>'+(frozen?'保存時EV候補':'EV1.15以上')+'</span><b>'+positives+'頭</b></div>';
+  const cuts=data.rows.filter(x=>Number(x.adj)<=-3).length;sum.innerHTML='<div><span>1着候補</span><b>'+data.rows.length+'頭</b></div><div><span>レンジ内基準勝率</span><b>'+pc(data.poolMass)+'</b></div><div><span>削る候補</span><b>'+cuts+'頭</b></div>';
   const sp=data.spread||{effectiveN:data.rows.length,ratio:1,label:'横並び',level:'flat',decision:'単勝は見送り寄り',reason:'候補内で市場支持が広く分散'},spCls=sp.level==='focus'?'spreadFocus':sp.level==='mid'?'spreadMid':'spreadFlat';
   spreadBox.innerHTML='<div class="evSpreadCard '+spCls+'"><span>1着レンジ内のオッズ分散</span><b>'+esc(sp.label)+'　実質 '+Number(sp.effectiveN).toFixed(1)+'頭 / '+data.rows.length+'頭</b><small>実質頭数比 '+pc(sp.ratio)+'。小さいほど上位数頭への支持集中。</small></div><div class="evSpreadCard '+spCls+'"><span>単勝の絞りやすさ</span><b>'+esc(sp.decision)+'</b><small>'+esc(sp.reason)+'。EV判定とは別の「市場構造」チェックです。</small></div>';
   const sop=(v,cur,label)=>'<option value="'+v+'" '+(cur===v?'selected':'')+'>'+label+'</option>';
   const badge=x=>{const v=Number(x.adj)||0;return(v>0?'＋':'')+String(v).replace('-', '−')};
-  rowsBox.innerHTML=data.rows.map(x=>{const cls=x.ev>=1.15?'evGood':x.ev>=1.05?'evMaybe':'evNo',disabled=frozen?' disabled':'';return '<div class="evRow" data-ev-horse="'+x.horse_no+'"><div class="evHorse">'+x.horse_no+'番<br><span class="muted">'+x.popularity+'人気</span></div><div class="evNum">'+Number(x.win_odds).toFixed(1)+'倍</div><div class="evNum"><b>'+badge(x)+'</b>（×'+Number(x.mult||winEvMultiplier(x.adj)).toFixed(2)+'）</div><div class="evNum">'+pc(x.estProb)+'</div><div class="evNum">'+(x.fairOdds==null?'—':Number(x.fairOdds).toFixed(1)+'倍')+'</div><div class="evTag '+cls+'">'+x.tag+'<br>'+Number(x.ev).toFixed(2)+'</div><div class="evHorseInputs"><label class="evField"><span>脚質</span><select class="evStyle" data-horse="'+x.horse_no+'"'+disabled+'>'+sop('',x.style,'未選択')+sop('逃げ',x.style,'逃げ')+sop('先行',x.style,'先行')+sop('差し',x.style,'差し')+sop('追込',x.style,'追込')+'</select></label><label class="evField"><span>枠位置</span><select class="evZone" data-horse="'+x.horse_no+'"'+disabled+'>'+sop('',x.zone,'未選択')+sop('内',x.zone,'内')+sop('中',x.zone,'中')+sop('外',x.zone,'外')+'</select></label><label class="evField start"><span>スタート・出遅れ癖</span><select class="evStart" data-horse="'+x.horse_no+'"'+disabled+'>'+sop('none',x.startRisk,'問題なし')+sop('mild',x.startRisk,'やや出遅れ癖')+sop('strong',x.startRisk,'強い出遅れ癖')+'</select></label><label class="evField settle"><span>気性・道中の折り合い</span><select class="evSettle" data-horse="'+x.horse_no+'"'+disabled+'>'+sop('none',x.settlingRisk,'問題なし')+sop('mild',x.settlingRisk,'やや不安')+sop('strong',x.settlingRisk,'強い不安')+'</select></label></div><div class="evTenLine"><div class="evTenResult">テン1F</div><div class="evTenResult">'+(x.ten1f==null?'未入力':Number(x.ten1f).toFixed(1)+'秒 / '+(x.tenSource==='best'?'過去最速':'前走'))+'</div><div class="evTenResult">'+(!fullMode?'旧保存方式':!data.tenComplete?'全頭未入力：補正0':x.tenBand==='fast'?'全頭比：速い上位25% '+(x.tenSource==='best'?'±0.5評価':'±1評価'):x.tenBand==='slow'?'全頭比：遅い下位25% '+(x.tenSource==='best'?'±0.5評価':'±1評価'):'全頭比：中間（補正0）')+'</div></div><div class="evReason">'+esc((x.reasons||[]).join(' / '))+'</div></div>'}).join('');
+  rowsBox.innerHTML=data.rows.map(x=>{const cls=x.adj<=-3?'evNo':x.adj<=-2?'evMaybe':'evGood',disabled=frozen?' disabled':'';return '<div class="evRow" data-ev-horse="'+x.horse_no+'"><div class="evHorse">'+x.horse_no+'番<br><span class="muted">'+x.popularity+'人気</span></div><div class="evNum">'+Number(x.win_odds).toFixed(1)+'倍</div><div class="evNum"><b>'+badge(x)+'</b>（×'+Number(x.mult||winEvMultiplier(x.adj)).toFixed(2)+'）</div><div class="evNum">'+pc(x.estProb)+'</div><div class="evNum">'+(x.fairOdds==null?'—':Number(x.fairOdds).toFixed(1)+'倍')+'</div><div class="evTag '+cls+'">'+x.tag+'<br>'+Number(x.ev).toFixed(2)+'</div><div class="evHorseInputs"><label class="evField"><span>脚質</span><select class="evStyle" data-horse="'+x.horse_no+'"'+disabled+'>'+sop('',x.style,'未選択')+sop('逃げ',x.style,'逃げ')+sop('先行',x.style,'先行')+sop('差し',x.style,'差し')+sop('追込',x.style,'追込')+'</select></label><label class="evField"><span>枠位置</span><select class="evZone" data-horse="'+x.horse_no+'"'+disabled+'>'+sop('',x.zone,'未選択')+sop('内',x.zone,'内')+sop('中',x.zone,'中')+sop('外',x.zone,'外')+'</select></label><label class="evField start"><span>スタート・出遅れ癖</span><select class="evStart" data-horse="'+x.horse_no+'"'+disabled+'>'+sop('none',x.startRisk,'問題なし')+sop('mild',x.startRisk,'やや出遅れ癖')+sop('strong',x.startRisk,'強い出遅れ癖')+'</select></label><label class="evField settle"><span>気性・道中の折り合い</span><select class="evSettle" data-horse="'+x.horse_no+'"'+disabled+'>'+sop('none',x.settlingRisk,'問題なし')+sop('mild',x.settlingRisk,'やや不安')+sop('strong',x.settlingRisk,'強い不安')+'</select></label></div><div class="evTenLine"><div class="evTenResult">テン1F</div><div class="evTenResult">'+(x.ten1f==null?'未入力':Number(x.ten1f).toFixed(1)+'秒 / '+(x.tenSource==='best'?'過去最速':'前走'))+'</div><div class="evTenResult">'+(!fullMode?'旧保存方式':!data.tenComplete?'全頭未入力：補正0':x.tenBand==='fast'?'全頭比：速い上位25% '+(x.tenSource==='best'?'±0.5評価':'±1評価'):x.tenBand==='slow'?'全頭比：遅い下位25% '+(x.tenSource==='best'?'±0.5評価':'±1評価'):'全頭比：中間（補正0）')+'</div></div><div class="evReason">'+esc((x.reasons||[]).join(' / '))+'</div></div>'}).join('');
   if(!frozen){
     const rerender=()=>{const next=winEvConfig(r);renderWinEv(r,fr)};
     frontEl.oninput=()=>{let next=winEvConfig(r);const v=frontEl.value;next.frontCount=v===''?'':Math.max(0,Math.min(r.runners.length,Number(v)||0));saveWinEvConfig(r,next);rerender()};
@@ -1356,7 +1358,7 @@ $('savePlan').onclick=async()=>{
         p.opponents=nums.map(h=>{const x=findRunner(calc.runners,h);if(!x)throw new Error(`${h}番が入力時点オッズ表にありません`);if(x.popularity>calc.secondPlaceRange.end)throw new Error(`🔴 レンジ外ロック：${h}番は入力時点${x.popularity}人気です。2着レンジ${calc.secondPlaceRange.label}の外なので相手にできません`);if(x.win_odds>=40)throw new Error(`🔴 ダメです：${h}番は単勝${x.win_odds.toFixed(1)}倍です。40.0倍以上は相手にできません`);return{horse_no:h,popularity:x.popularity,win_odds:x.win_odds}})
       }
     }
-    const evCfg=winEvConfig({raceDate:p.raceDate,venue:p.venue,raceNo:p.raceNo}),ev=calcWinEv({raceDate:p.raceDate,venue:p.venue,raceNo:p.raceNo,runners:calc.runners},calc.firstRange,evCfg);if(ev.eligible)p.context.win_ev={version:'pace_track_ten1f_fullfield_v2',pool_mass:ev.poolMass,front_count:ev.frontCount,front_share:ev.frontShare,track_bias:ev.trackBias,ten_comparison_mode:'full_field',ten_count:ev.tenCount,ten_total:ev.tenTotal,ten_complete:ev.tenComplete,ten_q1:ev.tenQ1,ten_q3:ev.tenQ3,ten_field:(ev.tenField||[]).map(x=>({horse_no:x.horse_no,popularity:x.popularity,ten1f:x.ten1f,ten_source:x.tenSource,ten_band:x.tenBand,ten_adjustment:x.tenAdj})),market_spread:ev.spread,rows:ev.rows.map(x=>({horse_no:x.horse_no,popularity:x.popularity,win_odds:x.win_odds,style:x.style,zone:x.zone,start_risk:x.startRisk,settling_risk:x.settlingRisk,ten1f:x.ten1f,ten_source:x.tenSource,ten_band:x.tenBand,ten_adjustment:x.tenAdj,adjustment:x.adj,reasons:x.reasons,estimated_win_prob:x.estProb,fair_odds:x.fairOdds,ev:x.ev,tag:x.tag}))};
+    const evCfg=winEvConfig({raceDate:p.raceDate,venue:p.venue,raceNo:p.raceNo}),ev=calcWinEv({raceDate:p.raceDate,venue:p.venue,raceNo:p.raceNo,runners:calc.runners},calc.firstRange,evCfg);if(ev.eligible)p.context.win_ev={version:'negative_filter_fullfield_v3',pool_mass:ev.poolMass,front_count:ev.frontCount,front_share:ev.frontShare,track_bias:ev.trackBias,ten_comparison_mode:'full_field',ten_count:ev.tenCount,ten_total:ev.tenTotal,ten_complete:ev.tenComplete,ten_q1:ev.tenQ1,ten_q3:ev.tenQ3,ten_field:(ev.tenField||[]).map(x=>({horse_no:x.horse_no,popularity:x.popularity,ten1f:x.ten1f,ten_source:x.tenSource,ten_band:x.tenBand,ten_adjustment:x.tenAdj})),market_spread:ev.spread,rows:ev.rows.map(x=>({horse_no:x.horse_no,popularity:x.popularity,win_odds:x.win_odds,style:x.style,zone:x.zone,start_risk:x.startRisk,settling_risk:x.settlingRisk,ten1f:x.ten1f,ten_source:x.tenSource,ten_band:x.tenBand,ten_adjustment:x.tenAdj,adjustment:x.adj,reasons:x.reasons,estimated_win_prob:x.estProb,fair_odds:x.fairOdds,ev:x.ev,tag:x.tag}))};
     p.context.decision_snapshot=buildDecisionSnapshot(p,calc);const saved=await insertRace(p,calc);pendingAssessment=null;render(saved);$('msg').textContent='購入判断と入力時点の判定を保存しました。以後変更できません。';try{upsertDraft(formDraft())}catch{}await loadAll();renderRaceList();
   }catch(e){$('msg').textContent=e.message}
   finally{$('savePlan').disabled=false}
