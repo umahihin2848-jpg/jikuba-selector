@@ -740,6 +740,97 @@ function renderPlanSummary(r){
   }else if(decision==='skip')ps.innerHTML='<b>🔴 見送り</b><br>予定投資額 0円';
   else ps.innerHTML='<b>購入判断：未確定</b><br>「今回の戦い方」を見て券種を決めてください。';
 }
+function firstRangeSpreadAnalysis(runners,firstRange){
+  const n=(runners||[]).length,limit=Math.min(Number(firstRange&&firstRange.end)||0,n);
+  if(!firstRange||!firstRange.boundary||limit<1||limit>8)return{effectiveN:0,ratio:0,label:'判定不可',level:'off',decision:'判定不可',reason:'1着レンジの境界が成立していません'};
+  const inv=(runners||[]).map(x=>1/Number(x.win_odds)),total=inv.reduce((a,b)=>a+b,0);
+  if(!(total>0))return{effectiveN:0,ratio:0,label:'判定不可',level:'off',decision:'判定不可',reason:'オッズデータ不足'};
+  const probs=inv.slice(0,limit).map(v=>v/total),mass=probs.reduce((s,p)=>s+p,0);
+  if(!(mass>0))return{effectiveN:limit,ratio:1,label:'横並び',level:'flat',decision:'慎重',reason:'候補内の市場支持が均等に近い'};
+  const q=probs.map(p=>p/mass),hhi=q.reduce((s,p)=>s+p*p,0),effectiveN=hhi>0?1/hhi:limit,ratio=effectiveN/limit;
+  if(ratio<=.65)return{effectiveN:num(effectiveN,2),ratio:num(ratio,3),label:'集中',level:'focus',decision:'候補内で支持集中',reason:'上位数頭へ市場支持が集中'};
+  if(ratio<=.82)return{effectiveN:num(effectiveN,2),ratio:num(ratio,3),label:'やや分散',level:'mid',decision:'慎重',reason:'支持は割れているが完全な横並びではない'};
+  return{effectiveN:num(effectiveN,2),ratio:num(ratio,3),label:'横並び',level:'flat',decision:'見送り寄り',reason:'候補内で市場支持が広く分散'};
+}
+function g1FirstPlaceOverride(grade,age,distance,baseRange){
+  const g=String(grade||'').toUpperCase(),a=String(age||''),d=Number(distance);
+  const eligible=g==='G1'&&a&&a!=='2'&&Number.isFinite(d)&&d>=2000;
+  if(!eligible||!baseRange||baseRange.boundary)return{...(baseRange||{}),g1Fallback:false,ruleVersion:(baseRange&&baseRange.ruleVersion)||'2.20'};
+  return{...baseRange,originalTargetEnd:baseRange.targetEnd,originalEnd:baseRange.end,targetEnd:4,end:4,label:'1〜4番人気（G1フォールバック）',level:'go',status:'🔵 G1上位人気モード',locked:false,g1Fallback:true,v220Stop:true,reason:'G1・2000m以上・2歳以外の専用ルールです。明確な境界がない場合は、検証済みの専用フォールバックとして1着候補を1〜4人気へ広げます。',ruleVersion:'2.29'};
+}
+function g1SecondPlaceOverride(grade,age,distance,baseRange){
+  const g=String(grade||'').toUpperCase(),a=String(age||''),d=Number(distance);
+  const eligible=g==='G1'&&a&&a!=='2'&&Number.isFinite(d)&&d>=2000;
+  if(!eligible||!baseRange)return{...(baseRange||{}),g1SecondBuffered:false,ruleVersion:(baseRange&&baseRange.ruleVersion)||'2.20'};
+  const rawEnd=Number(baseRange.end||baseRange.targetEnd||12);
+  let end=10;
+  if(rawEnd<=5)end=8;
+  else if(rawEnd<=7)end=9;
+  const level=end<=8?'go':'caution';
+  return{...baseRange,rawTargetEnd:baseRange.targetEnd,rawEnd,targetEnd:end,end,label:'1〜'+end+'番人気（G1安全幅）',level,locked:false,g1SecondBuffered:true,reason:'G1・2000m以上・2歳以外では、2着の狭い境界をそのまま採用せず安全マージンを追加します。',ruleVersion:'2.30'};
+}
+function v229FilterAnalysis(grade,age,distance,baseFirstRange,firstRange,spread){
+  const g=String(grade||'').toUpperCase(),a=String(age||''),d=Number(distance),f=Number((firstRange&&firstRange.end)||0),ratio=statNumber(spread&&spread.ratio);
+  if(!g)return{mode:'unset',level:'caution',status:'⚪ 格未指定',short:'格未指定',locked:false,applies:false,reason:'格を選択してください。',ratio,firstEnd:f,ruleVersion:'2.51'};
+  if(g==='G1'){
+    if(!a||!Number.isFinite(d)||d<=0)return{mode:'g1_missing',level:'caution',status:'⚪ G1条件未入力',short:'条件未入力',locked:false,applies:false,reason:'G1専用判定には年齢条件と距離が必要です。',ratio,firstEnd:f,ruleVersion:'2.51'};
+    if(a==='2')return{mode:'g1_2yo',level:'hardStop',status:'🔴 2歳戦 実運用除外',short:'見送り',locked:true,applies:true,reason:'実運用では2歳OP以上を購入対象から除外します。',ratio,firstEnd:f,ruleVersion:'2.51'};
+    if(d>=2000){
+      if(firstRange&&firstRange.g1Fallback)return{mode:'g1_long_fallback',level:'go',status:'🔵 G1上位人気モード',short:'1〜4フォールバック',locked:false,applies:true,reason:'G1・2000m以上の専用フォールバックです。',ratio,firstEnd:4,ruleVersion:'2.51'};
+      if(baseFirstRange&&baseFirstRange.boundary)return{mode:'g1_long',level:'go',status:'🟢 G1中長距離 高信頼',short:'高信頼',locked:false,applies:true,reason:'G1・2000m以上の専用検証を優先します。',ratio,firstEnd:f,ruleVersion:'2.51'};
+    }
+    if(d===1200)return{mode:'g1_sprint',level:'caution',status:'🟡 G1・1200m 別扱い',short:'慎重',locked:false,applies:true,reason:'G1中長距離専用ルールの対象外です。',ratio,firstEnd:f,ruleVersion:'2.51'};
+    return{mode:'g1_other',level:'caution',status:'🟡 G1通常モード',short:'慎重',locked:false,applies:true,reason:'G1中長距離専用条件外。境界構造と条件実績を確認します。',ratio,firstEnd:f,ruleVersion:'2.51'};
+  }
+  if(g!=='G2'&&g!=='G3')return{mode:'other',level:'caution',status:'⚪ 対象外',short:'対象外',locked:false,applies:false,reason:'G2/G3旧フィルターの対象外です。',ratio,firstEnd:f,ruleVersion:'2.51'};
+  if(!a)return{mode:'g2g3_age_missing',level:'caution',status:'⚪ 年齢未指定',short:'条件未入力',locked:false,applies:false,reason:'固定除外条件の確認に年齢が必要です。',ratio,firstEnd:f,ruleVersion:'2.51'};
+  if(a==='2')return{mode:'g2g3_2yo',level:'hardStop',status:'🔴 2歳戦 実運用除外',short:'見送り',locked:true,applies:true,reason:'2歳OP以上は固定除外です。',ratio,firstEnd:f,ruleVersion:'2.51'};
+  if(g==='G3'&&a==='3'&&Number.isFinite(d)&&d<=1600)return{mode:'g3_3yo_shortmile',level:'hardStop',status:'🔴 3歳短距離〜マイルG3 除外',short:'見送り',locked:true,applies:true,reason:'3歳1600m以下G3は固定除外です。',ratio,firstEnd:f,ruleVersion:'2.51'};
+  if(!firstRange||!firstRange.boundary)return{mode:'g2g3',level:'caution',status:'🟡 1着境界なし',short:'境界弱い',locked:false,applies:true,legacyPass:false,legacyDanger:false,boundaryGrade:'STOP',calibratedProbability:null,calibrationN:0,reason:'旧G2/G3高信頼フィルターではなく、v2.50境界確率を優先します。今回は1着候補を区切る境界がないため慎重です。',ratio,firstEnd:f,ruleVersion:'2.51'};
+  const sig=structuralSignal(firstRange,spread,'first',g),cal=calibratedBoundaryProbability(firstRange.boundary.score,'first');
+  const legacyDanger=f>=5&&f<=8&&ratio!==null&&ratio>=.85&&ratio<=.95;
+  const legacyPass=f>=5&&f<=8&&!legacyDanger;
+  let status='🔵 境界確率を優先',short='境界優先',level=(sig.grade==='A'||sig.grade==='B')?'go':'caution';
+  let reason='旧G2/G3高信頼フィルターは参考情報に変更しました。1着候補が1〜3・1〜4人気まで狭いこと自体はマイナスにしません。'+sig.reason+'。';
+  if(legacyDanger)reason+=' 旧検証では「1着5〜8人気＋Neff85〜95%」が81.9%だったため、この組み合わせに限って補助的な注意を残します。';
+  else if(legacyPass)reason+=' 旧高信頼条件にも該当しますが、最終判定は境界確率を優先します。';
+  else reason+=' 旧高信頼条件の範囲外でも、それだけを理由に見送りにはしません。';
+  return{mode:'g2g3',level,status,short,locked:false,applies:true,legacyPass,legacyDanger,boundaryGrade:sig.grade,calibratedProbability:cal?.rate??null,calibrationN:cal?.n||0,reason,ratio,firstEnd:f,ruleVersion:'2.51'};
+}
+function selectionDecisionV229(base,v229){
+  const b={...(base||{})};if(!v229)return{...b,ruleVersion:'2.29'};
+  if(b.locked)return{...b,ruleVersion:'2.29',v229Filter:v229};
+  if(v229.locked)return{level:'hardStop',status:'🔴 v2.30 見送り',short:'見送り',locked:true,reason:v229.reason+' '+(b.reason||''),firstEnd:b.firstEnd,secondEnd:b.secondEnd,ruleVersion:'2.29',v229Filter:v229};
+  if(v229.mode==='g1_long_fallback')return{...b,level:'go',status:'🔵 G1上位人気モード',short:'1〜4フォールバック',locked:false,reason:v229.reason+' '+(b.reason||''),ruleVersion:'2.29',v229Filter:v229};
+  if(v229.mode==='g1_long'&&b.level==='go')return{...b,status:'🟢 G1中長距離 高信頼候補',short:'高信頼',locked:false,reason:v229.reason+' '+(b.reason||''),ruleVersion:'2.29',v229Filter:v229};
+  if(v229.mode==='g1_long'&&b.level==='caution')return{...b,status:'🟡 1着高信頼・2着慎重',short:'慎重',locked:false,reason:v229.reason+' '+(b.reason||''),ruleVersion:'2.29',v229Filter:v229};
+  if(v229.mode==='g1_2yo'||v229.mode==='g1_sprint'||v229.mode==='g1_other')return{...b,level:'caution',status:v229.status,short:'慎重',locked:false,reason:v229.reason+' '+(b.reason||''),ruleVersion:'2.29',v229Filter:v229};
+  if(v229.mode==='g2g3'&&v229.level==='caution')return{...b,level:'caution',status:'🟡 慎重に検討',short:'慎重',locked:false,reason:v229.reason+' '+(b.reason||''),ruleVersion:'2.29',v229Filter:v229};
+  if(v229.mode==='g2g3'&&v229.level==='go'&&b.level==='go')return{...b,status:'🟢 G2/G3 高信頼候補',short:'高信頼',locked:false,reason:v229.reason+' '+(b.reason||''),ruleVersion:'2.29',v229Filter:v229};
+  if(v229.mode==='g2g3'&&v229.level==='go'&&b.level==='caution')return{...b,status:'🟡 1着高信頼・2着慎重',short:'慎重',locked:false,reason:v229.reason+' '+(b.reason||''),ruleVersion:'2.29',v229Filter:v229};
+  return{...b,ruleVersion:'2.29',v229Filter:v229};
+}
+function selectionDecisionV230(base,v229,secondPlaceRange){
+  const b={...(base||{})};if(!v229)return{...b,ruleVersion:'2.51'};
+  const s=Number((secondPlaceRange&&secondPlaceRange.end)||b.secondEnd||12);
+  const g1Long=v229.mode==='g1_long'||v229.mode==='g1_long_fallback';
+  if(g1Long){
+    if(s<=8)return{...b,level:'go',status:v229.mode==='g1_long_fallback'?'🔵 G1上位人気＋2着1〜8':'🟢 G1中長距離 高信頼候補',short:'高信頼',locked:false,reason:v229.reason+' 2着候補は1〜8人気まで。',secondEnd:s,ruleVersion:'2.51',v229Filter:v229};
+    if(s===9)return{...b,level:'caution',status:'🟡 G1高信頼・2着1〜9',short:'慎重',locked:false,reason:v229.reason+' 2着候補は1〜9人気まで。',secondEnd:s,ruleVersion:'2.51',v229Filter:v229};
+    return{...b,level:'caution',status:'🟡 G1高信頼・2着広め',short:'慎重',locked:false,reason:v229.reason+' 2着候補が広いため馬連は慎重です。',secondEnd:s,ruleVersion:'2.51',v229Filter:v229};
+  }
+  if(v229.locked)return selectionDecisionV229(b,v229);
+  if(v229.mode==='g2g3'){
+    const fg=v229.boundaryGrade||'STOP';
+    if(fg==='A'||fg==='B'){
+      if(s>=12)return{...b,level:'caution',status:'🟡 単勝条件付き・馬連見送り',short:'単勝条件付き',locked:false,reason:'1着側は境界構造を評価できますが、2着候補が1〜12人気まで広いため馬連は見送ります。旧G2/G3フィルター外だけを理由には見送りません。 '+v229.reason,secondEnd:s,ruleVersion:'2.51',v229Filter:v229};
+      if(s>=10)return{...b,level:'caution',status:'🟡 単勝候補・馬連慎重',short:'単勝優先',locked:false,reason:'1着側は境界構造を評価できます。2着候補が広いため単勝を優先します。 '+v229.reason,secondEnd:s,ruleVersion:'2.51',v229Filter:v229};
+      return{...b,level:fg==='A'?'go':'caution',status:fg==='A'?'🟢 境界確率優先・購入候補':'🟡 境界確率優先・条件付き',short:fg==='A'?'購入候補':'条件付き',locked:false,reason:v229.reason+' 2着候補も'+s+'人気までです。',secondEnd:s,ruleVersion:'2.51',v229Filter:v229};
+    }
+    return{...b,level:'caution',status:'🟡 境界構造が弱い',short:'慎重',locked:false,reason:'旧フィルターではなく、1着境界そのものが弱いため慎重です。 '+v229.reason,secondEnd:s,ruleVersion:'2.51',v229Filter:v229};
+  }
+  return selectionDecisionV229(b,v229);
+}
 function boundaryStrengthText(range){
   const b=range&&range.boundary;
   if(!b)return '明確な境界なし';
