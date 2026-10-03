@@ -85,7 +85,7 @@ async function run(browserType,label){
   page.on('pageerror',e=>errs.push('pageerror:'+e.message));
   page.on('console',m=>{if(m.type()==='error')errs.push('console:'+m.text())});
   await page.goto(LOCAL,{waitUntil:'networkidle'});
-  assert(await page.title()==='レース戦略 v2.41',label+' title');
+  assert(await page.title()==='レース戦略 v2.42',label+' title');
   assert(await page.locator('link[rel="manifest"]').getAttribute('href')==='./manifest.webmanifest',label+' manifest');
   const bodyText=await page.locator('body').innerText();
   assert(bodyText.includes('入力時刻に制限はありません'),label+' 時間制限なし表示');
@@ -103,12 +103,12 @@ async function run(browserType,label){
   assert(await page.locator('#tierForwardDashboard').count()===1,label+' 4段階前向き成績UIシェル');
   assert(await page.locator('#hardLockAudit').count()===1,label+' 固定ロック監査UIシェル');
   assert(await page.locator('#eligibilityGuard').count()===1,label+' 入力時対象判定ガードUIシェル');
-  assert(await page.locator('#splitStakeBox').count()===1&&await page.locator('#winPlannedStake').count()===1&&await page.locator('#quinellaPlannedStake').count()===1&&await page.locator('#wideAdd').count()===1&&await page.locator('#widePlannedStake').count()===1,label+' 単勝・馬連・ワイドの予定額UIシェル');
+  assert(await page.locator('#splitStakeBox').count()===1&&await page.locator('#winPlannedStake').count()===1&&await page.locator('#quinellaPlannedStake').count()===1&&await page.locator('#wideAdd').count()===1&&await page.locator('#widePlannedStake').count()===1&&await page.locator('#wideOpponents').count()===1,label+' 単勝・馬連・ワイドの予定額・相手UIシェル');
   const inputOrder=await page.evaluate(()=>{const pos=id=>{const el=document.getElementById(id);return el?Array.from(document.querySelectorAll('#inputCard *')).indexOf(el):-1};return{grade:pos('grade'),surface:pos('surface'),age:pos('age'),weight:pos('weight'),distance:pos('distance'),runner:pos('runnerCountSelect'),judge:pos('judge')}}); 
   assert(inputOrder.grade>=0&&inputOrder.grade<inputOrder.runner&&inputOrder.distance<inputOrder.runner&&inputOrder.runner<inputOrder.judge,label+' レース条件を上部入力フローへ移動 '+JSON.stringify(inputOrder));
   await page.selectOption('#grade','G3');await page.selectOption('#age','3');await page.selectOption('#weight','fixed');await page.fill('#distance','1600');await page.waitForTimeout(20);
   assert((await page.textContent('#eligibilityGuard')).includes('購入対象外'),label+' 3歳1600m以下G3を入力時に赤ロック');
-  assert(await page.locator('#betDecision').isDisabled()&&await page.locator('#betType').isDisabled()&&await page.locator('#wideAdd').isDisabled()&&await page.locator('#plannedStake').isDisabled()&&await page.locator('#widePlannedStake').isDisabled()&&await page.locator('#opponents').isDisabled(),label+' 対象外は購入操作を無効化');
+  assert(await page.locator('#betDecision').isDisabled()&&await page.locator('#betType').isDisabled()&&await page.locator('#wideAdd').isDisabled()&&await page.locator('#plannedStake').isDisabled()&&await page.locator('#widePlannedStake').isDisabled()&&await page.locator('#opponents').isDisabled()&&await page.locator('#wideOpponents').isDisabled(),label+' 対象外は購入操作を無効化');
   assert(await page.inputValue('#betDecision')==='skip',label+' 対象外は見送りへ強制');
   await page.selectOption('#grade','G1');await page.waitForTimeout(20);
   assert((await page.textContent('#eligibilityGuard')).includes('対象レース'),label+' 3歳G1は1600mでも対象');
@@ -325,7 +325,7 @@ async function run(browserType,label){
   await page.selectOption('#betType','both');
   await page.selectOption('#wideAdd','yes');
   assert(await page.locator('#splitStakeBox').isVisible()&&!(await page.locator('#singleStakeBox').isVisible()),label+' 単勝＋馬連で分割入力を表示');
-  assert(await page.locator('#wideStakeBox').isVisible()&&await page.locator('#allStakeTotal').isVisible(),label+' ワイド追加の予定額入力を表示');
+  assert(await page.locator('#wideStakeBox').isVisible()&&await page.locator('#wideOpponentBox').isVisible()&&await page.locator('#allStakeTotal').isVisible(),label+' ワイド追加の予定額・最大2頭入力を表示');
   await page.fill('#winPlannedStake','400');
   await page.fill('#quinellaPlannedStake','600');
   await page.fill('#widePlannedStake','300');
@@ -335,11 +335,18 @@ async function run(browserType,label){
   await page.fill('#opponents','11');
   await page.waitForTimeout(50);
   assert((await page.textContent('#opponentBrake')).includes('40.0倍以上'),label+' 40倍ブレーキ');
-  await page.fill('#opponents','2 3');
+  await page.fill('#opponents','2 3 4');
+  await page.fill('#wideOpponents','2 3 4');await page.waitForTimeout(30);
+  assert((await page.textContent('#inputBrake')).includes('最大2頭'),label+' ワイド3頭以上をブロック');
+  await page.fill('#wideOpponents','2 5');await page.waitForTimeout(30);
+  assert((await page.textContent('#inputBrake')).includes('馬連相手候補に含まれていません'),label+' ワイドは馬連相手候補の部分集合');
+  await page.fill('#wideOpponents','2 3');await page.waitForTimeout(30);
+  assert(!(await page.locator('#inputBrake').isVisible()),label+' ワイド2頭なら入力ブレーキ解除');
+  assert((await page.textContent('#planSummary')).includes('馬連相手候補（広め）')&&(await page.textContent('#planSummary')).includes('ワイド相手（最大2頭）'),label+' 馬連とワイドの相手を別表示');
   assert((await page.textContent('#wallSummary')).includes('最大の壁'),label+' 壁サマリー表示');
   assert((await page.textContent('#wallList')).includes('1→2'),label+' 壁一覧表示');
   assert((await page.textContent('#axisRisk')).includes('市場警告なし'),label+' 軸警告UI');
-  assert((await page.textContent('#secondPlaceBox')).includes('2着レンジ')&&(await page.textContent('#secondPlaceBox')).includes('ワイド専用3着レンジはまだ未採用'),label+' 2着レンジを馬連・ワイド相手候補に共用');
+  assert((await page.textContent('#secondPlaceBox')).includes('2着レンジ')&&(await page.textContent('#secondPlaceBox')).includes('ワイドはその馬連相手候補から最大2頭'),label+' 馬連広め・ワイド最大2頭ルール表示');
   assert((await page.textContent('#marketPatternBox')).includes('条件 × オッズ構造'),label+' 型判定UI');
   assert((await page.textContent('#decisionPipelineBox')).includes('7段階判定'),label+' 7段階UI');
   assert((await page.textContent('#strategyBox')).length>10,label+' 実戦戦略UI');
@@ -359,13 +366,13 @@ async function run(browserType,label){
   assert(post.context?.bet_type==='both'&&post.context?.wide_selected===true,label+' 単勝＋馬連＋ワイドを保存可能');
   assert(post.planned_stake_yen===1300&&post.context?.planned_win_stake_yen===400&&post.context?.planned_quinella_stake_yen===600&&post.context?.planned_wide_stake_yen===300,label+' 単勝・馬連・ワイドの予定額を別会計で保存 '+JSON.stringify(post.context));
   assert(post.prior_axis_popularity===1,label+' 軸人気自動保存');
-  assert(post.quinella_opponents.length===2,label+' 条件付き馬連の相手保存');
+  assert(post.quinella_opponents.length===3&&post.context?.wide_opponents?.length===2&&post.context?.wide_opponent_limit===2,label+' 馬連は広め3頭・ワイドは最大2頭で別保存 '+JSON.stringify(post.context));
   assert((await page.textContent('#raceList')).includes('購入'),label+' 判定後に一覧が購入表示');
   const doneItem=page.locator('#raceList .raceItem').filter({hasText:label+'テスト'});
   assert(await doneItem.count()===1,label+' 判定済みレースが一覧に存在');
   await doneItem.click();
   assert(await page.inputValue('#raceName')===label+'テスト',label+' 判定済み一覧から入力画面へ復帰');
-  assert(await page.inputValue('#winPlannedStake')==='400'&&await page.inputValue('#quinellaPlannedStake')==='600'&&await page.inputValue('#wideAdd')==='yes'&&await page.inputValue('#widePlannedStake')==='300',label+' 保存済みの3券種別予定額を復元');
+  assert(await page.inputValue('#winPlannedStake')==='400'&&await page.inputValue('#quinellaPlannedStake')==='600'&&await page.inputValue('#wideAdd')==='yes'&&await page.inputValue('#widePlannedStake')==='300'&&await page.inputValue('#opponents')==='2 3 4'&&await page.inputValue('#wideOpponents')==='2 3',label+' 保存済みの3券種別予定額・馬連広め・ワイド2頭を復元');
 
 
   const row=db.rows[0];
