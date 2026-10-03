@@ -893,7 +893,8 @@ function structuralSignal(range,spread,role,grade){
   const cal=calibratedBoundaryProbability(score,role);
   let calibratedApplied=false;
   if(cal&&cal.material){
-    level=cal.rate>=FORMAL_PROMOTION_POLICY.minFirstRate?'A':cal.rate>=FORMAL_PROMOTION_POLICY.goodFirstRate?'B':'C';
+    const strongCut=role==='second'?FORMAL_PROMOTION_POLICY.minPairRate:FORMAL_PROMOTION_POLICY.minFirstRate,goodCut=role==='second'?FORMAL_PROMOTION_POLICY.goodPairRate:FORMAL_PROMOTION_POLICY.goodFirstRate;
+    level=cal.rate>=strongCut?'A':cal.rate>=goodCut?'B':'C';
     calibratedApplied=true;
   }
   let note='境界 '+b.k+'→'+(b.k+1)+'人気 / '+score.toFixed(1)+'点 / 次点差 '+margin.toFixed(1);
@@ -1436,7 +1437,7 @@ function buildDecisionSnapshot(p,calc){
   const fixedEx=fixedExclusionAnalysis(r.context||{}),legacyEx=exclusionText(calc.v229Filter);
   const reason=pipe.summary;
   return{
-    app_version:'2.40',
+    app_version:'2.50',
     captured_at:new Date().toISOString(),
     condition_category:conditionCategory(r),
     first_range_end:Number(calc.firstRange?.end||0),
@@ -1877,8 +1878,8 @@ function renderAvailabilityBalance(h){
   box.innerHTML=card('green','🟢 強候補',c.strong,s.strong,'主要条件を通過し注意0〜1個')+card('yellow','🟡 条件付き',c.conditional,s.conditional,'注意0〜2個または強候補基準未達。ハンデ戦は検証完了までここが上限')+card('yellow','🟠 見送り推奨',c.recommend_skip,s.recommend_skip,'注意3個以上。購入禁止ではない')+card('red','🔴 固定ロック',c.hard_lock,s.hard_lock,'2歳OP以上・3歳1600m以下G3/L/OP');
 }
 function forwardTierSnapshot(r){
-  const s=r?.context?.decision_snapshot||null;
-  if(!s||!s.four_level_code||!String(s.decision_pipeline_version||'').startsWith('v2.40-balance-'))return null;
+  const s=r?.context?.decision_snapshot||null,v=String(s?.decision_pipeline_version||'');
+  if(!s||!s.four_level_code||!(v.startsWith('v2.40-balance-')||v.startsWith('v2.49-stat-')||v.startsWith('v2.50-cal-')))return null;
   return s;
 }
 function tierPerformanceRows(rows){
