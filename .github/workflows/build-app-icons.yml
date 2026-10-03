@@ -34,5 +34,6 @@ jobs:
             echo "No icon changes"
           else
             git commit -m "Build horse app icons"
+            git pull --rebase origin main
             git push
           fi
