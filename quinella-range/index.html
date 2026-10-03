@@ -536,7 +536,7 @@ function clearFormForNew(){pendingAssessment=null;hideQuickDecisionReason();
   $('venue').value='';$('raceNo').value='11';$('raceName').value='';$('runnerCountSelect').value='';renderOddsGrid();
   $('axisHorseNo').value='';$('betDecision').value='';$('betType').value='';$('wideAdd').value='no';$('plannedStake').value='';$('winPlannedStake').value='';$('quinellaPlannedStake').value='';$('widePlannedStake').value='';$('opponents').value='';$('wideOpponents').value='';updateStakePlanUI();
   $('grade').value='';$('surface').value='';$('age').value='';$('weight').value='';$('distance').value='';
-  $('result').classList.add('hidden');$('winEvBox')?.classList.add('hidden');$('msg').textContent='';$('draftMsg').textContent='';updateInputBrake();updateOpponentBrake();updateEligibilityGuard();
+  $('result').classList.add('hidden');$('msg').textContent='';$('draftMsg').textContent='';updateInputBrake();updateOpponentBrake();updateEligibilityGuard();
 }
 function loadDraftToForm(d){
   pendingAssessment=null;hideQuickDecisionReason();raceFormLoading=true;
