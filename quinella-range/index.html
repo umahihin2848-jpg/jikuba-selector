@@ -1151,9 +1151,9 @@ function decisionPipelineAnalysis(r,fr,pr,spread,v229,sd){
 }
 function applyPipelineToStrategy(base,pipe,fr){
   if(pipe.fourLevelCode==='hard_lock')return{level:'stop',title:'固定ロック',badge:'買わない条件',main:'購入不可',quinella:'購入不可',first:'1〜'+Number(fr?.end||0)+'人気',action:'次のレースへ',next:pipe.summary};
-  if(pipe.fourLevelCode==='recommend_skip')return{...base,level:'caution',title:'見送り推奨',badge:'注意'+pipe.riskCount+'項目',main:'基本見送り',quinella:'基本見送り',action:'買うなら弱点を再確認',next:pipe.summary+' '+(base?.next||'')};
-  if(pipe.fourLevelCode==='strong')return{...base,level:'go',title:'強候補',badge:'注意'+pipe.riskCount+'項目',main:pipe.finalCode==='win_quinella'?'単勝＋馬連':'単勝中心',quinella:pipe.finalCode==='win_quinella'?'強候補':'条件付き',action:'軸・相手を最終確認',next:pipe.summary+' '+(base?.next||'')};
-  return{...base,level:'caution',title:'条件付き',badge:'注意'+pipe.riskCount+'項目',main:'明確な軸がある時に検討',quinella:'慎重',action:'注意点を確認',next:pipe.summary+' '+(base?.next||'')};
+  if(pipe.fourLevelCode==='recommend_skip')return{...base,level:'caution',title:'見送り推奨',badge:'独立リスク'+pipe.riskCount+'種類',main:'基本見送り',quinella:'基本見送り',action:'買うなら弱点を再確認',next:pipe.summary+' '+(base?.next||'')};
+  if(pipe.fourLevelCode==='strong')return{...base,level:'go',title:'強候補',badge:'独立リスク'+pipe.riskCount+'種類',main:pipe.finalCode==='win_quinella'?'単勝＋馬連':'単勝中心',quinella:pipe.finalCode==='win_quinella'?'強候補':'条件付き',action:'軸・相手を最終確認',next:pipe.summary+' '+(base?.next||'')};
+  return{...base,level:'caution',title:'条件付き',badge:'独立リスク'+pipe.riskCount+'種類',main:'明確な軸がある時に検討',quinella:'慎重',action:'注意点を確認',next:pipe.summary+' '+(base?.next||'')};
 }
 function renderDecisionPipeline(pipe){
   const box=$('decisionPipelineBox');if(!box||!pipe)return;
@@ -1378,8 +1378,11 @@ function buildDecisionSnapshot(p,calc){
     hard_lock_reason:pipe.hardLockReason,
     four_level_code:pipe.fourLevelCode,
     four_level_label:pipe.fourLevelLabel,
-    risk_signal_count:pipe.riskCount,
+    risk_signal_count:pipe.rawRiskCount??pipe.riskSignals.length,
+    risk_group_count:pipe.riskCount,
     risk_signals:pipe.riskSignals.map(x=>({id:x.id,label:x.label,detail:x.detail,severity:x.severity})),
+    risk_groups:(pipe.riskGroups||[]).map(g=>({id:g.id,label:g.label,severity:g.severity,items:g.items.map(x=>x.id)})),
+    range_efficiency:pipe.rangeEfficiency?{field_size:pipe.rangeEfficiency.fieldSize,range_size:pipe.rangeEfficiency.rangeSize,candidate_share:pipe.rangeEfficiency.candidateShare,compression:pipe.rangeEfficiency.compression,market_mass:pipe.rangeEfficiency.marketMass,historical_rate:pipe.rangeEfficiency.historicalRate,market_gap:pipe.rangeEfficiency.marketGap}:null,
     decision_pipeline_win_fit:pipe.winFit,
     decision_pipeline_quinella_fit:pipe.quinellaFit,
     decision_pipeline_stages:pipe.stages.map(x=>({id:x.id,status:x.status,value:x.value})),
@@ -1497,7 +1500,7 @@ function renderBetPriority(pipe,fr,pr,r=null){
     qLabel='買わない';qBadge='固定ロック';qSub='単勝・馬連とも購入対象外。';
   }else{
     if(pipe.winFit==='candidate'){winLabel='単勝候補';winBadge='主戦OK';winSub='1着レンジ '+(fr?.label||'—')+'。ここから1〜2頭へ絞る。';}
-    else if(pipe.fourLevelCode==='recommend_skip'){winLabel='見送り寄り';winBadge='注意重複';winSub='単勝条件が弱く、注意点が重なっています。';}
+    else if(pipe.fourLevelCode==='recommend_skip'){winLabel='見送り寄り';winBadge='独立リスク複数';winSub='同じ原因の重複を除いても、独立した気になる点が複数あります。';}
     if(axisPolicy.axis&&axisPolicy.popularity<=6)winSub+=' 軸'+axisPolicy.popularity+'人気は単勝で人気順位ロックしません。';
     if(pipe.quinellaFit==='candidate'){
       if(!axisPolicy.axis){qLabel='馬連も追加可';qBadge='追加条件通過';qSub='軸は1〜3人気を通常、4人気は高分散・強判定時のみ自動候補。';}
@@ -1522,7 +1525,7 @@ function renderBetPriority(pipe,fr,pr,r=null){
   qc.className='betCard '+(pipe.hardLocked?'stop':qGo?'primary':'secondary');
   const axisWarning=axisPolicy.axis&&axisPolicy.popularity===4?'<br><b>⚠️ 4人気軸：</b>高分散。強判定時だけ馬連・ワイドを自動候補にします。':axisPolicy.axis&&axisPolicy.popularity>=5?'<br><b>⚠️ '+axisPolicy.popularity+'人気軸：</b>馬連・ワイドは自動推奨外です。':'';
   ws.className='warningStrip '+(pipe.hardLocked?'stop':pipe.riskCount>=2||axisPolicy.highVariance||axisPolicy.popularity>=5?'caution':'good');
-  ws.innerHTML=(pipe.hardLocked?'<b>🔴 固定ロック</b> '+esc(pipe.hardLockReason):pipe.riskSignals.length?'<b>注意 '+pipe.riskCount+'個：</b> '+pipe.riskSignals.map(x=>esc(x.label)).join(' / '):'<b>✅ 大きな注意点なし</b>　単勝候補の絞り込みへ進みます。')+axisWarning;
+  ws.innerHTML=(pipe.hardLocked?'<b>🔴 固定ロック</b> '+esc(pipe.hardLockReason):(pipe.riskGroups||[]).length?'<b>独立リスク '+pipe.riskCount+'種類：</b> '+pipe.riskGroups.map(x=>esc(x.label)).join(' / '):'<b>✅ 大きな注意点なし</b>　単勝候補の絞り込みへ進みます。')+axisWarning;
   renderAxisTicketPolicy(r?.runners||pendingAssessment?.calc?.runners||[],pipe,axisNo);
 }
 function render(r){
