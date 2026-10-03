@@ -85,7 +85,7 @@ async function run(browserType,label){
   page.on('pageerror',e=>errs.push('pageerror:'+e.message));
   page.on('console',m=>{if(m.type()==='error')errs.push('console:'+m.text())});
   await page.goto(LOCAL,{waitUntil:'networkidle'});
-  assert(await page.title()==='レース戦略 v2.40',label+' title');
+  assert(await page.title()==='レース戦略 v2.41',label+' title');
   assert(await page.locator('link[rel="manifest"]').getAttribute('href')==='./manifest.webmanifest',label+' manifest');
   const bodyText=await page.locator('body').innerText();
   assert(bodyText.includes('入力時刻に制限はありません'),label+' 時間制限なし表示');
@@ -94,7 +94,7 @@ async function run(browserType,label){
   assert(!bodyText.includes('v2.38'),label+' v2.38の旧表記が残っている');
   const fullText=await page.locator('body').textContent();
   assert(fullText.includes('2021〜2026 型再分類')&&fullText.includes('構造A/Aだけで買う'),label+' 型再分類UI');
-  assert(bodyText.includes('基本は単勝。馬連は条件が揃ったレースだけ追加する。'),label+' 単勝主戦メッセージ');
+  assert(bodyText.includes('基本は単勝。馬連・ワイドは条件が揃ったレースだけ追加する。'),label+' 単勝主戦メッセージ');
   assert(await page.locator('#betPriority').count()===1,label+' 単勝主戦・馬連追加UIシェル');
   assert(await page.locator('#ticketDecisionHero').count()===1,label+' 単勝・馬連大型判定UIシェル');
   assert(await page.locator('#evTenFieldGrid').count()===1,label+' 全頭テン1F入力UIシェル');
@@ -103,12 +103,12 @@ async function run(browserType,label){
   assert(await page.locator('#tierForwardDashboard').count()===1,label+' 4段階前向き成績UIシェル');
   assert(await page.locator('#hardLockAudit').count()===1,label+' 固定ロック監査UIシェル');
   assert(await page.locator('#eligibilityGuard').count()===1,label+' 入力時対象判定ガードUIシェル');
-  assert(await page.locator('#splitStakeBox').count()===1&&await page.locator('#winPlannedStake').count()===1&&await page.locator('#quinellaPlannedStake').count()===1,label+' 単勝＋馬連の予定額分割UIシェル');
+  assert(await page.locator('#splitStakeBox').count()===1&&await page.locator('#winPlannedStake').count()===1&&await page.locator('#quinellaPlannedStake').count()===1&&await page.locator('#wideAdd').count()===1&&await page.locator('#widePlannedStake').count()===1,label+' 単勝・馬連・ワイドの予定額UIシェル');
   const inputOrder=await page.evaluate(()=>{const pos=id=>{const el=document.getElementById(id);return el?Array.from(document.querySelectorAll('#inputCard *')).indexOf(el):-1};return{grade:pos('grade'),surface:pos('surface'),age:pos('age'),weight:pos('weight'),distance:pos('distance'),runner:pos('runnerCountSelect'),judge:pos('judge')}}); 
   assert(inputOrder.grade>=0&&inputOrder.grade<inputOrder.runner&&inputOrder.distance<inputOrder.runner&&inputOrder.runner<inputOrder.judge,label+' レース条件を上部入力フローへ移動 '+JSON.stringify(inputOrder));
   await page.selectOption('#grade','G3');await page.selectOption('#age','3');await page.selectOption('#weight','fixed');await page.fill('#distance','1600');await page.waitForTimeout(20);
   assert((await page.textContent('#eligibilityGuard')).includes('購入対象外'),label+' 3歳1600m以下G3を入力時に赤ロック');
-  assert(await page.locator('#betDecision').isDisabled()&&await page.locator('#betType').isDisabled()&&await page.locator('#plannedStake').isDisabled()&&await page.locator('#opponents').isDisabled(),label+' 対象外は購入操作を無効化');
+  assert(await page.locator('#betDecision').isDisabled()&&await page.locator('#betType').isDisabled()&&await page.locator('#wideAdd').isDisabled()&&await page.locator('#plannedStake').isDisabled()&&await page.locator('#widePlannedStake').isDisabled()&&await page.locator('#opponents').isDisabled(),label+' 対象外は購入操作を無効化');
   assert(await page.inputValue('#betDecision')==='skip',label+' 対象外は見送りへ強制');
   await page.selectOption('#grade','G1');await page.waitForTimeout(20);
   assert((await page.textContent('#eligibilityGuard')).includes('対象レース'),label+' 3歳G1は1600mでも対象');
@@ -323,11 +323,15 @@ async function run(browserType,label){
   await page.fill('#axisHorseNo','1');
   await page.selectOption('#betDecision','buy');
   await page.selectOption('#betType','both');
+  await page.selectOption('#wideAdd','yes');
   assert(await page.locator('#splitStakeBox').isVisible()&&!(await page.locator('#singleStakeBox').isVisible()),label+' 単勝＋馬連で分割入力を表示');
+  assert(await page.locator('#wideStakeBox').isVisible()&&await page.locator('#allStakeTotal').isVisible(),label+' ワイド追加の予定額入力を表示');
   await page.fill('#winPlannedStake','400');
   await page.fill('#quinellaPlannedStake','600');
-  assert(await page.inputValue('#plannedStake')==='1000'&&(await page.textContent('#plannedStakeTotal')).includes('1,000'),label+' 単勝＋馬連の合計予定額を自動計算');
-  assert((await page.textContent('#planSummary')).includes('単勝 400円')&&(await page.textContent('#planSummary')).includes('馬連 600円'),label+' 購入計画に券種別予定額を表示');
+  await page.fill('#widePlannedStake','300');
+  assert(await page.inputValue('#plannedStake')==='1000'&&(await page.textContent('#plannedStakeTotal')).includes('1,000'),label+' 単勝＋馬連の基本予定額を自動計算');
+  assert((await page.textContent('#allPlannedStakeTotal')).includes('1,300'),label+' ワイド込み全券種予定額を自動計算');
+  assert((await page.textContent('#planSummary')).includes('単勝 400円')&&(await page.textContent('#planSummary')).includes('馬連 600円')&&(await page.textContent('#planSummary')).includes('ワイド 300円'),label+' 購入計画に3券種別予定額を表示');
   await page.fill('#opponents','11');
   await page.waitForTimeout(50);
   assert((await page.textContent('#opponentBrake')).includes('40.0倍以上'),label+' 40倍ブレーキ');
@@ -335,7 +339,7 @@ async function run(browserType,label){
   assert((await page.textContent('#wallSummary')).includes('最大の壁'),label+' 壁サマリー表示');
   assert((await page.textContent('#wallList')).includes('1→2'),label+' 壁一覧表示');
   assert((await page.textContent('#axisRisk')).includes('市場警告なし'),label+' 軸警告UI');
-  assert((await page.textContent('#secondPlaceBox')).includes('2着レンジ'),label+' 2着レンジUI');
+  assert((await page.textContent('#secondPlaceBox')).includes('2着レンジ')&&(await page.textContent('#secondPlaceBox')).includes('ワイド専用3着レンジはまだ未採用'),label+' 2着レンジを馬連・ワイド相手候補に共用');
   assert((await page.textContent('#marketPatternBox')).includes('条件 × オッズ構造'),label+' 型判定UI');
   assert((await page.textContent('#decisionPipelineBox')).includes('7段階判定'),label+' 7段階UI');
   assert((await page.textContent('#strategyBox')).length>10,label+' 実戦戦略UI');
@@ -352,8 +356,8 @@ async function run(browserType,label){
   assert(post.context?.decision_snapshot?.hard_lock===false,label+' 非固定条件はhard lock false');
   assert(post.context?.decision_snapshot?.four_level_code==='strong',label+' 4段階判定ログ保存 '+JSON.stringify(post.context?.decision_snapshot));
   assert(Number.isInteger(post.context?.decision_snapshot?.risk_signal_count)&&Array.isArray(post.context?.decision_snapshot?.risk_signals),label+' 注意項目ログ保存');
-  assert(post.context?.bet_type==='both',label+' 単勝＋馬連を保存可能');
-  assert(post.planned_stake_yen===1000&&post.context?.planned_win_stake_yen===400&&post.context?.planned_quinella_stake_yen===600,label+' 単勝・馬連の予定額を別会計で保存 '+JSON.stringify(post.context));
+  assert(post.context?.bet_type==='both'&&post.context?.wide_selected===true,label+' 単勝＋馬連＋ワイドを保存可能');
+  assert(post.planned_stake_yen===1300&&post.context?.planned_win_stake_yen===400&&post.context?.planned_quinella_stake_yen===600&&post.context?.planned_wide_stake_yen===300,label+' 単勝・馬連・ワイドの予定額を別会計で保存 '+JSON.stringify(post.context));
   assert(post.prior_axis_popularity===1,label+' 軸人気自動保存');
   assert(post.quinella_opponents.length===2,label+' 条件付き馬連の相手保存');
   assert((await page.textContent('#raceList')).includes('購入'),label+' 判定後に一覧が購入表示');
@@ -361,20 +365,23 @@ async function run(browserType,label){
   assert(await doneItem.count()===1,label+' 判定済みレースが一覧に存在');
   await doneItem.click();
   assert(await page.inputValue('#raceName')===label+'テスト',label+' 判定済み一覧から入力画面へ復帰');
-  assert(await page.inputValue('#winPlannedStake')==='400'&&await page.inputValue('#quinellaPlannedStake')==='600',label+' 保存済みの券種別予定額を復元');
+  assert(await page.inputValue('#winPlannedStake')==='400'&&await page.inputValue('#quinellaPlannedStake')==='600'&&await page.inputValue('#wideAdd')==='yes'&&await page.inputValue('#widePlannedStake')==='300',label+' 保存済みの3券種別予定額を復元');
 
 
   const row=db.rows[0];
   await page.fill('#f'+row.id,'1'); await page.fill('#s'+row.id,'3');
   await page.fill('#wk'+row.id,'0'); await page.fill('#wp'+row.id,'0');
   await page.fill('#qk'+row.id,'1000'); await page.fill('#qp'+row.id,'0');
+  await page.fill('#dk'+row.id,'300'); await page.fill('#dp'+row.id,'540');
   await page.getByRole('button',{name:'結果保存'}).first().click();
   await page.waitForFunction(()=>document.querySelector('#history')?.textContent.includes('1着は1着レンジ内'),null,{timeout:5000});
   const histText=await page.textContent('#history');
   assert(histText.includes('1着は1着レンジ内')&&histText.includes('2着は2着レンジ内'),label+' 1着・2着レンジ判定');
-  assert(db.getPatch().result_first_horse_no===1&&db.getPatch().result_second_horse_no===3,label+' 結果PATCH');
+  assert(db.getPatch().result_first_horse_no===1&&db.getPatch().result_second_horse_no===3&&db.getPatch().context?.performance?.wide_stake_yen===300&&db.getPatch().context?.performance?.wide_return_yen===540,label+' 結果PATCH＋ワイド実績保存');
   const statsText=await page.textContent('#stats');
   assert(statsText.includes('1着レンジ内率')&&statsText.includes('両方レンジ内率'),label+' 1着・2着集計');
+  const perfText=await page.textContent('#performanceStats');
+  assert(perfText.includes('ワイド')&&perfText.includes('180%'),label+' ワイド単独の的中率・回収率集計 '+perfText);
   assert((await page.textContent('#patternValidationSummary')).includes('v2.39型ログ'),label+' 型別前向き検証UI');
   const availabilityText=await page.textContent('#availabilityDashboard');
   assert(availabilityText.includes('強候補')&&availabilityText.includes('条件付き')&&availabilityText.includes('見送り推奨')&&availabilityText.includes('固定ロック'),label+' 4段階レース数ダッシュボード '+availabilityText);
