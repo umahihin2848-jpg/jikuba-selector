@@ -764,10 +764,10 @@ function fixedExclusionAnalysis(ctx={}){
   return{excluded:false,code:'',title:'',reason:''};
 }
 function purchaseGuardControls(locked){
-  const ids=['betDecision','betType','plannedStake','winPlannedStake','quinellaPlannedStake','opponents'];
+  const ids=['betDecision','betType','wideAdd','plannedStake','winPlannedStake','quinellaPlannedStake','widePlannedStake','opponents'];
   for(const id of ids){const el=$(id);if(el)el.disabled=!!locked}
   if(locked){
-    $('betDecision').value='skip';$('betType').value='';$('plannedStake').value='';$('winPlannedStake').value='';$('quinellaPlannedStake').value='';updateStakePlanUI();$('opponents').value='';
+    $('betDecision').value='skip';$('betType').value='';$('wideAdd').value='no';$('plannedStake').value='';$('winPlannedStake').value='';$('quinellaPlannedStake').value='';$('widePlannedStake').value='';updateStakePlanUI();$('opponents').value='';
     updateOpponentBrake();updateInputBrake();
     if(pendingAssessment?.preview)renderPlanSummary(pendingAssessment.preview);
   }
@@ -781,7 +781,7 @@ function updateEligibilityGuard(){
   }
   const fixed=fixedExclusionAnalysis(ctx);
   if(fixed.excluded){
-    purchaseGuardControls(true);box.className='eligibilityGuard stop';title.textContent='🔴 購入対象外';detail.textContent=fixed.reason+' 単勝・馬連とも購入操作をロックしました。見送りとしてのみ保存できます。';return;
+    purchaseGuardControls(true);box.className='eligibilityGuard stop';title.textContent='🔴 購入対象外';detail.textContent=fixed.reason+' 単勝・馬連・ワイドの購入操作をロックしました。見送りとしてのみ保存できます。';return;
   }
   purchaseGuardControls(false);
   if(ctx.weight==='handicap'){
