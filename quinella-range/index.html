@@ -130,9 +130,9 @@
       <div class="notice" id="rule"></div>
     </div>
     <div id="v229Box" class="winRange hidden">
-      <div class="winRangeHead"><div><div class="winRangeTitle">G1/G2/G3 高信頼フィルター</div><div class="winRangeValue" id="v229Value"></div></div><div class="winRangeStatus" id="v229Status"></div></div>
+      <div class="winRangeHead"><div><div class="winRangeTitle">G1専用 / G2・G3 境界優先判定</div><div class="winRangeValue" id="v229Value"></div></div><div class="winRangeStatus" id="v229Status"></div></div>
       <div class="winRangeText" id="v229Text"></div>
-      <div class="winRangeNote">2歳OP以上と3歳短距離〜マイルG3を実運用除外。G2/G3はNeff危険帯も除外します。</div>
+      <div class="winRangeNote">固定除外は維持。G2/G3は旧「1着5〜8人気＋Neff安全帯」を参考情報に下げ、境界スコアの校正確率を優先します。Neff注意は検証対象だった1着5〜8人気時だけ使います。</div>
     </div>
     <div id="axisRisk" class="axisRisk hidden"></div>
     <div>
@@ -164,7 +164,7 @@
 <details class="card archiveDetails"><summary>検証ルール・過去統計を見る</summary><div class="archiveBody">
 <section class="card"><div><h2 style="margin:0">ルール管理</h2><div class="muted">正式ルール・検証中の仮説・却下した案を分離。仮説は表示だけで判定ロジックには入りません。</div></div><div id="ruleRegistry" class="ruleRegistryGrid"></div></section>
 <section class="card"><div><h2 style="margin:0">2021〜2026 型再分類</h2><div class="muted">母数・捕捉率・時系列安定性を優先。構造A/B/Cは境界の明瞭さを表すだけで、単独では買いシグナルにしません。</div></div><div id="historicalPatternReview" class="ruleRegistryGrid"></div></section>
-<section class="card"><div><h2 style="margin:0">2026年9月まで・実運用除外後の前向き検証</h2><div class="muted">最終単勝オッズ → 現行1着高信頼フィルター → 現行2着レンジで再計算。2歳OP以上、3歳の短距離〜マイルG3を実運用どおり除外しています。</div></div>
+<section class="card"><div><h2 style="margin:0">2026年9月まで・旧G2/G3フィルター参考検証</h2><div class="muted">ここは旧「1着5〜8人気＋Neff安全帯」で集計した参考データです。v2.51のG2/G3最終判定はこの通過可否ではなく、境界確率を優先します。固定除外条件は従来どおり維持します。</div></div>
 <div class="validationGrid">
   <div class="validationCard green"><div class="validationTitle"><b>全体</b><span class="confidence strong">2026施行済み</span></div><div class="validationMetrics"><div><span>対象</span><b>30</b></div><div><span>高信頼通過</span><b>11</b></div><div><span>1着捕捉</span><b>11/11</b></div><div><span>2着捕捉</span><b>9/11</b></div></div><div class="validationNote">1・2着同時 9/11 = 81.8%。1着側は全捕捉。</div></div>
   <div class="validationCard green"><div class="validationTitle"><b>G3ダート</b><span class="confidence material">継続良好</span></div><div class="validationMetrics"><div><span>2026 1着</span><b>4/4</b></div><div><span>2026 2着</span><b>4/4</b></div><div><span>21〜26 1着</span><b>41/41</b></div><div><span>捕捉率</span><b>100%</b></div></div></div>
@@ -1379,7 +1379,7 @@ function renderRuleRegistry(){
   }).join('');
 }
 function conditionSampleMeta(r,fr){
-  const g=String(r.context?.grade||'').toUpperCase(),surface=String(r.context?.surface||''),a=String(r.context?.age||''),weight=String(r.context?.weight||''),d=Number(r.context?.distance),f=Number(fr?.end||0);
+  const g=String(r.context?.grade||'').toUpperCase(),surface=String(r.context?.surface||''),a=String(r.context?.age||''),d=Number(r.context?.distance),f=Number(fr?.end||0);
   const fixedEx=fixedExclusionAnalysis(r.context||{});
   if(fixedEx.excluded)return{label:'N=—（実運用除外）',n:null};
   if(a==='2')return{label:'N=—（実運用除外）',n:null};
@@ -1391,23 +1391,24 @@ function conditionSampleMeta(r,fr){
     if(d===1600)return{label:'検証 N=14',n:14};
     if(d===1200)return{label:'検証 N=10',n:10};
   }
+  const ref=x=>'旧フィルター参考 '+x;
   if(g==='G2'){
-    if(surface==='dirt')return{label:'1着検証 N=5',n:5};
-    if(surface==='turf'&&d===1800)return{label:'1着 N=18 / 2着2026 N=2',n:18};
-    if(surface==='turf'&&(d===1400||d===2000))return{label:'1着検証 N=16',n:16};
-    if(surface==='turf'&&d===2400)return{label:'1着検証 N=8',n:8};
-    if(surface==='turf'&&d===1600)return{label:'1着検証 N=19',n:19};
-    if(surface==='turf'&&d===2200)return{label:'1着検証 N=23',n:23};
-    return{label:'G2高信頼全体 N=126',n:126};
+    if(surface==='dirt')return{label:ref('1着 N=5'),n:5};
+    if(surface==='turf'&&d===1800)return{label:ref('1着 N=18 / 2着2026 N=2'),n:18};
+    if(surface==='turf'&&(d===1400||d===2000))return{label:ref('1着 N=16'),n:16};
+    if(surface==='turf'&&d===2400)return{label:ref('1着 N=8'),n:8};
+    if(surface==='turf'&&d===1600)return{label:ref('1着 N=19'),n:19};
+    if(surface==='turf'&&d===2200)return{label:ref('1着 N=23'),n:23};
+    return{label:ref('G2全体 N=126'),n:126};
   }
   if(g==='G3'){
-    if(surface==='dirt')return{label:'1着 N=41 / 2着2026 N=4',n:41};
-    if(surface==='turf'&&d===1200)return{label:'1着検証 N=22',n:22};
-    if(surface==='turf'&&d===1400)return{label:'1着検証 N=9',n:9};
-    if(surface==='turf'&&d===1600)return{label:'1着 N=16 / 2着2026 N=1',n:16};
-    if(surface==='turf'&&d===1800)return{label:'1着 N=29 / 2着2026 N=4',n:29};
-    if(surface==='turf'&&d===2000)return{label:'1着検証 N=36',n:36};
-    return{label:'G3高信頼全体 N=172',n:172};
+    if(surface==='dirt')return{label:ref('1着 N=41 / 2着2026 N=4'),n:41};
+    if(surface==='turf'&&d===1200)return{label:ref('1着 N=22'),n:22};
+    if(surface==='turf'&&d===1400)return{label:ref('1着 N=9'),n:9};
+    if(surface==='turf'&&d===1600)return{label:ref('1着 N=16 / 2着2026 N=1'),n:16};
+    if(surface==='turf'&&d===1800)return{label:ref('1着 N=29 / 2着2026 N=4'),n:29};
+    if(surface==='turf'&&d===2000)return{label:ref('1着 N=36'),n:36};
+    return{label:ref('G3全体 N=172'),n:172};
   }
   if(g==='L'||g==='OP')return{label:'型別N=蓄積中',n:null};
   return{label:'N=—',n:null};
@@ -1428,11 +1429,11 @@ function fixedDecisionReason(r,fr,pr,v229,cp,st,sd){
   if(fixedEx.excluded)return '見送り：'+fixedEx.reason;
   const excluded=exclusionText(v229);
   if(excluded)return '見送り：'+excluded;
-  if(sd?.locked||v229?.locked)return '見送り：'+(v229?.short&&v229.short!=='見送り'?v229.short:'1着・2着候補を十分に圧縮できない');
-  const cat=cp?.title&&cp.title!=='条件データ不足'?cp.title:conditionCategory(r);
-  const high=v229?.level==='go'?'高信頼通過':(v229?.short||'通常判定');
-  const q=st?.quinella==='追加候補'||st?.quinella==='検証中候補'?'単勝＋馬連候補':'単勝候補';
-  return [cat,high,'1着'+fr.label,'2着'+pr.label].filter(Boolean).join('・')+' → '+q;
+  if(sd?.locked||v229?.locked)return '見送り：'+(v229?.short&&v229.short!=='見送り'?v229.short:'候補構造を十分に絞れない');
+  const cat=cp?.title&&cp.title!=='条件データ不足'?cp.title:conditionCategory(r),g=String(r.context?.grade||'').toUpperCase();
+  const basis=(g==='G2'||g==='G3')?'境界確率優先':v229?.level==='go'?'高信頼通過':(v229?.short||'通常判定');
+  const q=st?.quinella==='追加候補'||st?.quinella==='検証中候補'||st?.quinella==='条件付き'?'単勝＋馬連候補':'単勝候補';
+  return [cat,basis,'1着'+fr.label,'2着'+pr.label].filter(Boolean).join('・')+' → '+q;
 }
 function buildDecisionSnapshot(p,calc){
   const r={context:p.context||{},runners:calc.runners,structure:calc.structure,axisRisk:calc.axisRisk};
@@ -1444,7 +1445,7 @@ function buildDecisionSnapshot(p,calc){
   const fixedEx=fixedExclusionAnalysis(r.context||{}),legacyEx=exclusionText(calc.v229Filter);
   const reason=pipe.summary;
   return{
-    app_version:'2.50',
+    app_version:'2.51',
     captured_at:new Date().toISOString(),
     condition_category:conditionCategory(r),
     first_range_end:Number(calc.firstRange?.end||0),
