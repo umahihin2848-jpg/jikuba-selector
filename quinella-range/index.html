@@ -21,7 +21,8 @@
 <button class="wide" id="judge">まず判定を見る</button><div id="msg" class="muted" style="margin-top:8px"></div>
 <div class="notice" style="margin-top:12px"><b>判定を見てから購入判断</b><br>上の「今回の戦い方」に合わせて券種を選びます。単勝だけなら相手馬入力は不要です。</div>
 <div class="grid"><div><label>買う / 見送り</label><select id="betDecision"><option value="">判定後に選択</option><option value="buy">購入</option><option value="skip">見送り</option></select></div><div><label>購入券種</label><select id="betType"><option value="">判定後に選択</option><option value="win">単勝</option><option value="quinella">馬連</option><option value="both">単勝＋馬連</option></select></div></div>
-<label>予定投資額（合計）</label><input id="plannedStake" type="number" min="0" step="100" inputmode="numeric" placeholder="例：1000">
+<div id="singleStakeBox"><label>予定投資額（合計）</label><input id="plannedStake" type="number" min="0" step="100" inputmode="numeric" placeholder="例：1000"></div>
+<div id="splitStakeBox" class="hidden"><div class="grid"><div><label>単勝予定額</label><input id="winPlannedStake" type="number" min="0" step="100" inputmode="numeric" placeholder="例：2000"></div><div><label>馬連予定額</label><input id="quinellaPlannedStake" type="number" min="0" step="100" inputmode="numeric" placeholder="例：3000"></div></div><div class="notice" style="margin-top:8px"><b>合計予定額：<span id="plannedStakeTotal">0円</span></b><br><span class="muted">単勝＋馬連は別会計で保存します。</span></div></div>
 <label>相手馬（馬連を買う時だけ）</label><textarea id="opponents" style="min-height:80px" placeholder="例：3 8 12"></textarea><div class="muted">単勝のみなら空欄でOK。馬連・単勝＋馬連では、2着レンジ内の相手馬だけ入力できます。</div><div id="opponentBrake" class="oddsBrake hidden"></div><div id="inputBrake" class="oddsBrake hidden"></div>
 
 <div class="draftActions"><button class="secondary" id="saveDraft">一覧に保存（未判定）</button><button class="secondary" id="deleteDraft" title="未判定レースを一覧から削除">削除</button></div><div id="draftMsg" class="draftSaved"></div><button class="wide" id="savePlan" style="background:#179b67">購入/見送りを確定して保存</button><div class="muted" style="margin-top:6px">判定を見るだけなら保存不要です。保存すると、その時点のオッズと購入判断を凍結します。</div></section>
@@ -202,16 +203,16 @@ function updateOpponentBrake(){
   if(msgs.length){box.textContent='🔴 購入不可：'+msgs.join(' / ')+'。相手から外してください。';box.classList.remove('hidden');$('opponents').classList.add('dangerInput');return true}
   box.classList.add('hidden');if(!updateInputBrake())$('opponents').classList.remove('dangerInput');return false;
 }
-$('runnerCountSelect').addEventListener('change',renderOddsGrid);$('axisHorseNo').addEventListener('input',updateInputBrake);$('opponents').addEventListener('input',()=>{updateInputBrake();updateOpponentBrake()});$('betDecision').addEventListener('change',()=>{updateInputBrake();updateOpponentBrake()});$('betType').addEventListener('change',()=>{updateInputBrake();updateOpponentBrake()});
+$('runnerCountSelect').addEventListener('change',renderOddsGrid);$('axisHorseNo').addEventListener('input',updateInputBrake);$('opponents').addEventListener('input',()=>{updateInputBrake();updateOpponentBrake()});$('betDecision').addEventListener('change',()=>{updateInputBrake();updateOpponentBrake()});$('betType').addEventListener('change',()=>{updateStakePlanUI();updateInputBrake();updateOpponentBrake()});$('winPlannedStake').addEventListener('input',stakePlanValues);$('quinellaPlannedStake').addEventListener('input',stakePlanValues);
 $('saveDraft').onclick=()=>{try{const d=upsertDraft(formDraft());$('draftMsg').textContent=`${d.raceNo}R ${d.raceName||'レース名未入力'} を一覧に保存しました。`}catch(e){$('draftMsg').textContent=e.message}};
 $('deleteDraft').onclick=()=>{const k=raceKey($('raceDate').value,$('venue').value,$('raceNo').value);const exists=raceListRows().some(x=>x.key===k);if(!exists){$('draftMsg').textContent='このレースの未判定データはありません。';return}removeDraftByKey(k);$('draftMsg').textContent='未判定データを一覧から削除しました。'};
 $('newRace').onclick=()=>{const d=$('raceDate').value||jpDate();clearFormForNew();$('raceDate').value=d;renderRaceList();document.getElementById('inputCard').scrollIntoView({behavior:'smooth',block:'start'})};
 $('raceDate').addEventListener('change',renderRaceList);
-for(const id of ['raceName','axisHorseNo','plannedStake','opponents','distance'])$(id).addEventListener('input',()=>{const k=raceKey($('raceDate').value,$('venue').value,$('raceNo').value);if(!raceFormLoading&&raceListRows().some(x=>x.key===k)){try{upsertDraft(formDraft())}catch{}}});
+for(const id of ['raceName','axisHorseNo','plannedStake','winPlannedStake','quinellaPlannedStake','opponents','distance'])$(id).addEventListener('input',()=>{const k=raceKey($('raceDate').value,$('venue').value,$('raceNo').value);if(!raceFormLoading&&raceListRows().some(x=>x.key===k)){try{upsertDraft(formDraft())}catch{}}});
 for(const id of ['venue','raceNo','betDecision','betType','grade','age','weight'])$(id).addEventListener('change',()=>{const k=raceKey($('raceDate').value,$('venue').value,$('raceNo').value);if(!raceFormLoading&&raceListRows().some(x=>x.key===k)){try{upsertDraft(formDraft())}catch{}}});
 for(const id of ['grade','age','weight'])$(id).addEventListener('change',updateEligibilityGuard);
 $('distance').addEventListener('input',updateEligibilityGuard);
-for(const id of ['plannedStake','opponents'])$(id).addEventListener('input',()=>{if(pendingAssessment?.preview)renderPlanSummary(pendingAssessment.preview)});
+for(const id of ['plannedStake','winPlannedStake','quinellaPlannedStake','opponents'])$(id).addEventListener('input',()=>{if(pendingAssessment?.preview)renderPlanSummary(pendingAssessment.preview)});
 $('betDecision').addEventListener('change',()=>{if(pendingAssessment?.preview)renderPlanSummary(pendingAssessment.preview)});
 
 function baseRangeEnd(code,runners){
@@ -397,13 +398,31 @@ const WIN_EV_KEY='quinella_range_win_ev_v1';
 function raceListRows(){try{const x=JSON.parse(localStorage.getItem(RACE_LIST_KEY)||'[]');return Array.isArray(x)?x:[]}catch{return[]}}
 function saveRaceListRows(rows){localStorage.setItem(RACE_LIST_KEY,JSON.stringify(rows))}
 function raceKey(date,venue,no){return [date||'',venue||'',Number(no)||0].join('|')}
+function stakePlanValues(){
+  const type=$('betType').value;
+  if(type==='both'){
+    const win=Number($('winPlannedStake').value)||0,q=Number($('quinellaPlannedStake').value)||0,total=win+q;
+    $('plannedStake').value=total>0?String(total):'';
+    $('plannedStakeTotal').textContent=yen(total);
+    return{win,quinella:q,total};
+  }
+  const total=Number($('plannedStake').value)||0;
+  return{win:type==='win'?total:0,quinella:type==='quinella'?total:0,total};
+}
+function updateStakePlanUI(){
+  const both=$('betType').value==='both';
+  $('singleStakeBox').classList.toggle('hidden',both);
+  $('splitStakeBox').classList.toggle('hidden',!both);
+  if(both)stakePlanValues();
+  if(pendingAssessment?.preview)renderPlanSummary(pendingAssessment.preview);
+}
 function formDraft(){
   const odds={};$('oddsGrid').querySelectorAll('input[data-horse]').forEach(el=>{if(el.value!=='')odds[el.dataset.horse]=el.value});
   return{
     key:raceKey($('raceDate').value,$('venue').value,$('raceNo').value),
     raceDate:$('raceDate').value,venue:$('venue').value,raceNo:Number($('raceNo').value),
     raceName:$('raceName').value.trim(),runnerCount:Number($('runnerCountSelect').value)||null,odds,
-    axisHorseNo:$('axisHorseNo').value,betDecision:$('betDecision').value,betType:$('betType').value,plannedStake:$('plannedStake').value,
+    axisHorseNo:$('axisHorseNo').value,betDecision:$('betDecision').value,betType:$('betType').value,plannedStake:$('plannedStake').value,winPlannedStake:$('winPlannedStake').value,quinellaPlannedStake:$('quinellaPlannedStake').value,
     opponents:$('opponents').value,grade:$('grade').value,surface:$('surface').value,age:$('age').value,weight:$('weight').value,distance:$('distance').value,
     updatedAt:new Date().toISOString()
   }
@@ -427,7 +446,7 @@ function renderRaceList(){
 }
 function clearFormForNew(){pendingAssessment=null;
   $('venue').value='';$('raceNo').value='11';$('raceName').value='';$('runnerCountSelect').value='';renderOddsGrid();
-  $('axisHorseNo').value='';$('betDecision').value='';$('betType').value='';$('plannedStake').value='';$('opponents').value='';
+  $('axisHorseNo').value='';$('betDecision').value='';$('betType').value='';$('plannedStake').value='';$('winPlannedStake').value='';$('quinellaPlannedStake').value='';$('opponents').value='';updateStakePlanUI();
   $('grade').value='';$('surface').value='';$('age').value='';$('weight').value='';$('distance').value='';
   $('result').classList.add('hidden');$('winEvBox')?.classList.add('hidden');$('msg').textContent='';$('draftMsg').textContent='';updateInputBrake();updateOpponentBrake();updateEligibilityGuard();
 }
@@ -437,7 +456,7 @@ function loadDraftToForm(d){
     $('raceDate').value=d.raceDate||jpDate();$('venue').value=d.venue||'';$('raceNo').value=String(d.raceNo||11);$('raceName').value=d.raceName||'';
     $('runnerCountSelect').value=d.runnerCount?String(d.runnerCount):'';renderOddsGrid();
     if(d.runnerCount&&d.odds){for(const[h,o]of Object.entries(d.odds)){const el=$('oddsGrid').querySelector(`input[data-horse="${h}"]`);if(el)el.value=o}syncOddsFromGrid()}
-    $('axisHorseNo').value=d.axisHorseNo||'';$('betDecision').value=d.betDecision||'';$('betType').value=d.betType||'';$('plannedStake').value=d.plannedStake||'';$('opponents').value=d.opponents||'';
+    $('axisHorseNo').value=d.axisHorseNo||'';$('betDecision').value=d.betDecision||'';$('betType').value=d.betType||'';$('plannedStake').value=d.plannedStake||'';$('winPlannedStake').value=d.winPlannedStake||'';$('quinellaPlannedStake').value=d.quinellaPlannedStake||'';updateStakePlanUI();$('opponents').value=d.opponents||'';
     $('grade').value=d.grade||'';$('surface').value=d.surface||'';$('age').value=d.age||'';$('weight').value=d.weight||'';$('distance').value=d.distance||'';
     $('result').classList.add('hidden');$('draftMsg').textContent='未判定の入力内容を読み込みました。';
   }finally{raceFormLoading=false}
@@ -449,7 +468,7 @@ function loadAssessmentToForm(r){
     $('raceDate').value=r.raceDate;$('venue').value=r.venue;$('raceNo').value=String(r.raceNo);$('raceName').value=r.raceName||'';
     $('runnerCountSelect').value=String(r.n||'');renderOddsGrid();
     for(const x of r.runners||[]){const el=$('oddsGrid').querySelector(`input[data-horse="${x.horse_no}"]`);if(el)el.value=String(x.win_odds)}syncOddsFromGrid();
-    $('axisHorseNo').value=r.priorAxisHorseNo||'';$('betDecision').value=r.betDecision||'';$('betType').value=r.context?.bet_type||(r.betDecision==='buy'?'quinella':'');$('plannedStake').value=r.plannedStake||'';
+    $('axisHorseNo').value=r.priorAxisHorseNo||'';$('betDecision').value=r.betDecision||'';$('betType').value=r.context?.bet_type||(r.betDecision==='buy'?'quinella':'');$('plannedStake').value=r.plannedStake||'';$('winPlannedStake').value=r.plannedWinStake||'';$('quinellaPlannedStake').value=r.plannedQuinellaStake||'';updateStakePlanUI();
     $('opponents').value=(r.opponents||[]).map(x=>x.horseNo).join(' ');
     $('grade').value=r.context?.grade||'';$('surface').value=r.context?.surface||'';$('age').value=r.context?.age||'';$('weight').value=r.context?.weight||'';$('distance').value=r.context?.distance||'';
     $('draftMsg').textContent='判定済みの凍結データを読み込みました.';
@@ -522,7 +541,7 @@ async function api(path,opt={}){
   }
 }
 function normalizeSnapshot(s){if(!Array.isArray(s))return[];if(s.length&&typeof s[0]==='object')return s.map(x=>({horse_no:Number(x.horse_no),popularity:Number(x.popularity),win_odds:Number(x.win_odds)})).sort((a,b)=>a.popularity-b.popularity);return[]}
-function rowToApp(r){const runners=normalizeSnapshot(r.odds_snapshot),n=runners.length||Number(r.runner_count),wallAnalysis=analyzeWalls(runners),axisRisk=axisRiskAnalysis(runners),ctx=r.context||{},derivedSecond=secondRangeAnalysis(runners,r.structure_code),secondRange=ctx.second_range||derivedSecond,structure={code:r.structure_code,name:r.structure_name},baseFirstRange=ctx.base_first_range||firstPlaceRangeAnalysis(runners),firstRange=ctx.first_range||g1FirstPlaceOverride(ctx.grade||'',ctx.age||'',ctx.distance||'',baseFirstRange),baseSecondPlaceRange=ctx.base_second_place_range||secondPlaceRangeAnalysis(runners),secondPlaceRange=ctx.second_place_range||g1SecondPlaceOverride(ctx.grade||'',ctx.age||'',ctx.distance||'',baseSecondPlaceRange),baseSelectionDecision=selectionDecisionAnalysis(firstRange,secondPlaceRange),firstRangeSpread=ctx.first_range_spread||firstRangeSpreadAnalysis(runners,firstRange),v229Filter=ctx.v229_filter||ctx.v228_filter||v229FilterAnalysis(ctx.grade||'',ctx.age||'',ctx.distance||'',baseFirstRange,firstRange,firstRangeSpread),selectionDecision=ctx.selection_decision||selectionDecisionV230(baseSelectionDecision,v229Filter,secondPlaceRange);return{id:r.id,storageSource:r.__storage_source||'cloud',raceDate:r.race_date,venue:r.venue,raceNo:r.race_no,raceName:r.race_name||'',priorAxisHorseNo:r.prior_axis_horse_no==null?null:Number(r.prior_axis_horse_no),priorAxisPopularity:r.prior_axis_popularity==null?null:Number(r.prior_axis_popularity),betDecision:r.bet_decision,plannedStake:Number(r.planned_stake_yen||0),opponents:Array.isArray(r.quinella_opponents)?r.quinella_opponents.map(x=>({horseNo:Number(x.horse_no),winOdds:Number(x.win_odds),popularity:x.popularity==null?null:Number(x.popularity)})):[],assessedAt:r.assessed_at,runners,n,wallAnalysis,axisRisk,secondRange,baseFirstRange,firstRange,baseSecondPlaceRange,secondPlaceRange,firstRangeSpread,v229Filter,selectionDecision,c4:Number(r.c4),c9:Number(r.c59),c40:Number(r.c40),c12:Number(r.c12),fav:Number(r.fav_odds),under40:r.under40_count,gap45:Number(r.gap45),effectiveN:Number(r.effective_n),structure,brake:{level:r.brake_level,verdict:r.brake_verdict,risk:Number(r.risk_score),reasons:r.reasons||[]},context:ctx,rangeRuleVer:String(ctx.range_rule_ver||''),resultFirst:r.result_first_horse_no==null?null:Number(r.result_first_horse_no),resultSecond:r.result_second_horse_no==null?null:Number(r.result_second_horse_no),winStake:ctx.performance?.win_stake_yen==null?null:Number(ctx.performance.win_stake_yen),winReturn:ctx.performance?.win_return_yen==null?null:Number(ctx.performance.win_return_yen),quinellaStake:r.quinella_stake_yen==null?null:Number(r.quinella_stake_yen),quinellaReturn:r.quinella_return_yen==null?null:Number(r.quinella_return_yen),resultAt:r.result_recorded_at,locked:true}}
+function rowToApp(r){const runners=normalizeSnapshot(r.odds_snapshot),n=runners.length||Number(r.runner_count),wallAnalysis=analyzeWalls(runners),axisRisk=axisRiskAnalysis(runners),ctx=r.context||{},derivedSecond=secondRangeAnalysis(runners,r.structure_code),secondRange=ctx.second_range||derivedSecond,structure={code:r.structure_code,name:r.structure_name},baseFirstRange=ctx.base_first_range||firstPlaceRangeAnalysis(runners),firstRange=ctx.first_range||g1FirstPlaceOverride(ctx.grade||'',ctx.age||'',ctx.distance||'',baseFirstRange),baseSecondPlaceRange=ctx.base_second_place_range||secondPlaceRangeAnalysis(runners),secondPlaceRange=ctx.second_place_range||g1SecondPlaceOverride(ctx.grade||'',ctx.age||'',ctx.distance||'',baseSecondPlaceRange),baseSelectionDecision=selectionDecisionAnalysis(firstRange,secondPlaceRange),firstRangeSpread=ctx.first_range_spread||firstRangeSpreadAnalysis(runners,firstRange),v229Filter=ctx.v229_filter||ctx.v228_filter||v229FilterAnalysis(ctx.grade||'',ctx.age||'',ctx.distance||'',baseFirstRange,firstRange,firstRangeSpread),selectionDecision=ctx.selection_decision||selectionDecisionV230(baseSelectionDecision,v229Filter,secondPlaceRange);return{id:r.id,storageSource:r.__storage_source||'cloud',raceDate:r.race_date,venue:r.venue,raceNo:r.race_no,raceName:r.race_name||'',priorAxisHorseNo:r.prior_axis_horse_no==null?null:Number(r.prior_axis_horse_no),priorAxisPopularity:r.prior_axis_popularity==null?null:Number(r.prior_axis_popularity),betDecision:r.bet_decision,plannedStake:Number(r.planned_stake_yen||0),plannedWinStake:ctx.planned_win_stake_yen==null?((ctx.bet_type==='win')?Number(r.planned_stake_yen||0):0):Number(ctx.planned_win_stake_yen),plannedQuinellaStake:ctx.planned_quinella_stake_yen==null?((ctx.bet_type==='quinella')?Number(r.planned_stake_yen||0):0):Number(ctx.planned_quinella_stake_yen),opponents:Array.isArray(r.quinella_opponents)?r.quinella_opponents.map(x=>({horseNo:Number(x.horse_no),winOdds:Number(x.win_odds),popularity:x.popularity==null?null:Number(x.popularity)})):[],assessedAt:r.assessed_at,runners,n,wallAnalysis,axisRisk,secondRange,baseFirstRange,firstRange,baseSecondPlaceRange,secondPlaceRange,firstRangeSpread,v229Filter,selectionDecision,c4:Number(r.c4),c9:Number(r.c59),c40:Number(r.c40),c12:Number(r.c12),fav:Number(r.fav_odds),under40:r.under40_count,gap45:Number(r.gap45),effectiveN:Number(r.effective_n),structure,brake:{level:r.brake_level,verdict:r.brake_verdict,risk:Number(r.risk_score),reasons:r.reasons||[]},context:ctx,rangeRuleVer:String(ctx.range_rule_ver||''),resultFirst:r.result_first_horse_no==null?null:Number(r.result_first_horse_no),resultSecond:r.result_second_horse_no==null?null:Number(r.result_second_horse_no),winStake:ctx.performance?.win_stake_yen==null?null:Number(ctx.performance.win_stake_yen),winReturn:ctx.performance?.win_return_yen==null?null:Number(ctx.performance.win_return_yen),quinellaStake:r.quinella_stake_yen==null?null:Number(r.quinella_stake_yen),quinellaReturn:r.quinella_return_yen==null?null:Number(r.quinella_return_yen),resultAt:r.result_recorded_at,locked:true}}
 async function findRace(date,venue,no){const q=new URLSearchParams({select:'*',race_date:`eq.${date}`,venue:`eq.${venue}`,race_no:`eq.${no}`,limit:'1'}),x=await api('/race_assessments?'+q);return x?.[0]?rowToApp(x[0]):null}
 async function insertRace(p,calc){const row={race_date:p.raceDate,venue:p.venue,race_no:p.raceNo,race_name:p.raceName||null,prior_axis_horse_no:p.priorAxisHorseNo||null,prior_axis_popularity:p.priorAxisPopularity||null,bet_decision:p.betDecision,planned_stake_yen:p.plannedStake,quinella_opponents:p.opponents,odds_snapshot:calc.runners,runner_count:calc.n,c4:calc.c4,c59:calc.c9,c40:calc.c40,c12:calc.c12,fav_odds:calc.fav,under40_count:calc.under40,gap45:calc.gap45,effective_n:calc.effectiveN,structure_code:calc.structure.code,structure_name:calc.structure.name,brake_level:calc.brake.level,brake_verdict:calc.brake.verdict,risk_score:calc.brake.risk,reasons:calc.brake.reasons,context:{...(p.context||{}),wall_profile:calc.wallAnalysis.walls,max_wall:calc.wallAnalysis.max,upper_wall:calc.wallAnalysis.upper,middle_wall:calc.wallAnalysis.middle,axis_risk:calc.axisRisk,market_spread:calc.secondRange,second_range:calc.secondRange,base_first_range:calc.baseFirstRange,first_range:calc.firstRange,first_place_algo:'boundary_score_v1_g1_fallback_v230',base_second_place_range:calc.baseSecondPlaceRange,second_place_range:calc.secondPlaceRange,second_place_algo:'boundary_score_v1_g1_safety_v230',first_range_spread:calc.firstRangeSpread,v229_filter:calc.v229Filter,opponent_range_lock:true,selection_decision:calc.selectionDecision}};const x=await api('/race_assessments',{method:'POST',headers:{'content-type':'application/json','Prefer':'return=representation'},body:JSON.stringify(row)});return rowToApp(x[0])}
 function runnerText(r,h){const x=findRunner(r.runners,h);return x?`${h}番（入力時点 ${x.popularity}人気・${x.win_odds.toFixed(1)}倍）`:`${h}番（入力時点照合不可）`}
@@ -541,12 +560,12 @@ function pairOutcome(r){
 function renderPlanSummary(r){
   const ps=$('planSummary');if(!ps||!r)return;
   ps.classList.remove('hidden');
-  const preview=!!r.preview,decision=preview?$('betDecision').value:r.betDecision,betType=preview?$('betType').value:(r.context?.bet_type||(r.betDecision==='buy'?'quinella':'')),stake=preview?(Number($('plannedStake').value)||0):Number(r.plannedStake||0);
+  const preview=!!r.preview,decision=preview?$('betDecision').value:r.betDecision,betType=preview?$('betType').value:(r.context?.bet_type||(r.betDecision==='buy'?'quinella':'')),plan=preview?stakePlanValues():{win:Number(r.plannedWinStake||0),quinella:Number(r.plannedQuinellaStake||0),total:Number(r.plannedStake||0)},stake=plan.total;
   let opponents=[];if(preview){try{opponents=parseOpponentHorseNos($('opponents').value).map(h=>{const x=findRunner(r.runners,h);return x?{horseNo:h,popularity:x.popularity,winOdds:x.win_odds}:{horseNo:h,popularity:null,winOdds:null}})}catch{}}else opponents=r.opponents||[];
   const typeLabel=betType==='win'?'単勝':betType==='both'?'単勝＋馬連':betType==='quinella'?'馬連':'券種未選択';
   if(decision==='buy'){
     const detail=betType==='win'?'':(opponents.length?'<br>相手：'+esc(opponents.map(x=>x.winOdds!=null?x.horseNo+'番('+(x.popularity?x.popularity+'人気・':'')+Number(x.winOdds).toFixed(1)+'倍)':x.horseNo+'番').join(' / ')):'<br><span class="muted">馬連を買う場合は相手馬を入力してください</span>');
-    ps.innerHTML='<b>🟢 '+typeLabel+'・'+yen(stake)+'</b>'+detail;
+    const split=betType==='both'&&plan.win>0&&plan.quinella>0?'<br>単勝 '+yen(plan.win)+' / 馬連 '+yen(plan.quinella)+' / 合計 '+yen(stake):'';ps.innerHTML='<b>🟢 '+typeLabel+'・'+yen(stake)+'</b>'+split+detail;
   }else if(decision==='skip')ps.innerHTML='<b>🔴 見送り</b><br>予定投資額 0円';
   else ps.innerHTML='<b>購入判断：未確定</b><br>「今回の戦い方」を見て券種を決めてください。';
 }
@@ -735,10 +754,10 @@ function fixedExclusionAnalysis(ctx={}){
   return{excluded:false,code:'',title:'',reason:''};
 }
 function purchaseGuardControls(locked){
-  const ids=['betDecision','betType','plannedStake','opponents'];
+  const ids=['betDecision','betType','plannedStake','winPlannedStake','quinellaPlannedStake','opponents'];
   for(const id of ids){const el=$(id);if(el)el.disabled=!!locked}
   if(locked){
-    $('betDecision').value='skip';$('betType').value='';$('plannedStake').value='';$('opponents').value='';
+    $('betDecision').value='skip';$('betType').value='';$('plannedStake').value='';$('winPlannedStake').value='';$('quinellaPlannedStake').value='';updateStakePlanUI();$('opponents').value='';
     updateOpponentBrake();updateInputBrake();
     if(pendingAssessment?.preview)renderPlanSummary(pendingAssessment.preview);
   }
@@ -1296,7 +1315,7 @@ function render(r){
   const sb=$('selectionBox');sb.className='winRange '+sd.level;sb.classList.remove('hidden');
   $('selectionValue').textContent=sd.status;$('selectionStatus').textContent='1着'+fr.end+' / 2着'+pr.end;$('selectionText').textContent=sd.reason;
   renderWinEv(r,fr);
-  if(r.preview&&pipe.hardLocked){$('betDecision').value='skip';$('plannedStake').value='';$('opponents').value='';updateOpponentBrake();updateInputBrake();}if(r.preview)updateEligibilityGuard();
+  if(r.preview&&pipe.hardLocked){$('betDecision').value='skip';$('plannedStake').value='';$('winPlannedStake').value='';$('quinellaPlannedStake').value='';updateStakePlanUI();$('opponents').value='';updateOpponentBrake();updateInputBrake();}if(r.preview)updateEligibilityGuard();
   const arb=$('axisRisk');
   arb.className='axisRisk '+ar.level;arb.classList.remove('hidden');
   const axisInfo=r.priorAxisHorseNo?findRunner(r.runners,r.priorAxisHorseNo):null,axisTxt=axisInfo&&axisInfo.popularity<=4?'<br><b>今回の事前軸：'+axisInfo.popularity+'番人気</b>':'';
@@ -1335,7 +1354,7 @@ $('judge').onclick=async()=>{
 $('savePlan').onclick=async()=>{
   $('savePlan').disabled=true;
   try{
-    const p={raceDate:$('raceDate').value,venue:$('venue').value,raceNo:Number($('raceNo').value),raceName:$('raceName').value.trim(),priorAxisHorseNo:Number($('axisHorseNo').value)||null,betDecision:$('betDecision').value,betType:$('betType').value,plannedStake:Number($('plannedStake').value)||0,opponentsRaw:$('opponents').value,oddsRaw:$('odds').value,context:{grade:$('grade').value,surface:$('surface').value,age:$('age').value,weight:$('weight').value,distance:$('distance').value,bet_type:$('betType').value,range_rule_ver:'2.40',filter_rule_ver:'2.40',strategy_rule_ver:'2.40',rule_registry_ver:'2.40',snapshot_format:'horse_popularity_odds'}};
+    const plan=stakePlanValues(),p={raceDate:$('raceDate').value,venue:$('venue').value,raceNo:Number($('raceNo').value),raceName:$('raceName').value.trim(),priorAxisHorseNo:Number($('axisHorseNo').value)||null,betDecision:$('betDecision').value,betType:$('betType').value,plannedStake:plan.total,plannedWinStake:plan.win,plannedQuinellaStake:plan.quinella,opponentsRaw:$('opponents').value,oddsRaw:$('odds').value,context:{grade:$('grade').value,surface:$('surface').value,age:$('age').value,weight:$('weight').value,distance:$('distance').value,bet_type:$('betType').value,planned_win_stake_yen:plan.win,planned_quinella_stake_yen:plan.quinella,range_rule_ver:'2.40',filter_rule_ver:'2.40',strategy_rule_ver:'2.40',rule_registry_ver:'2.40',snapshot_format:'horse_popularity_odds'}};
     if(!pendingAssessment||pendingAssessment.key!==raceKey(p.raceDate,p.venue,p.raceNo))throw new Error('先に「まず判定を見る」を押してください');
     if(pendingAssessment.oddsRaw!==p.oddsRaw)throw new Error('判定後にオッズが変更されています。もう一度「まず判定を見る」で再判定してください');if(pendingAssessment.grade!==p.context.grade)throw new Error('判定後に格が変更されています。もう一度「まず判定を見る」で再判定してください');if(pendingAssessment.surface!==p.context.surface)throw new Error('判定後に芝/ダートが変更されています。もう一度「まず判定を見る」で再判定してください');if(pendingAssessment.age!==p.context.age||pendingAssessment.distance!==String(p.context.distance||'')||pendingAssessment.weight!==p.context.weight)throw new Error('判定後に年齢条件・距離・重量条件が変更されています。もう一度「まず判定を見る」で再判定してください');
     const old=await findRace(p.raceDate,p.venue,p.raceNo);if(old){pendingAssessment=null;render(old);throw new Error('このレースはすでに保存済みです')}
@@ -1343,10 +1362,10 @@ $('savePlan').onclick=async()=>{
     const rr={context:p.context,runners:calc.runners,structure:calc.structure};
     const mp=marketPatternAnalysis(rr,calc.firstRange,calc.secondPlaceRange,calc.firstRangeSpread,calc.v229Filter);
     const pipe=decisionPipelineAnalysis(rr,calc.firstRange,calc.secondPlaceRange,calc.firstRangeSpread,calc.v229Filter,calc.selectionDecision);
-    if(pipe.hardLocked){p.betDecision='skip';p.betType='';p.context.bet_type='';p.plannedStake=0;p.opponents=[];p.opponentsRaw='';}
+    if(pipe.hardLocked){p.betDecision='skip';p.betType='';p.context.bet_type='';p.plannedStake=0;p.plannedWinStake=0;p.plannedQuinellaStake=0;p.context.planned_win_stake_yen=0;p.context.planned_quinella_stake_yen=0;p.opponents=[];p.opponentsRaw='';}
     if(p.priorAxisHorseNo){const ai=findRunner(calc.runners,p.priorAxisHorseNo);if(!ai)throw new Error(`事前軸${p.priorAxisHorseNo}番が入力時点オッズ表にありません`);p.priorAxisPopularity=ai.popularity}else p.priorAxisPopularity=null;
     if(!p.betDecision)throw new Error('判定を確認したあと「購入」か「見送り」を選択してください');
-    if(p.betDecision==='skip'){p.betType='';p.context.bet_type='';p.plannedStake=0;p.opponents=[]}
+    if(p.betDecision==='skip'){p.betType='';p.context.bet_type='';p.plannedStake=0;p.plannedWinStake=0;p.plannedQuinellaStake=0;p.context.planned_win_stake_yen=0;p.context.planned_quinella_stake_yen=0;p.opponents=[]}
     else{
       if(!p.betType)throw new Error('購入する場合、券種を選択してください');
       if(!p.priorAxisHorseNo)throw new Error('購入する場合、最終軸の馬番が必要です');
@@ -1354,6 +1373,7 @@ $('savePlan').onclick=async()=>{
       if(ai.popularity>calc.firstRange.end)throw new Error(`軸馬は1着レンジ${calc.firstRange.label}の中から選んでください（現在${ai.popularity}番人気）`);
       if((p.betType==='quinella'||p.betType==='both')&&ai.popularity>4)throw new Error(`馬連を買う場合、軸は入力時点1〜4番人気が必要です（現在${ai.popularity}番人気）`);
       if(!Number.isInteger(p.plannedStake)||p.plannedStake<=0)throw new Error('購入する場合、予定投資額を1円以上の整数で入力してください');
+      if(p.betType==='both'&&(!Number.isInteger(p.plannedWinStake)||p.plannedWinStake<=0||!Number.isInteger(p.plannedQuinellaStake)||p.plannedQuinellaStake<=0))throw new Error('単勝＋馬連では、単勝予定額と馬連予定額をそれぞれ1円以上で入力してください');
       if(p.betType==='win'){p.opponents=[]}
       else{
         const nums=parseOpponentHorseNos(p.opponentsRaw);if(!nums.length)throw new Error('馬連を買う場合、相手馬を1頭以上入力してください');if(nums.includes(p.priorAxisHorseNo))throw new Error('相手馬に軸と同じ馬番は入れられません');
@@ -1549,13 +1569,13 @@ async function loadAll(){
 }
 function csvQuote(v){return'"'+String(v??'').replaceAll('"','""')+'"'}$('exportCsv').onclick=async()=>{try{
   const h=historyCache.length?historyCache:await getHistory();
-  const cols=['race_date','venue','race_no','race_name','odds_snapshot','range_code','condition_category','condition_sample_n','market_pattern_key','market_pattern_status','first_structure_grade','second_structure_grade','quinella_pattern_fit','pattern_locked','four_level_code','four_level_label','risk_signal_count','risk_signals','hard_lock','hard_lock_code','decision_reason','high_confidence_pass','exclusion_reason','neff','neff_ratio','first_place_range_end','second_place_range_end','selection_status','selection_locked','result_first_horse_no','result_first_popularity','first_in_range','result_second_horse_no','result_second_popularity','second_in_range','both_in_target_ranges','bet_decision','bet_type','planned_stake_yen','opponents','win_stake_yen','win_return_yen','win_roi_pct','quinella_stake_yen','quinella_return_yen','quinella_roi_pct'];
+  const cols=['race_date','venue','race_no','race_name','odds_snapshot','range_code','condition_category','condition_sample_n','market_pattern_key','market_pattern_status','first_structure_grade','second_structure_grade','quinella_pattern_fit','pattern_locked','four_level_code','four_level_label','risk_signal_count','risk_signals','hard_lock','hard_lock_code','decision_reason','high_confidence_pass','exclusion_reason','neff','neff_ratio','first_place_range_end','second_place_range_end','selection_status','selection_locked','result_first_horse_no','result_first_popularity','first_in_range','result_second_horse_no','result_second_popularity','second_in_range','both_in_target_ranges','bet_decision','bet_type','planned_stake_yen','planned_win_stake_yen','planned_quinella_stake_yen','opponents','win_stake_yen','win_return_yen','win_roi_pct','quinella_stake_yen','quinella_return_yen','quinella_roi_pct'];
   let csv='\ufeff'+cols.join(',')+'\n';
   csv+=h.map(r=>{
     const market=r.secondRange||secondRangeAnalysis(r.runners,r.structure.code),fr=r.firstRange||firstPlaceRangeAnalysis(r.runners),pr=r.secondPlaceRange||secondPlaceRangeAnalysis(r.runners),sd=r.selectionDecision||selectionDecisionAnalysis(fr,pr),o=pairOutcome(r),f=findRunner(r.runners,r.resultFirst),s=findRunner(r.runners,r.resultSecond);
-    const ds=r.context?.decision_snapshot||{};return[r.raceDate,r.venue,r.raceNo,r.raceName,r.runners.map(x=>x.horse_no+'='+x.popularity+'='+x.win_odds).join('|'),r.structure.code,ds.condition_category||'',ds.condition_sample_n??'',ds.market_pattern_key||'',ds.market_pattern_status||'',ds.first_structure_grade||'',ds.second_structure_grade||'',ds.quinella_pattern_fit||'',ds.pattern_locked??'',ds.four_level_code||'',ds.four_level_label||'',ds.risk_signal_count??'',Array.isArray(ds.risk_signals)?ds.risk_signals.map(x=>x.id||x.label).join('|'):'',ds.hard_lock??'',ds.hard_lock_code||'',ds.decision_reason||'',ds.high_confidence_pass??'',ds.exclusion_reason||'',ds.neff??'',ds.neff_ratio??'',fr.end,pr.end,sd.status,sd.locked,r.resultFirst,f?f.popularity:'',o?o.firstInRange:'',r.resultSecond,s?s.popularity:'',o?o.secondInRange:'',o?o.bothInTarget:'',r.betDecision,r.context?.bet_type||'',r.plannedStake,(r.opponents||[]).map(x=>x.horseNo+'='+(x.popularity||'')+'='+x.winOdds).join('|'),r.winStake,r.winReturn,r.winStake>0?roiPct(r.winStake,r.winReturn):'',r.quinellaStake,r.quinellaReturn,r.quinellaStake>0?roiPct(r.quinellaStake,r.quinellaReturn):''];
+    const ds=r.context?.decision_snapshot||{};return[r.raceDate,r.venue,r.raceNo,r.raceName,r.runners.map(x=>x.horse_no+'='+x.popularity+'='+x.win_odds).join('|'),r.structure.code,ds.condition_category||'',ds.condition_sample_n??'',ds.market_pattern_key||'',ds.market_pattern_status||'',ds.first_structure_grade||'',ds.second_structure_grade||'',ds.quinella_pattern_fit||'',ds.pattern_locked??'',ds.four_level_code||'',ds.four_level_label||'',ds.risk_signal_count??'',Array.isArray(ds.risk_signals)?ds.risk_signals.map(x=>x.id||x.label).join('|'):'',ds.hard_lock??'',ds.hard_lock_code||'',ds.decision_reason||'',ds.high_confidence_pass??'',ds.exclusion_reason||'',ds.neff??'',ds.neff_ratio??'',fr.end,pr.end,sd.status,sd.locked,r.resultFirst,f?f.popularity:'',o?o.firstInRange:'',r.resultSecond,s?s.popularity:'',o?o.secondInRange:'',o?o.bothInTarget:'',r.betDecision,r.context?.bet_type||'',r.plannedStake,r.plannedWinStake,r.plannedQuinellaStake,(r.opponents||[]).map(x=>x.horseNo+'='+(x.popularity||'')+'='+x.winOdds).join('|'),r.winStake,r.winReturn,r.winStake>0?roiPct(r.winStake,r.winReturn):'',r.quinellaStake,r.quinellaReturn,r.quinellaStake>0?roiPct(r.quinellaStake,r.quinellaReturn):''];
   }).map(row=>row.map(csvQuote).join(',')).join('\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='race-strategy-v2.39-history.csv';a.click();URL.revokeObjectURL(a.href);
 }catch(e){alert(e.message)}};
-$('reload').onclick=()=>{loadAll();renderRaceList()};renderRuleRegistry();renderHistoricalPatternReview();renderOddsGrid();updateEligibilityGuard();renderRaceList();loadAll();
+$('reload').onclick=()=>{loadAll();renderRaceList()};renderRuleRegistry();renderHistoricalPatternReview();renderOddsGrid();updateStakePlanUI();updateEligibilityGuard();renderRaceList();loadAll();
 </script></body></html>
