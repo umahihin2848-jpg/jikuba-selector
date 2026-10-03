@@ -85,7 +85,7 @@ async function run(browserType,label){
   page.on('pageerror',e=>errs.push('pageerror:'+e.message));
   page.on('console',m=>{if(m.type()==='error')errs.push('console:'+m.text())});
   await page.goto(LOCAL,{waitUntil:'networkidle'});
-  assert(await page.title()==='レース戦略 v2.42',label+' title');
+  assert(await page.title()==='レース戦略 v2.43',label+' title');
   assert(await page.locator('link[rel="manifest"]').getAttribute('href')==='./manifest.webmanifest',label+' manifest');
   const bodyText=await page.locator('body').innerText();
   assert(bodyText.includes('入力時刻に制限はありません'),label+' 時間制限なし表示');
@@ -103,7 +103,7 @@ async function run(browserType,label){
   assert(await page.locator('#tierForwardDashboard').count()===1,label+' 4段階前向き成績UIシェル');
   assert(await page.locator('#hardLockAudit').count()===1,label+' 固定ロック監査UIシェル');
   assert(await page.locator('#eligibilityGuard').count()===1,label+' 入力時対象判定ガードUIシェル');
-  assert(await page.locator('#splitStakeBox').count()===1&&await page.locator('#winPlannedStake').count()===1&&await page.locator('#quinellaPlannedStake').count()===1&&await page.locator('#wideAdd').count()===1&&await page.locator('#widePlannedStake').count()===1&&await page.locator('#wideOpponents').count()===1,label+' 単勝・馬連・ワイドの予定額・相手UIシェル');
+  assert(await page.locator('#splitStakeBox').count()===1&&await page.locator('#winPlannedStake').count()===1&&await page.locator('#quinellaPlannedStake').count()===1&&await page.locator('#wideAdd').count()===1&&await page.locator('#widePlannedStake').count()===1&&await page.locator('#wideOpponents').count()===1&&await page.locator('#wideRecommendation').count()===1,label+' 単勝・馬連・ワイドの予定額・相手・暫定候補UIシェル');
   const inputOrder=await page.evaluate(()=>{const pos=id=>{const el=document.getElementById(id);return el?Array.from(document.querySelectorAll('#inputCard *')).indexOf(el):-1};return{grade:pos('grade'),surface:pos('surface'),age:pos('age'),weight:pos('weight'),distance:pos('distance'),runner:pos('runnerCountSelect'),judge:pos('judge')}}); 
   assert(inputOrder.grade>=0&&inputOrder.grade<inputOrder.runner&&inputOrder.distance<inputOrder.runner&&inputOrder.runner<inputOrder.judge,label+' レース条件を上部入力フローへ移動 '+JSON.stringify(inputOrder));
   await page.selectOption('#grade','G3');await page.selectOption('#age','3');await page.selectOption('#weight','fixed');await page.fill('#distance','1600');await page.waitForTimeout(20);
@@ -335,7 +335,9 @@ async function run(browserType,label){
   await page.fill('#opponents','11');
   await page.waitForTimeout(50);
   assert((await page.textContent('#opponentBrake')).includes('40.0倍以上'),label+' 40倍ブレーキ');
-  await page.fill('#opponents','2 3 4');
+  await page.fill('#opponents','2 3 4');await page.waitForTimeout(30);
+  const wideRecText=await page.textContent('#wideRecommendation');
+  assert(wideRecText.includes('2番')&&wideRecText.includes('4番')&&wideRecText.includes('中心境界'),label+' ワイド暫定候補は中心＋6人気以内の中心境界 '+wideRecText);
   await page.fill('#wideOpponents','2 3 4');await page.waitForTimeout(30);
   assert((await page.textContent('#inputBrake')).includes('最大2頭'),label+' ワイド3頭以上をブロック');
   await page.fill('#wideOpponents','2 5');await page.waitForTimeout(30);
@@ -367,6 +369,7 @@ async function run(browserType,label){
   assert(post.planned_stake_yen===1300&&post.context?.planned_win_stake_yen===400&&post.context?.planned_quinella_stake_yen===600&&post.context?.planned_wide_stake_yen===300,label+' 単勝・馬連・ワイドの予定額を別会計で保存 '+JSON.stringify(post.context));
   assert(post.prior_axis_popularity===1,label+' 軸人気自動保存');
   assert(post.quinella_opponents.length===3&&post.context?.wide_opponents?.length===2&&post.context?.wide_opponent_limit===2,label+' 馬連は広め3頭・ワイドは最大2頭で別保存 '+JSON.stringify(post.context));
+  assert(post.context?.wide_candidate_recommendation?.version==='wide-center-boundary-v1'&&post.context?.wide_candidate_recommendation?.axis_popularity===1&&JSON.stringify(post.context?.wide_candidate_recommendation?.candidate_horse_nos)===JSON.stringify([2,4]),label+' ワイド暫定候補を前向き検証用に保存 '+JSON.stringify(post.context?.wide_candidate_recommendation));
   assert((await page.textContent('#raceList')).includes('購入'),label+' 判定後に一覧が購入表示');
   const doneItem=page.locator('#raceList .raceItem').filter({hasText:label+'テスト'});
   assert(await doneItem.count()===1,label+' 判定済みレースが一覧に存在');
