@@ -11,7 +11,7 @@
 @media(max-width:560px){.ticketDecisionHero{grid-template-columns:1fr}.ticketDecisionHeroCard b{font-size:23px}.betPriority{grid-template-columns:1fr}.betDecision{font-size:20px}}
 </style></head><body><main class="wrap"><h1>レース戦略</h1><div class="tag">基本は単勝。馬連・ワイドは条件が揃ったレースだけ追加する。</div><div id="storageStatus" class="muted" style="margin:6px 0 10px">保存先：確認中…</div>
 <section class="card raceListCard"><div class="raceListHead"><div><h2 style="margin:0">レース一覧</h2><div class="muted"><span id="raceListDate"></span> の対象レース</div></div><button class="secondary" id="newRace">＋ 新規</button></div><div id="raceList" class="raceList"></div></section>
-<section class="card" id="inputCard"><div class="notice"><b>運用：</b><b>まず単勝を買えるレースか判定</b>します。単勝は1〜6人気程度まで人気順位だけで制限せず、1着レンジと軸馬評価を優先。馬連・ワイドは1〜3人気軸を通常、4人気軸は強判定時だけ高分散候補、5人気以下は自動推奨しません。ワイド相手は馬連候補から最大2頭です。</div><div id="eligibilityGuard" class="eligibilityGuard neutral" role="status" aria-live="polite"><div id="eligibilityGuardTitle" class="eligibilityGuardTitle">対象判定：条件入力待ち</div><div id="eligibilityGuardText" class="eligibilityGuardText">格・年齢・距離を入力すると、購入対象か自動確認します。</div></div>
+<section class="card" id="inputCard"><div class="notice"><b>運用：</b><b>まず単勝を買えるレースか判定</b>します。馬連は実際の軸＋相手の買い目を前向き検証し、ワイドは馬連と独立して1〜2頭を選び、軸＋相手がともに3着以内だったかを直接検証します。軸人気別ルールはNが貯まるまで保守的な暫定運用です。</div><div id="eligibilityGuard" class="eligibilityGuard neutral" role="status" aria-live="polite"><div id="eligibilityGuardTitle" class="eligibilityGuardTitle">対象判定：条件入力待ち</div><div id="eligibilityGuardText" class="eligibilityGuardText">格・年齢・距離を入力すると、購入対象か自動確認します。</div></div>
 <div class="grid4"><div><label>日付</label><input id="raceDate" type="date"></div><div><label>競馬場</label><select id="venue"><option value="">選択</option><option>札幌</option><option>函館</option><option>福島</option><option>新潟</option><option>東京</option><option>中山</option><option>中京</option><option>京都</option><option>阪神</option><option>小倉</option></select></div><div><label>R</label><select id="raceNo"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option selected>11</option><option>12</option></select></div></div>
 <label>レース名（任意）</label><input id="raceName" placeholder="例：スプリンターズS">
 <div class="notice" style="margin-top:12px"><b>レース条件</b><br>判定に使う基本条件です。ここを入力すると対象/対象外も自動判定します。</div>
@@ -640,6 +640,8 @@ function runnerText(r,h){const x=findRunner(r.runners,h);return x?`${h}番（入
 function inRecommendedRange(r,info){if(!info)return null;if(r.structure.code==='A')return info.popularity<=4;if(r.structure.code==='B')return info.popularity<=9;if(r.structure.code==='C')return info.popularity<=12;return info.win_odds<40}
 function plannedQuinellaOutcome(r){
   if(!r||r.resultFirst==null||r.resultSecond==null||!r.priorAxisHorseNo)return null;
+  const qPlanned=r.context?.bet_type==='quinella'||r.context?.bet_type==='both'||Number(r.plannedQuinellaStake)>0;
+  if(!qPlanned)return null;
   const opp=(r.opponents||[]).map(x=>Number(x.horseNo)).filter(Number.isFinite);
   if(!opp.length)return null;
   const axis=Number(r.priorAxisHorseNo),top2=[Number(r.resultFirst),Number(r.resultSecond)],axisIn=top2.includes(axis),partner=axisIn?top2.find(x=>x!==axis):null;
@@ -648,6 +650,8 @@ function plannedQuinellaOutcome(r){
 }
 function plannedWideOutcome(r){
   if(!r||r.resultFirst==null||r.resultSecond==null||r.resultThird==null||!r.priorAxisHorseNo)return null;
+  const wPlanned=!!(r.context?.wide_selected||Number(r.plannedWideStake)>0);
+  if(!wPlanned)return null;
   const opp=(r.wideOpponents||[]).map(x=>Number(x.horseNo)).filter(Number.isFinite);
   if(!opp.length)return null;
   const axis=Number(r.priorAxisHorseNo),top3=[Number(r.resultFirst),Number(r.resultSecond),Number(r.resultThird)],axisIn=top3.includes(axis),hitNos=axisIn?opp.filter(h=>top3.includes(h)):[];
@@ -655,6 +659,7 @@ function plannedWideOutcome(r){
 }
 function wideRecommendationOutcome(r){
   if(!r||r.resultFirst==null||r.resultSecond==null||r.resultThird==null||!r.priorAxisHorseNo)return null;
+  if(!(r.context?.wide_selected||Number(r.plannedWideStake)>0))return null;
   const rec=r.context?.wide_candidate_recommendation,cands=Array.isArray(rec?.candidate_horse_nos)?rec.candidate_horse_nos.map(Number).filter(Number.isFinite):[];
   if(!rec?.eligible||!cands.length)return null;
   const axis=Number(r.priorAxisHorseNo),top3=[Number(r.resultFirst),Number(r.resultSecond),Number(r.resultThird)],axisIn=top3.includes(axis),slotHits=cands.map(h=>!!(axisIn&&top3.includes(h)));
@@ -1519,7 +1524,7 @@ function renderBetPriority(pipe,fr,pr,r=null){
   if(hero){hero.classList.remove('hidden');$('winHeroLabel').textContent=winLabel;$('winHeroSub').textContent=winSub;$('quinellaHeroLabel').textContent=qLabel;$('quinellaHeroSub').textContent=qSub;wh.className='ticketDecisionHeroCard '+(pipe.hardLocked||pipe.fourLevelCode==='recommend_skip'?'stop':pipe.winFit==='candidate'?'go':'caution');qh.className='ticketDecisionHeroCard '+(pipe.hardLocked||pipe.fourLevelCode==='recommend_skip'?'stop':qGo?'go':'caution');}
   wc.className='betCard '+(pipe.hardLocked?'stop':pipe.winFit==='candidate'?'primary':'secondary');
   qc.className='betCard '+(pipe.hardLocked?'stop':qGo?'primary':'secondary');
-  const axisWarning=axisPolicy.axis&&axisPolicy.popularity===4?'<br><b>⚠️ 4人気軸：</b>高分散。強判定時だけ馬連・ワイドを自動候補にします。':axisPolicy.axis&&axisPolicy.popularity>=5?'<br><b>⚠️ '+axisPolicy.popularity+'人気軸：</b>馬連・ワイドは自動推奨外です。':'';
+  const axisWarning=axisPolicy.axis&&axisPolicy.popularity===4?'<br><b>⚠️ 4人気軸：</b>馬連は強判定時のみ候補、ワイドは直接3着内データを蓄積中。':axisPolicy.axis&&axisPolicy.popularity>=5?'<br><b>⚠️ '+axisPolicy.popularity+'人気軸：</b>馬連・ワイドとも前向きNが十分になるまで自動推奨外です。':'';
   ws.className='warningStrip '+(pipe.hardLocked?'stop':pipe.riskCount>=2||axisPolicy.highVariance||axisPolicy.popularity>=5?'caution':'good');
   ws.innerHTML=(pipe.hardLocked?'<b>🔴 固定ロック</b> '+esc(pipe.hardLockReason):(pipe.riskGroups||[]).length?'<b>独立リスク '+pipe.riskCount+'種類：</b> '+pipe.riskGroups.map(x=>esc(x.label)).join(' / '):'<b>✅ 大きな注意点なし</b>　単勝候補の絞り込みへ進みます。')+axisWarning;
   renderAxisTicketPolicy(r?.runners||pendingAssessment?.calc?.runners||[],pipe,axisNo);
@@ -1588,7 +1593,7 @@ $('judge').onclick=async()=>{
     if(calc.n!==selectedRunnerCount)throw new Error('出走頭数とオッズ入力数が一致しません');
     let axisPop=null;
     if(p.priorAxisHorseNo){const ai=findRunner(calc.runners,p.priorAxisHorseNo);if(!ai)throw new Error(`事前軸${p.priorAxisHorseNo}番が入力時点オッズ表にありません`);axisPop=ai.popularity}
-    const preview={id:null,raceDate:p.raceDate,venue:p.venue,raceNo:p.raceNo,raceName:p.raceName,priorAxisHorseNo:p.priorAxisHorseNo,priorAxisPopularity:axisPop,betDecision:'',plannedStake:0,opponents:[],assessedAt:null,runners:calc.runners,n:calc.n,wallAnalysis:calc.wallAnalysis,axisRisk:calc.axisRisk,secondRange:calc.secondRange,baseFirstRange:calc.baseFirstRange,firstRange:calc.firstRange,baseSecondPlaceRange:calc.baseSecondPlaceRange,secondPlaceRange:calc.secondPlaceRange,firstRangeSpread:calc.firstRangeSpread,v229Filter:calc.v229Filter,selectionDecision:calc.selectionDecision,c4:calc.c4,c9:calc.c9,c40:calc.c40,c12:calc.c12,fav:calc.fav,under40:calc.under40,gap45:calc.gap45,effectiveN:calc.effectiveN,structure:calc.structure,brake:calc.brake,context:{grade:p.grade,surface:p.surface,age:p.age,weight:$('weight').value,distance:p.distance,bet_type:'',range_rule_ver:'2.40',filter_rule_ver:'2.40',strategy_rule_ver:'2.40',rule_registry_ver:'2.40',axis_ticket_policy_ver:'axis-popularity-ticket-v1'},locked:false,preview:true};
+    const preview={id:null,raceDate:p.raceDate,venue:p.venue,raceNo:p.raceNo,raceName:p.raceName,priorAxisHorseNo:p.priorAxisHorseNo,priorAxisPopularity:axisPop,betDecision:'',plannedStake:0,opponents:[],assessedAt:null,runners:calc.runners,n:calc.n,wallAnalysis:calc.wallAnalysis,axisRisk:calc.axisRisk,secondRange:calc.secondRange,baseFirstRange:calc.baseFirstRange,firstRange:calc.firstRange,baseSecondPlaceRange:calc.baseSecondPlaceRange,secondPlaceRange:calc.secondPlaceRange,firstRangeSpread:calc.firstRangeSpread,v229Filter:calc.v229Filter,selectionDecision:calc.selectionDecision,c4:calc.c4,c9:calc.c9,c40:calc.c40,c12:calc.c12,fav:calc.fav,under40:calc.under40,gap45:calc.gap45,effectiveN:calc.effectiveN,structure:calc.structure,brake:calc.brake,context:{grade:p.grade,surface:p.surface,age:p.age,weight:$('weight').value,distance:p.distance,bet_type:'',range_rule_ver:'2.50',filter_rule_ver:'2.51',strategy_rule_ver:'2.53',rule_registry_ver:'2.53',axis_ticket_policy_ver:'axis-ticket-forward-v2'},locked:false,preview:true};
     pendingAssessment={key:raceKey(p.raceDate,p.venue,p.raceNo),oddsRaw:p.oddsRaw,grade:p.grade,surface:p.surface,age:p.age,weight:$('weight').value,distance:String(p.distance||''),calc,preview};
     render(preview);renderAxisTicketPolicy(calc.runners,currentPendingPipe(),Number($('axisHorseNo').value));renderWideCandidateRecommendation();
     $('msg').textContent='判定しました。結果と解説を確認してから、購入/見送りを決めてください。';
@@ -1599,7 +1604,7 @@ $('judge').onclick=async()=>{
 $('savePlan').onclick=async()=>{
   $('savePlan').disabled=true;
   try{
-    const plan=stakePlanValues(),p={raceDate:$('raceDate').value,venue:$('venue').value,raceNo:Number($('raceNo').value),raceName:$('raceName').value.trim(),priorAxisHorseNo:Number($('axisHorseNo').value)||null,betDecision:$('betDecision').value,betType:$('betType').value,wideSelected:$('wideAdd').value==='yes',plannedStake:plan.total,plannedWinStake:plan.win,plannedQuinellaStake:plan.quinella,plannedWideStake:plan.wide,opponentsRaw:$('opponents').value,wideOpponentsRaw:$('wideOpponents').value,oddsRaw:$('odds').value,context:{grade:$('grade').value,surface:$('surface').value,age:$('age').value,weight:$('weight').value,distance:$('distance').value,bet_type:$('betType').value,wide_selected:$('wideAdd').value==='yes',planned_win_stake_yen:plan.win,planned_quinella_stake_yen:plan.quinella,planned_wide_stake_yen:plan.wide,wide_opponents:[],wide_opponent_limit:2,range_rule_ver:'2.40',filter_rule_ver:'2.40',strategy_rule_ver:'2.40',rule_registry_ver:'2.40',axis_ticket_policy_ver:'axis-popularity-ticket-v1',snapshot_format:'horse_popularity_odds'}};
+    const plan=stakePlanValues(),p={raceDate:$('raceDate').value,venue:$('venue').value,raceNo:Number($('raceNo').value),raceName:$('raceName').value.trim(),priorAxisHorseNo:Number($('axisHorseNo').value)||null,betDecision:$('betDecision').value,betType:$('betType').value,wideSelected:$('wideAdd').value==='yes',plannedStake:plan.total,plannedWinStake:plan.win,plannedQuinellaStake:plan.quinella,plannedWideStake:plan.wide,opponentsRaw:$('opponents').value,wideOpponentsRaw:$('wideOpponents').value,oddsRaw:$('odds').value,context:{grade:$('grade').value,surface:$('surface').value,age:$('age').value,weight:$('weight').value,distance:$('distance').value,bet_type:$('betType').value,wide_selected:$('wideAdd').value==='yes',planned_win_stake_yen:plan.win,planned_quinella_stake_yen:plan.quinella,planned_wide_stake_yen:plan.wide,wide_opponents:[],wide_opponent_limit:2,range_rule_ver:'2.50',filter_rule_ver:'2.51',strategy_rule_ver:'2.53',rule_registry_ver:'2.53',axis_ticket_policy_ver:'axis-ticket-forward-v2',snapshot_format:'horse_popularity_odds'}};
     if(!pendingAssessment||pendingAssessment.key!==raceKey(p.raceDate,p.venue,p.raceNo))throw new Error('先に「まず判定を見る」を押してください');
     if(pendingAssessment.oddsRaw!==p.oddsRaw)throw new Error('判定後にオッズが変更されています。もう一度「まず判定を見る」で再判定してください');if(pendingAssessment.grade!==p.context.grade)throw new Error('判定後に格が変更されています。もう一度「まず判定を見る」で再判定してください');if(pendingAssessment.surface!==p.context.surface)throw new Error('判定後に芝/ダートが変更されています。もう一度「まず判定を見る」で再判定してください');if(pendingAssessment.age!==p.context.age||pendingAssessment.distance!==String(p.context.distance||'')||pendingAssessment.weight!==p.context.weight)throw new Error('判定後に年齢条件・距離・重量条件が変更されています。もう一度「まず判定を見る」で再判定してください');
     const old=await findRace(p.raceDate,p.venue,p.raceNo);if(old){pendingAssessment=null;render(old);throw new Error('このレースはすでに保存済みです')}
