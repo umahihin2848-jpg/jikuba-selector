@@ -21,7 +21,7 @@
 <button class="wide" id="judge">まず判定を見る</button><div id="msg" class="muted" style="margin-top:8px"></div>
 <div class="notice" style="margin-top:12px"><b>判定を見てから購入判断</b><br>上の「今回の戦い方」に合わせて券種を選びます。単勝だけなら相手馬入力は不要です。</div>
 <div class="grid"><div><label>買う / 見送り</label><select id="betDecision"><option value="">判定後に選択</option><option value="buy">購入</option><option value="skip">見送り</option></select></div><div><label>購入券種</label><select id="betType"><option value="">判定後に選択</option><option value="win">単勝</option><option value="quinella">馬連</option><option value="both">単勝＋馬連</option></select></div></div>
-<div id="singleStakeBox"><label>予定投資額（合計）</label><input id="plannedStake" type="number" min="0" step="100" inputmode="numeric" placeholder="例：1000"></div>
+<div id="singleStakeBox"><label>基本券種予定額</label><input id="plannedStake" type="number" min="0" step="100" inputmode="numeric" placeholder="例：1000"></div>
 <div id="splitStakeBox" class="hidden"><div class="grid"><div><label>単勝予定額</label><input id="winPlannedStake" type="number" min="0" step="100" inputmode="numeric" placeholder="例：2000"></div><div><label>馬連予定額</label><input id="quinellaPlannedStake" type="number" min="0" step="100" inputmode="numeric" placeholder="例：3000"></div></div><div class="notice" style="margin-top:8px"><b>単勝＋馬連予定額：<span id="plannedStakeTotal">0円</span></b><br><span class="muted">単勝と馬連は別会計で保存します。</span></div></div>
 <div class="grid"><div><label>ワイド追加</label><select id="wideAdd"><option value="no">追加しない</option><option value="yes">追加する</option></select></div><div id="wideStakeBox" class="hidden"><label>ワイド予定額</label><input id="widePlannedStake" type="number" min="0" step="100" inputmode="numeric" placeholder="例：1000"></div></div>
 <div id="allStakeTotal" class="notice hidden" style="margin-top:8px"><b>全券種合計予定額：<span id="allPlannedStakeTotal">0円</span></b><br><span class="muted">単勝・馬連・ワイドは別会計で成績集計します。</span></div>
@@ -69,7 +69,7 @@
   <div id="secondPlaceBox" class="winRange secondaryRange hidden">
     <div class="winRangeHead"><div><div class="winRangeTitle">2着レンジ</div><div class="winRangeValue" id="secondPlaceValue"></div></div><div class="winRangeStatus" id="secondPlaceStatus"></div></div>
     <div class="winRangeText" id="secondPlaceText"></div>
-    <div class="winRangeNote">馬連を追加する時だけ重視。G2/G3は単勝優先です。</div>
+    <div class="winRangeNote">馬連・ワイドの相手候補を絞る時に重視。ワイド専用3着レンジはまだ未採用です。</div>
   </div>
 </div>
 
@@ -1435,7 +1435,7 @@ function histItem(r){
   const baseBetType=r.context?.bet_type==='win'?'単勝':r.context?.bet_type==='both'?'単勝＋馬連':r.context?.bet_type==='quinella'?'馬連':'',betType=baseBetType+((r.context?.wide_selected||Number(r.plannedWideStake)>0)?(baseBetType?'＋':'')+'ワイド':'');
   const plan=r.betDecision==='buy'?'購入予定 '+(betType?betType+' / ':'')+yen(r.plannedStake)+' / 相手 '+(r.opponents||[]).map(x=>x.horseNo+'番('+(x.popularity?x.popularity+'人気・':'')+Number(x.winOdds).toFixed(1)+'倍)').join('・'):'見送り予定';
   let bet='';
-  if(done&&(r.winStake!=null||r.quinellaStake!=null)){
+  if(done&&(r.winStake!=null||r.quinellaStake!=null||r.wideStake!=null)){
     const ws=Number(r.winStake||0),wr=Number(r.winReturn||0),qs=Number(r.quinellaStake||0),qr=Number(r.quinellaReturn||0),ds=Number(r.wideStake||0),dr=Number(r.wideReturn||0);
     bet='<br><b>単勝：</b>'+(ws>0?yen(ws)+' → '+yen(wr)+'（'+roiPct(ws,wr)+'%）':'購入なし')+'<br><b>馬連：</b>'+(qs>0?yen(qs)+' → '+yen(qr)+'（'+roiPct(qs,qr)+'%）':'購入なし')+'<br><b>ワイド：</b>'+(ds>0?yen(ds)+' → '+yen(dr)+'（'+roiPct(ds,dr)+'%）':'購入なし');
   }
