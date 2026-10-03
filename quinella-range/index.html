@@ -211,13 +211,13 @@ function updateInputBrake(){
     try{w=parseOpponentHorseNos($('wideOpponents').value)}catch(e){bad.push(e.message);$('wideOpponents').classList.add('dangerInput')}
     if(!w.length){bad.push('ワイド相手を1〜2頭入力してください');$('wideOpponents').classList.add('dangerInput')}
     if(w.length>2){bad.push('ワイド相手は最大2頭までです');$('wideOpponents').classList.add('dangerInput')}
-    const sr=pendingAssessment?.calc?.secondRange||secondRangeAnalysis(runners,pendingAssessment?.calc?.structure?.code||classify({c4:0,c9:0,c12:0,gap45:0,effectiveN:99}).code),wb=wideOpponentBoundaryAnalysis(runners,sr,axis);
-    if(!wb.eligible){bad.push('明確なワイド相手境界がないため、今回はワイドを保存できません');$('wideOpponents').classList.add('dangerInput')}
+    const sr=pendingAssessment?.calc?.secondRange||null,wb=sr?wideOpponentBoundaryAnalysis(runners,sr,axis):null;
+    if(sr&&!wb.eligible){bad.push('明確なワイド相手境界がないため、今回はワイドを保存できません');$('wideOpponents').classList.add('dangerInput')}
     for(const h of w){
       const x=findRunner(runners,h);
       if(!x){bad.push(h+'番（ワイド相手）がオッズ表にありません');$('wideOpponents').classList.add('dangerInput');continue}
       if(h===axis){bad.push('ワイド相手に軸と同じ馬番は入れられません');$('wideOpponents').classList.add('dangerInput')}
-      if(wb.eligible&&x.popularity>wb.end){bad.push(h+'番は'+x.popularity+'人気で、ワイド境界 '+wb.label+' の外です');$('wideOpponents').classList.add('dangerInput')}
+      if(wb?.eligible&&x.popularity>wb.end){bad.push(h+'番は'+x.popularity+'人気で、ワイド境界 '+wb.label+' の外です');$('wideOpponents').classList.add('dangerInput')}
     }
   }
   if(bad.length){box.textContent='🔴 入力エラー：'+bad.join(' / ');box.classList.remove('hidden');return true}
