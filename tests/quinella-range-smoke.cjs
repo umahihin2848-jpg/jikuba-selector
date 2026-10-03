@@ -22,7 +22,7 @@ async function runLocal(browserType,label){
   page.on('pageerror',e=>errs.push(e.message));
   await page.goto(LOCAL,{waitUntil:'networkidle'});
 
-  assert((await page.title())==='レース戦略 v2.54',label+' title');
+  assert((await page.title())==='レース戦略 v2.55',label+' title');
   const helpers=await page.evaluate(()=>({
     g1First:typeof g1FirstPlaceOverride,
     g1Second:typeof g1SecondPlaceOverride,
@@ -55,14 +55,14 @@ async function runLive(){
   const browser=await webkit.launch({headless:true});
   const context=await browser.newContext({viewport:{width:390,height:844},locale:'ja-JP'});
   const page=await context.newPage();
-  const resp=await page.goto(LIVE+'?smoke=254-helper',{waitUntil:'networkidle',timeout:60000});
+  const resp=await page.goto(LIVE+'?smoke=255-display',{waitUntil:'networkidle',timeout:60000});
   assert(resp&&resp.ok(),'live page HTTP');
   const state=await page.evaluate(()=>({
     title:document.title,
     g1First:typeof g1FirstPlaceOverride,
     selection:typeof selectionDecisionV230
   }));
-  assert(state.title==='レース戦略 v2.54','live title '+state.title);
+  assert(state.title==='レース戦略 v2.55','live title '+state.title);
   assert(state.g1First==='function','live g1FirstPlaceOverride missing');
   assert(state.selection==='function','live selectionDecisionV230 missing');
   await context.close();await browser.close();
