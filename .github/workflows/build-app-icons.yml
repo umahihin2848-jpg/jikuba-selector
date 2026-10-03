@@ -1,0 +1,38 @@
+name: Build app icons
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "quinella-range/icon-source.svg"
+      - ".github/workflows/build-app-icons.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build-icons:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install SVG renderer
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y librsvg2-bin
+      - name: Render icons
+        run: |
+          rsvg-convert -w 180 -h 180 -o quinella-range/icon-180.png quinella-range/icon-source.svg
+          rsvg-convert -w 192 -h 192 -o quinella-range/icon-192.png quinella-range/icon-source.svg
+          rsvg-convert -w 512 -h 512 -o quinella-range/icon-512.png quinella-range/icon-source.svg
+      - name: Commit icons
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add quinella-range/icon-180.png quinella-range/icon-192.png quinella-range/icon-512.png
+          if git diff --cached --quiet; then
+            echo "No icon changes"
+          else
+            git commit -m "Build horse app icons"
+            git push
+          fi
