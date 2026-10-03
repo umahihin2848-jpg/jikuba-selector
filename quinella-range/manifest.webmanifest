@@ -1,5 +1,5 @@
 {
-  "name": "レース戦略 v2.39",
+  "name": "レース戦略 v2.54",
   "short_name": "レース戦略",
   "start_url": "./",
   "scope": "./",
@@ -7,5 +7,25 @@
   "background_color": "#07111f",
   "theme_color": "#07111f",
   "lang": "ja",
-  "description": "レース条件と単勝オッズ構造を組み合わせ、1着・2着を別評価して、狭く絞れる型だけを前向き検証する競馬戦略アプリ"
+  "description": "レース条件と単勝オッズ構造を組み合わせ、1着・2着を別評価して、狭く絞れる型だけを前向き検証する競馬戦略アプリ",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
 }
