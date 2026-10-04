@@ -1,0 +1,30 @@
+name: Reconstruct pre-race track bias
+on:
+  push:
+    branches: ["three-stage-bc-probability"]
+permissions:
+  contents: read
+jobs:
+  bias:
+    strategy:
+      fail-fast: false
+      matrix:
+        yy: ["22","23","24","25","26"]
+        chunk: [0,1,2,3]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install --no-save cheerio@1.0.0
+      - name: Reconstruct bias
+        env:
+          YY: ${{ matrix.yy }}
+          CHUNK: ${{ matrix.chunk }}
+        run: node analysis/waku-backtest/fetch_track_bias.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: track-bias-${{ matrix.yy }}-${{ matrix.chunk }}
+          path: analysis/waku-backtest/track-bias-out/
