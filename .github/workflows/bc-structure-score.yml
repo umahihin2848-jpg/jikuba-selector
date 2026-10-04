@@ -1,0 +1,46 @@
+name: Odds-only BC structure score
+on:
+  push:
+    branches: ["historical-waku-backtest"]
+permissions:
+  contents: read
+jobs:
+  fetch:
+    strategy:
+      fail-fast: false
+      matrix:
+        yy: ["22","23","24","25"]
+        chunk: [0,1,2,3]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install --no-save cheerio@1.0.0
+      - name: Fetch full odds
+        env:
+          YY: ${{ matrix.yy }}
+          CHUNK: ${{ matrix.chunk }}
+        run: node analysis/waku-backtest/fetch_full_chunk.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bcs-${{ matrix.yy }}-${{ matrix.chunk }}
+          path: analysis/waku-backtest/full-chunk-out/
+  score:
+    needs: fetch
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: bcs-*
+          path: analysis/waku-backtest/bc-score-merge
+          merge-multiple: true
+      - run: node analysis/waku-backtest/bc_structure_score.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bc-structure-score-report
+          path: analysis/waku-backtest/bc-score-out/
