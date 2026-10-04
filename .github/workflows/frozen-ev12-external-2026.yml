@@ -1,0 +1,97 @@
+name: Frozen EV12 external 2026
+on:
+  push:
+    branches: ["external-bc-validation"]
+permissions:
+  contents: read
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install --no-save cheerio@1.0.0
+      - name: Discover 2026 set
+        env:
+          YEAR: "2026"
+        run: node analysis/waku-backtest/discover_external_ids.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ext-ids-2026
+          path: analysis/waku-backtest/discover-out/discovered-2026.json
+
+  hist:
+    strategy:
+      fail-fast: false
+      matrix:
+        yy: ["22","23","24","25"]
+        chunk: [0,1,2,3]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install --no-save cheerio@1.0.0
+      - name: Fetch historical full odds
+        env:
+          YY: ${{ matrix.yy }}
+          CHUNK: ${{ matrix.chunk }}
+        run: node analysis/waku-backtest/fetch_full_chunk.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hist-${{ matrix.yy }}-${{ matrix.chunk }}
+          path: analysis/waku-backtest/full-chunk-out/
+
+  ext:
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        chunk: [0,1,2,3]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install --no-save cheerio@1.0.0
+      - uses: actions/download-artifact@v4
+        with:
+          name: ext-ids-2026
+          path: analysis/waku-backtest/external-ids
+      - name: Fetch 2026 full odds
+        env:
+          CHUNK: ${{ matrix.chunk }}
+        run: node analysis/waku-backtest/fetch_external_2026_full.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ext-26-${{ matrix.chunk }}
+          path: analysis/waku-backtest/full-chunk-out/
+
+  evaluate:
+    needs: [hist, ext]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: hist-*
+          path: analysis/waku-backtest/ext-eval-hist
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: ext-26-*
+          path: analysis/waku-backtest/ext-eval-2026
+          merge-multiple: true
+      - run: node analysis/waku-backtest/external_2026_ev12.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frozen-ev12-external-2026-report
+          path: analysis/waku-backtest/external-eval-out/
