@@ -35,9 +35,9 @@
 <div class="muted">2軸は自動生成します。現行の1着レンジ内から、単勝市場の2着内推定 × 枠内代表度で2頭を選び、可能な限り別枠にします。</div>
 <div id="horseGrid" class="horseGrid"></div>
 
-<h3>枠連オッズ 上位18組</h3>
-<div class="muted">市場3段pを出すため、今回は<b>オッズ付き必須</b>です。形式：<b>1-2=4.8 2-5=6.1 3-5=7.4 ...</b>。オッズ順に自動整列します。</div>
-<textarea id="frameMarket" placeholder="1-2=4.8 2-5=6.1 3-5=7.4 ... 上位18組"></textarea>
+<h3>枠連オッズ 全組</h3>
+<div class="muted">市場3段pの①は<b>枠連市場全体</b>を分母にするため、出走枠から成立する枠連オッズを全組入力してください。形式：<b>1-2=4.8 2-5=6.1 3-5=7.4 ...</b>。オッズ順に自動整列します。</div>
+<textarea id="frameMarket" placeholder="1-2=4.8 1-3=7.2 1-4=12.5 ... 成立する枠連を全組"></textarea>
 
 <h3>馬連オッズ</h3>
 <div class="muted">合成オッズと市場EVを出すため、最終候補の馬連オッズを入力します。足りない場合でも3段pまでは計算し、不足点数を表示します。</div>
@@ -72,7 +72,7 @@
 <h3>例外警告</h3>
 <div id="warnings" class="warningList"></div>
 
-<div class="notice" style="margin-top:10px"><b>判定ルール：</b>市場3段pは基準確率として表示します。トラックバイアス・脚質・距離変化は通常のpへ自動加点しません。EVが1を超えても「割安候補（検証中）」までで、確定購入にはしません。</div>
+<div class="notice" style="margin-top:10px"><b>判定ルール：</b>市場3段pは基準確率として表示します。トラックバイアス・脚質・距離変化は通常のpへ自動加点しません。EVが1を超えても「割安候補（検証中）」までで、確定購入にはしません。過去検証は最終オッズ中心なので、発走前オッズでの運用は今後も検証対象です。</div>
 <button id="saveAnalysis" class="wide">この分析を保存</button>
 <div id="saveMsg" class="muted" style="margin-top:6px"></div>
 </section>
@@ -117,10 +117,15 @@ function parseFrameMarket(raw){
   var parts=t.replace(/[，、]/g,',').split(/[\s,]+/).filter(Boolean),rows=[];
   parts.forEach(function(p){var m=p.match(/^([1-8])[-:]([1-8])=(\d+(?:\.\d+)?)$/);if(!m)throw new Error('枠連はオッズ付きで入力してください：'+p+'（例 2-5=6.1）');var a=Number(m[1]),b=Number(m[2]),od=Number(m[3]);rows.push({pair:pairKey(a,b),a:Math.min(a,b),b:Math.max(a,b),odds:od})});
   if(new Set(rows.map(function(x){return x.pair})).size!==rows.length)throw new Error('同じ枠連組み合わせが重複しています');
-  rows.sort(function(a,b){return a.odds-b.odds||a.a-b.a||a.b-b.b});rows.forEach(function(x,i){x.rank=i+1});if(rows.length<18)throw new Error('枠連オッズは上位18組まで入力してください（現在'+rows.length+'組）');return rows.slice(0,18)
+  rows.sort(function(a,b){return a.odds-b.odds||a.a-b.a||a.b-b.b});rows.forEach(function(x,i){x.rank=i+1});if(rows.length<14)throw new Error('枠連オッズは少なくとも14組以上必要です（現在'+rows.length+'組）');return rows
 }
 function parseQuinellaOdds(raw){var map={};String(raw||'').trim().replace(/[，、]/g,',').split(/[\s,]+/).filter(Boolean).forEach(function(p){var m=p.match(/^(\d{1,2})[-:](\d{1,2})=(\d+(?:\.\d+)?)$/);if(!m)throw new Error('馬連オッズ入力を確認：'+p);map[pairKey(Number(m[1]),Number(m[2]))]=Number(m[3])});return map}
 function frameGroups(horses){var g={};horses.forEach(function(h){if(!g[h.frame])g[h.frame]=[];g[h.frame].push(h)});return g}
+function expectedFramePairs(groups){
+  var fs=Object.keys(groups).map(Number).sort(function(a,b){return a-b}),out=[];
+  for(var i=0;i<fs.length;i++)for(var j=i;j<fs.length;j++){var a=fs[i],b=fs[j];if(a===b&&(groups[a]||[]).length<2)continue;out.push(pairKey(a,b))}
+  return out
+}
 function firstPlaceRangeAnalysis(horses){
   var rs=horses.slice().sort(function(a,b){return a.popularity-b.popularity}),n=rs.length;if(n<2)return{end:Math.min(10,n),boundary:null};
   var inv=rs.map(function(x){return 1/x.winOdds}),tot=inv.reduce(function(s,x){return s+x},0),p=inv.map(function(x){return x/tot});
@@ -147,7 +152,9 @@ function framePairTicketInfo(fp,axes,groups,cap,qOdds){
   return{framePair:fp.pair,rank:fp.rank,frameOdds:fp.odds,a:fp.a,b:fp.b,den:den,allAxisMass:allMass/den,keptMass:keepMass/den,mass100:mass100/den,tickets:Object.keys(kept).map(function(k){return kept[k]}),links:links}
 }
 function analyzeCore(horses,market,qOdds){
-  var groups=frameGroups(horses),ax=selectAxes(horses,groups);if(ax.axes.length<2)throw new Error('2軸を作れませんでした');
+  var groups=frameGroups(horses),expected=expectedFramePairs(groups),got=new Set(market.map(function(x){return x.pair})),missingFrameOdds=expected.filter(function(k){return !got.has(k)});
+  if(missingFrameOdds.length)throw new Error('枠連オッズ全組が必要です。不足 '+missingFrameOdds.length+'組：'+missingFrameOdds.slice(0,8).join('、')+(missingFrameOdds.length>8?'…':''));
+  var ax=selectAxes(horses,groups);if(ax.axes.length<2)throw new Error('2軸を作れませんでした');
   var axes=ax.axes,target=market.filter(function(x){return x.rank>=3&&x.rank<=14}),allInv=market.reduce(function(s,x){return s+1/x.odds},0),targetInv=target.reduce(function(s,x){return s+1/x.odds},0),pA=allInv?targetInv/allInv:0;
   var fieldW=horses.reduce(function(s,h){return s+h.weight},0),infos=[],weak=[],covered=[];
   target.forEach(function(fp){var info=framePairTicketInfo(fp,axes,groups,50,qOdds);if(!info)return;var otherFrames=[];info.links.forEach(function(a){otherFrames.push(a.frame===fp.a?fp.b:fp.a)});var oppSupport=otherFrames.length?Math.max.apply(null,otherFrames.map(function(f){return (groups[f]||[]).reduce(function(s,h){return s+h.weight},0)/fieldW})):0;info.oppSupport=oppSupport;info.weak=(fp.rank>=11||oppSupport<.05);infos.push(info);if(info.weak)weak.push(info);else covered.push(info)});
@@ -162,7 +169,7 @@ function renderAnalysis(a){
   $('pText').textContent=pct(a.pFinal);$('pSub').textContent='市場3段p｜オッズ構造からの基準確率';
   if(a.composite){$('priceHero').className='heroBox '+(a.ev>=1?'caution':a.ev<.95?'stop':'info');$('priceText').textContent=a.composite.toFixed(2)+'倍 / '+a.ev.toFixed(2);$('priceSub').textContent='合成オッズ / 市場EV = p × O'}else{$('priceHero').className='heroBox info';$('priceText').textContent='オッズ不足';$('priceSub').textContent='候補'+a.tickets.length+'点中 '+a.missing.length+'点不足'}
   $('axisCards').innerHTML=a.axes.map(function(x,i){return'<div class="axisCard"><div class="tiny">軸'+(i+1)+'</div><strong>'+x.horseNo+'番（'+x.frame+'枠）</strong><div class="axisMeta"><span class="pill">'+x.popularity+'人気 '+x.winOdds.toFixed(1)+'倍</span><span class="pill">2着内推定 '+pct(x.top2)+'</span><span class="pill">枠内代表 '+pct(x.frameRep)+'</span></div></div>'}).join('');
-  $('pA').textContent=pct(a.pA);$('pASub').textContent='上位18組の逆数市場量のうち3〜14位が占める割合';
+  $('pA').textContent=pct(a.pA);$('pASub').textContent='入力した枠連全市場の逆数市場量のうち3〜14位が占める割合';
   $('pB').textContent=pct(a.pB);$('pBSub').textContent='3〜14位市場量のうち2軸で覆い、弱枠を除いて残る割合';
   $('pC').textContent=pct(a.pC);$('pCSub').textContent='覆った枠内で、単勝50倍未満へ変換後に残る構造支持量';
   $('formulaText').textContent=pct(a.pA)+' × '+pct(a.pB)+' × '+pct(a.pC)+' = '+pct(a.pFinal);
