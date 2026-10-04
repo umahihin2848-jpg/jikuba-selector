@@ -1330,7 +1330,8 @@ function renderQuickDecisionReason(pipe){
   $('quickDecisionReasonText').textContent=q.text;
   $('quickDecisionReasonStats').innerHTML=
     '<div class="quickDecisionReasonStat"><b>今回の1着構造（最優先）</b>'+esc(q.currentStat)+'</div>'+
-    '<div class="quickDecisionReasonStat"><b>馬連レンジ率</b>'+esc(q.quinellaRangeStat)+'</div>'+\n    '<div class="quickDecisionReasonStat"><b>境界確率（前向きデータ）</b>'+esc(q.boundaryStat)+'</div>'+
+    '<div class="quickDecisionReasonStat"><b>馬連レンジ率</b>'+esc(q.quinellaRangeStat)+'</div>'+
+    '<div class="quickDecisionReasonStat"><b>境界確率（前向きデータ）</b>'+esc(q.boundaryStat)+'</div>'+
     '<div class="quickDecisionReasonStat"><b>過去参考：'+esc(q.historyLabel)+'</b>勝ち馬を1着候補内に捉えた割合：'+esc(q.firstStat)+'</div>'+
     '<div class="quickDecisionReasonStat"><b>馬連の過去参考</b>1着・2着を両方候補内に捉えた割合：'+esc(q.pairStat)+'</div>'+
     '<div class="quickDecisionReasonStat"><b>今回のレンジ効率</b>'+esc(q.rangeStat)+'</div>';
@@ -1503,7 +1504,9 @@ function buildDecisionSnapshot(p,calc){
     risk_group_count:pipe.riskCount,
     risk_signals:pipe.riskSignals.map(x=>({id:x.id,label:x.label,detail:x.detail,severity:x.severity})),
     risk_groups:(pipe.riskGroups||[]).map(g=>({id:g.id,label:g.label,severity:g.severity,items:g.items.map(x=>x.id)})),
-    range_efficiency:pipe.rangeEfficiency?{field_size:pipe.rangeEfficiency.fieldSize,range_size:pipe.rangeEfficiency.rangeSize,candidate_share:pipe.rangeEfficiency.candidateShare,compression:pipe.rangeEfficiency.compression,market_mass:pipe.rangeEfficiency.marketMass,historical_rate:pipe.rangeEfficiency.historicalRate,market_gap:pipe.rangeEfficiency.marketGap}:null,\n    first_range_share_policy:pipe.firstRangePolicy?{share:pipe.firstRangePolicy.share,band:pipe.firstRangePolicy.band,label:pipe.firstRangePolicy.label,range_size:pipe.firstRangePolicy.rangeSize,field_size:pipe.firstRangePolicy.fieldSize}:null,\n    quinella_range_share_policy:pipe.quinellaRangePolicy?{share:pipe.quinellaRangePolicy.share,band:pipe.quinellaRangePolicy.band,label:pipe.quinellaRangePolicy.label,range_size:pipe.quinellaRangePolicy.rangeSize,field_size:pipe.quinellaRangePolicy.fieldSize}:null,
+    range_efficiency:pipe.rangeEfficiency?{field_size:pipe.rangeEfficiency.fieldSize,range_size:pipe.rangeEfficiency.rangeSize,candidate_share:pipe.rangeEfficiency.candidateShare,compression:pipe.rangeEfficiency.compression,market_mass:pipe.rangeEfficiency.marketMass,historical_rate:pipe.rangeEfficiency.historicalRate,market_gap:pipe.rangeEfficiency.marketGap}:null,
+    first_range_share_policy:pipe.firstRangePolicy?{share:pipe.firstRangePolicy.share,band:pipe.firstRangePolicy.band,label:pipe.firstRangePolicy.label,range_size:pipe.firstRangePolicy.rangeSize,field_size:pipe.firstRangePolicy.fieldSize}:null,
+    quinella_range_share_policy:pipe.quinellaRangePolicy?{share:pipe.quinellaRangePolicy.share,band:pipe.quinellaRangePolicy.band,label:pipe.quinellaRangePolicy.label,range_size:pipe.quinellaRangePolicy.rangeSize,field_size:pipe.quinellaRangePolicy.fieldSize}:null,
     first_boundary_calibration:pipe.firstBoundaryCalibration?{rate:pipe.firstBoundaryCalibration.rate,n:pipe.firstBoundaryCalibration.n,hits:pipe.firstBoundaryCalibration.hits,ci_low:pipe.firstBoundaryCalibration.ci?.low??null,ci_high:pipe.firstBoundaryCalibration.ci?.high??null,bin:pipe.firstBoundaryCalibration.binLabel,pool:pipe.firstBoundaryCalibration.poolLabel}:null,
     second_boundary_calibration:pipe.secondBoundaryCalibration?{rate:pipe.secondBoundaryCalibration.rate,n:pipe.secondBoundaryCalibration.n,hits:pipe.secondBoundaryCalibration.hits,ci_low:pipe.secondBoundaryCalibration.ci?.low??null,ci_high:pipe.secondBoundaryCalibration.ci?.high??null,bin:pipe.secondBoundaryCalibration.binLabel,pool:pipe.secondBoundaryCalibration.poolLabel}:null,
     decision_pipeline_win_fit:pipe.winFit,
