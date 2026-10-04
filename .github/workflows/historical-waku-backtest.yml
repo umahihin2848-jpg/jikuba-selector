@@ -1,0 +1,27 @@
+name: Historical waku backtest
+
+on:
+  push:
+    branches: ["historical-waku-backtest"]
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install parser
+        run: npm install --no-save cheerio@1.0.0
+      - name: Run historical backtest
+        run: node analysis/waku-backtest/run.cjs
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: historical-waku-backtest
+          path: analysis/waku-backtest/out/
