@@ -10,6 +10,24 @@
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#06111d,#081624 45%,#06111d);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 .wrap{max-width:960px;margin:0 auto;padding:18px 14px 72px}h1{font-size:27px;margin:0 0 4px}h2{font-size:19px;margin:0 0 10px}h3{font-size:16px;margin:16px 0 8px}.tag{color:#b7c8d8;font-size:13px;line-height:1.55;margin-bottom:12px}.card{background:rgba(11,26,42,.97);border:1px solid var(--line);border-radius:17px;padding:14px;margin:11px 0;box-shadow:0 12px 30px rgba(0,0,0,.18)}.notice{background:#0a1726;border:1px solid #29415e;border-radius:12px;padding:11px;font-size:12px;line-height:1.65}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.grid4{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:9px}.field{margin-top:9px}label{display:block;color:#aebed0;font-size:11px;font-weight:800;margin-bottom:5px}input,select,textarea{width:100%;border:1px solid #31506f;border-radius:10px;background:#071522;color:#fff;padding:10px;font-size:16px;outline:none}textarea{min-height:98px;font-size:14px;line-height:1.5}button{border:0;border-radius:11px;padding:11px 14px;font-weight:900;font-size:15px;background:#237f63;color:white}button.secondary{background:#20364e;color:#dce9f5}button.danger{background:#65323c}button.wide{width:100%;margin-top:12px}.muted{color:var(--sub);font-size:11px;line-height:1.55}.horseGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:8px}.horseRow{display:grid;grid-template-columns:48px 78px 1fr;gap:6px;align-items:center;background:#081624;border:1px solid #20364e;border-radius:10px;padding:7px}.horseNo{font-weight:900;text-align:center}.horseRow select,.horseRow input{padding:8px;font-size:14px}.hero{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.heroBox{background:#081624;border:1px solid #29415e;border-radius:13px;padding:11px}.heroBox span{display:block;color:#9fb0c3;font-size:10px;font-weight:900}.heroBox b{display:block;margin-top:4px;font-size:20px}.heroBox small{display:block;margin-top:4px}.go{border-color:#2f8f6a!important;background:#0b2a22!important}.go b{color:#76efc3}.caution{border-color:#806b25!important;background:#2a2514!important}.caution b{color:#ffe184}.stop{border-color:#a9651b!important;background:#302115!important}.stop b{color:#ffc166}.info{border-color:#315f8f!important;background:#0e2236!important}.info b{color:#9ed0ff}.pill{display:inline-block;border:1px solid #345575;background:#10243a;border-radius:999px;padding:3px 7px;font-size:10px;font-weight:900;margin-right:4px}.stageFlow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}.stage{background:#081624;border:1px solid #29415e;border-radius:13px;padding:11px}.stage .num{font-size:10px;color:#8fb0cc;font-weight:900}.stage b{display:block;font-size:23px;margin:4px 0}.stage small{color:#9fb0c3;line-height:1.45}.axisGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.axisCard{background:#081624;border:1px solid #29415e;border-radius:12px;padding:11px}.axisCard strong{font-size:20px}.axisMeta{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}.pairCard{border:1px solid #29415e;border-radius:13px;padding:11px;margin-top:8px;background:#081624}.pairTop{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.pairTitle{font-size:16px;font-weight:950}.pairGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:8px}.metric{background:#0b1d2e;border:1px solid #213b55;border-radius:9px;padding:8px}.metric span{display:block;font-size:9px;color:#91a5b9}.metric b{display:block;font-size:14px;margin-top:2px}.bets{margin-top:8px;display:grid;gap:5px}.betRow{display:flex;justify-content:space-between;gap:8px;background:#0d2235;border-radius:9px;padding:8px;font-size:12px}.warningList{display:grid;gap:7px;margin-top:8px}.warning{background:#2a2514;border:1px solid #806b25;border-radius:10px;padding:9px;font-size:12px;line-height:1.55}.okBox{background:#0b2a22;border:1px solid #2f8f6a;border-radius:10px;padding:9px;font-size:12px}.history{border-top:1px solid #29415e;padding:12px 0}.history:first-child{border-top:0}.historyHead{display:flex;justify-content:space-between;gap:8px}.hidden{display:none!important}.tiny{font-size:10px;color:#8ea2b5}.divider{height:1px;background:#20364e;margin:12px 0}
 @media(max-width:620px){.grid,.grid4{grid-template-columns:1fr 1fr}.grid4>div:first-child{grid-column:1/-1}.horseGrid{grid-template-columns:1fr}.hero,.stageFlow{grid-template-columns:1fr}.axisGrid{grid-template-columns:1fr}.pairGrid{grid-template-columns:1fr 1fr}.wrap{padding:14px 10px 60px}}
+
+/* iPhone-friendly odds entry */
+.oddsSectionHead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:9px 0 6px}
+.progressPill{display:inline-flex;align-items:center;min-height:30px;padding:5px 9px;border:1px solid #345575;background:#10243a;border-radius:999px;color:#cfe3f4;font-size:11px;font-weight:900}
+.oddsEntryGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:7px}
+.oddsEntryRow{display:grid;grid-template-columns:48px minmax(0,1fr);gap:6px;align-items:center;background:#081624;border:1px solid #20364e;border-radius:10px;padding:6px}
+.oddsEntryRow.filled{border-color:#39765f;background:#092019}
+.pairLabel{text-align:center;font-size:12px;font-weight:950;white-space:nowrap;color:#dce9f5}
+.oddsEntryRow input{min-width:0;padding:9px 7px;font-size:16px;text-align:right;font-variant-numeric:tabular-nums}
+.entryHint{grid-column:1/-1;border:1px dashed #31506f;border-radius:10px;padding:11px;color:var(--sub);font-size:11px;line-height:1.55}
+.bulkInput{margin-top:9px;border:1px solid #20364e;border-radius:10px;background:#081624;padding:8px 10px}
+.bulkInput summary{cursor:pointer;color:#9fb0c3;font-size:11px;font-weight:900;list-style:none}
+.bulkInput summary::-webkit-details-marker{display:none}
+.bulkInput textarea{margin-top:8px;min-height:86px}
+.bulkInput button{width:100%;margin-top:7px}
+.candidateStatus{margin-top:8px;padding:9px 10px;border-radius:10px;background:#0a1726;border:1px solid #29415e;color:#b8c9d9;font-size:11px;line-height:1.55}
+@media(max-width:620px){.oddsEntryGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.oddsEntryRow{grid-template-columns:42px minmax(0,1fr);padding:6px}.pairLabel{font-size:11px}.oddsEntryRow input{font-size:16px;padding:10px 6px}.oddsSectionHead button{padding:8px 10px;font-size:12px}}
+
 </style>
 </head>
 <body><main class="wrap">
@@ -36,14 +54,22 @@
 <div id="horseGrid" class="horseGrid"></div>
 
 <h3>枠連オッズ 全組</h3>
-<div class="muted">市場3段pの①は<b>枠連市場全体</b>を分母にするため、出走枠から成立する枠連オッズを全組入力してください。形式：<b>1-2=4.8 2-5=6.1 3-5=7.4 ...</b>。オッズ順に自動整列します。</div>
-<textarea id="frameMarket" placeholder="1-2=4.8 1-3=7.2 1-4=12.5 ... 成立する枠連を全組"></textarea>
+<div class="muted">出走枠から成立する組み合わせを自動表示します。<b>オッズの数字だけ</b>入力してください。枠番順に並び、判定時はオッズ順へ自動整列します。</div>
+<div class="oddsSectionHead"><span id="frameProgress" class="progressPill">枠を入力してください</span><button id="clearFrameOdds" class="secondary" type="button">クリア</button></div>
+<div id="frameOddsGrid" class="oddsEntryGrid"><div class="entryHint">上の馬番ごとの「枠」をすべて選ぶと、成立する枠連の入力欄が自動で出ます。</div></div>
+<input id="frameMarket" type="hidden">
+<details class="bulkInput"><summary>PC用：一括コピペ入力</summary><textarea id="frameMarketBulk" placeholder="1-2=4.8 1-3=7.2 1-4=12.5 ..."></textarea><button id="applyFrameBulk" class="secondary" type="button">一括入力を反映</button></details>
 
 <h3>馬連オッズ</h3>
-<div class="muted">合成オッズと市場EVを出すため、最終候補の馬連オッズを入力します。足りない場合でも3段pまでは計算し、不足点数を表示します。</div>
-<textarea id="quinellaOdds" placeholder="例：3-8=18.4 3-10=31.2 7-8=22.1 ..."></textarea>
+<div class="muted">枠連まで入力したら「馬連候補を作る」を押してください。2軸と3〜14位の枠連から、<b>必要な馬連だけ</b>入力欄を作ります。</div>
+<button id="prepareQuinella" class="wide secondary" type="button">馬連候補を作る</button>
+<div id="quinellaCandidateStatus" class="candidateStatus">まだ候補を作っていません。</div>
+<div class="oddsSectionHead"><span id="quinellaProgress" class="progressPill">0 / 0入力済み</span><button id="clearQuinellaOdds" class="secondary" type="button">クリア</button></div>
+<div id="quinellaOddsGrid" class="oddsEntryGrid"><div class="entryHint">候補作成後、ここに馬番の組み合わせが表示されます。</div></div>
+<input id="quinellaOdds" type="hidden">
+<details class="bulkInput"><summary>PC用：一括コピペ入力</summary><textarea id="quinellaOddsBulk" placeholder="3-8=18.4 3-10=31.2 7-8=22.1 ..."></textarea><button id="applyQuinellaBulk" class="secondary" type="button">一括入力を反映</button></details>
 
-<button id="analyze" class="wide">オッズを翻訳する</button>
+<button id="analyze" class="wide">最終判定する</button>
 <div id="error" class="notice hidden" style="margin-top:8px"></div>
 </section>
 
@@ -94,6 +120,22 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){retur
 function pct(x){return x==null||!isFinite(x)?'—':(x*100).toFixed(1)+'%'}
 function clamp(x,a,b){return Math.max(a==null?0:a,Math.min(b==null?1:b,x))}
 function pairKey(a,b){a=Number(a);b=Number(b);return a<=b?a+'-'+b:b+'-'+a}
+function parsePairOddsText(raw,maxNo){
+  var map={},t=String(raw||'').trim();if(!t)return map;
+  t.replace(/[，、]/g,',').split(/[\s,]+/).filter(Boolean).forEach(function(p){
+    var m=p.match(/^(\d{1,2})[-:](\d{1,2})=(\d+(?:\.\d+)?)$/);if(!m)throw new Error('入力形式を確認：'+p+'（例 1-2=4.8）');
+    var a=Number(m[1]),b=Number(m[2]),od=Number(m[3]);if(a<1||b<1||a>maxNo||b>maxNo||a===b&&maxNo>8)throw new Error('組み合わせを確認：'+p);
+    if(!(od>0))throw new Error('オッズを確認：'+p);map[pairKey(a,b)]=od
+  });return map
+}
+function numericPairSort(a,b){var aa=a.split('-').map(Number),bb=b.split('-').map(Number);return aa[0]-bb[0]||aa[1]-bb[1]}
+function gridOddsMap(selector){var map={};document.querySelectorAll(selector).forEach(function(inp){var v=Number(inp.value);if(v>0)map[inp.dataset.pair]=v});return map}
+function updateGridProgress(selector,id){
+  var inputs=Array.from(document.querySelectorAll(selector)),filled=inputs.filter(function(x){return Number(x.value)>0}).length;
+  if($(id))$(id).textContent=filled+' / '+inputs.length+'入力済み';
+  inputs.forEach(function(inp){var row=inp.closest('.oddsEntryRow');if(row)row.classList.toggle('filled',Number(inp.value)>0)})
+}
+function focusNextOddsInput(current,selector){var a=Array.from(document.querySelectorAll(selector)),i=a.indexOf(current);if(i>=0&&i<a.length-1){a[i+1].focus();a[i+1].select()}}
 function jpDate(){var d=new Date(Date.now()+9*3600000);return d.toISOString().slice(0,10)}
 function records(){try{return JSON.parse(localStorage.getItem(STORE)||'[]')}catch(e){return[]}}
 function putRecords(a){localStorage.setItem(STORE,JSON.stringify(a))}
@@ -113,7 +155,7 @@ function getHorses(){
   var sorted=rows.slice().sort(function(a,b){return a.winOdds-b.winOdds||a.horseNo-b.horseNo});sorted.forEach(function(x,i){x.popularity=i+1});return rows
 }
 function parseFrameMarket(raw){
-  var t=String(raw||'').trim();if(!t)throw new Error('枠連オッズ上位18組を入力してください');
+  var t=String(raw||'').trim();if(!t)throw new Error('枠連オッズを入力してください');
   var parts=t.replace(/[，、]/g,',').split(/[\s,]+/).filter(Boolean),rows=[];
   parts.forEach(function(p){var m=p.match(/^([1-8])[-:]([1-8])=(\d+(?:\.\d+)?)$/);if(!m)throw new Error('枠連はオッズ付きで入力してください：'+p+'（例 2-5=6.1）');var a=Number(m[1]),b=Number(m[2]),od=Number(m[3]);rows.push({pair:pairKey(a,b),a:Math.min(a,b),b:Math.max(a,b),odds:od})});
   if(new Set(rows.map(function(x){return x.pair})).size!==rows.length)throw new Error('同じ枠連組み合わせが重複しています');
@@ -125,6 +167,50 @@ function expectedFramePairs(groups){
   var fs=Object.keys(groups).map(Number).sort(function(a,b){return a-b}),out=[];
   for(var i=0;i<fs.length;i++)for(var j=i;j<fs.length;j++){var a=fs[i],b=fs[j];if(a===b&&(groups[a]||[]).length<2)continue;out.push(pairKey(a,b))}
   return out
+}
+function frameGroupsFromInputs(){
+  var g={},selected=0;document.querySelectorAll('.horseRow').forEach(function(row){var f=Number(row.querySelector('select').value);if(!f)return;selected++;if(!g[f])g[f]=[];g[f].push({horseNo:Number(row.dataset.horse),frame:f})});
+  return{groups:g,selected:selected}
+}
+function syncFrameMarketFromGrid(){
+  var map=gridOddsMap('.frameOddsInput'),parts=Object.keys(map).sort(numericPairSort).map(function(k){return k+'='+map[k]});$('frameMarket').value=parts.join(' ');updateGridProgress('.frameOddsInput','frameProgress')
+}
+function renderFrameOddsGrid(){
+  var box=$('frameOddsGrid');if(!box)return;
+  var old=gridOddsMap('.frameOddsInput'),hidden={};try{hidden=parsePairOddsText($('frameMarket').value,8)}catch(e){}
+  var info=frameGroupsFromInputs(),n=Number($('runnerCount').value);
+  if(info.selected!==n){box.innerHTML='<div class="entryHint">上の馬番ごとの「枠」をすべて選ぶと、成立する枠連の入力欄が自動で出ます。</div>';$('frameMarket').value='';$('frameProgress').textContent=info.selected+' / '+n+'頭の枠を選択済み';return}
+  var pairs=expectedFramePairs(info.groups);
+  box.innerHTML=pairs.map(function(k){var v=old[k]!=null?old[k]:(hidden[k]!=null?hidden[k]:'');return'<label class="oddsEntryRow"><span class="pairLabel">'+k+'</span><input class="frameOddsInput" data-pair="'+k+'" type="number" min="1" max="9999.9" step="0.1" inputmode="decimal" placeholder="オッズ" value="'+esc(v)+'"></label>'}).join('');
+  syncFrameMarketFromGrid()
+}
+function syncQuinellaFromGrid(){
+  var map=gridOddsMap('.quinellaOddsInput'),parts=Object.keys(map).sort(numericPairSort).map(function(k){return k+'='+map[k]});$('quinellaOdds').value=parts.join(' ');updateGridProgress('.quinellaOddsInput','quinellaProgress')
+}
+function renderQuinellaOddsGrid(pairs){
+  var box=$('quinellaOddsGrid'),old=gridOddsMap('.quinellaOddsInput'),hidden={};try{hidden=parsePairOddsText($('quinellaOdds').value,18)}catch(e){}
+  pairs=Array.from(new Set(pairs||[])).sort(numericPairSort);
+  if(!pairs.length){box.innerHTML='<div class="entryHint">今回入力が必要な馬連候補はありません。</div>';$('quinellaOdds').value='';updateGridProgress('.quinellaOddsInput','quinellaProgress');return}
+  box.innerHTML=pairs.map(function(k){var v=old[k]!=null?old[k]:(hidden[k]!=null?hidden[k]:'');return'<label class="oddsEntryRow"><span class="pairLabel">'+k+'</span><input class="quinellaOddsInput" data-pair="'+k+'" type="number" min="1" max="9999.9" step="0.1" inputmode="decimal" placeholder="オッズ" value="'+esc(v)+'"></label>'}).join('');
+  syncQuinellaFromGrid()
+}
+function showInputError(e){$('error').textContent='🔴 '+e.message;$('error').classList.remove('hidden')}
+function prepareQuinella(){
+  $('error').classList.add('hidden');
+  try{
+    syncFrameMarketFromGrid();
+    var horses=getHorses(),market=parseFrameMarket($('frameMarket').value),a=analyzeCore(horses,market,{});
+    renderQuinellaOddsGrid(a.tickets.map(function(x){return x.pair}));
+    $('quinellaCandidateStatus').innerHTML='<b>2軸 '+a.axes.map(function(x){return x.horseNo+'番'}).join('・')+'</b>｜市場3段p '+pct(a.pFinal)+'｜馬連候補 '+a.tickets.length+'点';
+    return a
+  }catch(e){showInputError(e);return null}
+}
+function applyBulkToGrid(rawId,selector,maxNo,syncFn){
+  try{
+    var map=parsePairOddsText($(rawId).value,maxNo),inputs=Array.from(document.querySelectorAll(selector));if(!inputs.length)throw new Error('先に入力欄を表示してください');
+    var hit=0;inputs.forEach(function(inp){if(map[inp.dataset.pair]!=null){inp.value=map[inp.dataset.pair];hit++}});
+    syncFn();if(!hit)throw new Error('現在の候補に一致する組み合わせがありません')
+  }catch(e){showInputError(e)}
 }
 function firstPlaceRangeAnalysis(horses){
   var rs=horses.slice().sort(function(a,b){return a.popularity-b.popularity}),n=rs.length;if(n<2)return{end:Math.min(10,n),boundary:null};
@@ -178,13 +264,32 @@ function renderAnalysis(a){
   var ws=[];if(a.capRemoved>=.031)ws.push('⚠️ 50〜100倍帯を切る影響が大きい（pC差 '+(a.capRemoved*100).toFixed(1)+'pt）。pCの信頼度を低めに見る候補です。');if(a.weak.length)ws.push('⚠️ 弱枠 '+a.weak.length+'組を除外：'+a.weak.map(function(x){return x.framePair+'（'+x.rank+'位）'}).join('、'));if(a.range.end>6)ws.push('⚠️ 1着レンジは1〜'+a.range.end+'人気で広め。2軸の生存力は慎重に見る。');if(!ws.length)ws.push('✅ 現在の検証済み警告条件には該当していません。');$('warnings').innerHTML=ws.map(function(x){return'<div class="'+(x.indexOf('✅')===0?'okBox':'warning')+'">'+x+'</div>'}).join('')
 }
 function analyze(){
-  $('error').classList.add('hidden');try{var horses=getHorses(),market=parseFrameMarket($('frameMarket').value),qOdds=parseQuinellaOdds($('quinellaOdds').value),a=analyzeCore(horses,market,qOdds);current={version:'waku-bc-translator-v2',capturedAt:new Date().toISOString(),raceDate:$('raceDate').value,venue:$('venue').value,raceNo:Number($('raceNo').value),raceName:$('raceName').value.trim(),runnerCount:horses.length,horses:horses,frameMarket:market,quinellaOdds:qOdds,range:a.range,axes:a.axes,pA:a.pA,pB:a.pB,pC:a.pC,pC100:a.pC100,capRemoved:a.capRemoved,pFinal:a.pFinal,covered:a.covered.map(function(x){return{framePair:x.framePair,rank:x.rank,oppSupport:x.oppSupport,keptMass:x.keptMass,tickets:x.tickets}}),weak:a.weak.map(function(x){return{framePair:x.framePair,rank:x.rank,oppSupport:x.oppSupport}}),tickets:a.tickets,missing:a.missing.map(function(x){return x.pair}),composite:a.composite,ev:a.ev};renderAnalysis(current)}catch(e){$('error').textContent='🔴 '+e.message;$('error').classList.remove('hidden')}
+  $('error').classList.add('hidden');try{
+    syncFrameMarketFromGrid();
+    var horses=getHorses(),market=parseFrameMarket($('frameMarket').value),pre=analyzeCore(horses,market,{});
+    renderQuinellaOddsGrid(pre.tickets.map(function(x){return x.pair}));syncQuinellaFromGrid();
+    var qOdds=parseQuinellaOdds($('quinellaOdds').value),a=analyzeCore(horses,market,qOdds);
+    $('quinellaCandidateStatus').innerHTML='<b>2軸 '+a.axes.map(function(x){return x.horseNo+'番'}).join('・')+'</b>｜市場3段p '+pct(a.pFinal)+'｜馬連候補 '+a.tickets.length+'点';
+    current={version:'waku-bc-translator-v2-mobile-input',capturedAt:new Date().toISOString(),raceDate:$('raceDate').value,venue:$('venue').value,raceNo:Number($('raceNo').value),raceName:$('raceName').value.trim(),runnerCount:horses.length,horses:horses,frameMarket:market,quinellaOdds:qOdds,range:a.range,axes:a.axes,pA:a.pA,pB:a.pB,pC:a.pC,pC100:a.pC100,capRemoved:a.capRemoved,pFinal:a.pFinal,covered:a.covered.map(function(x){return{framePair:x.framePair,rank:x.rank,oppSupport:x.oppSupport,keptMass:x.keptMass,tickets:x.tickets}}),weak:a.weak.map(function(x){return{framePair:x.framePair,rank:x.rank,oppSupport:x.oppSupport}}),tickets:a.tickets,missing:a.missing.map(function(x){return x.pair}),composite:a.composite,ev:a.ev};renderAnalysis(current)
+  }catch(e){showInputError(e)}
 }
 function saveAnalysis(){if(!current)return;var a=records(),rec=JSON.parse(JSON.stringify(current));rec.id=Date.now();a.unshift(rec);putRecords(a.slice(0,100));$('saveMsg').textContent='保存しました。';renderHistory()}
 function renderHistory(){var a=records();if(!a.length){$('history').innerHTML='<div class="muted" style="margin-top:12px">まだ保存データはありません。</div>';return}$('history').innerHTML=a.map(function(r){var j=judgeClass(r.ev,(r.missing||[]).length);return'<div class="history"><div class="historyHead"><div><b>'+esc(r.raceDate+' '+r.venue+r.raceNo+'R '+(r.raceName||''))+'</b><div class="muted">軸 '+r.axes.map(function(x){return x.horseNo+'番'}).join('・')+' / p '+pct(r.pFinal)+' / 合成 '+(r.composite?r.composite.toFixed(2)+'倍':'—')+' / EV '+(r.ev?r.ev.toFixed(2):'—')+'</div><div class="tiny">'+j.text+'</div></div></div></div>'}).join('')}
 function clearHistory(){if(!confirm('保存履歴をすべて削除しますか？'))return;localStorage.removeItem(STORE);renderHistory()}
-$('runnerCount').addEventListener('change',renderHorseGrid);$('analyze').addEventListener('click',analyze);$('saveAnalysis').addEventListener('click',saveAnalysis);$('clearHistory').addEventListener('click',clearHistory);
-initSelects();
+$('runnerCount').addEventListener('change',function(){renderHorseGrid();renderFrameOddsGrid();renderQuinellaOddsGrid([]);$('quinellaCandidateStatus').textContent='頭数が変わりました。枠連入力後に候補を作り直してください。'});
+$('horseGrid').addEventListener('change',function(e){if(e.target.matches('select'))renderFrameOddsGrid();$('quinellaCandidateStatus').textContent='馬番・枠・単勝が変わりました。候補を作り直してください。'});
+$('horseGrid').addEventListener('input',function(e){if(e.target.matches('input'))$('quinellaCandidateStatus').textContent='単勝オッズが変わりました。候補を作り直してください。'});
+$('frameOddsGrid').addEventListener('input',function(){syncFrameMarketFromGrid();$('quinellaCandidateStatus').textContent='枠連オッズが変わりました。候補を作り直してください。'});
+$('frameOddsGrid').addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.matches('.frameOddsInput')){e.preventDefault();focusNextOddsInput(e.target,'.frameOddsInput')}});
+$('quinellaOddsGrid').addEventListener('input',syncQuinellaFromGrid);
+$('quinellaOddsGrid').addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.matches('.quinellaOddsInput')){e.preventDefault();focusNextOddsInput(e.target,'.quinellaOddsInput')}});
+$('prepareQuinella').addEventListener('click',prepareQuinella);
+$('clearFrameOdds').addEventListener('click',function(){document.querySelectorAll('.frameOddsInput').forEach(function(x){x.value=''});syncFrameMarketFromGrid()});
+$('clearQuinellaOdds').addEventListener('click',function(){document.querySelectorAll('.quinellaOddsInput').forEach(function(x){x.value=''});syncQuinellaFromGrid()});
+$('applyFrameBulk').addEventListener('click',function(){renderFrameOddsGrid();applyBulkToGrid('frameMarketBulk','.frameOddsInput',8,syncFrameMarketFromGrid)});
+$('applyQuinellaBulk').addEventListener('click',function(){if(!document.querySelector('.quinellaOddsInput'))prepareQuinella();applyBulkToGrid('quinellaOddsBulk','.quinellaOddsInput',18,syncQuinellaFromGrid)});
+$('analyze').addEventListener('click',analyze);$('saveAnalysis').addEventListener('click',saveAnalysis);$('clearHistory').addEventListener('click',clearHistory);
+initSelects();renderFrameOddsGrid();
 })();
 </script>
 </body></html>
