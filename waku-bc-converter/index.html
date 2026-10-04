@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07111d">
+<title>枠連BCコンバーター</title>
+<style>
+:root{--bg:#06111d;--card:#0b1a2a;--card2:#0f2236;--line:#29415e;--txt:#eef5fb;--sub:#9fb0c3;--g:#58d3a5;--y:#f3cd62;--o:#f0a04b;--r:#ff7777}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#06111d,#081624 45%,#06111d);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.wrap{max-width:920px;margin:0 auto;padding:18px 14px 70px}h1{font-size:27px;margin:0 0 4px}h2{font-size:19px;margin:0 0 10px}h3{font-size:16px;margin:14px 0 7px}.tag{color:#b7c8d8;font-size:13px;line-height:1.55;margin-bottom:12px}.card{background:rgba(11,26,42,.96);border:1px solid var(--line);border-radius:17px;padding:14px;margin:11px 0;box-shadow:0 12px 30px rgba(0,0,0,.18)}.notice{background:#0a1726;border:1px solid #29415e;border-radius:12px;padding:11px;font-size:12px;line-height:1.65}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.grid4{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:9px}.field{margin-top:9px}label{display:block;color:#aebed0;font-size:11px;font-weight:800;margin-bottom:5px}input,select,textarea{width:100%;border:1px solid #31506f;border-radius:10px;background:#071522;color:#fff;padding:10px;font-size:16px;outline:none}textarea{min-height:90px;font-size:14px;line-height:1.5}button{border:0;border-radius:11px;padding:11px 14px;font-weight:900;font-size:15px;background:#237f63;color:white}button.secondary{background:#20364e;color:#dce9f5}button.danger{background:#65323c}button.wide{width:100%;margin-top:12px}.muted{color:var(--sub);font-size:11px;line-height:1.55}.horseGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:8px}.horseRow{display:grid;grid-template-columns:48px 78px 1fr;gap:6px;align-items:center;background:#081624;border:1px solid #20364e;border-radius:10px;padding:7px}.horseNo{font-weight:900;text-align:center}.horseRow select,.horseRow input{padding:8px;font-size:14px}.hero{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.heroBox{background:#081624;border:1px solid #29415e;border-radius:13px;padding:11px}.heroBox span{display:block;color:#9fb0c3;font-size:10px;font-weight:900}.heroBox b{display:block;margin-top:4px;font-size:19px}.go{border-color:#2f8f6a!important;background:#0b2a22!important}.go b{color:#76efc3}.caution{border-color:#806b25!important;background:#2a2514!important}.caution b{color:#ffe184}.stop{border-color:#a9651b!important;background:#302115!important}.stop b{color:#ffc166}.pill{display:inline-block;border:1px solid #345575;background:#10243a;border-radius:999px;padding:3px 7px;font-size:10px;font-weight:900;margin-right:4px}.pairCard{border:1px solid #29415e;border-radius:13px;padding:11px;margin-top:8px;background:#081624}.pairTop{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.pairTitle{font-size:17px;font-weight:950}.pairGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:8px}.metric{background:#0b1d2e;border:1px solid #213b55;border-radius:9px;padding:8px}.metric span{display:block;font-size:9px;color:#91a5b9}.metric b{display:block;font-size:14px;margin-top:2px}.bets{margin-top:8px;display:grid;gap:5px}.betRow{display:flex;justify-content:space-between;gap:8px;background:#0d2235;border-radius:9px;padding:8px;font-size:12px}.cutoffTable{width:100%;border-collapse:collapse;margin-top:8px;font-size:12px}.cutoffTable th,.cutoffTable td{border-bottom:1px solid #233c55;padding:8px 5px;text-align:right}.cutoffTable th:first-child,.cutoffTable td:first-child{text-align:left}.ok{color:#76efc3}.warn{color:#ffe184}.ng{color:#ffb5be}.history{border-top:1px solid #29415e;padding:12px 0}.history:first-child{border-top:0}.historyHead{display:flex;justify-content:space-between;gap:8px}.resultGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:8px}.zoneGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:8px}.zone{border:1px solid #29415e;border-radius:10px;padding:8px;background:#081624}.zone span{font-size:10px;color:#9fb0c3}.zone b{display:block;font-size:17px}.hidden{display:none!important}
+@media(max-width:620px){.grid,.grid4{grid-template-columns:1fr 1fr}.grid4>div:first-child{grid-column:1/-1}.horseGrid{grid-template-columns:1fr}.hero{grid-template-columns:1fr 1fr}.heroBox:first-child{grid-column:1/-1}.pairGrid{grid-template-columns:1fr 1fr}.zoneGrid{grid-template-columns:1fr 1fr}.wrap{padding:14px 10px 60px}}
+</style>
+</head>
+<body><main class="wrap">
+<h1>枠連BCコンバーター</h1>
+<div class="tag">枠連を買うのではなく、決着帯を3〜14人気に圧縮 → 軸枠の代表馬を確認 → 枠内の弱い馬を削って馬連へ変換する実験ツール。</div>
+
+<section class="card">
+<h2>元の仮説</h2>
+<div class="notice">既存集計：A 29.4%（1位・13〜18位） / B 30.2%（2・3位、10〜12位） / C 30.6%（4〜9位） / D 9.8%（19位以下）。<br><b>狙い：</b>カチカチと大荒れを予測しにいかず、3〜14位を中心に「現実的な中間決着」だけ拾えるか前向き検証します。</div>
+<div class="zoneGrid">
+<div class="zone"><span>A</span><b>29.4%</b><small>1 / 13〜18位</small></div>
+<div class="zone"><span>B</span><b>30.2%</b><small>2・3 / 10〜12位</small></div>
+<div class="zone"><span>C</span><b>30.6%</b><small>4〜9位</small></div>
+<div class="zone"><span>D</span><b>9.8%</b><small>19位以下</small></div>
+</div>
+</section>
+
+<section class="card">
+<h2>1. レース入力</h2>
+<div class="grid4">
+<div><label>日付</label><input id="raceDate" type="date"></div>
+<div><label>競馬場</label><select id="venue"><option>東京</option><option>中山</option><option>京都</option><option>阪神</option><option>中京</option><option>新潟</option><option>福島</option><option>小倉</option><option>札幌</option><option>函館</option></select></div>
+<div><label>R</label><select id="raceNo"></select></div>
+<div><label>頭数</label><select id="runnerCount"></select></div>
+</div>
+<div class="field"><label>レース名</label><input id="raceName" placeholder="例：○○ステークス"></div>
+
+<h3>馬番・枠・単勝オッズ</h3>
+<div class="muted">枠内の代表度を「1/単勝オッズ」で計算します。同枠に10倍と100倍なら、おおよそ91%対9%の支持になります。</div>
+<div id="horseGrid" class="horseGrid"></div>
+
+<h3>枠連人気 上位18組</h3>
+<div class="muted">人気順だけなら「1-2 2-5 3-6 ...」を1位から順に18組。オッズも使うなら「1-2=4.8 2-5=6.1 ...」を入力。オッズ形式は自動で人気順に並べます。</div>
+<textarea id="frameMarket" placeholder="例：1-2=4.8 2-5=6.1 3-5=7.4 ... 上位18組"></textarea>
+
+<h3>馬連オッズ（任意）</h3>
+<div class="muted">推奨馬連の「枠連→馬連の配当押し上げ倍率」を見る場合だけ入力。形式：馬番-馬番=オッズ。</div>
+<textarea id="quinellaOdds" placeholder="例：3-8=18.4 3-10=31.2"></textarea>
+
+<div class="grid">
+<div><label>事前軸の馬番</label><input id="axisHorse" type="number" min="1" max="18" inputmode="numeric" placeholder="例：3"></div>
+<div><label>今回使う枠連上限</label><select id="upperCutoff"><option value="10">3〜10位</option><option value="12">3〜12位</option><option value="14" selected>3〜14位</option><option value="16">3〜16位</option></select></div>
+</div>
+<div class="grid">
+<div><label>相手枠内の保持率</label><select id="retention"><option value="0.80">80%</option><option value="0.85" selected>85%</option><option value="0.90">90%</option><option value="0.95">95%</option></select></div>
+<div><label>後半R区分</label><input id="lateLabel" readonly></div>
+</div>
+<button id="analyze" class="wide">分析する</button>
+<div id="error" class="notice hidden" style="margin-top:8px"></div>
+</section>
+
+<section id="analysisCard" class="card hidden">
+<h2>2. 判定</h2>
+<div class="hero">
+<div id="targetHero" class="heroBox"><span>狙う枠連帯</span><b id="targetText"></b><small id="targetSub" class="muted"></small></div>
+<div id="axisHero" class="heroBox"><span>軸の枠内代表度</span><b id="axisText"></b><small id="axisSub" class="muted"></small></div>
+<div id="pointsHero" class="heroBox"><span>馬連変換</span><b id="pointsText"></b><small id="pointsSub" class="muted"></small></div>
+</div>
+
+<h3>上限比較</h3>
+<table class="cutoffTable"><thead><tr><th>枠連帯</th><th>軸枠を含む組</th><th>変換後馬連</th><th>枠連市場量*</th></tr></thead><tbody id="cutoffBody"></tbody></table>
+<div class="muted">* 枠連オッズを入力した場合のみ、入力した上位18組内で逆数正規化した参考値。的中率ではありません。</div>
+
+<h3>今回の枠→馬変換</h3>
+<div id="pairResults"></div>
+<div class="notice" style="margin-top:10px"><b>統計上の意味：</b>「軸枠が来たら軸馬も来る確率」と「相手枠が来たらどの馬が担うか」を分離します。上限14そのものはまだ仮説で、10/12/14/16を同時保存して結果から比較します。</div>
+<button id="saveAnalysis" class="wide">この時点の判定を保存</button>
+<div id="saveMsg" class="muted" style="margin-top:6px"></div>
+</section>
+
+<section class="card">
+<h2>3. 前向き検証</h2>
+<div id="validationSummary" class="notice">まだ結果データがありません。</div>
+<table class="cutoffTable"><thead><tr><th>上限</th><th>枠連捕捉率</th><th>最終馬連捕捉率</th><th>平均点数</th><th>1点効率</th></tr></thead><tbody id="validationBody"></tbody></table>
+<h3>後半R仮説（3〜14位）</h3>
+<div id="lateCompare" class="notice">結果が貯まると、1〜8Rと9〜12Rを自動比較します。</div>
+<h3>実測区画</h3>
+<div id="zoneObserved" class="zoneGrid"></div>
+<div class="muted" style="margin-top:8px">N&lt;30は探索段階。N≥30からWilson 95%区間も見て、上限14を正式ルールにするか判断します。</div>
+</section>
+
+<section class="card">
+<div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><h2 style="margin:0">保存履歴</h2><button id="exportCsv" class="secondary">CSV</button></div>
+<div id="history"></div>
+</section>
+</main>
+
+<script>
+(function(){
+'use strict';
+var STORE='wakuBcConverterV1';
+var current=null;
+function $(id){return document.getElementById(id)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function pct(x){return x==null?'—':(x*100).toFixed(1)+'%'}
+function clamp(x){return Math.max(0,Math.min(1,x))}
+function pairKey(a,b){a=Number(a);b=Number(b);return a<=b?a+'-'+b:b+'-'+a}
+function jpDate(){var d=new Date(Date.now()+9*3600000);return d.toISOString().slice(0,10)}
+function records(){try{return JSON.parse(localStorage.getItem(STORE)||'[]')}catch(e){return[]}}
+function putRecords(a){localStorage.setItem(STORE,JSON.stringify(a))}
+function wilson(h,n,z){if(!n)return null;z=z||1.96;var p=h/n,z2=z*z,d=1+z2/n,c=(p+z2/(2*n))/d,m=z*Math.sqrt((p*(1-p)+z2/(4*n))/n)/d;return{low:Math.max(0,c-m),high:Math.min(1,c+m)}}
+function zone(rank){if(rank==null||rank>=19)return'D';if(rank===1||(rank>=13&&rank<=18))return'A';if(rank===2||rank===3||(rank>=10&&rank<=12))return'B';if(rank>=4&&rank<=9)return'C';return'D'}
+function zoneLabel(rank){if(rank==null||rank>=19)return'D（19位以下）';return zone(rank)+'（'+rank+'位）'}
+function late(){var r=Number($('raceNo').value);$('lateLabel').value=r>=9?'後半R（9〜12R）':'前半R（1〜8R）'}
+function initSelects(){
+  $('raceNo').innerHTML=Array.from({length:12},function(_,i){return'<option value="'+(i+1)+'"'+(i===10?' selected':'')+'>'+(i+1)+'R</option>'}).join('');
+  $('runnerCount').innerHTML=Array.from({length:14},function(_,i){var n=i+5;return'<option value="'+n+'"'+(n===16?' selected':'')+'>'+n+'頭</option>'}).join('');
+  $('raceDate').value=jpDate();late();renderHorseGrid()
+}
+function renderHorseGrid(){
+  var n=Number($('runnerCount').value),old={};
+  document.querySelectorAll('.horseRow').forEach(function(row){old[row.dataset.horse]={frame:row.querySelector('select').value,odds:row.querySelector('input').value}});
+  $('horseGrid').innerHTML=Array.from({length:n},function(_,i){
+    var h=i+1,o=old[h]||{},opts='<option value="">枠</option>'+Array.from({length:8},function(_,j){var f=j+1;return'<option value="'+f+'"'+(String(o.frame)===String(f)?' selected':'')+'>'+f+'枠</option>'}).join('');
+    return'<div class="horseRow" data-horse="'+h+'"><div class="horseNo">'+h+'番</div><select aria-label="'+h+'番の枠">'+opts+'</select><input type="number" min="1" max="999.9" step="0.1" inputmode="decimal" placeholder="単勝" value="'+esc(o.odds||'')+'"></div>';
+  }).join('');
+  $('axisHorse').max=n
+}
+function getHorses(){
+  var rows=[];
+  document.querySelectorAll('.horseRow').forEach(function(row){
+    var h=Number(row.dataset.horse),f=Number(row.querySelector('select').value),o=Number(row.querySelector('input').value);
+    if(!f||!(o>=1))throw new Error(h+'番の枠と単勝オッズを入力してください');
+    rows.push({horseNo:h,frame:f,winOdds:o,weight:1/o})
+  });
+  var sorted=rows.slice().sort(function(a,b){return a.winOdds-b.winOdds||a.horseNo-b.horseNo});
+  sorted.forEach(function(x,i){x.popularity=i+1});
+  return rows.map(function(x){var y=sorted.find(function(s){return s.horseNo===x.horseNo});x.popularity=y.popularity;return x})
+}
+function parseFrameMarket(raw){
+  var t=String(raw||'').trim();if(!t)throw new Error('枠連人気上位18組を入力してください');
+  var parts=t.replace(/[，、]/g,',').split(/[\s,]+/).filter(Boolean),rows=[];
+  parts.forEach(function(p){
+    var m=p.match(/^([1-8])[-=:]([1-8])(?:[=:](\d+(?:\.\d+)?))?$/);
+    if(!m)throw new Error('枠連入力を確認：'+p+'（例 2-5 または 2-5=6.1）');
+    var a=Number(m[1]),b=Number(m[2]),od=m[3]==null?null:Number(m[3]);
+    rows.push({pair:pairKey(a,b),a:Math.min(a,b),b:Math.max(a,b),odds:od})
+  });
+  if(new Set(rows.map(function(x){return x.pair})).size!==rows.length)throw new Error('同じ枠連組み合わせが重複しています');
+  var withOdds=rows.filter(function(x){return x.odds!=null}).length;
+  if(withOdds!==0&&withOdds!==rows.length)throw new Error('枠連オッズ形式と人気順だけの形式は混在できません');
+  if(withOdds===rows.length){rows.sort(function(a,b){return a.odds-b.odds||a.a-b.a||a.b-b.b})}
+  rows.forEach(function(x,i){x.rank=i+1});
+  if(rows.length<18)throw new Error('区画A〜Dを判定するため、枠連人気は上位18組まで入力してください（現在'+rows.length+'組）');
+  return rows.slice(0,18)
+}
+function parseQuinellaOdds(raw){
+  var map={};String(raw||'').trim().replace(/[，、]/g,',').split(/[\s,]+/).filter(Boolean).forEach(function(p){
+    var m=p.match(/^(\d{1,2})[-=:](\d{1,2})[=:](\d+(?:\.\d+)?)$/);if(!m)throw new Error('馬連オッズ入力を確認：'+p);
+    map[pairKey(Number(m[1]),Number(m[2]))]=Number(m[3])
+  });return map
+}
+function frameGroups(horses){
+  var g={};horses.forEach(function(h){if(!g[h.frame])g[h.frame]=[];g[h.frame].push(h)});return g
+}
+function analyzeFramePair(fp,axis,groups,retention,qOdds){
+  if(fp.a!==axis.frame&&fp.b!==axis.frame)return null;
+  var same=fp.a===fp.b,partners=[],ceiling=0;
+  if(!same){
+    var axisGroup=groups[axis.frame]||[],otherFrame=fp.a===axis.frame?fp.b:fp.a,other=groups[otherFrame]||[];
+    var sumAxis=axisGroup.reduce(function(s,x){return s+x.weight},0),sumOther=other.reduce(function(s,x){return s+x.weight},0);
+    var axisShare=sumAxis?axis.weight/sumAxis:0;ceiling=axisShare;
+    partners=other.map(function(h){
+      var pc=sumOther?h.weight/sumOther:0;
+      return{horseNo:h.horseNo,popularity:h.popularity,winOdds:h.winOdds,partnerConditional:pc,exactShare:axisShare*pc}
+    })
+  }else{
+    var g=groups[axis.frame]||[],den=0,axisRaw=0;
+    for(var i=0;i<g.length;i++)for(var j=i+1;j<g.length;j++){var z=g[i].weight*g[j].weight;den+=z;if(g[i].horseNo===axis.horseNo||g[j].horseNo===axis.horseNo)axisRaw+=z}
+    ceiling=den?axisRaw/den:0;
+    partners=g.filter(function(h){return h.horseNo!==axis.horseNo}).map(function(h){
+      var raw=axis.weight*h.weight,exact=den?raw/den:0;
+      return{horseNo:h.horseNo,popularity:h.popularity,winOdds:h.winOdds,partnerConditional:axisRaw?raw/axisRaw:0,exactShare:exact}
+    })
+  }
+  partners.sort(function(a,b){return b.partnerConditional-a.partnerConditional||a.popularity-b.popularity});
+  var cum=0,recommended=[];
+  for(var k=0;k<partners.length;k++){recommended.push(partners[k]);cum+=partners[k].partnerConditional;if(cum+1e-12>=retention)break}
+  recommended.forEach(function(x){x.pair=pairKey(axis.horseNo,x.horseNo);x.quinellaOdds=qOdds[x.pair]||null;x.uplift=(x.quinellaOdds&&fp.odds)?x.quinellaOdds/fp.odds:null});
+  return{framePair:fp.pair,rank:fp.rank,frameOdds:fp.odds,zone:zone(fp.rank),sameFrame:same,axisCeiling:ceiling,partnerCoverage:clamp(cum),retainedFrameMass:clamp(ceiling*cum),partners:partners,recommended:recommended}
+}
+function cutoffAnalysis(cutoff,market,axis,groups,retention,qOdds){
+  if(market.length<cutoff)return{cutoff:cutoff,evaluable:false,pairs:[],points:0,marketMass:null};
+  var target=market.filter(function(x){return x.rank>=3&&x.rank<=cutoff&&((x.a===axis.frame)||(x.b===axis.frame))});
+  var pairs=target.map(function(fp){return analyzeFramePair(fp,axis,groups,retention,qOdds)}).filter(Boolean);
+  var points=pairs.reduce(function(s,p){return s+p.recommended.length},0),mass=null;
+  if(market.every(function(x){return x.odds!=null})){
+    var inv=market.map(function(x){return 1/x.odds}),tot=inv.reduce(function(s,x){return s+x},0);
+    mass=target.reduce(function(s,x){return s+(1/x.odds)/tot},0)
+  }
+  return{cutoff:cutoff,evaluable:true,pairs:pairs,points:points,marketMass:mass}
+}
+function axisRepresentative(axis,groups){
+  var g=groups[axis.frame]||[],sum=g.reduce(function(s,x){return s+x.weight},0);
+  return sum?axis.weight/sum:0
+}
+function analyze(){
+  $('error').classList.add('hidden');
+  try{
+    var horses=getHorses(),market=parseFrameMarket($('frameMarket').value),qOdds=parseQuinellaOdds($('quinellaOdds').value),axisNo=Number($('axisHorse').value),axis=horses.find(function(x){return x.horseNo===axisNo});
+    if(!axis)throw new Error('事前軸の馬番を入力してください');
+    var groups=frameGroups(horses),ret=Number($('retention').value),upper=Number($('upperCutoff').value),cuts=[10,12,14,16],by={};
+    cuts.forEach(function(c){by[c]=cutoffAnalysis(c,market,axis,groups,ret,qOdds)});
+    var selected=by[upper];if(!selected||!selected.evaluable)throw new Error('枠連人気データが上限'+upper+'位までありません');
+    var rep=axisRepresentative(axis,groups);
+    current={version:'waku-bc-v1',capturedAt:new Date().toISOString(),raceDate:$('raceDate').value,venue:$('venue').value,raceNo:Number($('raceNo').value),raceName:$('raceName').value.trim(),runnerCount:horses.length,isLate:Number($('raceNo').value)>=9,horses:horses,frameMarket:market,quinellaOdds:qOdds,axisHorseNo:axis.horseNo,axisFrame:axis.frame,axisPopularity:axis.popularity,axisWinOdds:axis.winOdds,axisRepresentative:rep,retention:ret,selectedCutoff:upper,cutoffs:by};
+    renderAnalysis(current)
+  }catch(e){$('error').textContent='🔴 '+e.message;$('error').classList.remove('hidden')}
+}
+function repClass(x){return x>=.80?'go':x>=.60?'caution':'stop'}
+function renderAnalysis(a){
+  var sel=a.cutoffs[a.selectedCutoff],core=sel.pairs.filter(function(p){return p.rank<=12}).length,ext=sel.pairs.filter(function(p){return p.rank>=13&&p.rank<=14}).length;
+  $('analysisCard').classList.remove('hidden');
+  $('targetHero').className='heroBox '+(sel.pairs.length?'go':'stop');$('targetText').textContent='枠連3〜'+a.selectedCutoff+'位';$('targetSub').textContent='軸'+a.axisFrame+'枠を含む '+sel.pairs.length+'組（コア3〜12：'+core+' / 拡張13〜14：'+ext+'）';
+  $('axisHero').className='heroBox '+repClass(a.axisRepresentative);$('axisText').textContent=pct(a.axisRepresentative);$('axisSub').textContent=a.axisHorseNo+'番 '+a.axisPopularity+'人気 '+a.axisWinOdds.toFixed(1)+'倍｜'+a.axisFrame+'枠の代表度';
+  $('pointsHero').className='heroBox '+(sel.points<=5?'go':sel.points<=8?'caution':'stop');$('pointsText').textContent=sel.points+'点';$('pointsSub').textContent='枠内'+Math.round(a.retention*100)+'%保持で馬連へ変換';
+  $('cutoffBody').innerHTML=[10,12,14,16].map(function(c){var x=a.cutoffs[c];if(!x.evaluable)return'<tr><td>3〜'+c+'</td><td colspan="3">入力不足</td></tr>';return'<tr><td>3〜'+c+'</td><td>'+x.pairs.length+'組</td><td>'+x.points+'点</td><td>'+(x.marketMass==null?'—':pct(x.marketMass))+'</td></tr>'}).join('');
+  if(!sel.pairs.length){$('pairResults').innerHTML='<div class="notice">軸'+a.axisFrame+'枠を含む組み合わせが3〜'+a.selectedCutoff+'位にありません。この軸では見送り候補です。</div>'}
+  else $('pairResults').innerHTML=sel.pairs.map(function(p){
+    var badge=p.rank<=12?'コア':'拡張';
+    var bets=p.recommended.map(function(x){
+      var u=x.uplift==null?'':'｜配当押上 '+x.uplift.toFixed(2)+'x';
+      return'<div class="betRow"><span><b>'+a.axisHorseNo+'-'+x.horseNo+'</b>（相手'+x.popularity+'人気 '+x.winOdds.toFixed(1)+'倍）</span><span>枠内 '+pct(x.partnerConditional)+u+'</span></div>'
+    }).join('');
+    return'<div class="pairCard"><div class="pairTop"><div><div class="pairTitle">枠連 '+p.framePair+'｜'+p.rank+'位</div><div class="muted">区画'+p.zone+' / '+badge+(p.frameOdds?' / 枠連'+p.frameOdds.toFixed(1)+'倍':'')+'</div></div><span class="pill">'+p.recommended.length+'点</span></div><div class="pairGrid"><div class="metric"><span>軸で変換できる上限</span><b>'+pct(p.axisCeiling)+'</b></div><div class="metric"><span>相手保持</span><b>'+pct(p.partnerCoverage)+'</b></div><div class="metric"><span>最終保持量</span><b>'+pct(p.retainedFrameMass)+'</b></div><div class="metric"><span>区画</span><b>'+p.zone+'</b></div></div><div class="bets">'+bets+'</div></div>'
+  }).join('');
+  $('saveMsg').textContent=''
+}
+function slimCutoff(x){return{cutoff:x.cutoff,evaluable:x.evaluable,points:x.points,marketMass:x.marketMass,pairs:x.pairs.map(function(p){return{framePair:p.framePair,rank:p.rank,zone:p.zone,axisCeiling:p.axisCeiling,partnerCoverage:p.partnerCoverage,retainedFrameMass:p.retainedFrameMass,recommended:p.recommended.map(function(r){return{horseNo:r.horseNo,pair:r.pair,partnerConditional:r.partnerConditional,exactShare:r.exactShare,quinellaOdds:r.quinellaOdds,uplift:r.uplift}})}})}}
+function saveAnalysis(){
+  if(!current)return;
+  var rec=JSON.parse(JSON.stringify(current));rec.id=Date.now();rec.cutoffs={};[10,12,14,16].forEach(function(c){rec.cutoffs[c]=slimCutoff(current.cutoffs[c])});rec.result=null;
+  var a=records(),key=rec.raceDate+'|'+rec.venue+'|'+rec.raceNo,idx=a.findIndex(function(x){return x.raceDate+'|'+x.venue+'|'+x.raceNo===key});
+  if(idx>=0&&a[idx].result){$('saveMsg').textContent='このレースは結果入力済みのため上書きしません。';return}
+  if(idx>=0)a[idx]=rec;else a.unshift(rec);putRecords(a);$('saveMsg').textContent='保存しました。結果入力後に10/12/14/16を同時比較します。';renderAll()
+}
+function frameOf(rec,h){var x=rec.horses.find(function(z){return z.horseNo===Number(h)});return x?x.frame:null}
+function actualRank(rec,f,s){var p=pairKey(frameOf(rec,f),frameOf(rec,s)),x=rec.frameMarket.find(function(z){return z.pair===p});return x?x.rank:19}
+function exactRecommended(rec,cutoff,f,s){
+  var x=rec.cutoffs[String(cutoff)]||rec.cutoffs[cutoff];if(!x||!x.evaluable)return false;var k=pairKey(f,s);
+  return x.pairs.some(function(p){return p.recommended.some(function(r){return r.pair===k})})
+}
+function saveResult(id){
+  var a=records(),rec=a.find(function(x){return x.id===id});if(!rec)return;
+  var f=Number($('rf'+id).value),s=Number($('rs'+id).value),stake=Number($('rk'+id).value||0),ret=Number($('rr'+id).value||0);
+  if(!Number.isInteger(f)||!Number.isInteger(s)||f===s||!frameOf(rec,f)||!frameOf(rec,s)){alert('1着・2着の馬番を正しく入力してください');return}
+  if(stake<0||ret<0){alert('投資・払戻は0以上');return}
+  var rank=actualRank(rec,f,s),z=zone(rank),axisIn=f===rec.axisHorseNo||s===rec.axisHorseNo;
+  var result={first:f,second:s,framePair:pairKey(frameOf(rec,f),frameOf(rec,s)),frameRank:rank,zone:z,axisIn:axisIn,stake:stake,returnYen:ret,recordedAt:new Date().toISOString(),cutoffs:{}};
+  [10,12,14,16].forEach(function(c){var x=rec.cutoffs[String(c)]||rec.cutoffs[c];result.cutoffs[c]={evaluable:!!(x&&x.evaluable),frameHit:!!(x&&x.evaluable&&rank>=3&&rank<=c),finalHit:!!(x&&x.evaluable&&exactRecommended(rec,c,f,s)),points:x&&x.evaluable?x.points:null}});
+  rec.result=result;putRecords(a);renderAll()
+}
+window.saveResult=saveResult;
+function del(id){if(!confirm('この保存データを削除しますか？'))return;putRecords(records().filter(function(x){return x.id!==id}));renderAll()}
+window.del=del;
+function rate(h,n){return n?h/n:null}
+function cutoffStats(a,c){
+  var rows=a.filter(function(r){return r.result&&(r.cutoffs[String(c)]||r.cutoffs[c])&&(r.cutoffs[String(c)]||r.cutoffs[c]).evaluable}),n=rows.length,fh=0,hh=0,pts=0;
+  rows.forEach(function(r){var x=r.result.cutoffs[String(c)]||r.result.cutoffs[c];if(x.frameHit)fh++;if(x.finalHit)hh++;pts+=Number(x.points||0)});
+  return{n:n,frameHits:fh,finalHits:hh,frameRate:rate(fh,n),finalRate:rate(hh,n),avgPoints:n?pts/n:null,pointEfficiency:pts?hh/pts:null,ciFrame:wilson(fh,n),ciFinal:wilson(hh,n)}
+}
+function renderValidation(){
+  var a=records(),done=a.filter(function(r){return r.result});
+  $('validationSummary').innerHTML='<b>保存 '+a.length+'R / 結果入力 '+done.length+'R</b><br><span class="muted">N<30は探索。上限ごとに同じレース集合で比較します。</span>';
+  $('validationBody').innerHTML=[10,12,14,16].map(function(c){var s=cutoffStats(a,c),fr=s.frameRate==null?'—':pct(s.frameRate)+(s.n>=30?' ['+pct(s.ciFrame.low)+'〜'+pct(s.ciFrame.high)+']':''),hr=s.finalRate==null?'—':pct(s.finalRate)+(s.n>=30?' ['+pct(s.ciFinal.low)+'〜'+pct(s.ciFinal.high)+']':'');return'<tr><td>3〜'+c+'</td><td>'+fr+'</td><td>'+hr+'</td><td>'+(s.avgPoints==null?'—':s.avgPoints.toFixed(1))+'</td><td>'+(s.pointEfficiency==null?'—':pct(s.pointEfficiency))+'</td></tr>'}).join('');
+  function split(isLate){var rs=done.filter(function(r){return r.isLate===isLate}),n=rs.length,h=rs.filter(function(r){var x=r.result.cutoffs['14']||r.result.cutoffs[14];return x&&x.frameHit}).length;return{n:n,h:h,rate:rate(h,n),ci:wilson(h,n)}}
+  var e=split(false),l=split(true);
+  $('lateCompare').innerHTML='<b>1〜8R：</b>'+(e.rate==null?'—':pct(e.rate))+'（'+e.h+'/'+e.n+'）　<b>9〜12R：</b>'+(l.rate==null?'—':pct(l.rate))+'（'+l.h+'/'+l.n+'）<br><span class="muted">後半Rで3〜14位決着が本当に増えるかを前向きに比較します。</span>';
+  var zs={A:0,B:0,C:0,D:0};done.forEach(function(r){zs[r.result.zone]++});
+  $('zoneObserved').innerHTML=['A','B','C','D'].map(function(z){return'<div class="zone"><span>区画'+z+'</span><b>'+pct(rate(zs[z],done.length))+'</b><small>'+zs[z]+'/'+done.length+'</small></div>'}).join('')
+}
+function renderHistory(){
+  var a=records();if(!a.length){$('history').innerHTML='<div class="muted" style="margin-top:12px">まだ保存データはありません。</div>';return}
+  $('history').innerHTML=a.map(function(r){
+    var sel=r.cutoffs[String(r.selectedCutoff)]||r.cutoffs[r.selectedCutoff],head='<div class="historyHead"><div><b>'+esc(r.raceDate+' '+r.venue+r.raceNo+'R '+(r.raceName||''))+'</b><div class="muted">軸 '+r.axisHorseNo+'番（'+r.axisFrame+'枠・代表度'+pct(r.axisRepresentative)+'） / 3〜'+r.selectedCutoff+'位 / '+sel.points+'点</div></div><button class="danger" onclick="del('+r.id+')">削除</button></div>';
+    if(r.result){
+      var rr=r.result,roi=rr.stake>0?(rr.returnYen/rr.stake):null;
+      return'<div class="history">'+head+'<div class="notice" style="margin-top:8px"><b>結果：</b>'+rr.first+'番→'+rr.second+'番 / 枠連'+rr.framePair+' '+zoneLabel(rr.frameRank)+'<br><b>軸：</b>'+(rr.axisIn?'✅ 連対':'⚠️ 圏外')+'　<b>3〜14：</b>'+((rr.cutoffs['14']||rr.cutoffs[14]).frameHit?'✅':'×')+'　<b>変換馬連：</b>'+((rr.cutoffs['14']||rr.cutoffs[14]).finalHit?'✅':'×')+(roi==null?'':'　<b>ROI：</b>'+pct(roi))+'</div></div>'
+    }
+    return'<div class="history">'+head+'<div class="resultGrid"><div><label>1着馬番</label><input id="rf'+r.id+'" type="number" min="1" max="18"></div><div><label>2着馬番</label><input id="rs'+r.id+'" type="number" min="1" max="18"></div><div><label>馬連投資（任意）</label><input id="rk'+r.id+'" type="number" min="0" step="100" value="0"></div><div><label>払戻（任意）</label><input id="rr'+r.id+'" type="number" min="0" step="10" value="0"></div></div><button class="secondary wide" onclick="saveResult('+r.id+')">結果を保存</button></div>'
+  }).join('')
+}
+function exportCsv(){
+  var a=records(),rows=[['date','venue','race_no','race_name','late','axis','axis_frame','axis_pop','axis_odds','axis_rep','selected_cutoff','retention','result_frame_rank','zone','axis_in','hit_10','hit_12','hit_14','hit_16','final_10','final_12','final_14','final_16','points_10','points_12','points_14','points_16','stake','return']];
+  a.forEach(function(r){var rr=r.result||{},get=function(c,k){return rr.cutoffs&&rr.cutoffs[c]?rr.cutoffs[c][k]:''},cx=function(c){var x=r.cutoffs[String(c)]||r.cutoffs[c];return x&&x.evaluable?x.points:''};rows.push([r.raceDate,r.venue,r.raceNo,r.raceName,r.isLate,r.axisHorseNo,r.axisFrame,r.axisPopularity,r.axisWinOdds,r.axisRepresentative,r.selectedCutoff,r.retention,rr.frameRank||'',rr.zone||'',rr.axisIn==null?'':rr.axisIn,get(10,'frameHit'),get(12,'frameHit'),get(14,'frameHit'),get(16,'frameHit'),get(10,'finalHit'),get(12,'finalHit'),get(14,'finalHit'),get(16,'finalHit'),cx(10),cx(12),cx(14),cx(16),rr.stake||0,rr.returnYen||0])});
+  var csv=rows.map(function(row){return row.map(function(v){return'"'+String(v==null?'':v).replace(/"/g,'""')+'"'}).join(',')}).join('\n');
+  var blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),ael=document.createElement('a');ael.href=url;ael.download='waku-bc-validation.csv';ael.click();setTimeout(function(){URL.revokeObjectURL(url)},1000)
+}
+function renderAll(){renderValidation();renderHistory()}
+$('runnerCount').addEventListener('change',renderHorseGrid);$('raceNo').addEventListener('change',late);$('analyze').addEventListener('click',analyze);$('saveAnalysis').addEventListener('click',saveAnalysis);$('exportCsv').addEventListener('click',exportCsv);
+initSelects();renderAll()
+})();
+</script>
+</body></html>
