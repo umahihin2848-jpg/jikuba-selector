@@ -26,6 +26,19 @@
 .bulkInput textarea{margin-top:8px;min-height:86px}
 .bulkInput button{width:100%;margin-top:7px}
 .candidateStatus{margin-top:8px;padding:9px 10px;border-radius:10px;background:#0a1726;border:1px solid #29415e;color:#b8c9d9;font-size:11px;line-height:1.55}
+.stakeBox{margin-top:12px;border:1px solid #31506f;border-radius:13px;background:#081624;padding:11px}
+.stakeControls{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end}
+.stakeControls button{height:42px;white-space:nowrap}
+.stakeSummary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:9px}
+.stakeMetric{background:#0b1d2e;border:1px solid #213b55;border-radius:9px;padding:8px}
+.stakeMetric span{display:block;font-size:9px;color:#91a5b9}
+.stakeMetric b{display:block;font-size:15px;margin-top:2px}
+.stakeRows{display:grid;gap:6px;margin-top:9px}
+.stakeRow{display:grid;grid-template-columns:64px 1fr 1fr;gap:8px;align-items:center;background:#0d2235;border-radius:9px;padding:9px;font-size:12px}
+.stakeRow b{font-size:13px}.stakeRow span:nth-child(2){text-align:right}.stakeRow span:last-child{text-align:right;color:#b8c9d9}
+.stakeNote{margin-top:8px;color:var(--sub);font-size:10px;line-height:1.55}
+@media(max-width:620px){.stakeControls{grid-template-columns:1fr}.stakeControls button{width:100%}.stakeSummary{grid-template-columns:1fr 1fr}.stakeRow{grid-template-columns:58px 1fr 1fr}}
+
 @media(max-width:620px){.oddsEntryGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.oddsEntryRow{grid-template-columns:42px minmax(0,1fr);padding:6px}.pairLabel{font-size:11px}.oddsEntryRow input{font-size:16px;padding:10px 6px}.oddsSectionHead button{padding:8px 10px;font-size:12px}}
 
 </style>
@@ -94,6 +107,16 @@
 
 <h3>今回の馬連候補</h3>
 <div id="pairResults"></div>
+
+<div class="stakeBox">
+<h3 style="margin-top:0">馬連購入配分｜均等払い戻し</h3>
+<div class="muted">総購入額だけ入力すると、候補ごとの払い戻しができるだけ揃うように<b>100円単位</b>で自動配分します。全候補を最低100円ずつ買う前提です。</div>
+<div class="stakeControls" style="margin-top:8px">
+<div><label>馬連予定額</label><input id="quinellaStake" type="number" min="100" step="100" inputmode="numeric" placeholder="例：3000"></div>
+<button id="calcQuinellaStake" class="secondary" type="button">購入額を計算</button>
+</div>
+<div id="stakePlan" class="candidateStatus">最終判定後に予定額を入力してください。</div>
+</div>
 
 <h3>例外警告</h3>
 <div id="warnings" class="warningList"></div>
@@ -249,6 +272,54 @@ function analyzeCore(horses,market,qOdds){
   var ticketMap={};covered.forEach(function(x){x.tickets.forEach(function(t){if(!ticketMap[t.pair])ticketMap[t.pair]={pair:t.pair,odds:t.odds,mass:t.mass};else{ticketMap[t.pair].mass+=t.mass;if(t.odds)ticketMap[t.pair].odds=t.odds}})});var tickets=Object.keys(ticketMap).map(function(k){return ticketMap[k]}).sort(function(a,b){return a.pair.localeCompare(b.pair)}),missing=tickets.filter(function(t){return !(t.odds>0)}),composite=null;if(tickets.length&&!missing.length){var burden=tickets.reduce(function(s,t){return s+1/t.odds},0);composite=burden?1/burden:null}var ev=composite?pFinal*composite:null;
   return{groups:groups,range:ax.range,axes:axes,pA:pA,pB:pB,pC:pC,pC100:pC100,capRemoved:capRemoved,pFinal:pFinal,target:target,covered:covered,weak:weak,tickets:tickets,missing:missing,composite:composite,ev:ev}
 }
+
+function yen(n){return Math.round(Number(n)||0).toLocaleString('ja-JP')+'円'}
+function equalPayoutPlan(tickets,totalYen){
+  var valid=(tickets||[]).filter(function(t){return t&&t.odds>0});
+  var total=Math.floor(Number(totalYen)/100)*100,n=valid.length;
+  if(!n)return{error:'馬連オッズが揃っていません。'};
+  if(!(total>0))return{error:'馬連予定額を入力してください。'};
+  if(total<n*100)return{error:'候補'+n+'点を全て買うには最低'+yen(n*100)+'必要です。'};
+  var unitsTotal=total/100,burden=valid.reduce(function(sum,t){return sum+1/t.odds},0);
+  if(!(burden>0))return{error:'馬連オッズを確認してください。'};
+  var theoreticalPayout=total/burden;
+  var rows=valid.map(function(t){
+    var ideal=theoreticalPayout/(100*t.odds);
+    return{pair:t.pair,odds:t.odds,idealUnits:ideal,units:Math.max(1,Math.floor(ideal))}
+  });
+  function sqerr(row,u){var d=(u*100*row.odds)-theoreticalPayout;return d*d}
+  var used=rows.reduce(function(sum,r){return sum+r.units},0);
+  while(used>unitsTotal){
+    var best=null,bestDelta=Infinity;
+    rows.forEach(function(r){if(r.units<=1)return;var d=sqerr(r,r.units-1)-sqerr(r,r.units);if(d<bestDelta){bestDelta=d;best=r}});
+    if(!best)break;best.units--;used--
+  }
+  while(used<unitsTotal){
+    var add=null,addDelta=Infinity;
+    rows.forEach(function(r){var d=sqerr(r,r.units+1)-sqerr(r,r.units);if(d<addDelta){addDelta=d;add=r}});
+    add.units++;used++
+  }
+  rows.forEach(function(r){r.stake=r.units*100;r.payout=r.stake*r.odds;r.diff=r.payout-theoreticalPayout});
+  rows.sort(function(a,b){return numericPairSort(a.pair,b.pair)});
+  var payouts=rows.map(function(r){return r.payout}),minP=Math.min.apply(null,payouts),maxP=Math.max.apply(null,payouts),avgP=payouts.reduce(function(a,b){return a+b},0)/payouts.length;
+  return{total:total,theoreticalPayout:theoreticalPayout,rows:rows,minPayout:minP,maxPayout:maxP,avgPayout:avgP,spread:maxP-minP,spreadRate:theoreticalPayout?((maxP-minP)/theoreticalPayout):0,composite:1/burden}
+}
+function renderStakePlan(){
+  var box=$('stakePlan');if(!box)return;
+  if(!current){box.textContent='最終判定後に予定額を入力してください。';return}
+  var plan=equalPayoutPlan(current.tickets,Number($('quinellaStake').value));
+  if(plan.error){box.innerHTML='⚠️ '+esc(plan.error);if(current){current.quinellaStake=null;current.stakePlan=null}return}
+  current.quinellaStake=plan.total;
+  current.stakePlan={total:plan.total,theoreticalPayout:plan.theoreticalPayout,minPayout:plan.minPayout,maxPayout:plan.maxPayout,spreadRate:plan.spreadRate,rows:plan.rows.map(function(r){return{pair:r.pair,odds:r.odds,stake:r.stake,payout:r.payout}})};
+  var summary='<div class="stakeSummary">'+
+    '<div class="stakeMetric"><span>総購入額</span><b>'+yen(plan.total)+'</b></div>'+
+    '<div class="stakeMetric"><span>理論均等払戻</span><b>'+yen(plan.theoreticalPayout)+'</b></div>'+
+    '<div class="stakeMetric"><span>100円丸め後</span><b>'+yen(plan.minPayout)+'〜'+yen(plan.maxPayout)+'</b></div>'+
+    '</div>';
+  var rows='<div class="stakeRows">'+plan.rows.map(function(r){return'<div class="stakeRow"><b>'+r.pair+'</b><span>'+r.odds.toFixed(1)+'倍 × <b>'+yen(r.stake)+'</b></span><span>払戻 '+yen(r.payout)+'</span></div>'}).join('')+'</div>';
+  var note='<div class="stakeNote">理論配分は「賭け金 ∝ 1 / オッズ」。100円単位では、理論払戻からの二乗誤差が小さくなるよう整数配分しています。払戻レンジ差は理論値比 '+(plan.spreadRate*100).toFixed(1)+'%。</div>';
+  box.innerHTML=summary+rows+note
+}
 function judgeClass(ev,missing){if(missing)return{cls:'info',text:'⚪ 馬連オッズ待ち',sub:'3段pは計算済み。候補'+missing+'点の馬連オッズが不足'};if(ev==null)return{cls:'info',text:'⚪ 判定待ち',sub:''};if(ev<.95)return{cls:'stop',text:'🟠 配当不足',sub:'市場基準pに対して合成オッズが足りない'};if(ev<1)return{cls:'caution',text:'⚪ ほぼ市場並み',sub:'控除を考えると積極的には買いにくい'};return{cls:'caution',text:'🟡 割安候補（検証中）',sub:'市場基準ではEV>1。ただし自動購入条件にはしない'}}
 function renderAnalysis(a){
   $('analysisCard').classList.remove('hidden');var j=judgeClass(a.ev,a.missing.length);$('judgeHero').className='heroBox '+j.cls;$('judgeText').textContent=j.text;$('judgeSub').textContent=j.sub;
@@ -262,6 +333,7 @@ function renderAnalysis(a){
   if(!a.covered.length){$('pairResults').innerHTML='<div class="notice">2軸につながる3〜14位の組み合わせが、弱枠削減後に残りません。見送り寄りです。</div>'}
   else $('pairResults').innerHTML=a.covered.map(function(p){var ts=p.tickets.map(function(t){return'<div class="betRow"><span><b>'+t.pair+'</b></span><span>'+(t.odds?t.odds.toFixed(1)+'倍':'馬連オッズ未入力')+'</span></div>'}).join('');return'<div class="pairCard"><div class="pairTop"><div><div class="pairTitle">枠連 '+p.framePair+'｜'+p.rank+'位</div><div class="muted">相手枠支持 '+pct(p.oppSupport)+' / 馬変換保持 '+pct(p.keptMass)+'</div></div><span class="pill">'+p.tickets.length+'点</span></div><div class="bets">'+ts+'</div></div>'}).join('');
   var ws=[];if(a.capRemoved>=.031)ws.push('⚠️ 50〜100倍帯を切る影響が大きい（pC差 '+(a.capRemoved*100).toFixed(1)+'pt）。pCの信頼度を低めに見る候補です。');if(a.weak.length)ws.push('⚠️ 弱枠 '+a.weak.length+'組を除外：'+a.weak.map(function(x){return x.framePair+'（'+x.rank+'位）'}).join('、'));if(a.range.end>6)ws.push('⚠️ 1着レンジは1〜'+a.range.end+'人気で広め。2軸の生存力は慎重に見る。');if(!ws.length)ws.push('✅ 現在の検証済み警告条件には該当していません。');$('warnings').innerHTML=ws.map(function(x){return'<div class="'+(x.indexOf('✅')===0?'okBox':'warning')+'">'+x+'</div>'}).join('')
+  if($('quinellaStake').value)renderStakePlan();else $('stakePlan').textContent='予定額を入力すると100円単位の均等払い戻し配分を表示します。';
 }
 function analyze(){
   $('error').classList.add('hidden');try{
@@ -270,7 +342,7 @@ function analyze(){
     renderQuinellaOddsGrid(pre.tickets.map(function(x){return x.pair}));syncQuinellaFromGrid();
     var qOdds=parseQuinellaOdds($('quinellaOdds').value),a=analyzeCore(horses,market,qOdds);
     $('quinellaCandidateStatus').innerHTML='<b>2軸 '+a.axes.map(function(x){return x.horseNo+'番'}).join('・')+'</b>｜市場3段p '+pct(a.pFinal)+'｜馬連候補 '+a.tickets.length+'点';
-    current={version:'waku-bc-translator-v2-mobile-input',capturedAt:new Date().toISOString(),raceDate:$('raceDate').value,venue:$('venue').value,raceNo:Number($('raceNo').value),raceName:$('raceName').value.trim(),runnerCount:horses.length,horses:horses,frameMarket:market,quinellaOdds:qOdds,range:a.range,axes:a.axes,pA:a.pA,pB:a.pB,pC:a.pC,pC100:a.pC100,capRemoved:a.capRemoved,pFinal:a.pFinal,covered:a.covered.map(function(x){return{framePair:x.framePair,rank:x.rank,oppSupport:x.oppSupport,keptMass:x.keptMass,tickets:x.tickets}}),weak:a.weak.map(function(x){return{framePair:x.framePair,rank:x.rank,oppSupport:x.oppSupport}}),tickets:a.tickets,missing:a.missing.map(function(x){return x.pair}),composite:a.composite,ev:a.ev};renderAnalysis(current)
+    current={version:'waku-bc-translator-v3-equal-payout',capturedAt:new Date().toISOString(),raceDate:$('raceDate').value,venue:$('venue').value,raceNo:Number($('raceNo').value),raceName:$('raceName').value.trim(),runnerCount:horses.length,horses:horses,frameMarket:market,quinellaOdds:qOdds,range:a.range,axes:a.axes,pA:a.pA,pB:a.pB,pC:a.pC,pC100:a.pC100,capRemoved:a.capRemoved,pFinal:a.pFinal,covered:a.covered.map(function(x){return{framePair:x.framePair,rank:x.rank,oppSupport:x.oppSupport,keptMass:x.keptMass,tickets:x.tickets}}),weak:a.weak.map(function(x){return{framePair:x.framePair,rank:x.rank,oppSupport:x.oppSupport}}),tickets:a.tickets,missing:a.missing.map(function(x){return x.pair}),composite:a.composite,ev:a.ev};renderAnalysis(current)
   }catch(e){showInputError(e)}
 }
 function saveAnalysis(){if(!current)return;var a=records(),rec=JSON.parse(JSON.stringify(current));rec.id=Date.now();a.unshift(rec);putRecords(a.slice(0,100));$('saveMsg').textContent='保存しました。';renderHistory()}
@@ -288,6 +360,7 @@ $('clearFrameOdds').addEventListener('click',function(){document.querySelectorAl
 $('clearQuinellaOdds').addEventListener('click',function(){document.querySelectorAll('.quinellaOddsInput').forEach(function(x){x.value=''});syncQuinellaFromGrid()});
 $('applyFrameBulk').addEventListener('click',function(){renderFrameOddsGrid();applyBulkToGrid('frameMarketBulk','.frameOddsInput',8,syncFrameMarketFromGrid)});
 $('applyQuinellaBulk').addEventListener('click',function(){if(!document.querySelector('.quinellaOddsInput'))prepareQuinella();applyBulkToGrid('quinellaOddsBulk','.quinellaOddsInput',18,syncQuinellaFromGrid)});
+$('calcQuinellaStake').addEventListener('click',renderStakePlan);$('quinellaStake').addEventListener('input',function(){if(current)renderStakePlan()});
 $('analyze').addEventListener('click',analyze);$('saveAnalysis').addEventListener('click',saveAnalysis);$('clearHistory').addEventListener('click',clearHistory);
 initSelects();renderFrameOddsGrid();
 })();
