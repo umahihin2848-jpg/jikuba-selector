@@ -95,8 +95,8 @@ async function run(browserType,label){
   await editor.locator('.first').fill(first);
   await editor.locator('.second').fill(second);
   await editor.locator('.purchased').selectOption('yes');
-  await editor.locator('.stake').fill(String(stakeAmount));
-  await editor.locator('.ret').fill(String(stakeAmount*2));
+  await editor.locator('.actualStake').fill(String(stakeAmount));
+  await editor.locator('.actualReturn').fill(String(stakeAmount*2));
   await editor.locator('.saveResult').click();
 
   assert((await page.locator('#dashBadge').textContent()).includes('1/1'),label+' dashboard badge settled');
