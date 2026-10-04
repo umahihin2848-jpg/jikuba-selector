@@ -30,4 +30,5 @@ jobs:
       - name: Run smoke test
         run: |
           node tests/smoke.cjs
-          node tests/quinella-range-smoke.cjs\n          node tests/waku-bc-smoke.cjs
+          node tests/quinella-range-smoke.cjs
+          node tests/waku-bc-smoke.cjs
