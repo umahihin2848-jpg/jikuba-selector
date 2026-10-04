@@ -1752,14 +1752,19 @@ function renderBetPriority(pipe,fr,pr,r=null){
   const qGo=!pipe.hardLocked&&pipe.quinellaFit==='candidate'&&qp.eligible&&(!axisPolicy.axis||axisPolicy.pairedAuto);
   if(hero){
     hero.classList.remove('hidden');
-    $('winHeroLabel').textContent=winLabel;$('winHeroSub').textContent=winSub;
-    $('quinellaHeroLabel').textContent=qLabel;$('quinellaHeroSub').textContent=qSub;
+    const fpRate=fp.available?(fp.share*100).toFixed(1)+'%':'—',qpRate=qp.available?(qp.share*100).toFixed(1)+'%':'—',wpRate=wp.available?(wp.share*100).toFixed(1)+'%':'—';
+    const topWinLabel=pipe.hardLocked?'🔴 買わない':fp.band==='skip'?'🟠 見送り':fp.band==='caution'?'🟡 慎重':fp.band==='good'?'🟡 条件付き':'🟢 候補';
+    const topWinSub=pipe.hardLocked?'固定除外条件':('1着レンジ '+fr.label+'・'+fpRate);
+    const topQLabel=pipe.hardLocked?'🔴 買わない':qp.band==='skip'?'🟠 見送り':qp.band==='caution'?'🟡 慎重':qGo?'🟢 追加候補':'🟠 追加なし';
+    const topQSub=pipe.hardLocked?'固定除外条件':qp.band==='skip'?('レンジ広すぎ｜'+pr.label+'・'+qpRate):qp.band==='caution'?('レンジ慎重｜'+pr.label+'・'+qpRate):qGo?('レンジ良好｜'+pr.label+'・'+qpRate):('レンジ良好・購入条件未達｜'+pr.label+'・'+qpRate);
+    const topWideLabel=pipe.hardLocked?'🔴 買わない':wp.band==='skip'?'🟠 見送り':wp.band==='caution'?'🟡 慎重':'🟢 候補あり';
+    const topWideSub=pipe.hardLocked?'固定除外条件':('3着レンジ '+wideRange.label+'・'+wpRate+(wp.band==='skip'?'':'｜最大2頭'));
+    $('winHeroLabel').textContent=topWinLabel;$('winHeroSub').textContent=topWinSub;
+    $('quinellaHeroLabel').textContent=topQLabel;$('quinellaHeroSub').textContent=topQSub;
     wh.className='ticketDecisionHeroCard '+(pipe.hardLocked?'hardLock':fp.band==='skip'?'stop':pipe.winFit==='candidate'?'go':'caution');
-    qh.className='ticketDecisionHeroCard '+(pipe.hardLocked?'hardLock':qp.band==='skip'?'stop':qGo?'go':'caution');
+    qh.className='ticketDecisionHeroCard '+(pipe.hardLocked?'hardLock':qp.band==='skip'?'stop':qGo?'go':qp.band==='caution'?'caution':'stop');
     if(wideh){
-      const wideLabel=pipe.hardLocked?'買わない':wp.band==='skip'?'ワイド見送り':wp.band==='caution'?'ワイド慎重':'候補あり';
-      const wideSub=pipe.hardLocked?'固定除外条件です。':wideRange.label+' / 3着候補 '+rangeSharePolicyText(wp)+'。'+(wp.band==='skip'?'候補が広すぎます。':'この中から最大2頭を選択。');
-      $('wideHeroLabel').textContent=wideLabel;$('wideHeroSub').textContent=wideSub;
+      $('wideHeroLabel').textContent=topWideLabel;$('wideHeroSub').textContent=topWideSub;
       wideh.className='ticketDecisionHeroCard '+(pipe.hardLocked?'hardLock':wp.band==='skip'?'stop':wp.band==='caution'?'caution':'go');
     }
   }
@@ -1768,7 +1773,8 @@ function renderBetPriority(pipe,fr,pr,r=null){
   const axisWarning=axisPolicy.axis&&axisPolicy.popularity===4?'<br><b>⚠️ 4人気軸：</b>馬連は強判定時のみ候補、ワイドは直接3着内データを蓄積中。':axisPolicy.axis&&axisPolicy.popularity>=5?'<br><b>⚠️ '+axisPolicy.popularity+'人気軸：</b>馬連・ワイドとも前向きNが十分になるまで自動推奨外です。':'';
   const shareWarning='<br><b>候補率：</b>単勝 '+(fp.available?(fp.share*100).toFixed(1)+'%':'—')+' / 馬連 '+(qp.available?(qp.share*100).toFixed(1)+'%':'—')+' / ワイド '+(wp.available?(wp.share*100).toFixed(1)+'%':'—');
   ws.className='warningStrip '+(pipe.hardLocked?'hardLock':fp.band==='skip'||qp.band==='skip'?'stop':pipe.riskCount>=2||axisPolicy.highVariance||axisPolicy.popularity>=5||fp.band==='caution'||qp.band==='caution'?'caution':'good');
-  ws.innerHTML=(pipe.hardLocked?'<b>🔴 固定ロック</b> '+esc(pipe.hardLockReason):(pipe.riskGroups||[]).length?'<b>独立リスク '+pipe.riskCount+'種類：</b> '+pipe.riskGroups.map(x=>esc(x.label)).join(' / '):'<b>✅ 大きな注意点なし</b>')+shareWarning+axisWarning;
+  const riskCount=(pipe.riskGroups||[]).length;
+  ws.innerHTML=(pipe.hardLocked?'<b>🔴 固定ロック</b> '+esc(pipe.hardLockReason):riskCount?'<b>⚠️ 注意'+(riskCount>1?' '+riskCount+'件':'')+'：</b> '+pipe.riskGroups.map(x=>esc(x.label)).join(' / '):'<b>✅ 大きな注意点なし</b>')+shareWarning+axisWarning;
   renderAxisTicketPolicy(r?.runners||pendingAssessment?.calc?.runners||[],pipe,axisNo);
 }
 function render(r){
