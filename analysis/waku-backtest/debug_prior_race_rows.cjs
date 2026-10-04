@@ -1,6 +1,6 @@
 const cheerio=require('cheerio');
 (async()=>{
- const ids=['2605040801','2605040802','2605040803','2605040804','2605040805','2605040806','2605040807','2605040808','2605040809','2605040810','2605040811'];
+ const ids=['2606010101','2606010102','2606010103','2606010104','2606010105','2606010106','2606010107','2606010108','2606010109','2606010110','2606010111'];
  for(const id of ids){
   try{
    const r=await fetch('https://sports.yahoo.co.jp/keiba/race/result/'+id+'/',{headers:{'user-agent':'Mozilla/5.0 historical-racing-research'}});
