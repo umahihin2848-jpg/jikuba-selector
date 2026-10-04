@@ -1,7 +1,7 @@
 name: Discover external BC races
 on:
   push:
-    branches: ["historical-waku-backtest"]
+    branches: ["external-bc-validation"]
 permissions:
   contents: read
 jobs:
