@@ -1883,14 +1883,14 @@ function render(r){
     rangeSummary.classList.remove('hidden');
   }
   const verdictIcon=pipe.fourLevelCode==='hard_lock'?'🔴':pipe.fourLevelCode==='recommend_skip'?'🟠':pipe.fourLevelCode==='conditional'?'🟡':'🟢';
-  const verdictShort=pipe.fourLevelCode==='hard_lock'?'固定ロック':pipe.fourLevelCode==='recommend_skip'?'見送り推奨':pipe.fourLevelCode==='conditional'?'条件付き':'購入候補';
+  const verdictShort=pipe.fourLevelCode==='hard_lock'?'固定ロック':pipe.fourLevelCode==='recommend_skip'?'レース見送り':pipe.fourLevelCode==='conditional'?'レース条件付き':'軸探し候補';
   const verdictClass=pipe.fourLevelCode==='hard_lock'?'statusLock':pipe.fourLevelCode==='recommend_skip'?'statusSkip':pipe.fourLevelCode==='conditional'?'statusConditional':'statusStrong';
   c.className='card verdict '+verdictClass;c.classList.remove('hidden');
   $('verdict').textContent=verdictIcon+' '+verdictShort;
   $('lead').textContent='境界確率優先｜'+pipe.summary;
   renderBetPriority(pipe,fr,pr,r);renderWinScope(pipe,fr,r);
   const stBox=$('strategyBox');stBox.className='strategyBox '+st.level;stBox.classList.remove('hidden');$('strategyTitle').textContent=st.title;$('strategyBadge').textContent=st.badge;$('strategyMain').textContent=st.main;$('strategyQuinella').textContent=st.quinella;$('strategyFirst').textContent=st.first;$('strategyAction').textContent=st.action;$('strategyNext').textContent=st.next;
-  const cpBox=$('conditionProfile');cpBox.className='conditionProfile '+cp.level;cpBox.classList.remove('hidden');$('conditionProfileTitle').textContent='過去参考：'+cp.title;$('conditionProfileBadge').textContent='参考・'+String(cp.badge||'').replace(/^参考・/,'');$('conditionProfileEvidence').textContent='過去成績：'+cp.evidence;$('conditionProfileSecond').textContent=cp.secondEvidence?'過去参考：'+cp.secondEvidence:'2着レンジ：条件別の追加検証なし';$('conditionProfileNote').textContent=(cp.note||'')+' 最終単勝評価は今回の1着レンジ・境界を優先します。';const sampleMeta=conditionSampleMeta(r,fr);$('conditionProfileN').textContent=sampleMeta.label;
+  const cpBox=$('conditionProfile');cpBox.className='conditionProfile '+cp.level;cpBox.classList.remove('hidden');$('conditionProfileTitle').textContent='過去参考：'+cp.title;$('conditionProfileBadge').textContent='参考・'+String(cp.badge||'').replace(/^参考・/,'');$('conditionProfileEvidence').textContent='過去成績：'+cp.evidence;$('conditionProfileSecond').textContent=cp.secondEvidence?'過去参考：'+cp.secondEvidence:'2着レンジ：条件別の追加検証なし';$('conditionProfileNote').textContent=(cp.note||'')+' 現在は1着レンジ・境界をレース選別に使い、軸の2着内・3着内は別判定します。';const sampleMeta=conditionSampleMeta(r,fr);$('conditionProfileN').textContent=sampleMeta.label;
   const mpBox=$('marketPatternBox');mpBox.className='patternBox '+mp.level;mpBox.classList.remove('hidden');$('marketPatternTitle').textContent=mp.title;$('marketPatternBadge').textContent=mp.badge;$('marketPatternKey').textContent=mp.key;$('patternFirst').textContent=mp.firstLabel;$('patternSecond').textContent=mp.secondLabel;$('patternQuinella').textContent=mp.quinellaFit;$('patternNote').textContent=mp.note;
   renderDecisionPipeline(pipe);renderQuickDecisionReason(pipe);
   const dr=$('decisionReason');dr.textContent=pipe.summary;dr.className='decisionReason'+(pipe.finalCode==='skip'?' stop':'');dr.classList.remove('hidden');
