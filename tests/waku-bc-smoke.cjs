@@ -62,6 +62,24 @@ async function run(browserType,label){
   assert(!judge.includes('馬連オッズ待ち'),label+' price judgement '+judge);
   assert((await page.locator('.pairCard').count())>0,label+' candidate frame pairs');
   assert((await page.locator('#warnings > div').count())>0,label+' warning/ok output');
+
+  const stakeAmount=Math.max(3000,qCount*500);
+  await page.fill('#quinellaStake',String(stakeAmount));
+  await page.click('#calcQuinellaStake');
+  const stakeRows=page.locator('#stakePlan .stakeRow');
+  assert((await stakeRows.count())===qCount,label+' stake rows');
+  const stakeTexts=await stakeRows.allTextContents();
+  let stakeSum=0;
+  for(const txt of stakeTexts){
+    const m=txt.match(/([0-9,]+)円.*払戻/);
+    assert(m,label+' stake amount row '+txt);
+    const v=Number(m[1].replace(/,/g,''));
+    assert(v>=100&&v%100===0,label+' stake unit '+v);
+    stakeSum+=v;
+  }
+  assert(stakeSum===stakeAmount,label+' stake total '+stakeSum+' vs '+stakeAmount);
+  const stakePlanText=await page.locator('#stakePlan').textContent();
+  assert(stakePlanText.includes('理論均等払戻')&&stakePlanText.includes('100円丸め後'),label+' equal payout summary');
   assert(!errs.length,label+' page errors: '+errs.join(' | '));
 
   await page.click('#saveAnalysis');
