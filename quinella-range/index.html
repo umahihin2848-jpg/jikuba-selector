@@ -111,7 +111,7 @@
   <div id="winRangeBox" class="winRange hidden">
     <div class="winRangeHead"><div><div class="winRangeTitle">1着レンジ</div><div class="winRangeValue" id="winRangeValue"></div></div><div class="winRangeStatus" id="winRangeStatus"></div></div>
     <div class="winRangeText" id="winRangeText"></div>
-    <div class="winRangeNote">単勝の最終評価は、この「今回の1着レンジ・境界」を最優先します。</div>
+    <div class="winRangeNote">1着レンジは「単勝を買う判定」ではなく、軸を探す価値があるレースかを選別するために使います。</div>
   </div>
   <div id="secondPlaceBox" class="winRange secondaryRange hidden">
     <div class="winRangeHead"><div><div class="winRangeTitle">馬連レンジ（2着候補）</div><div class="winRangeValue" id="secondPlaceValue"></div></div><div class="winRangeStatus" id="secondPlaceStatus"></div></div>
@@ -1488,7 +1488,7 @@ function quickDecisionReasonData(pipe){
   const p=pipe?.policy||FORMAL_PROMOTION_POLICY,e=pipe?.evidence||{},signals=Array.isArray(pipe?.riskSignals)?pipe.riskSignals:[],groups=Array.isArray(pipe?.riskGroups)?pipe.riskGroups:aggregateRiskGroups(signals);
   const eff=pipe?.rangeEfficiency||{available:false};
   const historyLabel=e?.label||'過去条件';
-  if(pipe?.fourLevelCode==='hard_lock')return{level:'stop',title:'🔴 単勝：買わない',text:plainReasonText(pipe.hardLockReason||'このレースは固定の除外条件に該当しています。'),meta:'この条件では買わないルールです。',currentStat:'—',firstStat:'—',pairStat:'—',rangeStat:'—',boundaryStat:'—',historyLabel};
+  if(pipe?.fourLevelCode==='hard_lock')return{level:'stop',title:'🔴 レース選別：対象外',text:plainReasonText(pipe.hardLockReason||'このレースは固定の除外条件に該当しています。'),meta:'この条件では買わないルールです。',currentStat:'—',firstStat:'—',pairStat:'—',rangeStat:'—',boundaryStat:'—',historyLabel};
   const rate=statNumber(e.firstRate),rateThreshold=Number(p.minFirstRate||.92),n=statNumber(e.n),minN=Number(p.minN||30),early=statNumber(e.earlyRate),late=statNumber(e.lateRate),block=Number(p.minBlockRate||.90);
   const negatives=[],seen=new Set(),add=(key,text)=>{if(text&&!seen.has(key)){seen.add(key);negatives.push(text)}};
   const firstOk=pipe?.firstGrade==='A'||pipe?.firstGrade==='B',secondOk=pipe?.secondGrade==='A'||pipe?.secondGrade==='B';
@@ -1501,11 +1501,11 @@ function quickDecisionReasonData(pipe){
   const groupSummary={market:'人気が分散していて軸を決めにくい',range:'候補範囲が広い、または候補を区切る線が弱い',history:'過去参考の勝ち馬捕捉が弱い',reliability:'過去参考のデータ量または年度安定性に不安がある',race:'レース条件がまだ再検証中'};
   for(const g of groups)add(g.id,groupSummary[g.id]||g.label);
 
-  let level='caution',title='🟡 単勝：条件付き';
-  if(pipe?.fourLevelCode==='recommend_skip')title='🟠 単勝：見送り寄り';
-  else if(pipe?.fourLevelCode==='strong'){level='go';title='🟢 単勝：購入候補';}
+  let level='caution',title='🟡 レース選別：条件付き';
+  if(pipe?.fourLevelCode==='recommend_skip')title='🟠 レース選別：見送り';
+  else if(pipe?.fourLevelCode==='strong'){level='go';title='🟢 レース選別：軸探し候補';}
 
-  let text=currentText+'。最終単勝評価は今回の1着レンジ・境界を最優先します。';
+  let text=currentText+'。ここでは勝ち馬1頭を当てるのではなく、軸を探す価値があるレースかを1着レンジ・境界で選別します。';
   if(rate!==null)text+=' '+historyLabel+'の過去実績 '+pipelineRateText(rate)+' は補足参考で、今回の境界が弱い時に単独で評価を上げる材料にはしません。';
   if(negatives.length)text+=' 確認点：'+negatives.join('。さらに、')+'。';
 
@@ -1580,14 +1580,15 @@ function renderHistoricalPatternReview(){
   }).join('');
 }
 const RULE_REGISTRY=[
+  {id:'v259_axis_survival',status:'formal',title:'1着レンジ→軸生存率→条件付き相手',detail:'1着レンジはレース選別専用。単勝オッズの逆数を正規化した支持をPlackett-Luce型順位モデルへ入れ、軸の1着・2着内・3着内を別推定。馬連は軸が2着以内だった場合の相手条件付き確率、ワイドは軸が3着以内だった場合の相手条件付き確率で順位付け。前向きN≥30ではWilson95%下限で軸生存率を検証する。',evidence:'v2.59-axis-survival'},
   {id:'v240_hard_lock',status:'formal',title:'固定ロック条件',detail:'2歳OP以上 / 3歳1600m以下のG3・L・OPだけを購入禁止。ハンデ戦は赤ロックを解除し、再検証完了までは条件付き上限。',evidence:'v2.40-balance-3'},
   {id:'v239_promotion_policy',status:'formal',title:'統計ベースの捕捉率基準',detail:'単勝：92%以上＝強候補水準、85〜91.9%＝良好で捕捉率だけでは見送りにしない、80〜84.9%＝注意、80%未満＝強い注意。強候補への昇格はN≥30・前期/後期とも≥90%・当日1着構造B以上も必要。馬連は1・2着同時90%以上・N≥30・2着構造B以上。95%Wilson信頼区間も表示。',evidence:'v2.48-stat-1'},
   {id:'v256_range_share',status:'formal',title:'出走頭数に対するレンジ率判定',detail:'固定の人気順位ではなく候補頭数÷出走頭数で評価。単勝は35%以下=強候補域、35〜45%=条件付き、45〜55%=慎重、55%超=原則見送り。馬連は45%以下=良い、45〜55%=許容、55〜65%=慎重、65%超=原則見送り。原則見送りは固定ロックではなく手動保存時に確認する。',evidence:'v2.56-range-share'},
   {id:'v257_wide_third_range',status:'formal',title:'ワイド3着レンジを独立化',detail:'3着候補を5〜12人気の独立境界スコアで推定。候補率50%以下=強い、50〜60%=良い、60〜70%=慎重、70%超=原則見送り。2着候補が3着候補を上回る場合だけ包含関係を保つ下限補正を行う。実購入はレンジ内から最大2頭。',evidence:'v2.57-wide-third-range'},
-  {id:'v255_win_display_priority',status:'formal',title:'単勝表示の優先順位を明確化',detail:'最終単勝評価は今回の1着レンジ・境界を最優先。過去の格・距離別捕捉率は「過去参考」と明記し、今回の境界が弱い時に過去成績だけで評価を上げない。',evidence:'v2.55-display'},
+  {id:'v255_win_display_priority',status:'superseded',title:'単勝表示の優先順位を明確化',detail:'最終単勝評価は今回の1着レンジ・境界を最優先。過去の格・距離別捕捉率は「過去参考」と明記し、今回の境界が弱い時に過去成績だけで評価を上げない。',evidence:'v2.55-display'},
   {id:'v254_wide_boundary_manual',status:'superseded',title:'旧ワイド中心境界（v2.57で置換）',detail:'ワイド相手の自動選定を廃止。市場の中心境界が上位2〜6人気に明確にある時だけワイド対象とし、アプリは境界までを提示、境界内から最大2頭はユーザーが選ぶ。境界外は保存不可。前向き統計では境界内機会率・自分の2頭の捕捉率・1頭目/2頭目・2頭目だけの追加捕捉・境界内選択効率を分離する。',evidence:'v2.54-wide-boundary'},
   {id:'v253_pair_forward',status:'formal',title:'馬連・ワイド実買い目前向き検証',detail:'馬連は1・2着レンジ同時捕捉と実際の軸＋相手買い目捕捉を分離し、平均相手数・総買い目効率・軸人気別成績・Wilson95%CIを表示。ワイドは馬連相手候補から独立させ、軸＋ワイド相手がともに3着以内だったかを直接検証。暫定候補1頭目/2頭目の成績と2頭目の上積みも前向き保存する。N<30は自動ルール変更に使わない。',evidence:'v2.53-forward'},
-  {id:'v252_no_win_ev',status:'formal',title:'単勝はレース可否まで',detail:'単勝候補馬の自動順位付け、推定勝率、適正オッズ、EV、テン1F・脚質・出遅れ・折り合い・バイアス補正を廃止。アプリは1着レンジ・境界スコア校正確率・単勝可否までを判定し、買う馬の最終選択はユーザーが行う。',evidence:'v2.52-scope'},
+  {id:'v252_no_win_ev',status:'superseded',title:'単勝はレース可否まで',detail:'単勝候補馬の自動順位付け、推定勝率、適正オッズ、EV、テン1F・脚質・出遅れ・折り合い・バイアス補正を廃止。アプリは1着レンジ・境界スコア校正確率・単勝可否までを判定し、買う馬の最終選択はユーザーが行う。',evidence:'v2.52-scope'},
   {id:'v251_boundary_first',status:'formal',title:'G2/G3 境界確率優先',detail:'旧「1着5〜8人気＋Neff安全帯」は絶対条件から参考情報へ変更。1〜3・1〜4人気まで狭いこと自体はマイナス評価しない。G2/G3はv2.50の境界スコア校正確率と当日境界構造を優先し、馬連は2着境界と1・2着同時捕捉データを別判定する。Neff85〜95%注意は検証母集団と一致する1着5〜8人気時だけ適用。',evidence:'v2.51-boundary-first'},
   {id:'v250_boundary_calibration',status:'formal',title:'境界スコアの確率校正',detail:'57点以上の境界スコアを6帯に分け、保存後に結果入力された前向きデータから実際の1着・2着捕捉率へ変換。スコア帯の実績逆転はPAVA単調回帰で隣接帯を統合し、N≥30の校正帯だけA/B/C判定へ反映。N不足は確率表示のみ。',evidence:'v2.50-cal-1'},
   {id:'v249_range_efficiency',status:'formal',title:'レンジ効率＋独立リスク',detail:'1着候補頭数/出走頭数、頭数圧縮率、今回オッズから計算した候補の市場期待を表示。過去捕捉率との差は参考値として表示し、十分な過去平均がない間は自動ロックには使わない。注意点は市場・候補範囲・過去実績・データ信頼性・レース条件にまとめ、同じ原因を二重カウントしない。',evidence:'v2.49-stat-2'},
