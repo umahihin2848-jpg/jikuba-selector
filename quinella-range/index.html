@@ -924,6 +924,7 @@ function historicalPatternGate(ctx={},v229,fr,pr,spread){
 function marketPatternAnalysis(r,fr,pr,spread,v229){
   const ctx=r&&r.context||{},g=String(ctx.grade||'').toUpperCase(),a=String(ctx.age||''),w=String(ctx.weight||''),d=Number(ctx.distance),surface=String(ctx.surface||'');
   const first=structuralSignal(fr,spread,'first',g),second=structuralSignal(pr,spread,'second',g),history=historicalPatternGate(ctx,v229,fr,pr,spread);
+  const fp=rangeSharePolicy(r&&r.runners||[],fr,'first'),qp=rangeSharePolicy(r&&r.runners||[],pr,'second');
   const stop=(title,note)=>({level:'stop',status:'見送り',badge:'型条件外',title,key:conditionCategory(r)||g,firstGrade:'STOP',firstLabel:'STOP',secondGrade:'STOP',secondLabel:'STOP',quinellaFit:'見送り',historyClass:'却下',historyEvidence:note,note});
   const fixedEx=fixedExclusionAnalysis(ctx);
   if(fixedEx.excluded)return stop(fixedEx.title,fixedEx.reason);
@@ -932,8 +933,9 @@ function marketPatternAnalysis(r,fr,pr,spread,v229){
   if(g==='G1'&&v229&&v229.level==='go'&&fg==='C')fg='B';
   const rank=x=>x==='A'?3:x==='B'?2:x==='C'?1:0,fa=rank(fg),sa=rank(sg);
   let quinella='見送り';
-  if(history.quinellaFit==='正式候補'&&fa>=3&&sa>=3)quinella='候補';
-  else if(history.quinellaFit==='検証継続'&&fa>=2&&sa>=2)quinella='慎重';
+  if(qp.eligible&&history.quinellaFit==='正式候補'&&fa>=3&&sa>=3)quinella='候補';
+  else if(qp.band!=='skip'&&history.quinellaFit==='検証継続'&&fa>=2&&sa>=2)quinella='慎重';
+  if(qp.band==='caution'||qp.band==='skip')quinella=qp.band==='skip'?'見送り':'慎重';
   const b1=fr&&fr.boundary?fr.boundary.k+'→'+(fr.boundary.k+1):'境界なし';
   const b2=pr&&pr.boundary?pr.boundary.k+'→'+(pr.boundary.k+1):'境界なし';
   const neffBand=Number.isFinite(Number(spread&&spread.ratio))?(Number(spread.ratio)<.65?'集中':Number(spread.ratio)<.82?'やや分散':Number(spread.ratio)<=.95?'注意帯':'横並び'):'不明';
@@ -944,26 +946,18 @@ function marketPatternAnalysis(r,fr,pr,spread,v229){
   const opl=(g==='L'||g==='OP');
   let level='caution',status=history.firstFit==='正式候補'?'1着正式候補・馬連'+quinella:'型検証中',badge=history.classification==='candidate'?'過去検証候補':'前向き検証';
   let title=history.title;
-  let note='過去分類：'+history.evidence+' / 1着構造：'+first.reason+' / 2着構造：'+second.reason+'。';
+  let note='過去分類：'+history.evidence+' / 1着構造：'+first.reason+' / 2着構造：'+second.reason+'。候補率は単勝 '+rangeSharePolicyText(fp)+' / 馬連 '+rangeSharePolicyText(qp)+'。';
   if(fg==='STOP'){level='caution';quinella='慎重';status='1着構造不明・見送り推奨';note+=' 境界が弱くても固定除外ではないため赤ロックはしません。';}
-  else if(history.firstFit==='正式候補'&&fa>=2){level='go';}
+  else if(history.firstFit==='正式候補'&&fa>=2&&fp.band==='strong'){level='go';}
+  if(fp.band==='good'){level='caution';status='1着候補率35〜45%・条件付き';}
+  else if(fp.band==='caution'){level='caution';status='1着候補率45〜55%・慎重';}
+  else if(fp.band==='skip'){level='caution';status='1着候補率55%超・見送り推奨';quinella='見送り';}
+  if(qp.band==='skip')note+=' 馬連レンジ率65%超のため馬連は原則見送り。';
+  else if(qp.band==='caution')note+=' 馬連レンジ率55〜65%のため馬連は慎重。';
   if(sg==='STOP')quinella='慎重';
   if(opl&&level==='go')level='caution';
   return{level,status,badge,title,key,firstGrade:fg,firstLabel:fg==='A'?'A・明確':fg==='B'?'B・まずまず':fg==='C'?'C・弱い':'STOP',secondGrade:sg,secondLabel:sg==='A'?'A・明確':sg==='B'?'B・まずまず':sg==='C'?'C・弱い':'STOP',quinellaFit:quinella,historyClass:history.firstFit,historyEvidence:history.evidence,note};
 }
-const FORMAL_PROMOTION_POLICY=Object.freeze({
-  version:'v2.48-stat-1',
-  minN:30,
-  minFirstRate:.92,
-  goodFirstRate:.85,
-  cautionFirstRate:.80,
-  minBlockRate:.90,
-  minPairN:30,
-  minPairRate:.90,
-  goodPairRate:.85,
-  minStructureGrade:'B',
-  wilsonZ:1.96
-});
 function historicalEvidenceProfile(ctx={},v229,fr,pr,spread){
   const g=String(ctx.grade||'').toUpperCase(),surface=String(ctx.surface||''),a=String(ctx.age||''),d=Number(ctx.distance);
   const mk=(id,label,n,firstHits,firstRate,earlyRate,lateRate,pairN=null,pairHits=null,pairRate=null,pairEarlyRate=null,pairLateRate=null,verifiedN=true,note='')=>({id,label,n,firstHits,firstRate,earlyRate,lateRate,pairN,pairHits,pairRate,pairEarlyRate,pairLateRate,verifiedN,note});
@@ -1693,7 +1687,7 @@ function render(r){
   const dr=$('decisionReason');dr.textContent=pipe.summary;dr.className='decisionReason'+(pipe.finalCode==='skip'?' stop':'');dr.classList.remove('hidden');
   $('opinionSummary').innerHTML='<div class="opinionRow"><span>結論</span><b>'+esc(op.conclusion)+'</b></div><div class="opinionRow"><span>1着</span><b>'+esc(op.first)+'</b></div><div class="opinionRow"><span>2着</span><b>'+esc(op.second)+'</b></div><div class="opinionRow"><span>注意</span><b>'+esc(op.caution)+'</b></div>';
   $('reasons').innerHTML=(r.brake.reasons||[]).map(x=>'<li>'+esc(x)+'</li>').join('');
-  $('rule').textContent='v2.40実戦型：基本は単勝。固定ロックは2歳OP以上・3歳1600m以下G3/L/OP。ハンデ戦は赤ロック解除済みで、全年度再検証が終わるまでは条件付き上限。馬連は1・2着同時捕捉と2着構造まで揃った時だけ追加候補にします。';
+  $('rule').textContent='v2.56実戦型：単勝は1着候補率35%以下を強候補域、35〜45%を条件付き、45〜55%を慎重、55%超を原則見送り。馬連は2着レンジ率45%以下を良い、45〜55%を許容、55〜65%を慎重、65%超を原則見送りとして、出走頭数に応じて評価します。';
   $('lock').innerHTML=r.preview?'<span class="lock">👀 判定プレビュー（まだ保存していません）</span>':'<span class="lock">🔒 入力時点の馬番・人気・オッズ／購入計画 凍結済み</span>';
   const ax=$('axisSummary');
   if(r.priorAxisHorseNo){
@@ -1736,7 +1730,7 @@ $('judge').onclick=async()=>{
     if(calc.n!==selectedRunnerCount)throw new Error('出走頭数とオッズ入力数が一致しません');
     let axisPop=null;
     if(p.priorAxisHorseNo){const ai=findRunner(calc.runners,p.priorAxisHorseNo);if(!ai)throw new Error(`事前軸${p.priorAxisHorseNo}番が入力時点オッズ表にありません`);axisPop=ai.popularity}
-    const preview={id:null,raceDate:p.raceDate,venue:p.venue,raceNo:p.raceNo,raceName:p.raceName,priorAxisHorseNo:p.priorAxisHorseNo,priorAxisPopularity:axisPop,betDecision:'',plannedStake:0,opponents:[],assessedAt:null,runners:calc.runners,n:calc.n,wallAnalysis:calc.wallAnalysis,axisRisk:calc.axisRisk,secondRange:calc.secondRange,baseFirstRange:calc.baseFirstRange,firstRange:calc.firstRange,baseSecondPlaceRange:calc.baseSecondPlaceRange,secondPlaceRange:calc.secondPlaceRange,firstRangeSpread:calc.firstRangeSpread,v229Filter:calc.v229Filter,selectionDecision:calc.selectionDecision,c4:calc.c4,c9:calc.c9,c40:calc.c40,c12:calc.c12,fav:calc.fav,under40:calc.under40,gap45:calc.gap45,effectiveN:calc.effectiveN,structure:calc.structure,brake:calc.brake,context:{grade:p.grade,surface:p.surface,age:p.age,weight:$('weight').value,distance:p.distance,bet_type:'',range_rule_ver:'2.50',filter_rule_ver:'2.51',strategy_rule_ver:'2.53',rule_registry_ver:'2.53',axis_ticket_policy_ver:'axis-ticket-forward-v2'},locked:false,preview:true};
+    const preview={id:null,raceDate:p.raceDate,venue:p.venue,raceNo:p.raceNo,raceName:p.raceName,priorAxisHorseNo:p.priorAxisHorseNo,priorAxisPopularity:axisPop,betDecision:'',plannedStake:0,opponents:[],assessedAt:null,runners:calc.runners,n:calc.n,wallAnalysis:calc.wallAnalysis,axisRisk:calc.axisRisk,secondRange:calc.secondRange,baseFirstRange:calc.baseFirstRange,firstRange:calc.firstRange,baseSecondPlaceRange:calc.baseSecondPlaceRange,secondPlaceRange:calc.secondPlaceRange,firstRangeSpread:calc.firstRangeSpread,v229Filter:calc.v229Filter,selectionDecision:calc.selectionDecision,c4:calc.c4,c9:calc.c9,c40:calc.c40,c12:calc.c12,fav:calc.fav,under40:calc.under40,gap45:calc.gap45,effectiveN:calc.effectiveN,structure:calc.structure,brake:calc.brake,context:{grade:p.grade,surface:p.surface,age:p.age,weight:$('weight').value,distance:p.distance,bet_type:'',range_rule_ver:'2.56',filter_rule_ver:'2.51',strategy_rule_ver:'2.56',rule_registry_ver:'2.56',axis_ticket_policy_ver:'axis-ticket-forward-v2'},locked:false,preview:true};
     pendingAssessment={key:raceKey(p.raceDate,p.venue,p.raceNo),oddsRaw:p.oddsRaw,grade:p.grade,surface:p.surface,age:p.age,weight:$('weight').value,distance:String(p.distance||''),calc,preview};
     render(preview);renderAxisTicketPolicy(calc.runners,currentPendingPipe(),Number($('axisHorseNo').value));renderWideCandidateRecommendation();
     $('msg').textContent='判定しました。結果と解説を確認してから、購入/見送りを決めてください。';
@@ -1747,7 +1741,7 @@ $('judge').onclick=async()=>{
 $('savePlan').onclick=async()=>{
   $('savePlan').disabled=true;
   try{
-    const plan=stakePlanValues(),p={raceDate:$('raceDate').value,venue:$('venue').value,raceNo:Number($('raceNo').value),raceName:$('raceName').value.trim(),priorAxisHorseNo:Number($('axisHorseNo').value)||null,betDecision:$('betDecision').value,betType:$('betType').value,wideSelected:$('wideAdd').value==='yes',plannedStake:plan.total,plannedWinStake:plan.win,plannedQuinellaStake:plan.quinella,plannedWideStake:plan.wide,opponentsRaw:$('opponents').value,wideOpponentsRaw:$('wideOpponents').value,oddsRaw:$('odds').value,context:{grade:$('grade').value,surface:$('surface').value,age:$('age').value,weight:$('weight').value,distance:$('distance').value,bet_type:$('betType').value,wide_selected:$('wideAdd').value==='yes',planned_win_stake_yen:plan.win,planned_quinella_stake_yen:plan.quinella,planned_wide_stake_yen:plan.wide,wide_opponents:[],wide_opponent_limit:2,range_rule_ver:'2.50',filter_rule_ver:'2.51',strategy_rule_ver:'2.53',rule_registry_ver:'2.53',axis_ticket_policy_ver:'axis-ticket-forward-v2',snapshot_format:'horse_popularity_odds'}};
+    const plan=stakePlanValues(),p={raceDate:$('raceDate').value,venue:$('venue').value,raceNo:Number($('raceNo').value),raceName:$('raceName').value.trim(),priorAxisHorseNo:Number($('axisHorseNo').value)||null,betDecision:$('betDecision').value,betType:$('betType').value,wideSelected:$('wideAdd').value==='yes',plannedStake:plan.total,plannedWinStake:plan.win,plannedQuinellaStake:plan.quinella,plannedWideStake:plan.wide,opponentsRaw:$('opponents').value,wideOpponentsRaw:$('wideOpponents').value,oddsRaw:$('odds').value,context:{grade:$('grade').value,surface:$('surface').value,age:$('age').value,weight:$('weight').value,distance:$('distance').value,bet_type:$('betType').value,wide_selected:$('wideAdd').value==='yes',planned_win_stake_yen:plan.win,planned_quinella_stake_yen:plan.quinella,planned_wide_stake_yen:plan.wide,wide_opponents:[],wide_opponent_limit:2,range_rule_ver:'2.56',filter_rule_ver:'2.51',strategy_rule_ver:'2.56',rule_registry_ver:'2.56',axis_ticket_policy_ver:'axis-ticket-forward-v2',snapshot_format:'horse_popularity_odds'}};
     if(!pendingAssessment||pendingAssessment.key!==raceKey(p.raceDate,p.venue,p.raceNo))throw new Error('先に「まず判定を見る」を押してください');
     if(pendingAssessment.oddsRaw!==p.oddsRaw)throw new Error('判定後にオッズが変更されています。もう一度「まず判定を見る」で再判定してください');if(pendingAssessment.grade!==p.context.grade)throw new Error('判定後に格が変更されています。もう一度「まず判定を見る」で再判定してください');if(pendingAssessment.surface!==p.context.surface)throw new Error('判定後に芝/ダートが変更されています。もう一度「まず判定を見る」で再判定してください');if(pendingAssessment.age!==p.context.age||pendingAssessment.distance!==String(p.context.distance||'')||pendingAssessment.weight!==p.context.weight)throw new Error('判定後に年齢条件・距離・重量条件が変更されています。もう一度「まず判定を見る」で再判定してください');
     const old=await findRace(p.raceDate,p.venue,p.raceNo);if(old){pendingAssessment=null;render(old);throw new Error('このレースはすでに保存済みです')}
