@@ -146,7 +146,7 @@ function framePairTicketInfo(fp,axes,groups,cap,qOdds){
   var links=axes.filter(function(a){return a.frame===fp.a||a.frame===fp.b});if(!links.length)return null;
   var den=pairMassDen(groups,fp.a,fp.b);if(!(den>0))return null;
   var all={},kept={},removed100={};
-  function add(map,key,w,od){if(!map[key])map[key]={pair:key,mass:0,odds:od||null};map[key].mass+=w;if(od)map[key].odds=od}
+  function add(map,key,w,od){if(!map[key])map[key]={pair:key,mass:w,odds:od||null};else if(w>map[key].mass)map[key].mass=w;if(od)map[key].odds=od}
   links.forEach(function(ax){var other=ax.frame===fp.a?fp.b:fp.a,opp=groups[other]||[];opp.forEach(function(h){if(h.horseNo===ax.horseNo)return;var k=pairKey(ax.horseNo,h.horseNo),w=ax.weight*h.weight;add(all,k,w,qOdds[k]);if(h.winOdds<cap)add(kept,k,w,qOdds[k]);if(h.winOdds<100)add(removed100,k,w,qOdds[k])})});
   var allMass=Object.keys(all).reduce(function(s,k){return s+all[k].mass},0),keepMass=Object.keys(kept).reduce(function(s,k){return s+kept[k].mass},0),mass100=Object.keys(removed100).reduce(function(s,k){return s+removed100[k].mass},0);
   return{framePair:fp.pair,rank:fp.rank,frameOdds:fp.odds,a:fp.a,b:fp.b,den:den,allAxisMass:allMass/den,keptMass:keepMass/den,mass100:mass100/den,tickets:Object.keys(kept).map(function(k){return kept[k]}),links:links}
