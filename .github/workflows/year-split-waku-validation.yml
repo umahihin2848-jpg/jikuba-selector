@@ -1,0 +1,60 @@
+name: Year split waku validation
+
+on:
+  push:
+    branches: ["historical-waku-backtest"]
+    paths:
+      - "analysis/waku-backtest/fetch_year.cjs"
+      - "analysis/waku-backtest/combine_years.cjs"
+      - ".github/workflows/year-split-waku-validation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    strategy:
+      fail-fast: false
+      matrix:
+        yy: ["22","23","24","25"]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install parser
+        run: npm install --no-save cheerio@1.0.0
+      - name: Fetch year
+        env:
+          YY: ${{ matrix.yy }}
+        run: node analysis/waku-backtest/fetch_year.cjs
+      - name: Upload year
+        uses: actions/upload-artifact@v4
+        with:
+          name: waku-year-${{ matrix.yy }}
+          path: analysis/waku-backtest/year-out/
+
+  combine:
+    needs: fetch
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Download years
+        uses: actions/download-artifact@v4
+        with:
+          pattern: waku-year-*
+          merge-multiple: true
+          path: analysis/waku-backtest/year-merge
+      - name: Combine and analyze
+        run: node analysis/waku-backtest/combine_years.cjs
+      - name: Upload combined report
+        uses: actions/upload-artifact@v4
+        with:
+          name: waku-historical-combined
+          path: analysis/waku-backtest/combined-out/
