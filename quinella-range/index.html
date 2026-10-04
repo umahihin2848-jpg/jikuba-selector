@@ -1786,15 +1786,16 @@ function boundaryDetail(range){
   const cand=top.length?' / 候補上位 '+top.map(x=>x.k+'→'+(x.k+1)+' '+Number(x.score).toFixed(1)).join('・'):'';
   return '【境界】'+b.k+'→'+(b.k+1)+'人気 / スコア '+Number(b.score).toFixed(1)+' / 信頼度 '+conf+' / 累積 '+pc(b.share)+' / 壁 '+Number(b.wall).toFixed(2)+'x / 周辺比 '+Number(b.prominence).toFixed(2)+'x / 次点差 '+Number(b.margin||0).toFixed(1)+cand;
 }
-function renderWinScope(pipe,fr){
+function renderWinScope(pipe,fr,r=null){
   const box=$('winScopeBox'),title=$('winScopeTitle'),text=$('winScopeText');if(!box||!title||!text||!pipe)return;
-  const b=fr&&fr.boundary,cal=pipe.firstBoundaryCalibration;
-  const range=fr?.label||'—';
-  const score=b&&Number.isFinite(Number(b.score))?Number(b.score).toFixed(0)+'点':'境界なし';
+  const b=fr&&fr.boundary,cal=pipe.firstBoundaryCalibration,rows=r?.runners||pendingAssessment?.calc?.runners||[];
+  const range=fr?.label||'—',score=b&&Number.isFinite(Number(b.score))?Number(b.score).toFixed(0)+'点':'境界なし';
   const prob=cal?pipelineRateText(cal.rate)+(cal.n?' / N='+cal.n:''):'前向きデータ蓄積中';
-  const verdict=pipe.hardLocked?'買わない':pipe.winFit==='candidate'?'購入候補':pipe.fourLevelCode==='recommend_skip'?'見送り寄り':'条件付き';
+  const axisNo=Number($('axisHorseNo')?.value||r?.priorAxisHorseNo||0),ctx=r?.context||{grade:pendingAssessment?.grade||'',surface:pendingAssessment?.surface||'',age:pendingAssessment?.age||'',weight:pendingAssessment?.weight||'',distance:pendingAssessment?.distance||''},wr=r?.widePlaceRange||pendingAssessment?.calc?.widePlaceRange||null;
+  const ap=axisTicketPolicy(rows,axisNo,pipe,ctx,wr);
+  const verdict=pipe.hardLocked?'買わない':!ap.axis?'軸入力待ち':!ap.winAuto?(ap.popularity<=2?'統計確認待ち':'見送り推奨'):pipe.winFit==='candidate'?'購入候補':pipe.fourLevelCode==='recommend_skip'?'見送り寄り':'条件付き';
   title.textContent='最終単勝評価：'+verdict;
-  text.innerHTML='<b>今回のオッズを最優先</b>｜1着レンジ <b>'+esc(range)+'</b> / 境界 <b>'+esc(score)+'</b> / 境界の推定捕捉率 <b>'+esc(prob)+'</b><br><span class="muted">過去の距離別・格別成績は参考値です。今回の1着境界が弱い時に、過去成績だけで単勝評価を上げません。買う馬の最終選択は自分で行います。</span>';
+  text.innerHTML='<b>今回のオッズを最優先</b>｜1着レンジ <b>'+esc(range)+'</b> / 境界 <b>'+esc(score)+'</b> / 境界の推定捕捉率 <b>'+esc(prob)+'</b><br><b>軸統計：</b>'+esc(ap.axis?ap.label:'軸未入力')+'<br><span class="muted">単勝は1着レンジだけでは🟢にしません。軸の前向き1着率についてN数と95%信頼下限が基準を超えた時だけ自動昇格します。</span>';
   box.className='notice'+(pipe.hardLocked?' stop':'');
 }
 function renderBetPriority(pipe,fr,pr,r=null){
@@ -1823,7 +1824,7 @@ function renderBetPriority(pipe,fr,pr,r=null){
       if(!axisPolicy.axis){qLabel='軸入力待ち';qBadge='統計ゲート';qSub='馬連は軸入力後、2着内率の統計ゲートも確認します。';}
       else if(axisPolicy.pairedAuto){
         qLabel=axisPolicy.highVariance?'馬連追加候補（高分散）':'馬連も追加可';qBadge=qp.band==='good'?'レンジ45%以下':'レンジ55%以下';qSub='2着候補 '+rangeSharePolicyText(qp)+'。';
-      }else{qLabel='自動推奨なし';qBadge=axisPolicy.popularity===4?'4人気・高分散':'5人気以下';qSub=axisPolicy.reason;}
+      }else{qLabel='自動推奨なし';qBadge=axisPolicy.popularity<=2?'統計確認待ち':axisPolicy.popularity<=4?'3〜4人気・原則見送り':'5人気以下';qSub=axisPolicy.reason;}
     }else if(axisPolicy.axis&&axisPolicy.popularity>=4){qLabel='自動推奨なし';qBadge=axisPolicy.popularity===4?'4人気・高分散':'5人気以下';qSub=axisPolicy.reason;}
     else if(pipe.winFit==='candidate'){qLabel='単勝のみ優先';qBadge='馬連未通過';qSub='単勝側は強いが、馬連の同時捕捉条件は未達。';}
     else if(qp.eligible){qLabel='原則追加なし';qBadge='条件付き';qSub='馬連レンジは許容範囲ですが、他の条件が未達です。';}
@@ -1892,7 +1893,7 @@ function render(r){
   c.className='card verdict '+verdictClass;c.classList.remove('hidden');
   $('verdict').textContent=verdictIcon+' '+verdictShort;
   $('lead').textContent='境界確率優先｜'+pipe.summary;
-  renderBetPriority(pipe,fr,pr,r);renderWinScope(pipe,fr);
+  renderBetPriority(pipe,fr,pr,r);renderWinScope(pipe,fr,r);
   const stBox=$('strategyBox');stBox.className='strategyBox '+st.level;stBox.classList.remove('hidden');$('strategyTitle').textContent=st.title;$('strategyBadge').textContent=st.badge;$('strategyMain').textContent=st.main;$('strategyQuinella').textContent=st.quinella;$('strategyFirst').textContent=st.first;$('strategyAction').textContent=st.action;$('strategyNext').textContent=st.next;
   const cpBox=$('conditionProfile');cpBox.className='conditionProfile '+cp.level;cpBox.classList.remove('hidden');$('conditionProfileTitle').textContent='過去参考：'+cp.title;$('conditionProfileBadge').textContent='参考・'+String(cp.badge||'').replace(/^参考・/,'');$('conditionProfileEvidence').textContent='過去成績：'+cp.evidence;$('conditionProfileSecond').textContent=cp.secondEvidence?'過去参考：'+cp.secondEvidence:'2着レンジ：条件別の追加検証なし';$('conditionProfileNote').textContent=(cp.note||'')+' 最終単勝評価は今回の1着レンジ・境界を優先します。';const sampleMeta=conditionSampleMeta(r,fr);$('conditionProfileN').textContent=sampleMeta.label;
   const mpBox=$('marketPatternBox');mpBox.className='patternBox '+mp.level;mpBox.classList.remove('hidden');$('marketPatternTitle').textContent=mp.title;$('marketPatternBadge').textContent=mp.badge;$('marketPatternKey').textContent=mp.key;$('patternFirst').textContent=mp.firstLabel;$('patternSecond').textContent=mp.secondLabel;$('patternQuinella').textContent=mp.quinellaFit;$('patternNote').textContent=mp.note;
