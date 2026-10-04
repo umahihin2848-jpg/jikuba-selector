@@ -51,6 +51,18 @@ async function runLocal(browserType,label){
   assert(calc.n===18,label+' compute runner count');
   assert(calc.first&&calc.second&&calc.wide,label+' compute ranges');
   assert(calc.wideEnd>=calc.secondEnd,label+' wide range must include quinella range '+JSON.stringify(calc));
+  const rendered=await page.evaluate(s=>{
+    const x=compute(s,'G2','older',2400);
+    render({...x,context:{grade:'G2',surface:'turf',age:'older',weight:'fixed',distance:2400},preview:true,raceDate:'2026-10-04',venue:'東京',raceNo:11,raceName:'smoke',priorAxisHorseNo:null,betDecision:'',plannedStake:0,opponents:[]});
+    return {
+      verdict:document.getElementById('verdict')?.textContent||'',
+      first:document.getElementById('rangeSummaryFirst')?.textContent||'',
+      second:document.getElementById('rangeSummarySecond')?.textContent||'',
+      wide:document.getElementById('rangeSummaryWide')?.textContent||'',
+      wideDetail:document.getElementById('widePlaceValue')?.textContent||''
+    };
+  },SAMPLE);
+  assert(rendered.verdict&&rendered.first&&rendered.second&&rendered.wide&&rendered.wideDetail,label+' result render '+JSON.stringify(rendered));
   const sharePolicy=await page.evaluate(()=>({
     first6:rangeSharePolicy(Array.from({length:18}),{end:6},'first').band,
     first8:rangeSharePolicy(Array.from({length:18}),{end:8},'first').band,
