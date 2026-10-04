@@ -29,8 +29,24 @@ async function run(browserType,label){
     await row.locator('select').selectOption(String(Math.ceil(h/2)));
     await row.locator('input').fill(String(ODDS[h-1]));
   }
-  await page.fill('#frameMarket',frameMarket());
-  await page.fill('#quinellaOdds',quinellaMarket());
+  const frameRows=frameMarket().split(' ');
+  for(const item of frameRows){
+    const [pair,odds]=item.split('=');
+    await page.locator('.frameOddsInput[data-pair="'+pair+'"]').fill(odds);
+  }
+  assert((await page.locator('#frameProgress').textContent()).includes('36 / 36'),label+' frame progress');
+
+  await page.click('#prepareQuinella');
+  const qInputs=page.locator('.quinellaOddsInput');
+  const qCount=await qInputs.count();
+  assert(qCount>0,label+' quinella candidates generated');
+  for(let i=0;i<qCount;i++){
+    const inp=qInputs.nth(i);
+    const pair=await inp.getAttribute('data-pair');
+    const [a,b]=pair.split('-').map(Number);
+    await inp.fill((8+(a+b)*1.7).toFixed(1));
+  }
+  assert((await page.locator('#quinellaProgress').textContent()).includes(qCount+' / '+qCount),label+' quinella progress');
   await page.click('#analyze');
 
   assert(await page.locator('#analysisCard').isVisible(),label+' analysis visible');
