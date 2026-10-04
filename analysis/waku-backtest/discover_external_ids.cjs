@@ -25,7 +25,7 @@ function parseResult(html,id){
 }
 async function mapLimit(a,n,fn){let q=0,o=new Array(a.length);async function w(){while(true){const i=q++;if(i>=a.length)return;o[i]=await fn(a[i],i)}}await Promise.all(Array.from({length:n},w));return o}
 (async()=>{
- const sched=await monthly(),openSched=sched.filter(x=>/オープン/.test(x.row)&&/芝/.test(x.row)&&!/障害/.test(x.row));
+ const sched=await monthly(),openSched=sched.filter(x=>/オープン/.test(x.row)&&/芝/.test(x.row)&&!/障害/.test(x.row)&&!/(?:2歳|3歳)オープン/.test(x.row));
  console.log('schedule links',sched.length,'open-ish',openSched.length);
  const details=await mapLimit(openSched,6,async(x,i)=>{try{const h=await get('https://sports.yahoo.co.jp/keiba/race/result/'+x.id+'/');if((i+1)%25===0)console.log('fetched',i+1,'/',openSched.length);return{...x,...parseResult(h,x.id)}}catch(e){return{...x,error:e.message}}});
  const good=details.filter(x=>!x.error&&x.open&&!x.jump&&x.runnerCount>=12);
