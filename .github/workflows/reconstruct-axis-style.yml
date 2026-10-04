@@ -1,7 +1,6 @@
 name: Reconstruct axis prior style
 on:
-  push:
-    branches: ["three-stage-bc-probability"]
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
