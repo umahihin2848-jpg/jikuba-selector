@@ -52,21 +52,15 @@ function build(r){
 }
 function percentile(sorted,v){if(!sorted.length)return .5;let lo=0,hi=sorted.length;while(lo<hi){const m=(lo+hi)>>1;if(sorted[m]<=v)lo=m+1;else hi=m}return lo/sorted.length}
 function transparentScorer(train){
- const keys=['zoneMass','bcCoverage','axisQuality','axisRep','weakBurdenShare','points','composite'],d={};
+ const d={};
  d.zoneMass=train.map(r=>r.c.zoneMass).sort((a,b)=>a-b);d.bcCoverage=train.map(r=>r.c.bcCoverage).sort((a,b)=>a-b);d.axisQuality=train.map(r=>r.c.axisQuality).sort((a,b)=>a-b);
  d.axisRep=train.map(r=>Math.min(r.c.axis1Rep,r.c.axis2Rep)).sort((a,b)=>a-b);d.weakBurdenShare=train.map(r=>r.c.weakBurdenShare).sort((a,b)=>a-b);d.points=train.map(r=>r.c.points).sort((a,b)=>a-b);d.composite=train.map(r=>r.c.composite).sort((a,b)=>a-b);
- return r=>{
-   const parts={
-    zone:percentile(d.zoneMass,r.c.zoneMass),
-    coverage:percentile(d.bcCoverage,r.c.bcCoverage),
-    axis:percentile(d.axisQuality,r.c.axisQuality),
-    representative:percentile(d.axisRep,Math.min(r.c.axis1Rep,r.c.axis2Rep)),
-    weak:1-percentile(d.weakBurdenShare,r.c.weakBurdenShare),
-    cost:1-percentile(d.points,r.c.points),
-    price:percentile(d.composite,r.c.composite)
-   };
-   const score=100*Object.values(parts).reduce((s,x)=>s+x,0)/Object.keys(parts).length;return{score,parts}
- }
+ const calc=r=>{
+   const parts={zone:percentile(d.zoneMass,r.c.zoneMass),coverage:percentile(d.bcCoverage,r.c.bcCoverage),axis:percentile(d.axisQuality,r.c.axisQuality),representative:percentile(d.axisRep,Math.min(r.c.axis1Rep,r.c.axis2Rep)),weak:1-percentile(d.weakBurdenShare,r.c.weakBurdenShare),cost:1-percentile(d.points,r.c.points),price:percentile(d.composite,r.c.composite)};
+   const raw=Object.values(parts).reduce((s,x)=>s+x,0)/Object.keys(parts).length;return{raw,parts}
+ };
+ const trainRaw=train.map(r=>calc(r).raw).sort((a,b)=>a-b);
+ return r=>{const x=calc(r);return{score:100*percentile(trainRaw,x.raw),parts:x.parts}}
 }
 const LF=['zoneMass','bcCoverage','axisQuality','axis1Rep','axis2Rep','weakBurdenShare','points','logComposite'];
 function lv(r){return[r.c.zoneMass,r.c.bcCoverage,r.c.axisQuality,r.c.axis1Rep,r.c.axis2Rep,r.c.weakBurdenShare,r.c.points,Math.log(Math.max(r.c.composite,1))]}
