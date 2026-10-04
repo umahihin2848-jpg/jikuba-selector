@@ -10,7 +10,7 @@ async function fetchHtml(url){
   let last;
   for(let k=0;k<4;k++){
     try{
-      const r=await fetch(url,{headers:{'user-agent':'Mozilla/5.0 (compatible; historical-racing-research/1.0)','accept-language':'ja,en-US;q=0.7'}});
+      const r=await fetch(url,{headers:{'user-agent':'Mozilla/5.0 (compatible; historical-racing-research/1.0)','accept-language':'ja,en-US;q=0.7'},signal:AbortSignal.timeout(10000)});
       if(!r.ok)throw new Error('HTTP '+r.status);
       const t=await r.text();if(t.length<1000)throw new Error('short html');
       return t;
@@ -152,7 +152,7 @@ function mdTable(arr,cols){
 }
 (async()=>{
   fs.mkdirSync('analysis/waku-backtest/out',{recursive:true});
-  const raw=await mapLimit(ids,3,getRace),good=raw.filter(x=>!x.error),bad=raw.filter(x=>x.error);
+  const raw=await mapLimit(ids,6,getRace),good=raw.filter(x=>!x.error),bad=raw.filter(x=>x.error);
   fs.writeFileSync('analysis/waku-backtest/out/races.json',JSON.stringify(good));
   const dev=good.filter(r=>r.year<=2023),test=good.filter(r=>r.year>=2024);
   const grid=[];for(const cut of CUTS)for(const ret of RETS)grid.push({dev:summary(dev,cut,ret),test:summary(test,cut,ret),all:summary(good,cut,ret)});
