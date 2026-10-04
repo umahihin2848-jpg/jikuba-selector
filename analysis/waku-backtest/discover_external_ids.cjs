@@ -25,7 +25,7 @@ function parseResult(html,id){
 }
 async function mapLimit(a,n,fn){let q=0,o=new Array(a.length);async function w(){while(true){const i=q++;if(i>=a.length)return;o[i]=await fn(a[i],i)}}await Promise.all(Array.from({length:n},w));return o}
 (async()=>{
- const sched=await monthly(),openSched=sched.filter(x=>/オープン/.test(x.row)&&!/障害/.test(x.row));
+ const sched=await monthly(),openSched=sched.filter(x=>/オープン/.test(x.row)&&/(?:GI{1,3}|G[123])/.test(x.row)&&!/障害/.test(x.row));
  console.log('schedule links',sched.length,'open-ish',openSched.length);
  const details=await mapLimit(openSched,6,async(x,i)=>{try{const h=await get('https://sports.yahoo.co.jp/keiba/race/result/'+x.id+'/');if((i+1)%25===0)console.log('fetched',i+1,'/',openSched.length);return{...x,...parseResult(h,x.id)}}catch(e){return{...x,error:e.message}}});
  const good=details.filter(x=>!x.error&&x.open&&!x.jump&&x.runnerCount>=12);
@@ -33,7 +33,7 @@ async function mapLimit(a,n,fn){let q=0,o=new Array(a.length);async function w()
  fs.writeFileSync('analysis/waku-backtest/discover-out/discovered-'+year+'.json',JSON.stringify(good,null,2));
  if(year===2022){
    const base=JSON.parse(fs.readFileSync('analysis/waku-backtest/race_ids_2022_2025.json','utf8')).filter(x=>x.startsWith('22'));
-   const found=new Set(good.map(x=>x.id)),bs=new Set(base),missing=base.filter(x=>!found.has(x)),extra=good.filter(x=>!bs.has(x)).map(x=>x.id);
+   const found=new Set(good.map(x=>String(x.id))),bs=new Set(base.map(String)),missing=base.filter(x=>!found.has(String(x))),extra=good.filter(x=>!bs.has(String(x.id))).map(x=>x.id);
    console.log('BASE',base.length,'DISCOVER',good.length,'MATCH',base.filter(x=>found.has(x)).length,'MISSING',missing.length,'EXTRA',extra.length);
    console.log('MISSING_IDS',JSON.stringify(missing));console.log('EXTRA_IDS',JSON.stringify(extra));
  }
