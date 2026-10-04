@@ -1,0 +1,46 @@
+name: Walk-forward BC race selection
+on:
+  push:
+    branches: ["historical-waku-backtest"]
+permissions:
+  contents: read
+jobs:
+  fetch:
+    strategy:
+      fail-fast: false
+      matrix:
+        yy: ["22","23","24","25"]
+        chunk: [0,1,2,3]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install --no-save cheerio@1.0.0
+      - name: Fetch full odds chunk
+        env:
+          YY: ${{ matrix.yy }}
+          CHUNK: ${{ matrix.chunk }}
+        run: node analysis/waku-backtest/fetch_full_chunk.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rs-${{ matrix.yy }}-${{ matrix.chunk }}
+          path: analysis/waku-backtest/full-chunk-out/
+  analyze:
+    needs: fetch
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: rs-*
+          path: analysis/waku-backtest/race-select-merge
+          merge-multiple: true
+      - run: node analysis/waku-backtest/walkforward_race_selection.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: walkforward-race-selection-report
+          path: analysis/waku-backtest/race-select-out/
