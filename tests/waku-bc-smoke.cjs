@@ -9,11 +9,6 @@ function frameMarket(){
   for(let a=1;a<=8;a++) for(let b=a;b<=8;b++){ rows.push(a+'-'+b+'='+o.toFixed(1)); o+=0.8; }
   return rows.join(' ');
 }
-function quinellaMarket(){
-  const rows=[];
-  for(let a=1;a<=16;a++) for(let b=a+1;b<=16;b++) rows.push(a+'-'+b+'='+(8+(a+b)*1.7).toFixed(1));
-  return rows.join(' ');
-}
 
 async function run(browserType,label){
   const browser=await browserType.launch({headless:true});
@@ -50,7 +45,12 @@ async function run(browserType,label){
   await page.click('#analyze');
 
   assert(await page.locator('#analysisCard').isVisible(),label+' analysis visible');
-  assert((await page.locator('#axisCards .axisCard').count())===2,label+' two axes');
+  assert((await page.locator('#scenarioComparison .scenarioCard').count())===3,label+' three axis scenarios');
+  assert((await page.locator('#scenarioComparison .scenarioCard.recommended').count())===1,label+' one recommended scenario');
+  const axisCount=await page.locator('#axisCards .axisCard').count();
+  assert(axisCount===1||axisCount===2,label+' recommended axis count '+axisCount);
+  const rec=await page.locator('#recommendation').textContent();
+  assert(rec.includes('1軸')||rec.includes('2軸'),label+' recommendation text '+rec);
   assert((await page.locator('#pA').textContent()).includes('%'),label+' pA');
   assert((await page.locator('#pB').textContent()).includes('%'),label+' pB');
   assert((await page.locator('#pC').textContent()).includes('%'),label+' pC');
@@ -63,11 +63,12 @@ async function run(browserType,label){
   assert((await page.locator('.pairCard').count())>0,label+' candidate frame pairs');
   assert((await page.locator('#warnings > div').count())>0,label+' warning/ok output');
 
-  const stakeAmount=Math.max(3000,qCount*500);
+  const stakeAmount=Math.max(5000,qCount*500);
   await page.fill('#quinellaStake',String(stakeAmount));
   await page.click('#calcQuinellaStake');
   const stakeRows=page.locator('#stakePlan .stakeRow');
-  assert((await stakeRows.count())===qCount,label+' stake rows');
+  const stakeCount=await stakeRows.count();
+  assert(stakeCount>0&&stakeCount<=qCount,label+' recommended stake rows '+stakeCount+' of '+qCount);
   const stakeTexts=await stakeRows.allTextContents();
   let stakeSum=0;
   for(const txt of stakeTexts){
@@ -85,9 +86,9 @@ async function run(browserType,label){
   await page.click('#saveAnalysis');
   assert((await page.locator('#history .history').count())===1,label+' history saved');
   const htxt=await page.locator('#history').textContent();
-  assert(htxt.includes('p ')&&htxt.includes('EV '),label+' history contains translated metrics');
+  assert(htxt.includes('推奨')&&htxt.includes('p ')&&htxt.includes('EV '),label+' history contains axis mode metrics');
 
   await context.close();await browser.close();
-  console.log('PASS '+label+' waku BC odds translator');
+  console.log('PASS '+label+' waku BC axis-mode translator');
 }
 (async()=>{await run(chromium,'Chromium');await run(webkit,'WebKit(iPhone Safari相当)')})().catch(e=>{console.error(e);process.exit(1)});
