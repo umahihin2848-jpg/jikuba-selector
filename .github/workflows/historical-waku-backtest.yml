@@ -3,6 +3,10 @@ name: Historical waku backtest
 on:
   push:
     branches: ["historical-waku-backtest"]
+    paths:
+      - "analysis/waku-backtest/run.cjs"
+      - "analysis/waku-backtest/race_ids_2022_2025.json"
+      - ".github/workflows/historical-waku-backtest.yml"
 
 permissions:
   contents: read
