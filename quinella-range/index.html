@@ -1960,7 +1960,16 @@ $('savePlan').onclick=async()=>{
     const mp=marketPatternAnalysis(rr,calc.firstRange,calc.secondPlaceRange,calc.firstRangeSpread,calc.v229Filter);
     const pipe=decisionPipelineAnalysis(rr,calc.firstRange,calc.secondPlaceRange,calc.firstRangeSpread,calc.v229Filter,calc.selectionDecision);
     if(pipe.hardLocked){p.betDecision='skip';p.betType='';p.context.bet_type='';p.plannedStake=0;p.plannedWinStake=0;p.plannedQuinellaStake=0;p.plannedWideStake=0;p.wideSelected=false;p.context.wide_selected=false;p.context.planned_win_stake_yen=0;p.context.planned_quinella_stake_yen=0;p.context.planned_wide_stake_yen=0;p.context.wide_opponents=[];p.wideOpponents=[];p.opponents=[];p.opponentsRaw='';p.wideOpponentsRaw='';}
-    if(p.priorAxisHorseNo){const ai=findRunner(calc.runners,p.priorAxisHorseNo);if(!ai)throw new Error(`事前軸${p.priorAxisHorseNo}番が入力時点オッズ表にありません`);p.priorAxisPopularity=ai.popularity;p.context.axis_stat_snapshot=axisStatSnapshot(calc.runners,p.priorAxisHorseNo,pipe,p.context,calc.widePlaceRange,calc.firstRange)}else{p.priorAxisPopularity=null;delete p.context.axis_stat_snapshot}
+    let savedAxisPolicy=null;
+    if(p.priorAxisHorseNo){
+      const ai=findRunner(calc.runners,p.priorAxisHorseNo);if(!ai)throw new Error(`事前軸${p.priorAxisHorseNo}番が入力時点オッズ表にありません`);
+      p.priorAxisPopularity=ai.popularity;
+      savedAxisPolicy=axisTicketPolicy(calc.runners,p.priorAxisHorseNo,pipe,p.context,calc.widePlaceRange,calc.firstRange,calc.secondPlaceRange);
+      p.context.axis_stat_snapshot=axisStatSnapshot(calc.runners,p.priorAxisHorseNo,pipe,p.context,calc.widePlaceRange,calc.firstRange);
+      p.context.axis_ticket_policy={version:savedAxisPolicy.ruleVersion,axis_popularity:savedAxisPolicy.popularity,market:savedAxisPolicy.market,win_validated:savedAxisPolicy.winAuto,paired_validated:savedAxisPolicy.pairedAuto,wide_validated:savedAxisPolicy.wideAuto,paired_usable:savedAxisPolicy.pairedUsable,wide_usable:savedAxisPolicy.wideUsable,reason:savedAxisPolicy.reason,evidence:savedAxisPolicy.evidence||null,baseline:AXIS_STAT_POLICY.baseline};
+      const preOppModel=opponentMarketAnalysis(calc.runners,p.priorAxisHorseNo,calc.secondPlaceRange,calc.widePlaceRange);
+      p.context.opponent_market_model=preOppModel?{version:preOppModel.modelVersion,axis_horse_no:preOppModel.axisHorseNo,market:preOppModel.market,quinella:{recommended_horse_nos:preOppModel.quinella.recommended.map(x=>x.horseNo),coverage:preOppModel.quinella.coverage,candidates:preOppModel.quinella.candidates.slice(0,8).map(x=>({horse_no:x.horseNo,popularity:x.popularity,conditional:x.conditional}))},wide:{recommended_horse_nos:preOppModel.wide.recommended.map(x=>x.horseNo),coverage:preOppModel.wide.coverage,candidates:preOppModel.wide.candidates.slice(0,8).map(x=>({horse_no:x.horseNo,popularity:x.popularity,conditional:x.conditional}))}}:null;
+    }else{p.priorAxisPopularity=null;delete p.context.axis_stat_snapshot;delete p.context.axis_ticket_policy;delete p.context.opponent_market_model}
     if(!p.betDecision)throw new Error('判定を確認したあと「購入」か「見送り」を選択してください');
     if(p.betDecision==='skip'){p.betType='';p.context.bet_type='';p.plannedStake=0;p.plannedWinStake=0;p.plannedQuinellaStake=0;p.plannedWideStake=0;p.wideSelected=false;p.context.wide_selected=false;p.context.planned_win_stake_yen=0;p.context.planned_quinella_stake_yen=0;p.context.planned_wide_stake_yen=0;p.context.wide_opponents=[];p.wideOpponents=[];p.opponents=[]}
     else{
@@ -1968,14 +1977,11 @@ $('savePlan').onclick=async()=>{
       if(!p.priorAxisHorseNo)throw new Error('購入する場合、最終軸の馬番が必要です');
       const ai=findRunner(calc.runners,p.priorAxisHorseNo);if(!ai)throw new Error('軸馬がオッズ表にありません');
       if(ai.popularity>calc.firstRange.end)throw new Error(`軸馬は1着レンジ${calc.firstRange.label}の中から選んでください（現在${ai.popularity}番人気）`);
-      const quinellaSelected=(p.betType==='quinella'||p.betType==='both'),axisPolicy=axisTicketPolicy(calc.runners,p.priorAxisHorseNo,pipe,p.context,calc.widePlaceRange,calc.firstRange,calc.secondPlaceRange);
+      const quinellaSelected=(p.betType==='quinella'||p.betType==='both'),axisPolicy=savedAxisPolicy||axisTicketPolicy(calc.runners,p.priorAxisHorseNo,pipe,p.context,calc.widePlaceRange,calc.firstRange,calc.secondPlaceRange);
       const fp=pipe.firstRangePolicy||rangeSharePolicy(calc.runners,calc.firstRange,'first'),qp=pipe.quinellaRangePolicy||rangeSharePolicy(calc.runners,calc.secondPlaceRange,'second');
       const winSelected=(p.betType==='win'||p.betType==='both');
       if(winSelected&&fp.band==='skip'&&!confirm('1着候補率が'+(fp.share*100).toFixed(1)+'%で55%を超えています。単勝は原則見送りです。手動判断として保存しますか？'))throw new Error('保存を中止しました');
       if(quinellaSelected&&qp.band==='skip'&&!confirm('馬連レンジ率が'+(qp.share*100).toFixed(1)+'%で65%を超えています。馬連は原則見送りです。手動判断として保存しますか？'))throw new Error('保存を中止しました');
-      const oppModel=opponentMarketAnalysis(calc.runners,p.priorAxisHorseNo,calc.secondPlaceRange,calc.widePlaceRange);
-      p.context.axis_ticket_policy={version:axisPolicy.ruleVersion,axis_popularity:axisPolicy.popularity,market:axisPolicy.market,win_validated:axisPolicy.winAuto,paired_validated:axisPolicy.pairedAuto,wide_validated:axisPolicy.wideAuto,paired_usable:axisPolicy.pairedUsable,wide_usable:axisPolicy.wideUsable,reason:axisPolicy.reason,evidence:axisPolicy.evidence||null,baseline:AXIS_STAT_POLICY.baseline};
-      p.context.opponent_market_model=oppModel?{version:oppModel.modelVersion,axis_horse_no:oppModel.axisHorseNo,market:oppModel.market,quinella:{recommended_horse_nos:oppModel.quinella.recommended.map(x=>x.horseNo),coverage:oppModel.quinella.coverage,candidates:oppModel.quinella.candidates.slice(0,8).map(x=>({horse_no:x.horseNo,popularity:x.popularity,conditional:x.conditional}))},wide:{recommended_horse_nos:oppModel.wide.recommended.map(x=>x.horseNo),coverage:oppModel.wide.coverage,candidates:oppModel.wide.candidates.slice(0,8).map(x=>({horse_no:x.horseNo,popularity:x.popularity,conditional:x.conditional}))}}:null;
       if(winSelected&&!axisPolicy.raceFilter?.eligible&&!confirm('このレースは1着レンジによるレース選別を通過していません。単勝を手動判断として保存しますか？'))throw new Error('保存を中止しました');
       if(quinellaSelected&&!axisPolicy.pairedUsable&&!confirm('馬連は軸2着内の市場推定またはレンジ条件が基準未達です。'+axisPolicy.reason+'\n手動判断として保存しますか？'))throw new Error('保存を中止しました');
       if(p.wideSelected&&!axisPolicy.wideUsable&&!confirm('ワイドは軸3着内の市場推定またはレンジ条件が基準未達です。'+axisPolicy.reason+'\n手動判断として保存しますか？'))throw new Error('保存を中止しました');
