@@ -1,0 +1,16 @@
+name: Inspect independent race features
+on:
+  push:
+    branches: ["three-stage-bc-probability"]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install --no-save cheerio@1.0.0
+      - run: node analysis/waku-backtest/debug_prior_race_rows.cjs
