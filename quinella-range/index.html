@@ -1053,6 +1053,19 @@ function historicalEvidenceProfile(ctx={},v229,fr,pr,spread){
   }
   return null;
 }
+const FORMAL_PROMOTION_POLICY=Object.freeze({
+  version:'v2.48-stat-1',
+  minN:30,
+  minFirstRate:.92,
+  goodFirstRate:.85,
+  cautionFirstRate:.80,
+  minBlockRate:.90,
+  minPairN:30,
+  minPairRate:.90,
+  goodPairRate:.85,
+  minStructureGrade:'B',
+  wilsonZ:1.96
+});
 function pipelineRateText(v){
   const n=statNumber(v);return n===null?'—':(n*100).toFixed(1)+'%';
 }
