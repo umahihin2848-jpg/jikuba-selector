@@ -7,8 +7,8 @@ async function monthly(){
  const map=new Map();
  for(let m=1;m<=12;m++){
   const html=await get('https://sports.yahoo.co.jp/keiba/schedule/monthly/?month='+m+'&year='+year),$=cheerio.load(html);
-  $('a[href*="/keiba/race/result/"]').each((_,a)=>{
-    const href=$(a).attr('href')||'',mm=href.match(/\/keiba\/race\/result\/(\d{10})/);if(!mm)return;
+  $('a[href*="/keiba/race/"]').each((_,a)=>{
+    const href=$(a).attr('href')||'',mm=href.match(/\/keiba\/race\/(?:index|result)\/(\d{10})/);if(!mm)return;
     const id=mm[1]; if(!id.startsWith(String(year).slice(-2)))return;
     const tr=$(a).closest('tr'),row=norm(tr.text()),name=norm($(a).text());
     map.set(id,{id,row,name,month:m});
