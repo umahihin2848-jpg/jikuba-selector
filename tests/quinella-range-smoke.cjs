@@ -22,14 +22,15 @@ async function runLocal(browserType,label){
   page.on('pageerror',e=>errs.push(e.message));
   await page.goto(LOCAL,{waitUntil:'networkidle'});
 
-  assert((await page.title())==='レース戦略 v2.55',label+' title');
+  assert((await page.title())==='レース戦略 v2.56',label+' title');
   const helpers=await page.evaluate(()=>({
     g1First:typeof g1FirstPlaceOverride,
     g1Second:typeof g1SecondPlaceOverride,
     spread:typeof firstRangeSpreadAnalysis,
     filter:typeof v229FilterAnalysis,
     selection:typeof selectionDecisionV230,
-    wideBoundary:typeof wideOpponentBoundaryAnalysis
+    wideBoundary:typeof wideOpponentBoundaryAnalysis,
+    rangeShare:typeof rangeSharePolicy
   }));
   for(const [k,v] of Object.entries(helpers)) assert(v==='function',label+' helper missing '+k+': '+v);
 
@@ -45,6 +46,18 @@ async function runLocal(browserType,label){
   },SAMPLE);
   assert(calc.n===18,label+' compute runner count');
   assert(calc.first&&calc.second,label+' compute ranges');
+  const sharePolicy=await page.evaluate(()=>({
+    first6:rangeSharePolicy(Array.from({length:18}),{end:6},'first').band,
+    first8:rangeSharePolicy(Array.from({length:18}),{end:8},'first').band,
+    first9:rangeSharePolicy(Array.from({length:18}),{end:9},'first').band,
+    first10:rangeSharePolicy(Array.from({length:18}),{end:10},'first').band,
+    second8:rangeSharePolicy(Array.from({length:18}),{end:8},'second').band,
+    second10:rangeSharePolicy(Array.from({length:18}),{end:10},'second').band,
+    second11:rangeSharePolicy(Array.from({length:18}),{end:11},'second').band,
+    second12:rangeSharePolicy(Array.from({length:18}),{end:12},'second').band
+  }));
+  assert(sharePolicy.first6==='strong'&&sharePolicy.first8==='good'&&sharePolicy.first9==='caution'&&sharePolicy.first10==='skip',label+' first range share bands '+JSON.stringify(sharePolicy));
+  assert(sharePolicy.second8==='good'&&sharePolicy.second10==='caution'&&sharePolicy.second11==='caution'&&sharePolicy.second12==='skip',label+' quinella range share bands '+JSON.stringify(sharePolicy));
   assert(!errs.length,label+' page errors: '+errs.join(' | '));
 
   await context.close();await browser.close();
@@ -55,14 +68,14 @@ async function runLive(){
   const browser=await webkit.launch({headless:true});
   const context=await browser.newContext({viewport:{width:390,height:844},locale:'ja-JP'});
   const page=await context.newPage();
-  const resp=await page.goto(LIVE+'?smoke=255-display',{waitUntil:'networkidle',timeout:60000});
+  const resp=await page.goto(LIVE+'?smoke=256-range-share',{waitUntil:'networkidle',timeout:60000});
   assert(resp&&resp.ok(),'live page HTTP');
   const state=await page.evaluate(()=>({
     title:document.title,
     g1First:typeof g1FirstPlaceOverride,
     selection:typeof selectionDecisionV230
   }));
-  assert(state.title==='レース戦略 v2.55','live title '+state.title);
+  assert(state.title==='レース戦略 v2.56','live title '+state.title);
   assert(state.g1First==='function','live g1FirstPlaceOverride missing');
   assert(state.selection==='function','live selectionDecisionV230 missing');
   await context.close();await browser.close();
