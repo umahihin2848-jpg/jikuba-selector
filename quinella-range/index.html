@@ -12,6 +12,36 @@
 @media(max-width:560px){.patternGrid{grid-template-columns:1fr}}
 .ticketDecisionHero{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0 14px}.ticketDecisionHeroCard{border:2px solid #29415e;border-radius:16px;padding:14px;background:#091725}.ticketDecisionHeroCard span{display:block;color:#9fb0c3;font-size:12px;font-weight:900}.ticketDecisionHeroCard b{display:block;font-size:25px;line-height:1.25;margin-top:4px}.ticketDecisionHeroCard small{display:block;color:#b8c8da;font-size:11px;line-height:1.5;margin-top:5px}.ticketDecisionHeroCard.go{border-color:#36d399;background:#0d2b25}.ticketDecisionHeroCard.go b{color:#76efc3}.ticketDecisionHeroCard.caution{border-color:#f7c948;background:#302812}.ticketDecisionHeroCard.caution b{color:#ffe184}.ticketDecisionHeroCard.stop{border-color:#ff6b6b;background:#35151d}.ticketDecisionHeroCard.stop b{color:#ffb5be}.betPriority{margin:12px 0;display:grid;grid-template-columns:1.2fr .8fr;gap:10px}.betCard{border:1px solid #29415e;border-radius:15px;padding:13px;background:#091725}.betCard.primary{border-color:#2f8f6a;background:#0c261f}.betCard.secondary{border-color:#31547a;background:#0a1726}.betCard.stop{border-color:#713744;background:#21131a}.betCardTop{display:flex;justify-content:space-between;gap:8px;align-items:center}.betRole{font-size:11px;font-weight:900;color:#9fb0c3}.betBadge{font-size:10px;font-weight:900;padding:4px 7px;border-radius:999px;background:#14263a}.betDecision{font-size:22px;font-weight:950;margin-top:5px}.betSub{font-size:12px;line-height:1.55;color:#b8c8da;margin-top:5px}.warningStrip{margin:10px 0 0;padding:10px 12px;border-radius:11px;background:#111c29;border:1px solid #293e55;font-size:12px;line-height:1.55}.warningStrip.good{border-color:#23664f}.warningStrip.caution{border-color:#806b25}.warningStrip.stop{border-color:#713744}.eligibilityGuard{margin:12px 0;padding:12px 13px;border-radius:13px;border:2px solid #29415e;background:#091624}.eligibilityGuardTitle{font-size:16px;font-weight:950}.eligibilityGuardText{font-size:12px;line-height:1.55;margin-top:4px;color:#c2d1e1}.eligibilityGuard.neutral{border-color:#29415e}.eligibilityGuard.good{border-color:#2f8f6a;background:#0c261f}.eligibilityGuard.good .eligibilityGuardTitle{color:#76efc3}.eligibilityGuard.caution{border-color:#8a7428;background:#2a2511}.eligibilityGuard.caution .eligibilityGuardTitle{color:#ffe184}.eligibilityGuard.stop{border-color:#ff6b6b;background:#48121d;box-shadow:0 0 0 2px rgba(255,107,107,.16) inset}.eligibilityGuard.stop .eligibilityGuardTitle{color:#ffd6db}.resultCore{margin-top:10px}.resultDetails{margin-top:12px;border:1px solid #243b57;border-radius:13px;background:#091522;padding:0 12px}.resultDetails>summary{cursor:pointer;padding:13px 2px;font-weight:850;color:#cfe1f4}.resultDetailsBody{display:grid;gap:10px;padding-bottom:12px}.secondaryRange{opacity:.92}.archiveDetails{padding:0!important}.archiveDetails>summary{cursor:pointer;list-style:none;padding:16px;font-size:17px;font-weight:900}.archiveDetails>summary::-webkit-details-marker{display:none}.archiveDetails>summary:after{content:'＋';float:right;color:#9fb0c3}.archiveDetails[open]>summary:after{content:'−'}.archiveBody{padding:0 16px 16px}.archiveBody>.card{margin:10px 0;background:#0a1726}.sectionEyebrow{font-size:11px;color:#9fb0c3;font-weight:900;letter-spacing:.04em;text-transform:uppercase;margin-bottom:3px}
 @media(max-width:560px){.ticketDecisionHero{grid-template-columns:1fr}.ticketDecisionHeroCard b{font-size:23px}.betPriority{grid-template-columns:1fr}.betDecision{font-size:20px}}
+
+/* v2.56 UX refresh: race-day information hierarchy */
+.verdict{position:relative;overflow:hidden;border:2px solid #29415e;background:linear-gradient(180deg,rgba(14,28,45,.98),rgba(9,22,36,.98));box-shadow:0 14px 34px rgba(0,0,0,.22)}
+.verdict.statusStrong{border-color:#2c846a;box-shadow:0 0 0 1px rgba(54,211,153,.12) inset,0 14px 34px rgba(0,0,0,.22)}
+.verdict.statusConditional{border-color:#806b25;box-shadow:0 0 0 1px rgba(247,201,72,.10) inset,0 14px 34px rgba(0,0,0,.22)}
+.verdict.statusSkip{border-color:#c87819;box-shadow:0 0 0 1px rgba(245,158,11,.10) inset,0 14px 34px rgba(0,0,0,.22)}
+.verdict.statusLock{border-color:#a53b4a;box-shadow:0 0 0 1px rgba(255,107,107,.12) inset,0 14px 34px rgba(0,0,0,.22)}
+.verdict.statusStrong .vtitle{color:#76efc3!important}.verdict.statusConditional .vtitle{color:#ffe184!important}.verdict.statusSkip .vtitle{color:#ffc166!important}.verdict.statusLock .vtitle{color:#ffb5be!important}
+.verdict .vtitle{font-size:27px;line-height:1.18;letter-spacing:-.02em;margin:3px 0 5px}.verdict .compactReason{margin:0 0 12px;color:#aebed0;font-size:12px;line-height:1.55}.verdict .lock{font-size:10px;padding:5px 8px;margin-bottom:7px;opacity:.86}
+.rangeSummaryHero{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:8px 0 10px;padding:0;border:0;background:transparent}
+.rangeSummaryRow{display:block;padding:11px 12px;border:1px solid #29415e;border-radius:13px;background:#081522;min-width:0}
+.rangeSummaryRow span{display:block;color:#9fb0c3;font-size:10px;font-weight:900;letter-spacing:.02em;margin-bottom:4px;white-space:normal}
+.rangeSummaryRow b{display:block;color:#f5f8fc;font-size:18px;font-weight:950;line-height:1.28;text-align:left;letter-spacing:-.01em}
+.rangeSummaryRow:first-child{border-color:#2f6f5d}.rangeSummaryRow:nth-child(2){border-color:#31547a}.rangeSummaryRow.win{display:none!important}
+.ticketDecisionHero{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 10px}
+.ticketDecisionHeroCard{min-width:0;padding:11px 12px;border:1px solid #29415e;border-radius:13px;background:#0a1726}
+.ticketDecisionHeroCard span{display:block;color:#9fb0c3;font-size:10px;font-weight:900;margin-bottom:3px}.ticketDecisionHeroCard b{display:block;font-size:17px;line-height:1.25}.ticketDecisionHeroCard small{display:block;color:#aebed0;font-size:10px;line-height:1.45;margin-top:4px}
+.ticketDecisionHeroCard.go{border-color:#2c846a;background:#0d2b25}.ticketDecisionHeroCard.go b{color:#76efc3}
+.ticketDecisionHeroCard.caution{border-color:#806b25;background:#2a2515}.ticketDecisionHeroCard.caution b{color:#ffe184}
+.ticketDecisionHeroCard.stop{border-color:#a9651b;background:#302115}.ticketDecisionHeroCard.stop b{color:#ffc166}
+.ticketDecisionHeroCard.hardLock{border-color:#a53b4a;background:#35151d}.ticketDecisionHeroCard.hardLock b{color:#ffb5be}
+#wideHeroCard{grid-column:1/-1}
+.warningStrip{margin:4px 0 10px!important;border-radius:11px!important;padding:9px 11px!important;font-size:11px!important;line-height:1.5!important}
+.warningStrip.good{border-color:#2c846a!important;background:#0c241f!important}.warningStrip.caution{border-color:#806b25!important;background:#292413!important}.warningStrip.stop{border-color:#a9651b!important;background:#302115!important}.warningStrip.hardLock{border-color:#a53b4a!important;background:#35151d!important}
+.resultDetails{margin-top:10px;border:1px solid #29415e;border-radius:14px;background:#081522;padding:0 12px}
+.resultDetails>summary{cursor:pointer;padding:14px 2px;font-size:15px;font-weight:900;color:#dce8f5;list-style:none}.resultDetails>summary::-webkit-details-marker{display:none}.resultDetails>summary:after{content:"＋";float:right;color:#9fb0c3;font-size:20px;line-height:16px}.resultDetails[open]>summary:after{content:"−"}.resultDetails[open]>summary{border-bottom:1px solid #20344d;margin-bottom:10px}
+.resultDetailsBody{padding-bottom:2px}.resultDetails .betPriority,.resultDetails .strategyBox,.resultDetails .decisionReason,.resultDetails .quickRanges{margin-top:10px}.resultDetails .analysisDetails{margin-bottom:10px}
+.quickRanges .winRangeTitle{font-size:11px}.quickRanges .winRangeValue{font-size:23px}
+.archiveHub{border-color:#29415e!important;background:rgba(10,23,38,.94)!important}.archiveHub>summary{font-size:18px!important;font-weight:900!important;padding:2px 0!important}.archiveHubBody{margin-top:12px}.archiveHubBody>.card,.archiveHubBody>.archiveDetails{margin:10px 0}.archiveHubBody>section.card h2{font-size:18px}
+@media(max-width:560px){.verdict{padding:14px}.verdict .vtitle{font-size:25px}.rangeSummaryHero{grid-template-columns:1fr 1fr}.rangeSummaryRow{padding:10px}.rangeSummaryRow b{font-size:16px}.ticketDecisionHeroCard{padding:10px}.ticketDecisionHeroCard b{font-size:16px}.quickRanges{grid-template-columns:1fr}.resultDetails{padding:0 10px}}
 </style></head><body><main class="wrap"><h1>レース戦略</h1><div class="tag">基本は単勝。馬連・ワイドは条件が揃ったレースだけ追加する。</div><div id="storageStatus" class="muted" style="margin:6px 0 10px">保存先：確認中…</div>
 <section class="card raceListCard"><div class="raceListHead"><div><h2 style="margin:0">レース一覧</h2><div class="muted"><span id="raceListDate"></span> の対象レース</div></div><button class="secondary" id="newRace">＋ 新規</button></div><div id="raceList" class="raceList"></div></section>
 <section class="card" id="inputCard"><div class="notice"><b>運用：</b><b>まず単勝を買えるレースか判定</b>します。馬連は実際の軸＋相手の買い目を前向き検証し、ワイドは馬連と独立して1〜2頭を選び、軸＋相手がともに3着以内だったかを直接検証します。軸人気別ルールはNが貯まるまで保守的な暫定運用です。</div><div id="eligibilityGuard" class="eligibilityGuard neutral" role="status" aria-live="polite"><div id="eligibilityGuardTitle" class="eligibilityGuardTitle">対象判定：条件入力待ち</div><div id="eligibilityGuardText" class="eligibilityGuardText">格・年齢・距離を入力すると、購入対象か自動確認します。</div></div>
@@ -36,15 +66,22 @@
 <div class="draftActions"><button class="secondary" id="saveDraft">一覧に保存（未判定）</button><button class="secondary" id="deleteDraft" title="未判定レースを一覧から削除">削除</button></div><div id="draftMsg" class="draftSaved"></div><button class="wide" id="savePlan" style="background:#179b67">購入/見送りを確定して保存</button><div class="muted" style="margin-top:6px">判定を見るだけなら保存不要です。保存すると、その時点のオッズと購入判断を凍結します。</div></section>
 <section id="result" class="card verdict hidden">
 <div id="lock"></div>
-<div id="ticketDecisionHero" class="ticketDecisionHero hidden"><div id="winHeroCard" class="ticketDecisionHeroCard"><span>単勝判定</span><b id="winHeroLabel">—</b><small id="winHeroSub"></small></div><div id="quinellaHeroCard" class="ticketDecisionHeroCard"><span>馬連判定</span><b id="quinellaHeroLabel">—</b><small id="quinellaHeroSub"></small></div></div>
 <div class="vtitle" id="verdict"></div>
 <p id="lead" class="compactReason"></p>
 <div id="rangeSummaryHero" class="rangeSummaryHero hidden">
   <div class="rangeSummaryRow"><span>1着レンジ</span><b id="rangeSummaryFirst">—</b></div>
-  <div class="rangeSummaryRow"><span>2着レンジ</span><b id="rangeSummarySecond">—</b></div>
+  <div class="rangeSummaryRow"><span>馬連レンジ（2着候補）</span><b id="rangeSummarySecond">—</b></div>
   <div id="rangeSummaryWinRow" class="rangeSummaryRow win"><span>単勝判定</span><b id="rangeSummaryWin">—</b></div>
 </div>
-
+<div id="ticketDecisionHero" class="ticketDecisionHero hidden">
+  <div id="winHeroCard" class="ticketDecisionHeroCard"><span>単勝</span><b id="winHeroLabel">—</b><small id="winHeroSub"></small></div>
+  <div id="quinellaHeroCard" class="ticketDecisionHeroCard"><span>馬連</span><b id="quinellaHeroLabel">—</b><small id="quinellaHeroSub"></small></div>
+  <div id="wideHeroCard" class="ticketDecisionHeroCard"><span>ワイド</span><b id="wideHeroLabel">—</b><small id="wideHeroSub"></small></div>
+</div>
+<div id="warningStrip" class="warningStrip hidden"></div>
+<details class="resultDetails">
+  <summary>判定の根拠・詳細を見る</summary>
+  <div class="resultDetailsBody">
 <div id="betPriority" class="betPriority hidden">
   <div id="winDecisionCard" class="betCard primary">
     <div class="betCardTop"><div class="betRole">主戦・単勝</div><div id="winDecisionBadge" class="betBadge"></div></div>
@@ -57,8 +94,6 @@
     <div id="quinellaDecisionSub" class="betSub"></div>
   </div>
 </div>
-<div id="warningStrip" class="warningStrip hidden"></div>
-
 <div id="strategyBox" class="strategyBox hidden">
   <div class="strategyTop"><div><div class="muted">今回の戦い方</div><div id="strategyTitle" class="strategyTitle"></div></div><div id="strategyBadge" class="strategyBadge"></div></div>
   <div class="strategyGrid">
@@ -78,15 +113,11 @@
     <div class="winRangeNote">単勝の最終評価は、この「今回の1着レンジ・境界」を最優先します。</div>
   </div>
   <div id="secondPlaceBox" class="winRange secondaryRange hidden">
-    <div class="winRangeHead"><div><div class="winRangeTitle">2着レンジ</div><div class="winRangeValue" id="secondPlaceValue"></div></div><div class="winRangeStatus" id="secondPlaceStatus"></div></div>
+    <div class="winRangeHead"><div><div class="winRangeTitle">馬連レンジ（2着候補）</div><div class="winRangeValue" id="secondPlaceValue"></div></div><div class="winRangeStatus" id="secondPlaceStatus"></div></div>
     <div class="winRangeText" id="secondPlaceText"></div>
-    <div class="winRangeNote">馬連相手はここから広めに残します。ワイドは別に、市場境界内から最大2頭を自分で選びます。</div>
+    <div class="winRangeNote">馬連の相手候補はこのレンジから広めに残します。ワイドは別に、市場境界内から最大2頭を自分で選びます。</div>
   </div>
 </div>
-
-<details class="resultDetails">
-  <summary>判定の根拠を見る（条件実績・オッズ構造・7段階判定）</summary>
-  <div class="resultDetailsBody">
 <div id="conditionProfile" class="conditionProfile hidden">
   <div class="conditionProfileTop"><div><div class="muted">過去条件の参考値（最終判定ではありません）</div><div id="conditionProfileTitle" class="conditionProfileTitle"></div></div><div id="conditionProfileBadge" class="conditionProfileBadge"></div></div>
   <div id="conditionProfileN" class="sampleN">N=—</div>
@@ -113,7 +144,7 @@
   <div id="decisionPipelineNote" class="patternNote"></div>
 </div>
   </div>
-</details>
+
 
 <div class="notice hidden" id="axisSummary" style="margin-top:9px"></div>
 <div class="notice hidden" id="planSummary" style="margin-top:9px"></div>
@@ -162,7 +193,9 @@
     </div>
   </div>
 </details>
+</details>
 </section>
+<details class="card archiveDetails archiveHub"><summary>検証・成績を見る</summary><div class="archiveBody archiveHubBody">
 <details class="card archiveDetails"><summary>検証ルール・過去統計を見る</summary><div class="archiveBody">
 <section class="card"><div><h2 style="margin:0">ルール管理</h2><div class="muted">正式ルール・検証中の仮説・却下した案を分離。仮説は表示だけで判定ロジックには入りません。</div></div><div id="ruleRegistry" class="ruleRegistryGrid"></div></section>
 <section class="card"><div><h2 style="margin:0">2021〜2026 型再分類</h2><div class="muted">母数・捕捉率・時系列安定性を優先。構造A/B/Cは境界の明瞭さを表すだけで、単独では買いシグナルにしません。</div></div><div id="historicalPatternReview" class="ruleRegistryGrid"></div></section>
@@ -180,6 +213,7 @@
 <section class="card"><div><h2 style="margin:0">単勝・馬連・ワイド 実戦成績</h2><div class="muted">単勝・馬連・ワイドを別会計で集計。券種ごとの的中率・回収率を独立して確認できます。</div></div><div id="performanceStats" class="performanceGrid"></div></section><section class="card"><div><h2 style="margin:0">馬連・ワイド 前向き統計</h2><div class="muted">馬連は実際の軸＋相手の買い目が当たったか、ワイドは軸＋相手がともに3着以内だったかを直接検証します。レンジ捕捉率とは分けて扱います。</div></div><div id="pairedForwardSummary" class="notice" style="margin-top:12px"></div><div id="pairedForwardDashboard" class="validationGrid"></div></section>
 <details class="card archiveDetails"><summary>詳細な検証DBを見る</summary><div class="archiveBody">
 <section class="card"><div><h2 style="margin:0">v2.39 型別・前向き検証</h2><div class="muted">保存時点の「条件×オッズ構造」型キーごとに、1着・2着・同時捕捉と実購入成績を集計します。結果を見て型キーや閾値を後から動かさず、v2.39以降の記録だけで再現性を確認します。</div></div><div id="patternValidationSummary" class="notice" style="margin-top:12px"></div><div id="patternValidationDashboard" class="comboGrid"></div></section><section class="card"><div><h2 style="margin:0">v2.20以降・境界スコア検証</h2><div class="muted">境界スコアをA/B/Cだけでなく、保存後に結果入力された前向きデータから実際の捕捉確率へ校正します。スコア帯ごとの実績が逆転した場合は単調回帰（PAVA）で隣接帯を統合し、スコアが高いほど推定捕捉率が下がらない形に補正します。</div></div><div id="boundaryCalibrationSummary" class="notice" style="margin-top:12px"></div><div id="boundaryCalibrationDashboard" class="validationGrid"></div><div id="validationSummary" class="notice" style="margin-top:12px"></div><div id="validationDashboard" class="validationGrid"></div></section><section class="card"><div class="row"><div><h2 style="margin:0">1着・2着レンジ検証DB</h2><div class="muted">実際の1着が1着レンジ内、実際の2着が2着レンジ内だったかを別々に検証します。3着以下は使いません。</div></div><button class="secondary" id="exportCsv">CSV</button></div><div id="stats" class="stats" style="margin-top:12px"></div></section>
+</div></details>
 </div></details>
 <section class="card"><div class="row"><h2 style="margin:0">判定履歴</h2><button class="secondary" id="reload">更新</button></div><div id="history"></div></section><div class="muted">レース戦略 v2.54。ワイド相手の自動選定を廃止し、アプリは市場の中心境界までを提示、その境界内から最大2頭は自分で選ぶ方式に変更しました。境界外は保存不可。境界内機会率と自分の選択捕捉率を分離して前向き検証します。</div></main>
 <script>
@@ -1632,10 +1666,13 @@ function renderWinScope(pipe,fr){
   box.className='notice'+(pipe.hardLocked?' stop':'');
 }
 function renderBetPriority(pipe,fr,pr,r=null){
-  const wrap=$('betPriority'),wc=$('winDecisionCard'),qc=$('quinellaDecisionCard'),ws=$('warningStrip'),hero=$('ticketDecisionHero'),wh=$('winHeroCard'),qh=$('quinellaHeroCard');if(!wrap)return;
+  const wrap=$('betPriority'),wc=$('winDecisionCard'),qc=$('quinellaDecisionCard'),ws=$('warningStrip'),hero=$('ticketDecisionHero'),wh=$('winHeroCard'),qh=$('quinellaHeroCard'),wideh=$('wideHeroCard');if(!wrap)return;
   wrap.classList.remove('hidden');ws.classList.remove('hidden');
   const axisNo=Number($('axisHorseNo')?.value||r?.priorAxisHorseNo||0),axisPolicy=axisTicketPolicy(r?.runners||pendingAssessment?.calc?.runners||[],axisNo,pipe);
   const fp=pipe.firstRangePolicy||rangeSharePolicy(r?.runners||pendingAssessment?.calc?.runners||[],fr,'first'),qp=pipe.quinellaRangePolicy||rangeSharePolicy(r?.runners||pendingAssessment?.calc?.runners||[],pr,'second');
+  const heroRows=r?.runners||pendingAssessment?.calc?.runners||[];
+  const heroMarket=r?.secondRange||secondRangeAnalysis(heroRows,r?.structure?.code||'D');
+  const wb=wideOpponentBoundaryAnalysis(heroRows,heroMarket,axisNo);
   let winLabel='条件付き',winBadge='単勝を検討',winSub='1着候補率 '+rangeSharePolicyText(fp)+'。';
   let qLabel='追加なし',qBadge='馬連は待つ',qSub='馬連レンジ率 '+rangeSharePolicyText(qp)+'。';
   if(pipe.hardLocked){
@@ -1662,12 +1699,24 @@ function renderBetPriority(pipe,fr,pr,r=null){
   $('winDecisionLabel').textContent=winLabel;$('winDecisionBadge').textContent=winBadge;$('winDecisionSub').textContent=winSub;
   $('quinellaDecisionLabel').textContent=qLabel;$('quinellaDecisionBadge').textContent=qBadge;$('quinellaDecisionSub').textContent=qSub;
   const qGo=!pipe.hardLocked&&pipe.quinellaFit==='candidate'&&qp.eligible&&(!axisPolicy.axis||axisPolicy.pairedAuto);
-  if(hero){hero.classList.remove('hidden');$('winHeroLabel').textContent=winLabel;$('winHeroSub').textContent=winSub;$('quinellaHeroLabel').textContent=qLabel;$('quinellaHeroSub').textContent=qSub;wh.className='ticketDecisionHeroCard '+(pipe.hardLocked||fp.band==='skip'?'stop':pipe.winFit==='candidate'?'go':'caution');qh.className='ticketDecisionHeroCard '+(pipe.hardLocked||qp.band==='skip'?'stop':qGo?'go':'caution');}
+  if(hero){
+    hero.classList.remove('hidden');
+    $('winHeroLabel').textContent=winLabel;$('winHeroSub').textContent=winSub;
+    $('quinellaHeroLabel').textContent=qLabel;$('quinellaHeroSub').textContent=qSub;
+    wh.className='ticketDecisionHeroCard '+(pipe.hardLocked?'hardLock':fp.band==='skip'?'stop':pipe.winFit==='candidate'?'go':'caution');
+    qh.className='ticketDecisionHeroCard '+(pipe.hardLocked?'hardLock':qp.band==='skip'?'stop':qGo?'go':'caution');
+    if(wideh){
+      const wideLabel=pipe.hardLocked?'買わない':wb.eligible?'候補あり':'見送り推奨';
+      const wideSub=pipe.hardLocked?'固定除外条件です。':wb.eligible?wb.label+'の境界内から最大2頭を選択。':'明確な市場境界がないため追加しない。';
+      $('wideHeroLabel').textContent=wideLabel;$('wideHeroSub').textContent=wideSub;
+      wideh.className='ticketDecisionHeroCard '+(pipe.hardLocked?'hardLock':wb.eligible?'go':'stop');
+    }
+  }
   wc.className='betCard '+(pipe.hardLocked||fp.band==='skip'?'stop':pipe.winFit==='candidate'?'primary':'secondary');
   qc.className='betCard '+(pipe.hardLocked||qp.band==='skip'?'stop':qGo?'primary':'secondary');
   const axisWarning=axisPolicy.axis&&axisPolicy.popularity===4?'<br><b>⚠️ 4人気軸：</b>馬連は強判定時のみ候補、ワイドは直接3着内データを蓄積中。':axisPolicy.axis&&axisPolicy.popularity>=5?'<br><b>⚠️ '+axisPolicy.popularity+'人気軸：</b>馬連・ワイドとも前向きNが十分になるまで自動推奨外です。':'';
   const shareWarning='<br><b>候補率：</b>単勝 '+(fp.available?(fp.share*100).toFixed(1)+'%':'—')+' / 馬連 '+(qp.available?(qp.share*100).toFixed(1)+'%':'—');
-  ws.className='warningStrip '+(pipe.hardLocked||fp.band==='skip'||qp.band==='skip'?'stop':pipe.riskCount>=2||axisPolicy.highVariance||axisPolicy.popularity>=5||fp.band==='caution'||qp.band==='caution'?'caution':'good');
+  ws.className='warningStrip '+(pipe.hardLocked?'hardLock':fp.band==='skip'||qp.band==='skip'?'stop':pipe.riskCount>=2||axisPolicy.highVariance||axisPolicy.popularity>=5||fp.band==='caution'||qp.band==='caution'?'caution':'good');
   ws.innerHTML=(pipe.hardLocked?'<b>🔴 固定ロック</b> '+esc(pipe.hardLockReason):(pipe.riskGroups||[]).length?'<b>独立リスク '+pipe.riskCount+'種類：</b> '+pipe.riskGroups.map(x=>esc(x.label)).join(' / '):'<b>✅ 大きな注意点なし</b>')+shareWarning+axisWarning;
   renderAxisTicketPolicy(r?.runners||pendingAssessment?.calc?.runners||[],pipe,axisNo);
 }
@@ -1678,8 +1727,7 @@ function render(r){
   const pr=r.secondPlaceRange||secondPlaceRangeAnalysis(r.runners);
   const rawFr=r.baseFirstRange||firstPlaceRangeAnalysis(r.runners),spread=r.firstRangeSpread||firstRangeSpreadAnalysis(r.runners,fr),v229=r.v229Filter||v229FilterAnalysis(r.context?.grade||'',r.context?.age||'',r.context?.distance||'',rawFr,fr,spread);
   const sd=r.selectionDecision||selectionDecisionV230(selectionDecisionAnalysis(fr,pr),v229,pr);
-  c.className='card verdict range'+code;c.classList.remove('hidden');
-  $('verdict').textContent=sd.status;
+  c.className='card verdict';c.classList.remove('hidden');
   const ar=r.axisRisk||axisRiskAnalysis(r.runners),op=buildOpinionSummary(fr,pr,sd,ar),cp=conditionProfileAnalysis(r,fr,v229),mp=marketPatternAnalysis(r,fr,pr,spread,v229),pipe=decisionPipelineAnalysis(r,fr,pr,spread,v229,sd),st=applyPipelineToStrategy(raceStrategyAnalysis(r,fr,pr,sd,v229,ar,cp),pipe,fr);
   const heroFp=pipe.firstRangePolicy||rangeSharePolicy(r.runners,fr,'first'),heroQp=pipe.quinellaRangePolicy||rangeSharePolicy(r.runners,pr,'second');
   const rangeSummary=$('rangeSummaryHero'),rangeSummaryWinRow=$('rangeSummaryWinRow');
@@ -1697,8 +1745,11 @@ function render(r){
     rangeSummary.classList.remove('hidden');
   }
   const verdictIcon=pipe.fourLevelCode==='hard_lock'?'🔴':pipe.fourLevelCode==='recommend_skip'?'🟠':pipe.fourLevelCode==='conditional'?'🟡':'🟢';
-  $('verdict').textContent=verdictIcon+' '+pipe.fourLevelLabel;
-  $('lead').textContent=pipe.summary;
+  const verdictShort=pipe.fourLevelCode==='hard_lock'?'固定ロック':pipe.fourLevelCode==='recommend_skip'?'見送り推奨':pipe.fourLevelCode==='conditional'?'条件付き':'購入候補';
+  const verdictClass=pipe.fourLevelCode==='hard_lock'?'statusLock':pipe.fourLevelCode==='recommend_skip'?'statusSkip':pipe.fourLevelCode==='conditional'?'statusConditional':'statusStrong';
+  c.className='card verdict '+verdictClass;c.classList.remove('hidden');
+  $('verdict').textContent=verdictIcon+' '+verdictShort;
+  $('lead').textContent='境界確率優先｜'+pipe.summary;
   renderBetPriority(pipe,fr,pr,r);renderWinScope(pipe,fr);
   const stBox=$('strategyBox');stBox.className='strategyBox '+st.level;stBox.classList.remove('hidden');$('strategyTitle').textContent=st.title;$('strategyBadge').textContent=st.badge;$('strategyMain').textContent=st.main;$('strategyQuinella').textContent=st.quinella;$('strategyFirst').textContent=st.first;$('strategyAction').textContent=st.action;$('strategyNext').textContent=st.next;
   const cpBox=$('conditionProfile');cpBox.className='conditionProfile '+cp.level;cpBox.classList.remove('hidden');$('conditionProfileTitle').textContent='過去参考：'+cp.title;$('conditionProfileBadge').textContent='参考・'+String(cp.badge||'').replace(/^参考・/,'');$('conditionProfileEvidence').textContent='過去成績：'+cp.evidence;$('conditionProfileSecond').textContent=cp.secondEvidence?'過去参考：'+cp.secondEvidence:'2着レンジ：条件別の追加検証なし';$('conditionProfileNote').textContent=(cp.note||'')+' 最終単勝評価は今回の1着レンジ・境界を優先します。';const sampleMeta=conditionSampleMeta(r,fr);$('conditionProfileN').textContent=sampleMeta.label;
