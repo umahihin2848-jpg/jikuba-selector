@@ -1,7 +1,6 @@
 name: Inspect independent race features
 on:
-  push:
-    branches: ["three-stage-bc-probability"]
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
