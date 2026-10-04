@@ -1,0 +1,28 @@
+name: Historical race metadata
+on:
+  push:
+    branches: ["historical-waku-backtest"]
+permissions:
+  contents: read
+jobs:
+  meta:
+    strategy:
+      fail-fast: false
+      matrix:
+        yy: ["22","23","24","25"]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install --no-save cheerio@1.0.0
+      - name: Fetch metadata
+        env:
+          YY: ${{ matrix.yy }}
+        run: node analysis/waku-backtest/fetch_meta_year.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: meta-${{ matrix.yy }}
+          path: analysis/waku-backtest/meta-out/
