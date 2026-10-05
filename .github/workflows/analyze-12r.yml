@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'analysis/analyze_12r.py'
+      - 'analysis/analyze_12r_deep.py'
       - '.github/workflows/analyze-12r.yml'
   workflow_dispatch:
 
@@ -19,5 +20,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Run 12R analysis
+      - name: Run 12R base analysis
         run: python analysis/analyze_12r.py
+      - name: Run 12R deep analysis
+        run: python analysis/analyze_12r_deep.py
