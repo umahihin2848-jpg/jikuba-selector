@@ -1,0 +1,49 @@
+{
+  "version": "race_shape_validation_v1",
+  "created": "2026-10-06",
+  "market_shape_393": {
+    "scope": "2022-2025 turf, adult (3yo+ or 4yo+) OP+ main races, field size >=12; 2yo/3yo-only/dirt/obstacle excluded",
+    "n": 393,
+    "train": "2022-2023 n=196",
+    "test": "2024-2025 n=197",
+    "odds_timing": "final win odds",
+    "entropy_cutpoints_from_train": {
+      "concentrated_max": 0.784593,
+      "dispersed_min": 0.854338
+    },
+    "groups": {
+      "concentrated": {
+        "train_2022_2023": {"n":66,"winner_pop_cumulative":{"3":{"hit":46,"n":66,"rate_pct":69.7,"wilson95_pct":[57.8,79.4]},"4":{"hit":54,"n":66,"rate_pct":81.8,"wilson95_pct":[70.9,89.3]},"5":{"hit":57,"n":66,"rate_pct":86.4,"wilson95_pct":[76.1,92.7]},"6":{"hit":57,"n":66,"rate_pct":86.4,"wilson95_pct":[76.1,92.7]},"8":{"hit":61,"n":66,"rate_pct":92.4,"wilson95_pct":[83.5,96.7]},"10":{"hit":64,"n":66,"rate_pct":97.0,"wilson95_pct":[89.6,99.2]},"12":{"hit":65,"n":66,"rate_pct":98.5,"wilson95_pct":[91.9,99.7]}}},
+        "test_2024_2025": {"n":61,"winner_pop_cumulative":{"3":{"hit":48,"n":61,"rate_pct":78.7,"wilson95_pct":[66.9,87.1]},"4":{"hit":52,"n":61,"rate_pct":85.2,"wilson95_pct":[74.3,92.0]},"5":{"hit":54,"n":61,"rate_pct":88.5,"wilson95_pct":[78.2,94.3]},"6":{"hit":54,"n":61,"rate_pct":88.5,"wilson95_pct":[78.2,94.3]},"8":{"hit":58,"n":61,"rate_pct":95.1,"wilson95_pct":[86.5,98.3]},"10":{"hit":59,"n":61,"rate_pct":96.7,"wilson95_pct":[88.8,99.1]},"12":{"hit":60,"n":61,"rate_pct":98.4,"wilson95_pct":[91.3,99.7]}}}
+      },
+      "middle": {
+        "train_2022_2023": {"n":64,"winner_pop_cumulative":{"3":{"hit":32,"n":64,"rate_pct":50.0,"wilson95_pct":[38.1,61.9]},"4":{"hit":40,"n":64,"rate_pct":62.5,"wilson95_pct":[50.3,73.3]},"5":{"hit":47,"n":64,"rate_pct":73.4,"wilson95_pct":[61.5,82.7]},"6":{"hit":52,"n":64,"rate_pct":81.2,"wilson95_pct":[70.0,88.9]},"8":{"hit":60,"n":64,"rate_pct":93.8,"wilson95_pct":[85.0,97.5]},"10":{"hit":62,"n":64,"rate_pct":96.9,"wilson95_pct":[89.3,99.1]},"12":{"hit":63,"n":64,"rate_pct":98.4,"wilson95_pct":[91.7,99.7]}}},
+        "test_2024_2025": {"n":86,"winner_pop_cumulative":{"3":{"hit":47,"n":86,"rate_pct":54.7,"wilson95_pct":[44.2,64.7]},"4":{"hit":53,"n":86,"rate_pct":61.6,"wilson95_pct":[51.1,71.2]},"5":{"hit":65,"n":86,"rate_pct":75.6,"wilson95_pct":[65.5,83.4]},"6":{"hit":69,"n":86,"rate_pct":80.2,"wilson95_pct":[70.6,87.3]},"8":{"hit":74,"n":86,"rate_pct":86.0,"wilson95_pct":[77.2,91.8]},"10":{"hit":83,"n":86,"rate_pct":96.5,"wilson95_pct":[90.2,98.8]},"12":{"hit":84,"n":86,"rate_pct":97.7,"wilson95_pct":[91.9,99.4]}}}
+      },
+      "dispersed": {
+        "train_2022_2023": {"n":66,"winner_pop_cumulative":{"3":{"hit":36,"n":66,"rate_pct":54.5,"wilson95_pct":[42.6,66.0]},"4":{"hit":42,"n":66,"rate_pct":63.6,"wilson95_pct":[51.6,74.2]},"5":{"hit":46,"n":66,"rate_pct":69.7,"wilson95_pct":[57.8,79.4]},"6":{"hit":50,"n":66,"rate_pct":75.8,"wilson95_pct":[64.2,84.5]},"8":{"hit":57,"n":66,"rate_pct":86.4,"wilson95_pct":[76.1,92.7]},"10":{"hit":60,"n":66,"rate_pct":90.9,"wilson95_pct":[81.6,95.8]},"12":{"hit":64,"n":66,"rate_pct":97.0,"wilson95_pct":[89.6,99.2]}}},
+        "test_2024_2025": {"n":50,"winner_pop_cumulative":{"3":{"hit":23,"n":50,"rate_pct":46.0,"wilson95_pct":[33.0,59.6]},"4":{"hit":27,"n":50,"rate_pct":54.0,"wilson95_pct":[40.4,67.0]},"5":{"hit":33,"n":50,"rate_pct":66.0,"wilson95_pct":[52.2,77.6]},"6":{"hit":35,"n":50,"rate_pct":70.0,"wilson95_pct":[56.2,80.9]},"8":{"hit":41,"n":50,"rate_pct":82.0,"wilson95_pct":[69.2,90.2]},"10":{"hit":46,"n":50,"rate_pct":92.0,"wilson95_pct":[81.2,96.8]},"12":{"hit":48,"n":50,"rate_pct":96.0,"wilson95_pct":[86.5,98.9]}}}
+      }
+    },
+    "notes": [
+      "Thresholds were set only on 2022-2023 and evaluated on 2024-2025.",
+      "Winner popularity in the 393 table is reconstructed from sorted final odds; tied odds may create minor rank ambiguity.",
+      "These thresholds are reference values for this scope, not universal rules for dirt, 3-win, juvenile or generation-only races.",
+      "Final odds are used; live T-15 application remains a distribution-shift risk."
+    ]
+  },
+  "top3_full_outcomes_86": {
+    "scope": "2022-2025 turf OP+, >=12 runners, non-generation; selected 1800m bettei and 2200m+ bettei/teiryo subset",
+    "n_races": 86,
+    "n_horses": 1272,
+    "train": "2022-2023 n=45 races",
+    "test": "2024-2025 n=41 races",
+    "winner": {"4":{"hit":68,"n":86,"rate_pct":79.1,"wilson95_pct":[69.3,86.3]},"6":{"hit":79,"n":86,"rate_pct":91.9,"wilson95_pct":[84.1,96.0]},"8":{"hit":84,"n":86,"rate_pct":97.7,"wilson95_pct":[91.9,99.4]}},
+    "second": {"6":{"hit":63,"n":86,"rate_pct":73.3,"wilson95_pct":[63.1,81.5]},"8":{"hit":74,"n":86,"rate_pct":86.0,"wilson95_pct":[77.2,91.8]},"10":{"hit":82,"n":86,"rate_pct":95.3,"wilson95_pct":[88.6,98.2]}},
+    "third": {"6":{"hit":64,"n":84,"rate_pct":76.2,"wilson95_pct":[66.1,84.0]},"8":{"hit":76,"n":84,"rate_pct":90.5,"wilson95_pct":[82.3,95.1]},"10":{"hit":82,"n":84,"rate_pct":97.6,"wilson95_pct":[91.7,99.3]}},
+    "notes": [
+      "This 86-race subset was selected after looking at historical results, so it is exploratory and not an independent universal backtest.",
+      "Use it only as a preliminary 2nd/3rd-place range reference until a broader full-field dataset is built."
+    ]
+  }
+}
