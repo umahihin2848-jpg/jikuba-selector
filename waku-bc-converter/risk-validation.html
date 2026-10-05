@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#06111d">
+<title>収束・資金曲線検証</title>
+<style>
+:root{--bg:#06111d;--card:#0b1a2a;--line:#29415e;--txt:#eef5fb;--sub:#9fb0c3;--g:#58d3a5;--y:#f3cd62;--r:#ff7777;--b:#77b8ff}*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#06111d,#081624 45%,#06111d);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.wrap{max-width:900px;margin:auto;padding:16px 12px 60px}.card{background:rgba(11,26,42,.97);border:1px solid var(--line);border-radius:16px;padding:14px;margin:10px 0}h1{font-size:25px;margin:0 0 5px}h2{font-size:18px;margin:0 0 8px}.muted{color:var(--sub);font-size:11px;line-height:1.6}.summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.metric{background:#081624;border:1px solid #29415e;border-radius:11px;padding:10px}.metric span{display:block;font-size:9px;color:#91a5b9;font-weight:900}.metric b{display:block;font-size:19px;margin-top:3px}.row{display:grid;grid-template-columns:1.05fr .85fr .85fr .85fr .9fr;gap:6px;align-items:center;border:1px solid #20364e;background:#081624;border-radius:9px;padding:8px;font-size:11px;margin-top:6px}.head{background:#0b1d2e;color:#91a5b9;font-weight:900}.cell{text-align:right}.cell:first-child{text-align:left}.notice{background:#0a1726;border:1px solid var(--line);border-radius:11px;padding:10px;font-size:11px;line-height:1.6}.warn{border-color:#806b25;background:#2a2514;color:#ffe184}.bad{border-color:#7d3434;background:#2b1717;color:#ffb0b0}.ok{border-color:#2f8f6a;background:#0b2a22;color:#9df2d0}label{font-size:11px;color:#aebed0;font-weight:800;display:block;margin-bottom:5px}input,select{width:100%;background:#071522;color:#fff;border:1px solid #31506f;border-radius:10px;padding:10px;font-size:16px}button{width:100%;border:0;border-radius:10px;padding:11px;font-size:15px;font-weight:900;background:#237f63;color:white;margin-top:8px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.tiny{font-size:10px;color:#8ea2b5;line-height:1.55}@media(max-width:620px){.summary{grid-template-columns:1fr 1fr}.row{grid-template-columns:1.1fr .75fr .8fr .8fr .9fr;font-size:9px;padding:7px 5px}.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body><main class="wrap">
+<h1>収束・資金曲線検証</h1>
+<div class="muted">枠連BCコンバーターの実購入履歴を使い、「期待値があっても何レース必要か」をブートストラップで推定します。購入額の大小をいったん除き、各レースを1単位購入として再標本化します。</div>
+<section class="card"><h2>現在の実績</h2><div id="summary" class="summary"></div><div id="gate" class="notice" style="margin-top:9px"></div></section>
+<section class="card"><h2>シミュレーション設定</h2><div class="grid2"><div><label>1レース想定購入額</label><input id="stake" type="number" min="100" step="100" value="3000"></div><div><label>反復回数</label><select id="iterations"><option value="2000">2,000回</option><option value="5000" selected>5,000回</option><option value="10000">10,000回</option></select></div></div><button id="run">再計算</button><div class="tiny" style="margin-top:7px">将来も現在と同じ回収倍率分布が続き、各レースが概ね独立という仮定です。nが小さいと高配当の未観測部分を捉えられないため、数値は過信しません。</div></section>
+<section class="card"><h2>何レースで安定するか</h2><div class="muted">「黒字確率」はその購入回数を終えた時点で累計回収率100%超となる割合。95%DDはシミュレーションの95パーセンタイル最大ドローダウンです。</div><div id="simTable"></div></section>
+<section class="card"><h2>必要nの概算</h2><div id="nEstimate" class="notice"></div><div class="tiny" style="margin-top:7px">これは平均・分散からの正規近似。実際の競馬収益は右裾が長いため、上のブートストラップ結果を優先します。</div></section>
+<section class="card"><h2>検証上の注意</h2><div id="cautions"></div></section>
+<script>
+(function(){
+'use strict';var STORE='wakuBcTranslatorV2';
+function $(id){return document.getElementById(id)}
+function records(){try{return JSON.parse(localStorage.getItem(STORE)||'[]')}catch(e){return[]}}
+function purchasedRows(){return records().filter(function(r){return r&&r.result&&r.result.purchased&&Number(r.result.actualStake)>0&&Number(r.result.actualReturn)>=0})}
+function fmtPct(x,d){return isFinite(x)?(x*100).toFixed(d==null?1:d)+'%':'—'}
+function yen(x){return isFinite(x)?Math.round(x).toLocaleString('ja-JP')+'円':'—'}
+function metric(l,v){return'<div class="metric"><span>'+l+'</span><b>'+v+'</b></div>'}
+function mean(a){return a.length?a.reduce(function(s,x){return s+x},0)/a.length:NaN}
+function sd(a){if(a.length<2)return NaN;var m=mean(a);return Math.sqrt(a.reduce(function(s,x){var d=x-m;return s+d*d},0)/(a.length-1))}
+function quantile(a,q){if(!a.length)return NaN;var b=a.slice().sort(function(x,y){return x-y}),p=(b.length-1)*q,i=Math.floor(p),f=p-i;return b[i+1]!=null?b[i]+f*(b[i+1]-b[i]):b[i]}
+function rng(seed){var x=seed||123456789;return function(){x^=x<<13;x^=x>>>17;x^=x<<5;return((x>>>0)%4294967296)/4294967296}}
+function outcomeData(){var rows=purchasedRows();return rows.map(function(r){return{gross:Number(r.result.actualReturn)/Number(r.result.actualStake),stake:Number(r.result.actualStake),ret:Number(r.result.actualReturn)}})}
+function gateText(n){if(n<30)return{c:'bad',t:'n='+n+'。まだ収束分析を判断材料にはしません。まず30件、できれば100件以上の実購入結果を蓄積。'};if(n<100)return{c:'warn',t:'n='+n+'。探索的な収束分析は可能ですが、まだ高配当1〜2回で結論が大きく動く段階です。'};if(n<300)return{c:'warn',t:'n='+n+'。実用的な目安が見え始める段階。300件以上で再確認し、年度・格別にも分けて確認します。'};if(n<1000)return{c:'ok',t:'n='+n+'。収束速度の推定にかなり使える段階です。1000件到達後は完全なアウト・オブ・サンプル区間でも確認します。'};return{c:'ok',t:'n='+n+'。母数は十分大きいですが、市場構造変化があるため年度別の安定性確認は継続します。'}}
+function simulate(outcomes,N,iters,seed){var rand=rng(seed),rois=[],dds=[],positive=0;for(var z=0;z<iters;z++){var gross=0,cum=0,peak=0,maxdd=0;for(var i=0;i<N;i++){var g=outcomes[Math.floor(rand()*outcomes.length)];gross+=g;cum+=g-1;if(cum>peak)peak=cum;var dd=peak-cum;if(dd>maxdd)maxdd=dd}var roi=gross/N;rois.push(roi);dds.push(maxdd);if(roi>1)positive++}return{p:positive/iters,med:quantile(rois,.5),lo:quantile(rois,.05),hi:quantile(rois,.95),dd95:quantile(dds,.95)}}
+function zN(mu,s,z){if(!(mu>0)||!(s>0))return null;return Math.ceil(Math.pow(z*s/mu,2))}
+function render(){var data=outcomeData(),n=data.length,gross=data.map(function(x){return x.gross}),stakes=data.map(function(x){return x.stake}),actualStake=data.reduce(function(s,x){return s+x.stake},0),actualRet=data.reduce(function(s,x){return s+x.ret},0),actualRoi=actualStake?actualRet/actualStake:NaN,eqRoi=mean(gross),hit=n?gross.filter(function(x){return x>0}).length/n:NaN,avgStake=mean(stakes),maxRet=n?Math.max.apply(null,data.map(function(x){return x.ret})):0,totalRet=data.reduce(function(s,x){return s+x.ret},0),topShare=totalRet?maxRet/totalRet:NaN;
+$('summary').innerHTML=metric('実購入n',n)+metric('実回収率',fmtPct(actualRoi,0))+metric('等額換算ROI',fmtPct(eqRoi,0))+metric('的中率',fmtPct(hit,1))+metric('平均購入額',yen(avgStake))+metric('最大1件寄与',fmtPct(topShare,1));var g=gateText(n);$('gate').className='notice '+g.c;$('gate').textContent=g.t;if(!n){$('simTable').innerHTML='<div class="notice">まだ実購入結果がありません。アプリの「検証」で結果・実投資・実払戻を登録すると自動で使われます。</div>';$('nEstimate').textContent='データ不足';$('cautions').innerHTML='<div class="notice">実購入結果を蓄積してください。</div>';return}
+var iters=Number($('iterations').value),stake=Number($('stake').value)||3000,horizons=[50,100,300,500,1000],html='<div class="row head"><div class="cell">購入n</div><div class="cell">黒字確率</div><div class="cell">中央値ROI</div><div class="cell">90%範囲</div><div class="cell">95%DD</div></div>';horizons.forEach(function(N,k){var s=simulate(gross,N,iters,24681357+n*97+N*131+k);html+='<div class="row"><div class="cell"><b>'+N+'</b></div><div class="cell">'+fmtPct(s.p,1)+'</div><div class="cell">'+fmtPct(s.med,0)+'</div><div class="cell">'+fmtPct(s.lo,0)+'〜'+fmtPct(s.hi,0)+'</div><div class="cell">'+s.dd95.toFixed(1)+'u<br><span class="tiny">'+yen(s.dd95*stake)+'</span></div></div>'});$('simTable').innerHTML=html;
+var net=gross.map(function(x){return x-1}),mu=mean(net),sig=sd(net),n80=zN(mu,sig,.841621),n90=zN(mu,sig,1.281552),n95=zN(mu,sig,1.644854);if(mu>0&&sig>0)$('nEstimate').innerHTML='現在の等額換算期待収益 <b>'+(mu*100).toFixed(1)+'%</b> / 1購入、標準偏差 '+sig.toFixed(2)+'u。<br>正規近似で累計黒字確率80%: <b>'+n80+'購入</b>、90%: <b>'+n90+'購入</b>、95%: <b>'+n95+'購入</b>。';else $('nEstimate').innerHTML='現在の標本平均がプラスではないため、「何件で黒字確率が高まるか」は算出しません。まず期待値の再検証が必要です。';
+var cs=[];if(n<100)cs.push('標本が100未満なので、シミュレーションの1000購入結果にも見かけ上の精密さがあります。');if(topShare>.25)cs.push('総払戻の'+fmtPct(topShare,1)+'を最大1レースが占めています。高配当依存が強く、収束は遅くなりやすいです。');if(Math.abs(actualRoi-eqRoi)>.10)cs.push('実回収率と等額換算ROIに10pt以上差があります。賭け金配分の影響が大きいです。');cs.push('ブートストラップは「今まで観測した配当分布」を再利用するため、未観測の超高配当や市場構造変化は表現できません。');cs.push('本稼働判定では、期待値のアウト・オブ・サンプル検証と、この収束/ドローダウン検証の両方を通過させます。');$('cautions').innerHTML=cs.map(function(x){return'<div class="notice" style="margin-top:7px">'+x+'</div>'}).join('')}
+$('run').addEventListener('click',render);var d=outcomeData();if(d.length){var m=mean(d.map(function(x){return x.stake}));if(isFinite(m)&&m>=100)$('stake').value=Math.round(m/100)*100}render();
+})();
+</script></main></body></html>
