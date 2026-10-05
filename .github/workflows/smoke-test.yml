@@ -32,3 +32,4 @@ jobs:
           node tests/smoke.cjs
           node tests/quinella-range-smoke.cjs
           node tests/waku-bc-smoke.cjs
+          node tests/waku-bc-scanner-smoke.cjs
