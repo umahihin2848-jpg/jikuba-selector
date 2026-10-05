@@ -1,0 +1,30 @@
+name: Analyze official JRA 12R holdout
+
+on:
+  push:
+    paths:
+      - 'analysis/analyze_12r_official_2016_2018.py'
+      - '.github/workflows/analyze-12r-official-holdout.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4 pypdf
+      - name: Run official JRA 2016-2018 holdout
+        run: python analysis/analyze_12r_official_2016_2018.py
+      - name: Upload parsed race table
+        uses: actions/upload-artifact@v4
+        with:
+          name: jra-12r-official-2016-2018
+          path: analysis/results/12r_official_2016_2018.csv
