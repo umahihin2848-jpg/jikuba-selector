@@ -5,6 +5,7 @@ on:
     paths:
       - 'analysis/analyze_12r.py'
       - 'analysis/analyze_12r_deep.py'
+      - 'analysis/analyze_12r_holdout.py'
       - '.github/workflows/analyze-12r.yml'
   workflow_dispatch:
 
@@ -24,3 +25,5 @@ jobs:
         run: python analysis/analyze_12r.py
       - name: Run 12R deep analysis
         run: python analysis/analyze_12r_deep.py
+      - name: Run 12R holdout validation
+        run: python analysis/analyze_12r_holdout.py
