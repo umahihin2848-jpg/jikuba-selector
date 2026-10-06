@@ -1,0 +1,72 @@
+{
+  "title": "Feature discovery from umade.csv v1",
+  "source": {
+    "file": "umade.csv",
+    "period": "2016-2026-10-04",
+    "rows": 74007,
+    "races": 5368,
+    "columns": 51
+  },
+  "recommended_app_layers": {
+    "market_structure": ["normalized win-market concentration", "entropy", "Neff", "top-share", "odds cliffs"],
+    "pace_structure": ["RPCI 4-band probability distribution", "90% conformal prediction range", "market/context explanation"],
+    "formation_pressure": ["escape pressure", "front pressure", "historical -3F/position profile", "formation pressure index"],
+    "horse_ability_fit": ["predicted RPCI-band fit", "PCI/-3F profile", "dirt reverse-pace closer signal", "large position-gain performance candidate"],
+    "explanation": ["structure label", "uncertainty label", "evidence sample size", "natural-language rationale"]
+  },
+  "new_findings": {
+    "large_position_gain_top3": {
+      "definition": "Previous race: gained at least 25% of field positions from first available corner to 4th corner and finished top 3.",
+      "baseline": "Current-race popularity, surface, class, distance bucket, going, field size and age logistic expectation.",
+      "2023_2024": {"n":222,"top3_observed":0.3153,"top3_expected":0.2914,"delta":0.0240},
+      "2025": {"n":87,"top3_observed":0.3678,"top3_expected":0.2861,"delta":0.0817},
+      "2026": {"n":83,"top3_observed":0.3855,"top3_expected":0.3064,"delta":0.0791},
+      "2025_2026_combined": {"n":170,"top3_observed":0.3765,"top3_expected":0.2960,"delta":0.0804,"bootstrap_95pct_ci_delta":[0.0167,0.1444]},
+      "status": "promising_beta_signal"
+    },
+    "large_position_gain_plus_fast_finish": {
+      "definition": "Previous race: gained at least 25% of field positions, finished top 3 and was in fastest quartile by final-3F rank.",
+      "2023_2024": {"n":169,"top3_observed":0.3195,"top3_expected":0.2986,"delta":0.0209},
+      "2025": {"n":61,"top3_observed":0.4262,"top3_expected":0.3122,"delta":0.1140},
+      "2026": {"n":61,"top3_observed":0.4262,"top3_expected":0.3155,"delta":0.1107},
+      "2025_2026_combined": {"n":122,"top3_observed":0.4262,"top3_expected":0.3139,"delta":0.1123,"bootstrap_95pct_ci_delta":[0.0342,0.1919]},
+      "status": "promising_beta_signal_small_n"
+    },
+    "dirt_reverse_pace_closer_top3": {
+      "definition": "Previous race was dirt, RPCI>=50, decision style was 差し/追込, and horse finished top 3; next race also dirt.",
+      "2023_2024": {"n":69,"top3_observed":0.4783,"top3_expected":0.3631,"delta":0.1152},
+      "2025": {"n":44,"top3_observed":0.5227,"top3_expected":0.3794,"delta":0.1433},
+      "2026": {"n":29,"top3_observed":0.4138,"top3_expected":0.3168,"delta":0.0970},
+      "2025_2026_combined": {"n":73,"top3_observed":0.4795,"top3_expected":0.3545,"delta":0.1249,"bootstrap_95pct_ci_delta":[0.0140,0.2380]},
+      "status": "promising_ability_signal_small_n",
+      "note": "Treat as ability/fit evidence, not a guaranteed win bonus."
+    },
+    "going_plus_turf_inout_for_rpci": {
+      "definition": "Add current 馬場状態 and 芝(内・外) to race-context RPCI classifier.",
+      "logloss_delta_vs_context_only": {
+        "2023_2024": -0.00686,
+        "2025": -0.00198,
+        "2026": -0.01239
+      },
+      "bootstrap_probability_of_improvement": {
+        "2023_2024": 0.909,
+        "2025": 0.604,
+        "2026": 0.948
+      },
+      "status": "small_but_consistent_context_improvement",
+      "note": "Useful as secondary RPCI context; effect is modest and not individually decisive."
+    }
+  },
+  "low_priority_or_rejected": {
+    "horse_age_as_independent_score": "Most of the apparent effect is already reflected in popularity/context.",
+    "drop_then_recover_and_win": "Did not reproduce across holdouts.",
+    "bodyweight_change": "No stable incremental signal across 2023-2026.",
+    "layoff_days": "No stable incremental signal after baseline adjustment.",
+    "course_A_B_C_D": "Some small gains in earlier holdouts but not consistently better than going+inout."
+  },
+  "implementation_policy": {
+    "production_now": ["RPCI probability distribution", "90% conformal range", "formation pressure index", "market structure", "natural-language explanation"],
+    "beta_badge": ["dirt reverse-pace closer ability", "large position-gain + fast-finish signal", "going+inout RPCI context"],
+    "do_not_score": ["age alone", "bodyweight change alone", "drop-recover-win narrative alone"]
+  }
+}
