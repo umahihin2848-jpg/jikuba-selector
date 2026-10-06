@@ -1,0 +1,1 @@
+(function(){'use strict';if(window.__rsaNativeMutationObserver){window.MutationObserver=window.__rsaNativeMutationObserver;delete window.__rsaNativeMutationObserver;}})();
