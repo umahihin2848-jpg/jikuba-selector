@@ -2,7 +2,7 @@
 const C=window.ShapeCore;if(!C)return;
 const STATE={byName:{},ready:false};window.RunningMarksState=STATE;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const num=v=>{const x=Number(String(v??'').replace(/[^0-9.+-]/g,''));return Number.isFinite(x)?x:NaN};
+const num=v=>{const s=String(v??'').trim();if(!s)return NaN;const t=s.replace(/[^0-9.+-]/g,'');if(!t)return NaN;const x=Number(t);return Number.isFinite(x)?x:NaN};
 const firstNum=v=>{const m=String(v??'').match(/\d+(?:\.\d+)?/);return m?Number(m[0]):NaN};
 const dateVal=v=>C.dateVal(v);
 const qRank=(arr,frac=.25)=>Math.max(1,Math.ceil(arr.length*frac));
