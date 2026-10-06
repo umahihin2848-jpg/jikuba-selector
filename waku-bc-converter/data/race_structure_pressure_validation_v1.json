@@ -1,0 +1,102 @@
+{
+  "version": "race_structure_pressure_v1",
+  "source": "TARGET export umade.csv",
+  "period": "2016-2026-10-04",
+  "scope": "flat races only; 3-win/old 1600man through G1/OP/L in uploaded file; obstacle classes excluded",
+  "rows": 74007,
+  "races_total": 5368,
+  "races_with_rpci": 4912,
+  "leakage_control": {
+    "rule": "for every target race, horse features use only starts strictly before that race",
+    "warmup": "2016",
+    "train": "2017-2022",
+    "model_selection": "2023-2024",
+    "confirmation": "2025",
+    "holdout": "2026 through 2026-10-04"
+  },
+  "race_counts": {
+    "2016": 423,
+    "2017": 424,
+    "2018": 425,
+    "2019": 430,
+    "2020": 455,
+    "2021": 473,
+    "2022": 476,
+    "2023": 481,
+    "2024": 478,
+    "2025": 485,
+    "2026": 362
+  },
+  "pre_race_structure_features": {
+    "expected_escape_count": "sum of each runner's shrinkage-smoothed prior escape probability",
+    "front_pressure_rate": "mean prior probability of escape or front-running across entrants",
+    "minus3f_position": "historical mean/quantiles of 上3F地点差 from prior starts only",
+    "pressure_index": "equal-weight standardized combination: escape pressure + front pressure - historical 3F-position gap"
+  },
+  "training_tertiles": {
+    "expected_escape_count": [1.0176456730, 1.4009523810],
+    "front_pressure_rate": [0.3342336843, 0.3726178451],
+    "historical_mean_3f_gap": [0.6486325722, 0.7621154050],
+    "pressure_index": [-0.38149182, 0.31301064]
+  },
+  "repeatability": {
+    "expected_escape_high_minus_low_rpci": {
+      "2025": {"difference": -3.6168, "bootstrap_95ci": [-4.6688, -2.5612]},
+      "2026": {"difference": -3.6607, "bootstrap_95ci": [-4.9582, -2.3989]}
+    },
+    "front_pressure_high_minus_low_rpci": {
+      "2025": {"difference": -2.1252, "bootstrap_95ci": [-3.1706, -1.0849]},
+      "2026": {"difference": -3.0590, "bootstrap_95ci": [-4.3161, -1.8196]}
+    },
+    "historical_3f_gap_high_minus_low_rpci": {
+      "2025": {"difference": 2.5252, "bootstrap_95ci": [1.5140, 3.5150]},
+      "2026": {"difference": 1.6044, "bootstrap_95ci": [0.4408, 2.7941]}
+    },
+    "pressure_index_high_minus_low_rpci": {
+      "2025": {"difference": -3.1855, "bootstrap_95ci": [-4.1883, -2.1895]},
+      "2026": {"difference": -3.2884, "bootstrap_95ci": [-4.4639, -2.1058]}
+    }
+  },
+  "pressure_index_bins": {
+    "2025": {
+      "low": {"n": 189, "mean_rpci": 51.5471, "p_rpci_lt_50": 0.3545, "p_rpci_ge_55": 0.2222},
+      "middle": {"n": 145, "mean_rpci": 49.7586, "p_rpci_lt_50": 0.5655, "p_rpci_ge_55": 0.1103},
+      "high": {"n": 151, "mean_rpci": 48.3616, "p_rpci_lt_50": 0.6556, "p_rpci_ge_55": 0.0795}
+    },
+    "2026": {
+      "low": {"n": 137, "mean_rpci": 51.7825, "p_rpci_lt_50": 0.3796, "p_rpci_ge_55": 0.3066},
+      "middle": {"n": 106, "mean_rpci": 50.3566, "p_rpci_lt_50": 0.5377, "p_rpci_ge_55": 0.1698},
+      "high": {"n": 119, "mean_rpci": 48.4941, "p_rpci_lt_50": 0.5966, "p_rpci_ge_55": 0.0504}
+    }
+  },
+  "rpcI_band_model_ablation": {
+    "selection_metric": "multiclass log loss on 2023-2024 only",
+    "best": "context+pace",
+    "2023_2024_logloss": {
+      "context": 0.97099,
+      "context+pace": 0.96237,
+      "context+style": 0.96624,
+      "context+style+gap": 0.97209,
+      "full": 0.96510
+    },
+    "2025_logloss": {
+      "context": 1.01993,
+      "context+pace": 1.00448,
+      "context+style": 1.02945,
+      "context+style+gap": 1.02576,
+      "full": 1.01579
+    },
+    "interpretation": "style/pressure features show repeatable directional association with RPCI, but did not reliably improve probabilistic RPCI-band prediction beyond broader historical pace features on 2023-2025. Use them primarily as an explanatory race-structure axis, not as an aggressive probability adjustment."
+  },
+  "style_realization_note": {
+    "2026_spearman_expected_escape_vs_realized_escape_count": -0.0520,
+    "2026_spearman_expected_front_vs_realized_front_count": 0.0832,
+    "interpretation": "predicting the exact number of runners classified as escape/front in the realized race is weak; the same pre-race tendencies are more useful for describing pace pressure than for naming the exact leader count."
+  },
+  "recommended_app_labels": {
+    "pressure_index_low": "先行圧低め / スロー側リスクあり",
+    "pressure_index_middle": "標準的な先行圧",
+    "pressure_index_high": "先行圧高め / 前傾方向",
+    "usage": "combine with RPCI probability distribution and conformal 90% range; do not convert pressure label alone into a betting signal"
+  }
+}
