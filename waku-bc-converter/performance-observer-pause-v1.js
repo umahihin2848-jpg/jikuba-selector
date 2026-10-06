@@ -1,0 +1,1 @@
+(function(){'use strict';if(window.__rsaNativeMutationObserver)return;window.__rsaNativeMutationObserver=window.MutationObserver;class SilentMutationObserver{constructor(cb){this.cb=cb}observe(){}disconnect(){}takeRecords(){return[]}}window.MutationObserver=SilentMutationObserver;})();
