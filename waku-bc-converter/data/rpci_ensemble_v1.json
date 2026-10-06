@@ -1,0 +1,59 @@
+{
+  "version": "rpci_ensemble_v1",
+  "created": "2026-10-06",
+  "source_file": "pci.csv (2016-2025)",
+  "target": "current race RPCI",
+  "bands": [
+    {"id":0,"label":"<45","upper_exclusive":45},
+    {"id":1,"label":"45-49.9","lower_inclusive":45,"upper_exclusive":50},
+    {"id":2,"label":"50-54.9","lower_inclusive":50,"upper_exclusive":55},
+    {"id":3,"label":">=55","lower_inclusive":55}
+  ],
+  "time_split": {"warmup":"2016","train":"2017-2022","validation":"2023-2024","holdout":"2025"},
+  "history_window": {"per_horse_last_n_prior_starts":5},
+  "ensemble": {
+    "model_a_weight": 0.34,
+    "model_b_weight": 0.66,
+    "model_a": {
+      "name":"RPCI + position/style",
+      "numeric_features":["distance","field_size","month","age_mean","female_share","hist_coverage","rpci_med_race_med","rpci_med_race_mean","same_rpci_med_race_med","same_rpci_med_race_mean","rpci_lt45_race_med","rpci_lt45_race_mean","rpci_45_50_race_med","rpci_45_50_race_mean","rpci_50_55_race_med","rpci_50_55_race_mean","rpci_ge55_race_med","rpci_ge55_race_mean","rpci_med_race_std","gap3f_med_race_med","gap3f_med_race_mean","same_gap3f_med_race_med","same_gap3f_med_race_mean","escape_rate_race_med","escape_rate_race_mean","front_rate_race_med","front_rate_race_mean","back_rate_race_med","back_rate_race_mean","gap3f_med_race_std","likely_escape_count","likely_front_count","likely_escape_share","likely_front_share"],
+      "categorical_features":["surface","class","venue"],
+      "sigma":3.25,
+      "ridge_alpha":20.0,
+      "note":"Preprocessing and coefficients are kept in the local model artifact used to generate this validation spec; app integration should reuse the same scorer implementation rather than refit in-browser."
+    },
+    "model_b": {
+      "name":"RPCI + PCI/Ave-3F",
+      "numeric_features":["distance","field_size","month","age_mean","female_share","hist_coverage","rpci_med_race_med","rpci_med_race_mean","same_rpci_med_race_med","same_rpci_med_race_mean","rpci_lt45_race_med","rpci_lt45_race_mean","rpci_45_50_race_med","rpci_45_50_race_mean","rpci_50_55_race_med","rpci_50_55_race_mean","rpci_ge55_race_med","rpci_ge55_race_mean","rpci_med_race_std","pci_med_race_med","pci_med_race_mean","ave3f_med_race_med","ave3f_med_race_mean","same_pci_med_race_med","same_pci_med_race_mean","same_ave3f_med_race_med","same_ave3f_med_race_mean","pci_med_race_std"],
+      "categorical_features":["surface","class","venue"],
+      "sigma":3.2,
+      "ridge_alpha":20.0,
+      "note":"Preprocessing and coefficients are kept in the local model artifact used to generate this validation spec; app integration should reuse the same scorer implementation rather than refit in-browser."
+    }
+  },
+  "feature_engineering": {
+    "current_race_known_before_start":["surface","distance","class","venue","field_size","month","age_mean","female_share"],
+    "horse_history":"For each current entrant, use only its last 5 starts strictly before the target race.",
+    "race_aggregation":"Aggregate entrant-level historical medians/rates using race-level median and/or mean as named in feature keys.",
+    "position_style":"Use historical 上3F地点差 and historical shares of 逃げ/先行/後方; current-race running style is never used.",
+    "same_surface":"Historical same-surface subsets are calculated from prior starts only."
+  },
+  "leakage_exclusions":["current-race RPCI","current-race PCI3","current-race PCI","current-race Ave-3F","current-race 上3F地点差","current-race 脚質","current-race 着順"],
+  "holdout_2025": {
+    "n":485,
+    "exact_band_accuracy":0.5567010309278351,
+    "exact_or_adjacent_band_rate":0.9711340206185567,
+    "band_logloss":0.9834301300106747,
+    "multiclass_brier":0.5668434983314462,
+    "bin_mae":0.47216494845360824,
+    "conditions_only_logloss":1.013883072117314,
+    "logloss_improvement_vs_conditions_only":0.030452942106639306,
+    "paired_bootstrap_95ci_improvement":[0.01011562,0.05139147]
+  },
+  "continuous_reference": {
+    "all_history_ridge_mae_2025":2.549621392479407,
+    "all_history_ridge_rmse_2025":3.2019428945894943,
+    "all_history_ridge_r2_2025":0.5382768209983418
+  },
+  "display_guidance":["Show four RPCI band probabilities, not a certain single RPCI.","If the top two bands are close, describe the pace outlook as split/uncertain.","Do not label horse-specific fit as value or expected value until separate outcome calibration is completed."]
+}
