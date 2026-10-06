@@ -4,6 +4,7 @@ if(File.prototype.__rsaTargetCompat)return;
 const orig=File.prototype.arrayBuffer;
 const q=v=>{v=String(v??'');return /[",\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
 const venueFromMeeting=v=>{const s=String(v||'');const map={札:'札幌',函:'函館',福:'福島',新:'新潟',東:'東京',中:'中山',名:'中京',京:'京都',阪:'阪神',小:'小倉'};for(const k of Object.keys(map))if(s.includes(k))return map[k];return''};
+const normalizeDate=v=>{const s=String(v||'').trim();const m=s.match(/(20\d{2})\D+(\d{1,2})\D+(\d{1,2})/);if(!m)return s;return `${m[1]}.${String(+m[2]).padStart(2,'0')}.${String(+m[3]).padStart(2,'0')}`};
 function transform(buf){
   let text;try{text=C.decode(buf)}catch(e){return buf}
   let grid;try{grid=C.parseCSV(text)}catch(e){return buf}
@@ -11,7 +12,7 @@ function transform(buf){
   const h=grid[0].map(x=>String(x||'').trim());
   const hasTarget=h.includes('何走目')&&h.includes('馬名')&&(h.includes('レースPCI')||h.includes('RPCI'));
   if(!hasTarget)return buf;
-  const idx=name=>h.indexOf(name), iName=idx('馬名'),iMeet=idx('開催'),iHistNo=idx('馬番'),iRpci=idx('レースPCI'),iStyle=idx('決手'),i1=idx('通過1'),i2=idx('通過2'),i3=idx('通過3'),i4=idx('通過4');
+  const idx=name=>h.indexOf(name), iName=idx('馬名'),iMeet=idx('開催'),iHistNo=idx('馬番'),iRpci=idx('レースPCI'),iStyle=idx('決手'),iDate=idx('日付'),i1=idx('通過1'),i2=idx('通過2'),i3=idx('通過3'),i4=idx('通過4');
   if(iName<0)return buf;
   const outH=h.slice();
   if(iHistNo>=0)outH[iHistNo]='過去馬番';
@@ -22,6 +23,7 @@ function transform(buf){
   const out=[outH];
   for(let rix=1;rix<grid.length;rix++){
     const r=grid[rix].slice();while(r.length<h.length)r.push('');
+    if(iDate>=0)r[iDate]=normalizeDate(r[iDate]);
     const name=String(r[iName]||'').trim();if(name&&!order.has(name))order.set(name,next++);
     const extras={
       '馬番':name?String(order.get(name)||''):'',
@@ -39,6 +41,6 @@ function transform(buf){
 }
 File.prototype.arrayBuffer=function(){return orig.call(this).then(transform)};
 File.prototype.__rsaTargetCompat=true;
-function note(){setTimeout(()=>{const f=document.getElementById('csvFile'),info=document.getElementById('csvInfo');if(!f?.files?.[0]||!info)return;const n=f.files[0].name||'';if(!/\.csv$/i.test(n))return;if(!info.querySelector('[data-target-compat]')){const d=document.createElement('div');d.dataset.targetCompat='1';d.className='tiny';d.style.marginTop='6px';d.textContent='TARGET全馬一括CSVを自動変換：レースPCI→RPCI／決手→脚質／開催→競馬場／全馬出力順→今回馬番';info.appendChild(d)}},180)}
+function note(){setTimeout(()=>{const f=document.getElementById('csvFile'),info=document.getElementById('csvInfo');if(!f?.files?.[0]||!info)return;const n=f.files[0].name||'';if(!/\.csv$/i.test(n))return;if(!info.querySelector('[data-target-compat]')){const d=document.createElement('div');d.dataset.targetCompat='1';d.className='tiny';d.style.marginTop='6px';d.textContent='TARGET全馬一括CSVを自動変換：レースPCI→RPCI／決手→脚質／開催→競馬場／日付正規化／全馬出力順→今回馬番';info.appendChild(d)}},180)}
 if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',()=>{document.getElementById('csvFile')?.addEventListener('change',note)});else document.getElementById('csvFile')?.addEventListener('change',note);
 })();
