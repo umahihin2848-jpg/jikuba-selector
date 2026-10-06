@@ -1,6 +1,7 @@
 (function(){'use strict';
 const C=window.ShapeCore;if(!C)return;
 let PM=null,lastCtx=null;
+window.CalibratedProbabilityState={ready:false,resultsByName:{},results:[],version:'v1'};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const style=document.createElement('style');
 style.textContent='.cpHero{font-size:17px;font-weight:900;margin:4px 0 8px}.cpProbGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.cpProbBox{padding:10px 8px;border-radius:12px;background:#091a26;border:1px solid #1b394c;text-align:center}.cpProbBox span{display:block;font-size:10px;color:#89aabc;margin-bottom:3px}.cpProbBox b{font-size:24px;line-height:1}.cpRef{margin-top:8px;padding:8px 9px;border-radius:10px;background:#0d2231;font-size:11px;color:#b9d0dc;line-height:1.45}.cpDeltaPos{color:#7fe5bd;font-weight:800}.cpDeltaNeg{color:#ffaaaa;font-weight:800}.cpDeltaZero{color:#e8eef2;font-weight:800}.cpRank{font-size:11px;color:#89aabc}.cpFoot{margin-top:8px;font-size:10px;color:#7391a3;line-height:1.5}@media(max-width:560px){.cpProbBox b{font-size:22px}}';
@@ -58,6 +59,8 @@ function render(){
   }
   if(!rows.length){box.innerHTML='<div class="notice yellow">レース条件と単勝オッズを入力すると確率を計算できます。</div>';return}
   rows.sort((a,b)=>b.top3-a.top3);
+  window.CalibratedProbabilityState={ready:true,resultsByName:Object.fromEntries(rows.map(x=>[x.name,x])),results:rows,version:'v1',model:PM};
+  window.dispatchEvent(new CustomEvent('calibrated-probability-ready'));
   box.innerHTML=rows.map((x,i)=>{
     const d=x.ref?x.top3-x.ref.top3:NaN,ds=Number.isFinite(d)?`${d>=0?'+':''}${(d*100).toFixed(1)}pt`:'—',dc=Number.isFinite(d)?deltaCls(d):'cpDeltaZero';
     const ref=x.ref?`同じ${x.pop}人気の10年実績 n=${x.ref.n.toLocaleString()}：勝${fmtPct(x.ref.win,1)} / 連対${fmtPct(x.ref.top2,1)} / 複勝${fmtPct(x.ref.top3,1)}`:'人気別実績なし';
