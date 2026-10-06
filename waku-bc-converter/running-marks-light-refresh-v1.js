@@ -1,0 +1,6 @@
+(function(){'use strict';
+function cleanName(txt){return String(txt||'').replace(/\([^)]*人気\)/g,'').replace(/^\s*\d+番\s*/,'').replace(/[⚡🏃🔥].*$/,'').trim()}
+function apply(){const S=window.RunningMarksState;if(!S?.ready)return;const box=document.getElementById('integratedViewList');if(!box)return;for(const el of box.querySelectorAll('.horseName')){let base=el.dataset.runningBase||cleanName(el.textContent);el.dataset.runningBase=base;const x=S.byName?.[base];let old=el.querySelector('.runningMarks');if(old)old.remove();if(!x?.marks?.length)continue;const s=document.createElement('span');s.className='runningMarks';s.style.marginLeft='7px';s.style.whiteSpace='nowrap';s.innerHTML=x.marks.map(m=>`<span title="${String(m.label||'').replace(/"/g,'&quot;')}" style="margin-left:3px">${m.icon}</span>`).join('');el.appendChild(s)}}
+function later(){setTimeout(apply,120);setTimeout(apply,500);setTimeout(apply,1200)}
+window.addEventListener('ability-opponent-ready',later);window.addEventListener('calibrated-probability-ready',later);document.getElementById('analyzeBtn')?.addEventListener('click',later);window.addEventListener('rsa-addons-ready',later);later();
+})();
