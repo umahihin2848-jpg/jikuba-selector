@@ -1,0 +1,104 @@
+{
+  "version": "race_shape_queue_v1",
+  "data": {
+    "train": "2018-2022",
+    "validation": "2023-2024",
+    "selection": "2025",
+    "holdout": "2026 through 2026-10-04",
+    "holdout_races_rpci": 362
+  },
+  "definitions": {
+    "escape_candidate_expected_count": "sum of each runner's smoothed pre-race P(逃げ), based only on prior starts",
+    "front_pressure": "mean/sum of each runner's smoothed pre-race P(逃げ or 先行), based only on prior starts",
+    "position_tendency": "prior -3F gap / probability of being within 1.0 sec at 3F point; used mainly horse-by-horse",
+    "smoothing": "fixed priors escape=0.08, front=0.33, recent window=5 starts, prior weight=3 for recent"
+  },
+  "train_tertile_thresholds": {
+    "expected_escape_recent": {
+      "low_max": 0.8804126984126983,
+      "high_min": 1.24
+    },
+    "front_pressure_recent": {
+      "low_max": 0.318380772005772,
+      "high_min": 0.35755175264550265
+    },
+    "close_pressure_recent": {
+      "low_max": 0.5134250992063492,
+      "high_min": 0.575234375
+    }
+  },
+  "incremental_rpci_multiclass_logistic": {
+    "baseline_conditions_only": {
+      "2023_2024": {"accuracy": 0.5516162669447341, "log_loss": 0.9750935171450555},
+      "2025": {"accuracy": 0.5278350515463918, "log_loss": 1.017090520537573},
+      "2026": {"accuracy": 0.56353591160221, "log_loss": 0.9512333873753456}
+    },
+    "plus_queue_features": {
+      "2023_2024": {"accuracy": 0.5849843587069864, "log_loss": 0.9662133004986864},
+      "2025": {"accuracy": 0.5670103092783505, "log_loss": 1.009451437904391},
+      "2026": {"accuracy": 0.5939226519337016, "log_loss": 0.9365127161502846}
+    }
+  },
+  "holdout_2026_structure": {
+    "escape_pressure_levels": {
+      "low": {"n": 119, "rpci_mean": 52.24, "p_rpci_lt50": 0.361, "p_rpci_lt45": 0.092, "p_rpci_ge55": 0.336},
+      "mid": {"n": 117, "rpci_mean": 49.831, "p_rpci_lt50": 0.556, "p_rpci_lt45": 0.128, "p_rpci_ge55": 0.137},
+      "high": {"n": 126, "rpci_mean": 48.857, "p_rpci_lt50": 0.571, "p_rpci_lt45": 0.214, "p_rpci_ge55": 0.079}
+    },
+    "front_pressure_levels": {
+      "low": {"n": 130, "rpci_mean": 51.662, "p_rpci_lt50": 0.4, "p_rpci_lt45": 0.108, "p_rpci_ge55": 0.285},
+      "mid": {"n": 117, "rpci_mean": 50.272, "p_rpci_lt50": 0.513, "p_rpci_lt45": 0.12, "p_rpci_ge55": 0.179},
+      "high": {"n": 115, "rpci_mean": 48.739, "p_rpci_lt50": 0.591, "p_rpci_lt45": 0.217, "p_rpci_ge55": 0.07}
+    },
+    "both_high": {
+      "n": 72,
+      "rpci_mean": 47.8806,
+      "p_rpci_lt50": 0.625,
+      "p_rpci_lt45": 0.2778,
+      "p_rpci_ge55": 0.0278,
+      "p_rpci_lt50_wilson95": [0.5095, 0.7278],
+      "p_rpci_ge55_wilson95": [0.0077, 0.0957]
+    },
+    "both_low": {
+      "n": 67,
+      "rpci_mean": 52.9463,
+      "p_rpci_lt50": 0.3433,
+      "p_rpci_lt45": 0.0746,
+      "p_rpci_ge55": 0.403,
+      "p_rpci_lt50_wilson95": [0.2409, 0.4627],
+      "p_rpci_ge55_wilson95": [0.2939, 0.5226]
+    },
+    "both_high_vs_both_low": {
+      "rpci_mean_difference": -5.0657,
+      "welch_t_p": 1.0742621396418646e-08,
+      "fisher_rpci_lt50_p": 0.001215250201340186
+    }
+  },
+  "horse_level_models": {
+    "escape_probability_2026": {
+      "auc": 0.791,
+      "brier": 0.0626,
+      "log_loss": 0.2262,
+      "unique_escape_races": 374,
+      "actual_escape_top1": 0.3422,
+      "top2": 0.5134,
+      "top3": 0.5936
+    },
+    "front_probability_2026": {
+      "auc": 0.749,
+      "brier": 0.1841,
+      "log_loss": 0.5455
+    }
+  },
+  "interpretation_rules": {
+    "high_pressure": "escape expected count >=1.24 AND front-pressure share >=0.3576",
+    "low_pressure": "escape expected count <=0.8804 AND front-pressure share <=0.3184",
+    "display_escape_candidates": "show top 2-3 horses by escape probability; do not declare a single leader",
+    "minus3f_usage": "use mainly for per-horse expected positioning and compactness; do not treat its race-average as a strong standalone RPCI predictor"
+  },
+  "warnings": [
+    "Current-race actual running style and current-race -3F gap are outcomes and are never used as pre-race inputs.",
+    "Historical source is the provided TARGET export; prior history outside the exported scope is unavailable.",
+    "Pressure classes are descriptive/predictive structure labels, not betting-edge claims."
+  ]
+}
