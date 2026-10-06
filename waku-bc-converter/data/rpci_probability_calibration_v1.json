@@ -1,0 +1,55 @@
+{
+  "version": "rpci_probability_calibration_v1",
+  "created": "2026-10-06",
+  "goal": "Calibrate 4-class RPCI probabilities without leakage",
+  "target_bands": ["<45", "45-49.9", "50-54.9", ">=55"],
+  "time_split": {
+    "train": "2016-2022",
+    "calibration": "2023-2024",
+    "selection_validation": "2025",
+    "final_holdout": "2026 through 2026-10-04"
+  },
+  "race_counts": {
+    "train": 3106,
+    "calibration": 959,
+    "selection_validation": 485,
+    "final_holdout": 362
+  },
+  "base_probability_model": "50/50 ensemble of multinomial logistic regression and ExtraTrees; features use only pre-race context and each entrant's prior races",
+  "candidate_calibrators": {
+    "raw": "No post-hoc calibration",
+    "temperature": {"temperature": 0.9864873463},
+    "isotonic": "One-vs-rest isotonic regression followed by renormalization",
+    "vector": "Multinomial logistic recalibration on log probabilities"
+  },
+  "selection_rule": "Use 2025 only. Primary metric log loss, with Brier/ECE and parsimony as secondary criteria. 2026 must not be used to choose the method.",
+  "metrics_2025": {
+    "raw": {"accuracy": 0.5402, "log_loss": 0.9935, "multiclass_brier": 0.5743, "top_label_ece": 0.0379, "classwise_ece": 0.0414},
+    "temperature": {"log_loss": 0.9938, "multiclass_brier": 0.5745, "top_label_ece": 0.0395},
+    "isotonic": {"log_loss": 1.0527, "multiclass_brier": 0.5716, "top_label_ece": 0.0558},
+    "vector": {"log_loss": 0.9935, "multiclass_brier": 0.5716, "top_label_ece": 0.0497}
+  },
+  "bootstrap_2025_logloss_difference_vs_raw": {
+    "temperature": {"mean_delta": 0.00036, "ci95": [-0.00043, 0.00117], "probability_improves": 0.188},
+    "isotonic": {"mean_delta": 0.05785, "ci95": [-0.01080, 0.15971], "probability_improves": 0.112},
+    "vector": {"mean_delta": 0.00034, "ci95": [-0.01759, 0.01834], "probability_improves": 0.494}
+  },
+  "decision": {
+    "selected": "raw",
+    "reason": "No calibrator produced a reproducible 2025 improvement over the raw ensemble. Temperature was effectively identity (T≈0.986), isotonic overfit, and vector calibration did not materially improve log loss while worsening top-label ECE. Parsimony therefore favors the raw ensemble."
+  },
+  "final_2026_holdout": {
+    "n": 362,
+    "class_counts": {"<45": 53, "45-49.9": 127, "50-54.9": 116, ">=55": 66},
+    "raw": {"accuracy": 0.6022, "log_loss": 0.9152, "multiclass_brier": 0.5314, "top_label_ece": 0.0572, "classwise_ece": 0.0473},
+    "bootstrap95_raw": {"accuracy": [0.5525, 0.6547], "log_loss": [0.8535, 0.9779], "multiclass_brier": [0.4968, 0.5638]},
+    "note": "The holdout supports useful probability ranking, but calibration is not perfect. Display probabilities with an uncertainty note and avoid interpreting 70% as an exact long-run frequency without ongoing recalibration monitoring."
+  },
+  "deployment_guidance": [
+    "Use raw ensemble probabilities in v1; do not add isotonic/vector calibration yet.",
+    "Show all four RPCI probabilities, not only the argmax band.",
+    "Track realized RPCI and append a calibration audit by season/month.",
+    "Recalibrate only if rolling log loss/Brier/ECE materially deteriorate on new unseen data.",
+    "Keep 2026 frozen as the final validation reference for v1."
+  ]
+}
