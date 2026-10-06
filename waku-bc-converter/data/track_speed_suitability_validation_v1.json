@@ -1,0 +1,46 @@
+{
+  "version": "track_speed_suitability_validation_v1",
+  "purpose": "Test whether horse-specific fast/slow track-speed suitability adds stable predictive value beyond ability/course context.",
+  "decision": "do_not_enable_horse_rating",
+  "data": {
+    "history": "2016-2025 JRA result data",
+    "holdout": "2026 through 2026-10-04",
+    "model_train": "2022-2024",
+    "validation": "2025",
+    "final_holdout": "2026"
+  },
+  "track_speed_definition": {
+    "base": "winner-time residual versus venue x surface x distance x class historical baseline",
+    "pace_adjustment": "RPCI residualization using 2016-2021 only",
+    "positive": "faster-than-baseline surface/time environment",
+    "negative": "slower / clock-taking environment",
+    "pre_race_signal": "official going-condition prior blended with strictly earlier same-day same-surface race residual when available"
+  },
+  "same_day_signal_quality": {
+    "2023": {"known_races": 88, "correlation": 0.596, "direction_match": 0.773},
+    "2024": {"known_races": 92, "correlation": 0.445, "direction_match": 0.707},
+    "2025": {"known_races": 83, "correlation": 0.541, "direction_match": 0.735},
+    "2026": {"known_races": 59, "correlation": 0.583, "direction_match": 0.814}
+  },
+  "horse_top3_model": {
+    "baseline": {
+      "2025": {"auc": 0.712362, "logloss": 0.461008, "brier": 0.147868},
+      "2026": {"auc": 0.711004, "logloss": 0.458421, "brier": 0.146450}
+    },
+    "plus_pre_race_track_speed_suitability": {
+      "2025": {"auc": 0.712076, "logloss": 0.461349, "brier": 0.147957},
+      "2026": {"auc": 0.708793, "logloss": 0.459387, "brier": 0.146763}
+    },
+    "oracle_current_race_track_speed_upper_bound": {
+      "2025": {"auc": 0.712623, "logloss": 0.461046, "brier": 0.147873},
+      "2026": {"auc": 0.709402, "logloss": 0.459086, "brier": 0.146669}
+    }
+  },
+  "interpretation": [
+    "Track speed itself is measurable and earlier same-surface races provide useful context when available.",
+    "Horse-specific fast/slow surface preference estimated from up to 10 prior starts is too noisy and does not add stable held-out predictive value.",
+    "Even an oracle current-race track-speed signal did not improve the 2026 horse-level top-3 model, so the limitation is not only pre-race speed estimation.",
+    "Do not add a fast/slow suitability grade or score to the production app at this time.",
+    "Re-test after more future data or a richer historical sample per horse becomes available. Track speed may be shown later as context-only, not as a ranking input."
+  ]
+}
