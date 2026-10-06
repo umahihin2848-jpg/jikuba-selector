@@ -1,0 +1,60 @@
+{
+  "version": "rpci_conformal_v1",
+  "created": "2026-10-06",
+  "purpose": "RPCI probability distribution + 90% prediction range + explanation rules",
+  "splits": {
+    "train": "2016-2022",
+    "conformal_calibration": "2023-2024",
+    "validation": "2025",
+    "final_holdout": "2026 through 2026-10-04"
+  },
+  "rpcibands": ["<45","45-49","50-54",">=55"],
+  "classification_conformal": {
+    "method": "split conformal using score 1 - p_true on the locked probability ensemble",
+    "alpha": 0.10,
+    "calibration_n": 959,
+    "nonconformity_quantile": 0.8294198869473592,
+    "include_band_if_probability_gte": 0.17058011305264076,
+    "2025": {"n":485,"coverage":0.8948453608247423,"mean_set_size_bands":2.158762886597938},
+    "2026": {"n":362,"coverage":0.9116022099447514,"mean_set_size_bands":2.1270718232044197,
+      "set_size_distribution":{"1_band":21,"2_bands":274,"3_bands":67,"4_bands":0}
+    },
+    "notes": [
+      "Coverage is marginal, not guaranteed conditionally for every individual race or every set-size subgroup.",
+      "Prediction sets were already contiguous in the holdout data, so they can be displayed as an ordinal RPCI band range."
+    ]
+  },
+  "continuous_conformal": {
+    "model": "ExtraTrees regression using only pre-race current-condition features plus entrants' prior-history aggregates",
+    "alpha": 0.10,
+    "calibration_n": 959,
+    "absolute_residual_quantile": 5.230891687281009,
+    "display_rule": "prediction +/- 5.23 RPCI points",
+    "2025": {"n":485,"coverage":0.8969072164948454,"mean_interval_width":10.461783374562012},
+    "2026": {"n":362,"coverage":0.9088397790055248,"mean_interval_width":10.461783374562017,"mae":2.29},
+    "notes": [
+      "Global split conformal was more stable than surface-specific or surface-by-distance Mondrian variants on 2025/2026.",
+      "Use the class conformal set as the primary user-facing range; continuous interval can be shown as technical detail."
+    ]
+  },
+  "explanation_rules": {
+    "certainty": {
+      "1_band": "比較的明確",
+      "2_bands": "方向性あり・二帯想定",
+      "3_or_more_bands": "不確実性高め"
+    },
+    "wording_constraints": [
+      "Never say the race structure is certain or guaranteed.",
+      "Do not call a one-band conformal set 90% certain; conformal coverage is marginal and subgroup coverage can differ.",
+      "Always show all four probabilities and the 90% conformal band range.",
+      "If two or more bands are included, describe the structure as a range rather than a point estimate.",
+      "Use lower RPCI as front-loaded/forward-leaning and higher RPCI as slower/late-leaning wording rather than absolute pace speed claims."
+    ],
+    "example": {
+      "probabilities":{"<45":0.12,"45-49":0.55,"50-54":0.28,">=55":0.05},
+      "conformal_range":["45-49","50-54"],
+      "certainty_label":"方向性あり・二帯想定",
+      "summary":"前傾寄りが本線だが、平均帯までを含む二帯想定。極端なスローの確率は低い。"
+    }
+  }
+}
