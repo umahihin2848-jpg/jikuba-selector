@@ -1,0 +1,55 @@
+{
+  "version": "integrated_interpretation_v1",
+  "purpose": "Combine market baseline with ability, course, condition-change and race-structure corrections without using an arbitrary point score.",
+  "training": {
+    "fit_year": 2025,
+    "holdout_year": 2026,
+    "market_baseline": "smooth logistic model using popularity rank and popularity rank squared",
+    "thresholds": "25th/75th percentiles of 2025 full-minus-market probability correction"
+  },
+  "features": ["pop", "pop2", "ability_p", "course_delta", "cond_delta", "struct_delta"],
+  "market_model": {
+    "features": ["pop", "pop2"],
+    "mean": [8.18760255241568, 87.08459434822242],
+    "scale": [4.477472366402525, 78.54814611212761],
+    "coef": [-1.1657712755367622, 0.01513373938472247],
+    "intercept": -1.7350740194372334
+  },
+  "full_model": {
+    "features": ["pop", "pop2", "ability_p", "course_delta", "cond_delta", "struct_delta"],
+    "mean": [8.18760255241568, 87.08459434822242, 0.20368993543912156, 0.0009541128240029581, 0.00041114824197815514, -0.00702038081296701],
+    "scale": [4.477472366402525, 78.54814611212761, 0.12114115862888203, 0.02079133505678035, 0.013613172119064258, 0.040996860268869305],
+    "coef": [-0.9566534280136746, -0.09525298617984322, 0.15405002820725963, 0.0033230208075160014, 0.031255949804084894, 0.018226076682537944],
+    "intercept": -1.7389643303718956
+  },
+  "correction_thresholds": {
+    "headwind_max": -0.007531995771271144,
+    "tailwind_min": 0.006748990868650578
+  },
+  "labels": {
+    "buy_material": "買い材料十分",
+    "rising": "浮上候補",
+    "fair": "評価据え置き",
+    "popular_headwind": "能力上位も割引",
+    "discount": "割引必要"
+  },
+  "holdout_2026": {
+    "n": 4084,
+    "races": 350,
+    "market": {"auc": 0.7668242479, "logloss": 0.4253732213, "brier": 0.1352139873},
+    "full": {"auc": 0.7680914033, "logloss": 0.4242219019, "brier": 0.1346377602},
+    "tailwind": {"n": 1036, "top3_rate": 0.2934362934, "market_expected": 0.2755664567},
+    "neutral": {"n": 2027, "top3_rate": 0.1233349778, "market_expected": 0.1118902764},
+    "headwind": {"n": 1021, "top3_rate": 0.2556317336, "market_expected": 0.3046191956},
+    "abilityA_tailwind": {"n": 557, "top3_rate": 0.3590664273, "market_expected": 0.3441524274},
+    "nonA_tailwind": {"n": 479, "top3_rate": 0.2171189979, "market_expected": 0.1958119982},
+    "abilityA_headwind": {"n": 159, "top3_rate": 0.3710691824, "market_expected": 0.4417416609},
+    "nonA_headwind": {"n": 862, "top3_rate": 0.2343387471, "market_expected": 0.2793263047}
+  },
+  "notes": [
+    "The integrated view is a probability correction relative to the market popularity baseline, not a 0-100 score.",
+    "Ability remains the foundation; course, condition and structure act as modest corrections.",
+    "A/B/C layer counts are display-only and are not used as additive points.",
+    "No betting EV claim is made by this model."
+  ]
+}
