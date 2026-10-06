@@ -1,0 +1,1 @@
+(function(){'use strict';let b=document.getElementById('analyzeBtn');if(!b)return;let old=b.onclick;b.onclick=function(e){let s=document.getElementById('csvState')?.textContent||'';if(!s.startsWith('解析済')){alert('RPCI・隊列・位置取りを統合解析するため、先にTARGET CSVを読み込み「CSVを解析」を押してください。');return}return old&&old.call(this,e)}})();
