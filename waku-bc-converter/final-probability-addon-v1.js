@@ -1,6 +1,6 @@
 (function(){'use strict';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let POLICY=null;
+let POLICY=null,lastSig='';
 const style=document.createElement('style');
 style.textContent='.fpLead{font-size:17px;font-weight:900;margin:3px 0 8px}.fpGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.fpBox{padding:10px 7px;border-radius:12px;background:#071b29;border:1px solid #1c3b4d;text-align:center}.fpBox span{display:block;font-size:10px;color:#89aabc;margin-bottom:3px}.fpBox b{font-size:25px;line-height:1}.fpTag{display:inline-block;margin-top:5px;padding:2px 6px;border-radius:999px;font-size:9px;font-weight:800}.fpKeep{background:#173143;color:#c7dbe6}.fpUse{background:#11382d;color:#7fe5bd}.fpCompare{margin-top:8px;padding:8px 9px;border-radius:10px;background:#0d2231;font-size:11px;line-height:1.5;color:#bdd1dc}.fpUp{color:#7fe5bd;font-weight:900}.fpDown{color:#ffaaaa;font-weight:900}.fpFoot{margin-top:8px;font-size:10px;color:#7896a7;line-height:1.5}@media(max-width:560px){.fpBox b{font-size:22px}}';
 document.head.appendChild(style);
@@ -27,12 +27,12 @@ function renumber(){
 }
 function integratedMap(){
   const root=document.getElementById('integratedViewList'),out={};if(!root)return out;
-  for(const card of root.querySelectorAll('.horse')){
+  let rank=0;for(const card of root.querySelectorAll('.horse')){rank++;
     const ht=card.querySelector('.horseName')?.textContent||'';
     const m=ht.match(/^\s*(\d+)番\s+/);if(!m)continue;const no=m[1];
     const p=card.querySelector('.ivProb')?.textContent||'';const b=card.querySelector('.ivBase')?.textContent||'';
     const full=Number(p.replace('%',''))/100,market=Number(b.replace('%',''))/100;
-    if(Number.isFinite(full))out[no]={fullP:full,marketP:Number.isFinite(market)?market:NaN};
+    if(Number.isFinite(full))out[no]={fullP:full,marketP:Number.isFinite(market)?market:NaN,rank};
   }
   return out;
 }
@@ -41,7 +41,9 @@ function render(){
   ensureUI();const box=document.getElementById('finalProbabilityList');if(!box)return;
   const S=window.CalibratedProbabilityState;if(!S?.ready){box.innerHTML='<div class="notice yellow">10年基礎確率の計算後に表示します。</div>';return}
   const im=integratedMap();
-  const rows=(S.results||[]).map(x=>{const ix=im[String(x.no)]||null;return{...x,finalWin:x.win,finalTop2:x.top2,finalTop3:ix?.fullP??x.top3,horseTop3:ix?.fullP,horseMarket:ix?.marketP}}).sort((a,b)=>b.finalTop3-a.finalTop3);
+  const rows=(S.results||[]).map(x=>{const ix=im[String(x.no)]||null;return{...x,finalWin:x.win,finalTop2:x.top2,finalTop3:ix?.fullP??x.top3,horseTop3:ix?.fullP,horseMarket:ix?.marketP,horseRank:ix?.rank}}).sort((a,b)=>Number.isFinite(a.horseRank)&&Number.isFinite(b.horseRank)?a.horseRank-b.horseRank:b.finalTop3-a.finalTop3);
+  const sig=JSON.stringify(rows.map(x=>[x.no,x.win,x.top2,x.top3,x.horseTop3,x.horseRank]))+'|'+(POLICY?.version||'');
+  if(sig===lastSig)return;lastSig=sig;
   box.innerHTML=rows.map((x,i)=>{
     const has=Number.isFinite(x.horseTop3),d=has?x.horseTop3-x.top3:NaN,cls=d>0.004?'fpUp':d<-.004?'fpDown':'';
     const compare=has?`10年基礎の複勝率 ${pct(x.top3)} → 馬固有3着内率 <span class="${cls}">${pct(x.horseTop3)}</span>。<br><span class="tiny">※別モデルをOOSで比較して採用した値で、基礎率へptを単純加算したものではありません。</span>`:`馬固有モデルの入力が揃っていないため、複勝率も10年基礎確率を使用します。`;
