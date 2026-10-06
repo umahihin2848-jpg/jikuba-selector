@@ -1,0 +1,103 @@
+{
+  "version": "race_shape_10y_validation_v1",
+  "source": {
+    "years": "2016-2025",
+    "scope": "JRA flat 3-win, OP, L, G3, G2, G1; obstacle races excluded",
+    "valid_races": 4355,
+    "split": {
+      "train": "2016-2022",
+      "validation": "2023-2024",
+      "holdout": "2025"
+    },
+    "odds": "final win odds"
+  },
+  "market_features": {
+    "entropy_neff_correlation": 0.909249,
+    "entropy_top3_correlation": -0.808915,
+    "top3_gap_correlation": 0.548115,
+    "note": "Entropy, Neff ratio and Top3 share largely measure the same latent market-concentration factor. They should not be naively added as independent scores."
+  },
+  "market_concentration_axis": {
+    "method": "PCA on 2016-2022 standardized market features",
+    "features": ["entropy", "neff_ratio", "top3_share", "max_gap_top10"],
+    "explained_variance_ratio_pc1": 0.728183,
+    "training_means": {
+      "entropy": 0.786951,
+      "neff_ratio": 0.448827,
+      "top3_share": 0.617666,
+      "max_gap_top10": 2.595514
+    },
+    "training_scales": {
+      "entropy": 0.073539,
+      "neff_ratio": 0.114512,
+      "top3_share": 0.107170,
+      "max_gap_top10": 1.177369
+    },
+    "signed_loadings": {
+      "entropy": -0.566390,
+      "neff_ratio": -0.504669,
+      "top3_share": 0.520011,
+      "max_gap_top10": 0.392556
+    },
+    "shape_cutpoints_train_only": {
+      "dispersed_max": -0.982221,
+      "concentrated_min": 0.738656
+    }
+  },
+  "holdout_2025_surface_shape": [
+    {"surface":"turf","shape":"dispersed","n":88,"winner_le4":0.602,"winner_le6":0.727,"winner_le8":0.818,"second_le8":0.875,"second_le10":0.909,"third_le10":0.841,"third_le12":0.920},
+    {"surface":"turf","shape":"middle","n":128,"winner_le4":0.703,"winner_le6":0.805,"winner_le8":0.883,"second_le8":0.906,"second_le10":0.984,"third_le10":0.906,"third_le12":0.945},
+    {"surface":"turf","shape":"concentrated","n":74,"winner_le4":0.838,"winner_le6":0.932,"winner_le8":0.973,"second_le8":0.946,"second_le10":0.946,"third_le10":0.959,"third_le12":0.986},
+    {"surface":"dirt","shape":"dispersed","n":44,"winner_le4":0.568,"winner_le6":0.818,"winner_le8":0.932,"second_le8":0.864,"second_le10":0.886,"third_le10":0.864,"third_le12":0.955},
+    {"surface":"dirt","shape":"middle","n":59,"winner_le4":0.678,"winner_le6":0.831,"winner_le8":0.898,"second_le8":0.780,"second_le10":0.898,"third_le10":0.898,"third_le12":0.966},
+    {"surface":"dirt","shape":"concentrated","n":63,"winner_le4":0.683,"winner_le6":0.825,"winner_le8":0.905,"second_le8":0.905,"second_le10":0.952,"third_le10":0.921,"third_le12":0.984}
+  ],
+  "robust_range_reference": {
+    "method": "smallest popularity cap reaching at least 90% in both 2016-2022 train and 2023-2024 validation; 2025 kept untouched",
+    "by_distance": [
+      {"bucket":"<=1400","winner_cap":9,"holdout_rate":0.925,"second_cap":10,"holdout_second_rate":0.906,"third_cap":12,"holdout_third_rate":0.962,"holdout_n":159},
+      {"bucket":"1500-1700","winner_cap":9,"holdout_rate":0.895,"second_cap":10,"holdout_second_rate":0.965,"third_cap":11,"holdout_third_rate":0.919,"holdout_n":86},
+      {"bucket":"1800-2000","winner_cap":8,"holdout_rate":0.902,"second_cap":9,"holdout_second_rate":0.935,"third_cap":10,"holdout_third_rate":0.902,"holdout_n":153},
+      {"bucket":"2100-2400","winner_cap":7,"holdout_rate":0.971,"second_cap":10,"holdout_second_rate":0.943,"third_cap":9,"holdout_third_rate":0.914,"holdout_n":35},
+      {"bucket":">=2500","winner_cap":8,"holdout_rate":0.913,"second_cap":8,"holdout_second_rate":0.913,"third_cap":9,"holdout_third_rate":0.826,"holdout_n":23}
+    ],
+    "by_grade": [
+      {"grade":"3win","winner_cap":8,"holdout_rate":0.900,"holdout_n":201},
+      {"grade":"G1","winner_cap":9,"holdout_rate":0.952,"holdout_n":21},
+      {"grade":"G2","winner_cap":8,"holdout_rate":0.892,"holdout_n":37},
+      {"grade":"G3","winner_cap":9,"holdout_rate":0.935,"holdout_n":62},
+      {"grade":"L","winner_cap":8,"holdout_rate":0.895,"holdout_n":57},
+      {"grade":"OP","winner_cap":7,"holdout_rate":0.872,"holdout_n":78}
+    ],
+    "note": "Grade-only caps were less stable out of sample than market-shape and distance information. Grade should remain a secondary context feature, not a hard lock."
+  },
+  "similar_race_engine": {
+    "design": "nearest historical races using whitened continuous market/distance features, with mild surface preference and no forced grade match",
+    "features": ["entropy", "neff_ratio", "top3_share", "max_gap_top10", "field_size", "distance"],
+    "neighbors": 80,
+    "quantile_for_cap": 0.90,
+    "validation_2023_2024": {
+      "winner_capture": 0.923,
+      "second_capture": 0.930,
+      "third_capture": 0.931
+    },
+    "holdout_2025": {
+      "winner_capture": 0.906,
+      "second_capture": 0.928,
+      "third_capture": 0.925,
+      "average_winner_cap": 7.96,
+      "average_second_cap": 9.70,
+      "average_third_cap": 10.51
+    },
+    "note": "This is preferred over a full Cartesian cross of market features x surface x distance x grade, because that approach creates many tiny cells and overfits."
+  },
+  "implementation_guidance": [
+    "Use market concentration as the primary race-shape axis.",
+    "Display Entropy, Neff, Top3 share and gap separately, but do not independently add all four scores.",
+    "Use popularity gap as an explanatory/support signal rather than a primary hard boundary.",
+    "Use distance continuously in similar-race search; surface can be mildly preferred, not necessarily hard-filtered.",
+    "Keep grade visible and available for subgroup summaries, but do not force exact-grade neighbors unless future validation shows improvement.",
+    "Always show n and Wilson 95% confidence intervals for empirical capture rates.",
+    "Final-odds results must not be presented as proven T-15 results without a separate snapshot validation."
+  ]
+}
