@@ -1,0 +1,140 @@
+{
+  "version": "rpci_model_validation_v1",
+  "created": "2026-10-06",
+  "sources": {
+    "historical": "pci.csv (2016-2025)",
+    "holdout": "pci2026.csv (through 2026-10-04)"
+  },
+  "target": {
+    "type": "multiclass RPCI band probability",
+    "bands": ["<45", "45-49.9", "50-54.9", ">=55"]
+  },
+  "split": {
+    "train": "2016-2022",
+    "validation": "2023-2025",
+    "final_holdout": "2026",
+    "n_train_races": 3106,
+    "n_validation_races": 1444,
+    "n_holdout_races": 362
+  },
+  "leakage_policy": [
+    "Current-race RPCI/PCI/PCI3/Ave-3F/-3F difference and running style are not used as predictors.",
+    "Horse-level predictors are computed strictly from prior starts using shifted expanding/rolling summaries.",
+    "Current race condition features such as venue, surface, distance, class, field size and month are allowed because they are known pre-race."
+  ],
+  "feature_groups": {
+    "race_context": ["venue", "surface", "distance", "distance bucket", "class", "field size", "month"],
+    "past_pace": ["historical RPCI mean", "last RPCI", "last-3 RPCI mean", "historical RPCI-band fractions"],
+    "past_horse_shape": ["historical PCI", "Ave-3F", "-3F difference", "closing 3F"],
+    "past_style": ["escape/front/mid/back style fractions", "front-pressure summaries"],
+    "history_quality": ["history count", "share with >=1/3/5 prior starts"]
+  },
+  "baselines": {
+    "global_mode_2026": {
+      "accuracy": 0.350829,
+      "log_loss": 1.324566,
+      "multiclass_brier": 0.719871,
+      "within_adjacent_band": 0.817680
+    },
+    "surface_x_distance_bucket_2026": {
+      "accuracy": 0.502762,
+      "macro_f1": 0.500968,
+      "log_loss": 1.057653,
+      "multiclass_brier": 0.612331,
+      "band_mae": 0.535912,
+      "within_adjacent_band": 0.961326
+    }
+  },
+  "candidate_models": {
+    "multinomial_logistic_C0.3": {
+      "validation_2023_2025": {
+        "accuracy": 0.557479,
+        "macro_f1": 0.548729,
+        "log_loss": 1.003933,
+        "multiclass_brier": 0.573197,
+        "band_mae": 0.482687,
+        "within_adjacent_band": 0.960526
+      },
+      "holdout_2026": {
+        "accuracy": 0.591160,
+        "macro_f1": 0.603229,
+        "log_loss": 0.933529,
+        "multiclass_brier": 0.552431,
+        "band_mae": 0.436464,
+        "within_adjacent_band": 0.972376
+      }
+    },
+    "extra_trees_leaf3": {
+      "validation_2023_2025": {
+        "accuracy": 0.546399,
+        "macro_f1": 0.530168,
+        "log_loss": 0.978749,
+        "multiclass_brier": 0.564474,
+        "band_mae": 0.486150,
+        "within_adjacent_band": 0.968837
+      },
+      "holdout_2026": {
+        "accuracy": 0.593923,
+        "macro_f1": 0.594381,
+        "log_loss": 0.935107,
+        "multiclass_brier": 0.540105,
+        "band_mae": 0.430939,
+        "within_adjacent_band": 0.975138
+      }
+    },
+    "probability_ensemble_50_50": {
+      "selection": "50/50 chosen on 2023-2025 validation by log loss before viewing 2026 result",
+      "validation_2023_2025": {
+        "accuracy": 0.560249,
+        "macro_f1": 0.548803,
+        "log_loss": 0.969012,
+        "multiclass_brier": 0.559647,
+        "band_mae": 0.474377,
+        "within_adjacent_band": 0.966066
+      },
+      "holdout_2026": {
+        "accuracy": 0.585635,
+        "macro_f1": 0.595066,
+        "log_loss": 0.919955,
+        "multiclass_brier": 0.537221,
+        "band_mae": 0.436464,
+        "within_adjacent_band": 0.977901
+      },
+      "recommended_role": "Use as the app's RPCI probability distribution because probability quality is better than selecting only one winning band."
+    }
+  },
+  "ablation": {
+    "context_only_holdout_2026": {
+      "accuracy": 0.555249,
+      "log_loss": 0.942460,
+      "multiclass_brier": 0.552801
+    },
+    "context_plus_past_RPCI_holdout_2026": {
+      "accuracy": 0.538674,
+      "log_loss": 0.940969,
+      "multiclass_brier": 0.553037
+    },
+    "full_history_logistic_holdout_2026": {
+      "accuracy": 0.591160,
+      "log_loss": 0.933529,
+      "multiclass_brier": 0.552431
+    },
+    "interpretation": "Past RPCI alone adds little beyond race context. The gain appears when PCI/Ave-3F/-3F difference/style history are combined with context. Do not treat historical RPCI as a standalone predictive signal."
+  },
+  "holdout_confusion_ensemble": {
+    "labels": ["<45", "45-49.9", "50-54.9", ">=55"],
+    "matrix_rows_true_cols_pred": [
+      [30,22,1,0],
+      [7,84,34,2],
+      [1,39,67,9],
+      [0,4,31,31]
+    ]
+  },
+  "next_steps": [
+    "Calibrate displayed probabilities with walk-forward calibration and reliability diagrams.",
+    "Add current win-market shape as a separate ablation rather than assuming it improves RPCI prediction.",
+    "Use model output as P(RPCI band), not as a deterministic RPCI value.",
+    "Build horse-fit explanations by comparing each horse's prior PCI/-3F profile against the predicted RPCI distribution.",
+    "Generate natural-language explanations from structured model outputs and evidence counts, not free-form unsupported text."
+  ]
+}
