@@ -9,51 +9,43 @@
     {"id":2,"label":"50-54.9","lower_inclusive":50,"upper_exclusive":55},
     {"id":3,"label":">=55","lower_inclusive":55}
   ],
-  "time_split": {"warmup":"2016","train":"2017-2022","validation":"2023-2024","holdout":"2025"},
-  "history_window": {"per_horse_last_n_prior_starts":5},
-  "ensemble": {
-    "model_a_weight": 0.34,
-    "model_b_weight": 0.66,
-    "model_a": {
+  "time_split":{"warmup":"2016","train":"2017-2022","validation":"2023-2024","holdout":"2025"},
+  "history_window":{"per_horse_last_n_prior_starts":5},
+  "ensemble":{
+    "model_a_weight":0.34,
+    "model_b_weight":0.66,
+    "model_a":{
       "name":"RPCI + position/style",
       "numeric_features":["distance","field_size","month","age_mean","female_share","hist_coverage","rpci_med_race_med","rpci_med_race_mean","same_rpci_med_race_med","same_rpci_med_race_mean","rpci_lt45_race_med","rpci_lt45_race_mean","rpci_45_50_race_med","rpci_45_50_race_mean","rpci_50_55_race_med","rpci_50_55_race_mean","rpci_ge55_race_med","rpci_ge55_race_mean","rpci_med_race_std","gap3f_med_race_med","gap3f_med_race_mean","same_gap3f_med_race_med","same_gap3f_med_race_mean","escape_rate_race_med","escape_rate_race_mean","front_rate_race_med","front_rate_race_mean","back_rate_race_med","back_rate_race_mean","gap3f_med_race_std","likely_escape_count","likely_front_count","likely_escape_share","likely_front_share"],
       "categorical_features":["surface","class","venue"],
-      "sigma":3.25,
+      "numeric_imputer_median":[1600.0,15.0,6.0,5.1875,0.2,0.9375,49.75,49.833333333333336,49.7375,49.766666666666666,0.0,0.09230769230769233,0.3666666666666667,0.35333333333333333,0.30000000000000004,0.33076923076923076,0.0,0.1,2.337767215861228,0.6499999999999999,0.6749999999999999,0.6499999999999999,0.675,0.0,0.06666666666666667,0.25,0.35208333333333336,0.2,0.26153846153846155,0.3686440525764657,1.0,3.0,0.07142857142857142,0.2222222222222222],
+      "numeric_scaler_mean":[1682.8736489004846,13.953410361535594,6.426015654118524,4.838871351602656,0.28415497225460834,0.8606852820649932,49.90132314573239,49.92884347801973,49.87586190831159,49.87521308210862,0.11622561808920365,0.15654170540816578,0.3328550130450988,0.35719298192511895,0.2909926698968816,0.32151240013933496,0.1244688781215058,0.1632788641506111,2.4489360166508702,0.6524599329109206,0.6775456829850507,0.652664927320164,0.6779953278881854,0.007370480805068952,0.08121440760466982,0.289706795875264,0.3608887239020321,0.18184867685426762,0.2705115482218182,0.37257677236261877,1.2937010808796123,3.2102124487513977,0.09068758568659908,0.22353106580897028],
+      "numeric_scaler_scale":[394.62496723588737,2.867503761382023,3.5690340103702396,1.172414672914602,0.2750875138047534,0.2208027173996149,3.2426802115635978,3.096129337503339,3.360177780557718,3.268883132328073,0.20602017386681995,0.18274623358784547,0.22897494270804072,0.18662035919804115,0.2219508079893497,0.17675585294099858,0.1889641246399882,0.17327193888853915,0.9060601886106775,0.17681623871865804,0.15372900261887792,0.1793133003933973,0.15634989620912168,0.06578223236267562,0.0810759436153614,0.21102311319226166,0.13390034816997196,0.17206176858309946,0.12041731230280828,0.10975743217509362,1.2001620508463793,2.1721855189590347,0.08290825901354425,0.14182869666732253],
+      "categorical_imputer":["芝","3勝","阪神"],
+      "categorical_categories":{"surface":["ダ","芝"],"class":["3勝","G1","G2","G3","L","OP","重賞"],"venue":["中京","中山","京都","函館","小倉","新潟","札幌","東京","福島","阪神"]},
       "ridge_alpha":20.0,
-      "note":"Preprocessing and coefficients are kept in the local model artifact used to generate this validation spec; app integration should reuse the same scorer implementation rather than refit in-browser."
+      "intercept":49.17139905637908,
+      "coefficients":[0.9608005566787131,-1.1111114396759074,0.07956433011740448,-0.16786730225269325,0.14499802319903984,0.3155961758543716,-0.2428294535063805,0.6556309454269524,0.11467521340769882,0.6997726433021644,0.045293179454440995,-0.06389966750829554,-0.39303021539622923,0.6682006465367931,0.052512233450584866,0.28503099014222055,0.15445472706480656,-0.0508075065368731,-0.012200078473725678,-0.24607090191909184,0.49935829432362444,-0.07985130137696805,0.22773007806952783,0.2783853742574375,-0.30211644845727686,-0.09248792875050448,-0.012685007757148616,0.12827739101453464,-0.03053563503536957,-0.23274187719024464,-0.08415332965211883,-0.0856222016536969,-0.030816605595991944,-0.007070506679467402,-1.0236391397823188,1.0236391397822966,-0.1221100770777539,-0.2775044702688708,0.24912308765047755,0.17016987906661107,-0.05255738548694279,0.004564683856440566,0.028314282260045516,-0.00008798677335505586,-0.48522577554630414,1.058252801128523,-1.1202765142165465,-0.9775676698947399,1.1502979122040313,-0.7356757635494874,1.8422634753410596,-1.1624607674223497,0.43048028872928384],
+      "sigma":3.25
     },
-    "model_b": {
+    "model_b":{
       "name":"RPCI + PCI/Ave-3F",
       "numeric_features":["distance","field_size","month","age_mean","female_share","hist_coverage","rpci_med_race_med","rpci_med_race_mean","same_rpci_med_race_med","same_rpci_med_race_mean","rpci_lt45_race_med","rpci_lt45_race_mean","rpci_45_50_race_med","rpci_45_50_race_mean","rpci_50_55_race_med","rpci_50_55_race_mean","rpci_ge55_race_med","rpci_ge55_race_mean","rpci_med_race_std","pci_med_race_med","pci_med_race_mean","ave3f_med_race_med","ave3f_med_race_mean","same_pci_med_race_med","same_pci_med_race_mean","same_ave3f_med_race_med","same_ave3f_med_race_mean","pci_med_race_std"],
       "categorical_features":["surface","class","venue"],
-      "sigma":3.2,
+      "numeric_imputer_median":[1600.0,15.0,6.0,5.1875,0.2,0.9375,49.75,49.833333333333336,49.7375,49.766666666666666,0.0,0.09230769230769233,0.3666666666666667,0.35333333333333333,0.30000000000000004,0.33076923076923076,0.0,0.1,2.337767215861228,51.0,50.93333333333334,36.2525,36.244,51.2,51.099999999999994,36.25,36.24332167832168,2.9836889918354426],
+      "numeric_scaler_mean":[1682.8736489004846,13.953410361535594,6.426015654118524,4.838871351602656,0.28415497225460834,0.8606852820649932,49.90132314573239,49.92884347801973,49.87586190831159,49.87521308210862,0.11622561808920365,0.15654170540816578,0.3328550130450988,0.35719298192511895,0.2909926698968816,0.32151240013933496,0.1244688781215058,0.1632788641506111,2.4489360166508702,51.10223630264629,50.99242953810068,36.083953596720086,36.07479093730153,51.090765933656364,50.98353133004751,36.093265933656355,36.08316847147102,3.041042041203013],
+      "numeric_scaler_scale":[394.62496723588737,2.867503761382023,3.5690340103702396,1.172414672914602,0.2750875138047534,0.2208027173996149,3.2426802115635978,3.096129337503339,3.360177780557718,3.268883132328073,0.20602017386681995,0.18274623358784547,0.22897494270804072,0.18662035919804115,0.2219508079893497,0.17675585294099858,0.1889641246399882,0.17327193888853915,0.9060601886106775,3.2218739284695737,3.0986856828060154,0.9141750767727524,0.877228925184656,3.356930756508158,3.279519015615167,0.9264144253405528,0.8915192042367904,0.9494241881023451],
+      "categorical_imputer":["芝","3勝","阪神"],
+      "categorical_categories":{"surface":["ダ","芝"],"class":["3勝","G1","G2","G3","L","OP","重賞"],"venue":["中京","中山","京都","函館","小倉","新潟","札幌","東京","福島","阪神"]},
       "ridge_alpha":20.0,
-      "note":"Preprocessing and coefficients are kept in the local model artifact used to generate this validation spec; app integration should reuse the same scorer implementation rather than refit in-browser."
+      "intercept":48.86682298541851,
+      "coefficients":[0.7702430675989187,-1.1212210339507516,0.10790988762906192,-0.0975676024872307,0.21734709496639143,0.14930157356836696,-0.18401187094245686,0.030107903666498723,-0.07387775488382066,-0.25901214272310974,0.016148996629075298,0.41517817444414656,-0.3779164011632217,0.8958458956022366,0.050006176566618384,0.37092452739274495,0.16876688095819006,-0.08678561032880736,0.10730363183287818,0.014223118104549726,0.6440343841630473,0.6155405855677475,0.8342127481211205,-0.13077069029807353,1.0974133952360672,-0.4312018451286829,-0.005927107864315198,-0.27850103699813095,-1.5078143444118546,1.507814344411832,0.12700888958091952,-0.5976173383211998,0.14945896346861537,-0.005168433147148628,0.13261169457794128,0.17844390896826093,0.01526231487253865,0.1073863156341946,-0.4553773787988715,1.0518558819365236,-1.2562120647744366,-1.0030044584037416,1.208067135406874,-0.870891199526,1.9746505274913198,-1.2246864299125049,0.46821167094675975],
+      "sigma":3.2
     }
   },
-  "feature_engineering": {
-    "current_race_known_before_start":["surface","distance","class","venue","field_size","month","age_mean","female_share"],
-    "horse_history":"For each current entrant, use only its last 5 starts strictly before the target race.",
-    "race_aggregation":"Aggregate entrant-level historical medians/rates using race-level median and/or mean as named in feature keys.",
-    "position_style":"Use historical 上3F地点差 and historical shares of 逃げ/先行/後方; current-race running style is never used.",
-    "same_surface":"Historical same-surface subsets are calculated from prior starts only."
-  },
+  "feature_engineering":{"current_race_known_before_start":["surface","distance","class","venue","field_size","month","age_mean","female_share"],"horse_history":"For each current entrant, use only its last 5 starts strictly before the target race.","race_aggregation":"Aggregate entrant-level historical medians/rates using race-level median and/or mean as named in feature keys.","position_style":"Use historical 上3F地点差 and historical shares of 逃げ/先行/後方; current-race running style is never used.","same_surface":"Historical same-surface subsets are calculated from prior starts only."},
   "leakage_exclusions":["current-race RPCI","current-race PCI3","current-race PCI","current-race Ave-3F","current-race 上3F地点差","current-race 脚質","current-race 着順"],
-  "holdout_2025": {
-    "n":485,
-    "exact_band_accuracy":0.5567010309278351,
-    "exact_or_adjacent_band_rate":0.9711340206185567,
-    "band_logloss":0.9834301300106747,
-    "multiclass_brier":0.5668434983314462,
-    "bin_mae":0.47216494845360824,
-    "conditions_only_logloss":1.013883072117314,
-    "logloss_improvement_vs_conditions_only":0.030452942106639306,
-    "paired_bootstrap_95ci_improvement":[0.01011562,0.05139147]
-  },
-  "continuous_reference": {
-    "all_history_ridge_mae_2025":2.549621392479407,
-    "all_history_ridge_rmse_2025":3.2019428945894943,
-    "all_history_ridge_r2_2025":0.5382768209983418
-  },
+  "holdout_2025":{"n":485,"exact_band_accuracy":0.5567010309278351,"exact_or_adjacent_band_rate":0.9711340206185567,"band_logloss":0.9834301300106747,"multiclass_brier":0.5668434983314462,"bin_mae":0.47216494845360824,"conditions_only_logloss":1.0142248961522304,"logloss_improvement_vs_conditions_only":0.03079476614155574,"paired_bootstrap_95ci_improvement":[0.010115617747518157,0.051391471590061695]},
+  "continuous_reference":{"all_history_ridge_mae_2025":2.549621392479407,"all_history_ridge_rmse_2025":3.2019428945894943,"all_history_ridge_r2_2025":0.5382768209983418},
   "display_guidance":["Show four RPCI band probabilities, not a certain single RPCI.","If the top two bands are close, describe the pace outlook as split/uncertain.","Do not label horse-specific fit as value or expected value until separate outcome calibration is completed."]
 }
