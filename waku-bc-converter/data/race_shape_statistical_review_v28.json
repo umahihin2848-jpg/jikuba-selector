@@ -1,0 +1,44 @@
+{
+  "version": "statistical_review_v28",
+  "principles": [
+    "Use time-split/holdout results over in-sample fit.",
+    "Do not count correlated market metrics as separate evidence.",
+    "RPCI probability distribution is the pace core; conformal set communicates uncertainty.",
+    "Queue pressure is explanatory context, not independent confirmation, because queue-derived features also enter the RPCI model.",
+    "Horse ability/course/condition/structure layers remain separate; do not collapse into an opaque total score.",
+    "Rare horse-level signals are explanatory beta flags until incremental held-out probability improvement is strong enough."
+  ],
+  "keep": {
+    "market_mci": "keep_as_single_market_shape_axis",
+    "rpci_distribution": "core",
+    "conformal_90": "core_uncertainty",
+    "queue_pressure": "explanation_only_not_double_counted",
+    "opponent_adjusted_ability": "keep_secondary_oos_positive",
+    "course_fit": "keep_secondary_oos_positive",
+    "condition_change": "keep_weak_secondary_small_oos_gain",
+    "integrated_market_relative_view": "keep_but_reword_as_tailwind_headwind_not_buy_signal"
+  },
+  "beta_signals": {
+    "dirt_reverse_flow_top3": {
+      "definition": "previous dirt race, finish<=3, decision in 差し/追込, RPCI>=50",
+      "2023_24": {"n": 69, "observed_top3": 0.4783, "baseline_expected": 0.3607, "lift_pp": 11.8},
+      "2025": {"n": 45, "observed_top3": 0.5111, "baseline_expected": 0.3716, "lift_pp": 14.0},
+      "2026": {"n": 29, "observed_top3": 0.4138, "baseline_expected": 0.3226, "lift_pp": 9.1},
+      "decision": "display_only_no_probability_addition"
+    },
+    "position_push_top3": {
+      "definition": "previous finish<=3 and early-corner to 4C gain >=25% of field",
+      "2023_24": {"n": 222, "observed_top3": 0.3153, "baseline_expected": 0.2927, "lift_pp": 2.3},
+      "2025": {"n": 87, "observed_top3": 0.3678, "baseline_expected": 0.2865, "lift_pp": 8.1},
+      "2026": {"n": 83, "observed_top3": 0.3855, "baseline_expected": 0.3082, "lift_pp": 7.7},
+      "decision": "display_beta_only_no_probability_addition"
+    }
+  },
+  "exclude_from_scoring": ["horse_age_standalone", "bodyweight_change_standalone", "position_drop_then_win_story"],
+  "ui_policy": {
+    "language": "racing_friendly",
+    "top_summary": "market x pace x front-pressure x readability",
+    "technical_metrics": "details_lower_in_page",
+    "avoid_terms": ["確実", "買い", "必勝", "断定"]
+  }
+}
