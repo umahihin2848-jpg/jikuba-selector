@@ -1,0 +1,68 @@
+{
+  "title": "Horse-fit three-factor validation v1",
+  "data": {
+    "source": "umade.csv",
+    "period": "2016-2026-10-04",
+    "rows": 74007,
+    "races": 5368
+  },
+  "design": {
+    "train": "2016-2022",
+    "validation": "2023-2024",
+    "holdout_1": "2025",
+    "holdout_2": "2026 through 2026-10-04",
+    "principle": "Use only information known before the target race for candidate horse-fit signals. Popularity, field size, surface/distance/class were used as baseline context where noted."
+  },
+  "horse_age": {
+    "definition": "Current horse age and age relative to the race median age.",
+    "incremental_model_result": {
+      "top3_logloss_delta": {
+        "2023_2024": -0.000512,
+        "2025": -0.000195,
+        "2026": -0.000001
+      },
+      "win_logloss_delta": {
+        "2023_2024": -0.000099,
+        "2025": -0.000203,
+        "2026": -0.000575
+      }
+    },
+    "holdout_observed_vs_baseline": {
+      "2025": {
+        "younger_than_race_median": {"n":2090,"top3_observed":0.2981,"top3_expected":0.2934,"win_observed":0.1115,"win_expected":0.1084},
+        "older_than_race_median": {"n":1805,"top3_observed":0.1357,"top3_expected":0.1383,"win_observed":0.0349,"win_expected":0.0383}
+      },
+      "2026": {
+        "younger_than_race_median": {"n":1513,"top3_observed":0.3020,"top3_expected":0.2920,"win_observed":0.1183,"win_expected":0.1080},
+        "older_than_race_median": {"n":1433,"top3_observed":0.1354,"top3_expected":0.1428,"win_observed":0.0293,"win_expected":0.0407}
+      }
+    },
+    "conclusion": "Raw age differences are large, but most are already reflected by popularity/context. Incremental predictive value is negligible. Keep age as explanatory context, not an independent scoring rule."
+  },
+  "dirt_closer": {
+    "generic_closer_profile": "Prior dirt closing tendency produced only very small incremental top-3 improvement and no stable win improvement.",
+    "strict_signal": {
+      "definition": "Previous race was dirt, RPCI<50, finish<=3, decision style was 差し or 追込, and 上3F地点差>=0.5. Evaluate only when the current dirt race itself was high pace (RPCI<50) for retrospective interaction validation.",
+      "2025": {"n":144,"top3_observed":0.3403,"top3_expected_from_baseline":0.2957,"top3_delta":0.0446,"win_observed":0.0903,"win_expected":0.1104,"win_delta":-0.0202},
+      "2026": {"n":119,"top3_observed":0.3193,"top3_expected_from_baseline":0.2744,"top3_delta":0.0449,"win_observed":0.0924,"win_expected":0.0973,"win_delta":-0.0048},
+      "bootstrap_95pct_ci_top3_delta": {
+        "2025": [-0.0287,0.1202],
+        "2026": [-0.0310,0.1250]
+      }
+    },
+    "conclusion": "Direction replicated in 2025 and 2026 for top-3 (+about 4.5 percentage points vs baseline) but uncertainty remains and no win edge was observed. Candidate only as a weak horse-fit/top-3 explanatory signal when the pre-race RPCI model itself predicts high pace; do not use as a winner bonus."
+  },
+  "drop_position_then_win": {
+    "definition": "Previous-race winner whose corner-position number worsened by at least one place during the race and then ultimately won. This treats the finish as the recovery endpoint and uses only the previous race as the future-race feature.",
+    "event_count_2016_2026": 1075,
+    "2025_next_start": {"n":110,"top3_observed":0.3636,"top3_expected":0.3458,"top3_delta":0.0179,"win_observed":0.1000,"win_expected":0.1383,"win_delta":-0.0383},
+    "2026_next_start": {"n":75,"top3_observed":0.2400,"top3_expected":0.2906,"top3_delta":-0.0506,"win_observed":0.0533,"win_expected":0.1040,"win_delta":-0.0506},
+    "stricter_thresholds": "Requiring a drop and recovery of >=2 or >=3 positions made the sample very small and did not produce stable holdout improvement.",
+    "conclusion": "Not reproducible across 2025 and 2026. Reject as a standalone positive feature for the production model."
+  },
+  "production_recommendation": {
+    "horse_age": "explanation_only",
+    "dirt_closer": "weak_top3_fit_signal_only_when_predicted_high_pace",
+    "drop_position_then_win": "reject"
+  }
+}
