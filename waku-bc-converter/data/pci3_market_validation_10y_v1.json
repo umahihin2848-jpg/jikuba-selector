@@ -1,0 +1,38 @@
+{
+  "version": "pci3_market_validation_10y_v1",
+  "source": "TARGET 2016-2025 seiseki CSV; PCI3 reconstructed as mean PCI of unique finish positions 1,2,3",
+  "scope": {
+    "races": 4518,
+    "train": "2016-2022",
+    "validation": "2023-2024",
+    "holdout": "2025",
+    "ties_or_nonunique_top3_excluded": true,
+    "obstacle_races_excluded": "PCI3=0 / obstacle-like data excluded"
+  },
+  "market_entropy_cutpoints_train_tertiles": {
+    "concentrated_max": 0.7684112075790357,
+    "middle_max": 0.8262406997582221
+  },
+  "pci3_official_bands": {
+    "high_pace": "<=48",
+    "average": "48<PCI3<56",
+    "slow_pace": ">=56"
+  },
+  "key_holdout_2025": {
+    "high_pace": {"n":75,"winner_top4_rate":0.653,"winner_top6_rate":0.827,"winner_top8_rate":0.880,"second_top8_rate":0.733,"third_top10_rate":0.907},
+    "average": {"n":312,"winner_top4_rate":0.683,"winner_top6_rate":0.804,"winner_top8_rate":0.894,"second_top8_rate":0.901,"third_top10_rate":0.885},
+    "slow_pace": {"n":90,"winner_top4_rate":0.722,"winner_top6_rate":0.833,"winner_top8_rate":0.900,"second_top8_rate":0.922,"third_top10_rate":0.933}
+  },
+  "holdout_2025_market_x_pci3": [
+    {"market":"集中","pci3":"ハイ(≤48)","n":18,"winner_top4":0.722,"winner_top6":0.833,"winner_top8":0.889,"second_top8":1.000,"third_top10":1.000},
+    {"market":"集中","pci3":"平均(48–56)","n":100,"winner_top4":0.750,"winner_top6":0.850,"winner_top8":0.920,"second_top8":0.900,"third_top10":0.940},
+    {"market":"集中","pci3":"スロー(≥56)","n":28,"winner_top4":0.821,"winner_top6":0.929,"winner_top8":0.964,"second_top8":0.964,"third_top10":0.964},
+    {"market":"中間","pci3":"ハイ(≤48)","n":28,"winner_top4":0.571,"winner_top6":0.750,"winner_top8":0.821,"second_top8":0.643,"third_top10":0.893},
+    {"market":"中間","pci3":"平均(48–56)","n":118,"winner_top4":0.695,"winner_top6":0.805,"winner_top8":0.898,"second_top8":0.924,"third_top10":0.856},
+    {"market":"中間","pci3":"スロー(≥56)","n":37,"winner_top4":0.730,"winner_top6":0.838,"winner_top8":0.892,"second_top8":0.865,"third_top10":0.946},
+    {"market":"分散","pci3":"ハイ(≤48)","n":29,"winner_top4":0.690,"winner_top6":0.897,"winner_top8":0.931,"second_top8":0.655,"third_top10":0.862},
+    {"market":"分散","pci3":"平均(48–56)","n":94,"winner_top4":0.596,"winner_top6":0.755,"winner_top8":0.862,"second_top8":0.872,"third_top10":0.862},
+    {"market":"分散","pci3":"スロー(≥56)","n":25,"winner_top4":0.600,"winner_top6":0.720,"winner_top8":0.840,"second_top8":0.960,"third_top10":0.880}
+  ],
+  "warning": "PCI3 is a post-race outcome and must not be used as a pre-race input for the same race. Use it as a teacher/label for pace prediction from prior-history features."
+}
