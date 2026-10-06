@@ -1,0 +1,1 @@
+(function(){'use strict';const C=window.ShapeCore;if(!C)return;const old=C.buildHistories;C.buildHistories=(rows,m)=>{let r=old(rows,m);for(let h of r.horses){let nos=[...new Set(h.history.map(x=>String(x.horseNo||'').trim()).filter(Boolean))];h.horseNo=nos.length===1?nos[0]:''}return r};})();
