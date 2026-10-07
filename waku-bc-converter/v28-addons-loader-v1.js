@@ -3,14 +3,17 @@ function load(src){return new Promise((resolve,reject)=>{const s=document.create
 async function start(){
   const seq=[
     'target-csv-compat-v1.js?v=20261007c',
+    'surface-alias-compat-v1.js?v=20261007a',
     'horse-fit-addon-v1.js',
     'ability-addon-opponent-v3.js',
     'course-fit-addon-v1.js',
+    'course-label-compat-v1.js?v=20261007a',
     'condition-change-addon-v1.js',
     'performance-observer-pause-v1.js?v=20261007a',
     'integrated-view-addon-v2.js?v=20261007g',
     'calibrated-probability-addon-v1.js?v=20261007c',
     'final-probability-addon-v2.js?v=20261007b',
+    'market-label-clarity-v1.js?v=20261007a',
     'performance-observer-resume-v1.js?v=20261007a',
     'csv-format-guard-v1.js',
     'race-review-addon-v1.js',
