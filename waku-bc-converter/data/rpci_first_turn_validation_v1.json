@@ -1,0 +1,82 @@
+{
+  "version": "rpci_first_turn_validation_v1",
+  "created": "2026-10-07",
+  "source_files": {
+    "historical": "pci.csv (2016-2025)",
+    "final_holdout": "pci2026.csv (through 2026-10-04)"
+  },
+  "target": {
+    "type": "multiclass RPCI band",
+    "bands": ["<45", "45-49.9", "50-54.9", ">=55"]
+  },
+  "leakage_policy": [
+    "Current-race RPCI/PCI/Ave-3F/position/style/outcome are not used as predictors.",
+    "Horse history uses only starts strictly before the target race.",
+    "Current race venue/surface/distance/class/field size are allowed because known pre-race."
+  ],
+  "modeling": {
+    "algorithm": "L2 multinomial logistic regression",
+    "C": 0.3,
+    "training": "2018-2022",
+    "conformal_calibration": "2023-2024",
+    "validation": "2025",
+    "final_holdout": "2026",
+    "history_window": "last 5 prior starts per entrant",
+    "comparison": [
+      "geometry = base pre-race history + loop length + straight length + elevation + left/right + route + geometry ratios",
+      "geometry_firstturn = geometry + first-turn distance + first-turn/distance ratio + straight-course flag",
+      "interactions = geometry_firstturn + first-turn ratio x escape/front/field-size interactions"
+    ]
+  },
+  "coverage": {
+    "course_conditions": 87,
+    "mapped": 87,
+    "holdout_2026_races": 362,
+    "holdout_2026_covered": 362
+  },
+  "metrics": {
+    "2025": {
+      "geometry": {"n":485,"acc":0.5670103093,"ll":0.993431,"brier":0.557806,"ece":0.016466},
+      "geometry_firstturn": {"n":485,"acc":0.5731958763,"ll":0.992631,"brier":0.557564,"ece":0.027293},
+      "interactions": {"n":485,"acc":0.5670103093,"ll":0.993175,"brier":0.558328,"ece":0.032184}
+    },
+    "2026": {
+      "geometry": {"n":362,"acc":0.6022099448,"ll":0.893107,"brier":0.521737,"ece":0.053566},
+      "geometry_firstturn": {"n":362,"acc":0.6298342541,"ll":0.872420,"brier":0.510879,"ece":0.055243},
+      "interactions": {"n":362,"acc":0.6325966851,"ll":0.869917,"brier":0.508325,"ece":0.057022}
+    }
+  },
+  "paired_bootstrap_2026_geometry_firstturn_minus_geometry": {
+    "replicates": 30000,
+    "log_loss": {"mean_delta":-0.0206864368,"ci95":[-0.0331758095,-0.0082757123],"probability_improves":0.9994666667},
+    "brier": {"mean_delta":-0.0108588069,"ci95":[-0.0192741530,-0.0024733317],"probability_improves":0.9953333333},
+    "accuracy": {"mean_delta":0.0276243094,"ci95":[-0.0027624309,0.0580110497],"note":"CI crosses 0; accuracy is secondary to probability quality."}
+  },
+  "pre_2026_check_2023_2025": {
+    "log_loss_mean_delta": -0.0042446073,
+    "bootstrap95": [-0.0128089335,0.0044479790],
+    "interpretation": "Point estimate improves, but CI crosses zero; the strong gain is concentrated in the untouched 2026 holdout."
+  },
+  "conformal_90": {
+    "calibration": "2023-2024 split conformal on score 1-p_true",
+    "2025": {
+      "geometry": {"coverage":0.8969072165,"mean_set_size":2.1752577320},
+      "geometry_firstturn": {"coverage":0.8865979381,"mean_set_size":2.1092783505}
+    },
+    "2026": {
+      "geometry": {"coverage":0.9060773481,"mean_set_size":2.1491712707},
+      "geometry_firstturn": {"coverage":0.9060773481,"mean_set_size":2.0883977901}
+    }
+  },
+  "subgroups_2026": {
+    "surface": {
+      "dirt": {"n":132,"geometry_log_loss":0.899474,"geometry_firstturn_log_loss":0.854929},
+      "turf": {"n":230,"geometry_log_loss":0.889453,"geometry_firstturn_log_loss":0.882459}
+    }
+  },
+  "decision": {
+    "first_turn_distance": "production_candidate",
+    "interactions": "reject_for_now",
+    "reason": "First-turn distance improves 2026 holdout Log Loss and Brier with paired bootstrap CIs below zero; interactions do not show a stable incremental benefit. 2025 improvement is small, so keep ongoing OOS monitoring."
+  }
+}
