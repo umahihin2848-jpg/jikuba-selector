@@ -1,5 +1,7 @@
 (function(){'use strict';
 function add(src){return new Promise((ok,fail)=>{const s=document.createElement('script');s.src=src;s.async=false;s.onload=ok;s.onerror=()=>fail(new Error(src));document.body.appendChild(s)})}
+function fixPaceSummary(){const target=document.getElementById('rsaStructureTextV3');if(!target)return;let pace='';const hero=(document.getElementById('heroSub')?.textContent||'').replace(/\s+/g,' ').trim();const hm=hero.match(/流れ本線\s*([^｜]+).*?90%レンジ\s*([^｜]+)/);if(hm)pace=`本線：${hm[1].trim()}｜90%予測レンジ：${hm[2].trim()}`;if(!pace){const rt=(document.getElementById('rpciText')?.textContent||'').replace(/\s+/g,' ').trim();const m=rt.match(/本線：?\s*(.*?)\s*90%予測レンジ：?\s*(.*?)(?:。|$)/);if(m)pace=`本線：${m[1].trim()}｜90%予測レンジ：${m[2].trim()}`}if(!pace)return;const lines=target.innerHTML.split('<br>');target.innerHTML=lines.map(line=>line.startsWith('ペース：')?`ペース：${pace}`:line).join('<br>')}
+function schedulePaceFix(){setTimeout(fixPaceSummary,260);setTimeout(fixPaceSummary,760);setTimeout(fixPaceSummary,1650)}
 async function boot(){const files=[
   'target-csv-compat-v1.js?v=20261007c',
   'surface-alias-compat-v1.js?v=20261007a',
@@ -21,7 +23,7 @@ async function boot(){const files=[
   'running-marks-light-refresh-v1.js?v=20261007a',
   'race-workspace-store-v1.js?v=20261007a',
   'v3-ui-final.js?v=20261007a'
-];for(const f of files){try{await add(f)}catch(e){console.warn('addon',f)}}window.dispatchEvent(new CustomEvent('rsa-addons-ready'))}
+];for(const f of files){try{await add(f)}catch(e){console.warn('addon',f)}}window.addEventListener('calibrated-probability-ready',schedulePaceFix);window.addEventListener('joint-pair-probability-ready',schedulePaceFix);window.addEventListener('rsa-addons-ready',schedulePaceFix);document.getElementById('analyzeBtn')?.addEventListener('click',schedulePaceFix);window.dispatchEvent(new CustomEvent('rsa-addons-ready'));schedulePaceFix()}
 function kick(){setTimeout(boot,60)}
 if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',kick,{once:true});else kick();
 })();
