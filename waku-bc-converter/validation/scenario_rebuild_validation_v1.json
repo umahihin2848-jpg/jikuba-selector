@@ -1,0 +1,41 @@
+{
+  "version": "scenario_rebuild_validation_v1",
+  "created": "2026-10-08",
+  "principle": "Scenario features are evaluated as pre-race race-shape information. They are not promoted to final horse probability corrections unless they improve forward OOS performance.",
+  "queue_front_back": {
+    "status": "adopt",
+    "summary": "Gate, first-turn distance and front competition improve continuous first-corner front-back position accuracy beyond horse history alone in 2024, 2025 and 2026 OOS.",
+    "validation": [
+      {"year": 2024, "history_mae": 0.202612, "scenario_mae": 0.198058, "mae_delta": -0.0041043, "ci95": [-0.0056552, -0.0025573]},
+      {"year": 2025, "history_mae": 0.203997, "scenario_mae": 0.199257, "mae_delta": -0.0041061, "ci95": [-0.0055669, -0.0025979]},
+      {"year": 2026, "history_mae": 0.203003, "scenario_mae": 0.197369, "mae_delta": -0.0062416, "ci95": [-0.0078806, -0.0046162]}
+    ]
+  },
+  "lateral_lane": {
+    "status": "descriptive_only",
+    "summary": "Historical source contains corner order but not measured rail/path width. Inner/middle/outer lane is therefore a heuristic based on gate, early speed and distance to first turn, not an empirically validated lane prediction."
+  },
+  "pace": {
+    "status": "reference",
+    "summary": "Race-composition pace model improves MAE directionally versus course historical mean in all three OOS years, but race-bootstrap confidence intervals cross zero.",
+    "validation": [
+      {"year": 2024, "course_mean_mae": 2.5681, "scenario_mae": 2.5409, "delta": -0.0272, "ci95": [-0.1453, 0.0907]},
+      {"year": 2025, "course_mean_mae": 2.6254, "scenario_mae": 2.5715, "delta": -0.0539, "ci95": [-0.1709, 0.0627]},
+      {"year": 2026, "course_mean_mae": 2.4524, "scenario_mae": 2.4144, "delta": -0.0379, "ci95": [-0.1797, 0.1034]}
+    ]
+  },
+  "pace_mismatch_horse_probability": {
+    "status": "reject",
+    "summary": "Using mismatch between predicted race pace and a horse's recent experienced RPCI range as a top-3 probability correction is not robust. It improved 2025 slightly but worsened 2026 and the 2026 race-bootstrap interval was above zero.",
+    "validation": [
+      {"year": 2025, "delta_logloss_vs_basic": -0.000099, "ci95": [-0.000627, 0.000434]},
+      {"year": 2026, "delta_logloss_vs_basic": 0.000619, "ci95": [0.000027, 0.001216]}
+    ]
+  },
+  "deployment_policy": {
+    "queue_front_back": "Use in the visual race map and scenario narrative when at least two prior valid corner runs are available.",
+    "lateral_lane": "Display as path estimate only.",
+    "pace": "Display as scenario/reference, not certainty.",
+    "pace_mismatch": "Display as a caution note only; do not downgrade calibrated win/top2/top3 probabilities."
+  }
+}
