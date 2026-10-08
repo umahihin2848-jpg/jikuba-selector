@@ -1,0 +1,14 @@
+{
+  "version": "race_coherent_validation_v1",
+  "method": "paired race-bootstrap 10000 resamples; projection fixed before validation",
+  "primary_holdout": {"year": 2026, "races": 358, "horses": 4973},
+  "note": "2025 is sanity/design only because the deployed base model was refit through 2025; 2026 is the true holdout in this paired prediction subset.",
+  "results": [
+    {"year":2025,"target":"win","races":476,"horses":6645,"raw_logloss":0.219532850168,"projected_logloss":0.219429761227,"delta_logloss":-0.000103088941,"ci95_delta_logloss":[-0.000165336817,-0.000061142114],"raw_brier":0.060613512489,"projected_brier":0.060582119777,"delta_brier":-0.000031392711,"ci95_delta_brier":[-0.000072177950,0.000010122264],"raw_ece15":0.004637566218,"projected_ece15":0.003259650695},
+    {"year":2025,"target":"top2","races":476,"horses":6645,"raw_logloss":0.342230251459,"projected_logloss":0.342012588722,"delta_logloss":-0.000217662738,"ci95_delta_logloss":[-0.00035819,-0.00011803],"raw_brier":0.105019362766,"projected_brier":0.104873238612,"delta_brier":-0.000146124154,"ci95_delta_brier":[-0.000219934033,-0.000075469648],"raw_ece15":0.006589086862,"projected_ece15":0.006672279844},
+    {"year":2025,"target":"top3","races":476,"horses":6645,"raw_logloss":0.435947463297,"projected_logloss":0.435628149038,"delta_logloss":-0.000319314258,"ci95_delta_logloss":[-0.00051748,-0.00012154],"raw_brier":0.140572047104,"projected_brier":0.140403492786,"delta_brier":-0.000168554318,"ci95_delta_brier":[-0.000285989928,-0.000033518803],"raw_ece15":0.010366595329,"projected_ece15":0.009298975246},
+    {"year":2026,"target":"win","races":358,"horses":4973,"raw_logloss":0.219272864638,"projected_logloss":0.219100532719,"delta_logloss":-0.000172331919,"ci95_delta_logloss":[-0.000333403491,-0.000063248508],"raw_brier":0.060443095851,"projected_brier":0.060370871699,"delta_brier":-0.000072224151,"ci95_delta_brier":[-0.000187609327,0.000015736232],"raw_ece15":0.007498460406,"projected_ece15":0.007814032687},
+    {"year":2026,"target":"top2","races":358,"horses":4973,"raw_logloss":0.350159643558,"projected_logloss":0.349819789052,"delta_logloss":-0.000339854506,"ci95_delta_logloss":[-0.00059349,-0.00016104],"raw_brier":0.106694714580,"projected_brier":0.106614483757,"delta_brier":-0.000080230823,"ci95_delta_brier":[-0.000167410094,0.000009931257],"raw_ece15":0.011212963409,"projected_ece15":0.013113292527},
+    {"year":2026,"target":"top3","races":358,"horses":4973,"raw_logloss":0.437376532979,"projected_logloss":0.436611877702,"delta_logloss":-0.000764655277,"ci95_delta_logloss":[-0.00166748,-0.00026714],"raw_brier":0.139971116882,"projected_brier":0.139711691840,"delta_brier":-0.000259425042,"ci95_delta_brier":[-0.000576600806,-0.000037602993],"raw_ece15":0.014992840513,"projected_ece15":0.013998816702}
+  ]
+}
