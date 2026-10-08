@@ -41,7 +41,8 @@ async function boot(){const files=[
   'rpci-fit-addon-v1.js?v=20261009a',
   'ui-fix-v4.js?v=20261008n',
   'analysis-output-polish-v1.js?v=20261009b',
-  'final-decision-card-v1.js?v=20261009d'
+  'final-decision-card-v1.js?v=20261009d',
+  'analysis-transition-v1.js?v=20261009e'
 ];for(const f of files){try{await add(f)}catch(e){console.warn('addon',f)}}window.addEventListener('calibrated-probability-ready',schedulePaceFix);window.addEventListener('joint-pair-probability-ready',schedulePaceFix);window.addEventListener('rsa-addons-ready',schedulePaceFix);document.getElementById('analyzeBtn')?.addEventListener('click',schedulePaceFix);window.dispatchEvent(new CustomEvent('rsa-addons-ready'));schedulePaceFix()}
 function kick(){setTimeout(boot,60)}
 if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',kick,{once:true});else kick();
