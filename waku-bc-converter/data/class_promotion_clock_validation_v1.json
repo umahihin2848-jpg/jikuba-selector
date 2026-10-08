@@ -1,0 +1,86 @@
+{
+  "version": "class_promotion_clock_validation_v1",
+  "created": "2026-10-09",
+  "source": "umade.csv",
+  "scope": {
+    "period": "2016-01-05 to 2026-10-04",
+    "flat_rows_used": 72789,
+    "horses": 9999,
+    "races": 5256,
+    "class_mapping": {
+      "1600万/3勝": 0,
+      "OP(L)/オープン": 1,
+      "G3": 2,
+      "G2": 3,
+      "G1": 4
+    }
+  },
+  "method": [
+    "Track each horse through consecutive starts within 365 days.",
+    "Promotion is defined as moving to a strictly higher mapped class.",
+    "Primary race-level comparison requires the same surface and exact distance; race-pair duplicates are removed.",
+    "Strict sensitivity comparison additionally requires same venue, course division and going.",
+    "Race-level clock is the winning time; field median time is also checked so the result is not winner-only.",
+    "Same-class repeat starts are used as a control for natural race-to-race drift."
+  ],
+  "results": {
+    "three_win_to_open_same_surface_distance": {
+      "unique_race_pairs": 802,
+      "winner_time_delta_seconds_mean": -0.368,
+      "winner_time_delta_bootstrap95": [-0.461, -0.271],
+      "winner_time_delta_median": -0.300,
+      "field_median_time_delta_mean": -0.354,
+      "same_class_three_win_control_winner_delta_mean": 0.000,
+      "same_class_three_win_control_field_median_delta_mean": 0.003,
+      "difference_vs_same_class_control_winner_seconds": -0.368,
+      "stability": {
+        "2016_2020": -0.333,
+        "2021_2023": -0.332,
+        "2024_2026": -0.450,
+        "turf": -0.316,
+        "dirt": -0.407
+      }
+    },
+    "three_win_to_open_strict_exact_condition_going": {
+      "unique_race_pairs": 133,
+      "winner_time_delta_seconds_mean": -0.431,
+      "winner_time_delta_bootstrap95": [-0.574, -0.292],
+      "winner_time_delta_median": -0.500,
+      "field_median_time_delta_mean": -0.403,
+      "same_class_three_win_control_unique_pairs": 603,
+      "same_class_three_win_control_winner_delta_mean": 0.013,
+      "same_class_three_win_control_field_median_delta_mean": 0.042,
+      "difference_vs_same_class_control_winner_seconds": -0.444,
+      "difference_vs_same_class_control_field_median_seconds": -0.445
+    },
+    "open_to_g3_same_surface_distance": {
+      "unique_race_pairs": 757,
+      "winner_time_delta_seconds_mean": -0.453,
+      "field_median_time_delta_mean": -0.399,
+      "same_class_open_control_winner_delta_mean": 0.026,
+      "same_class_open_control_field_median_delta_mean": 0.018,
+      "difference_vs_same_class_control_winner_seconds": -0.479
+    },
+    "promoted_horse_itself_strict_exact_condition_going": {
+      "all_promotions_n": 313,
+      "own_time_delta_seconds_mean": 0.147,
+      "own_time_delta_cluster_bootstrap95": [0.020, 0.267],
+      "finish_margin_time_delta_seconds_mean": 0.670,
+      "final3f_delta_seconds_mean": 0.328,
+      "three_win_to_open_n": 142,
+      "three_win_to_open_own_time_delta_seconds_mean": 0.305,
+      "three_win_to_open_own_time_delta_cluster_bootstrap95": [0.138, 0.470],
+      "three_win_to_open_finish_margin_time_delta_seconds_mean": 0.704,
+      "three_win_to_open_final3f_delta_seconds_mean": 0.344
+    }
+  },
+  "interpretation": [
+    "The race-level clock clearly becomes faster when the same horse steps into a higher class, even when surface and distance are held fixed; the strict same-venue/course/going check points the same way.",
+    "The field median time improves almost as much as the winner time, so this is not merely one exceptional winner producing the effect.",
+    "For 3-win to open, a universal +0.2-second class correction is not directly supported as an exact constant: the observed race-level shift is closer to 0.3-0.45 seconds in these matched comparisons.",
+    "However, the promoted horse's own realized time does not automatically get faster; in strict 3-win to open matches it is on average 0.305 seconds slower because the horse loses more ground to a faster race.",
+    "Therefore a class correction should be modeled as a race-environment / latent-output adjustment, not as a mechanical subtraction from every horse's future finishing time.",
+    "The precise value of a published '+0.2 sec' formula cannot be validated without the formula's exact target definition."
+  ],
+  "decision": "SUPPORTED_AS_RACE_LEVEL_EFFECT; DO_NOT_USE_FIXED_PLUS_0_2_AS_HORSE_TIME_CORRECTION"
+}
