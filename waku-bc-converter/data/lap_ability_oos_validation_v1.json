@@ -1,0 +1,75 @@
+{
+  "version": "lap_ability_oos_validation_v1",
+  "created": "2026-10-09",
+  "input": {
+    "lap_file": "lap2016_2026.csv",
+    "rows": 35857,
+    "period": "2016-01-05 to 2026-10-04",
+    "matched_high_class_flat_races": 4911,
+    "target_field12plus_races": {"2019":326,"2020":378,"2021":395,"2022":385,"2023":407,"2024":400,"2025":403,"2026":297}
+  },
+  "protocol": {
+    "train": "2019-2023",
+    "selection": "2024",
+    "confirmation": "2025",
+    "final_holdout": "2026",
+    "model": "ridge alpha=0.1; median imputation; standardized features",
+    "target": "race-relative final-3F; FinishScore = validated remaining-600m gap - predicted relative close",
+    "lap_history": "previous 5 starts only, strictly prior",
+    "condition_normalization": "past-only expanding z scores by surface x distance x going, fallback surface x distance; acceleration residualized against pre-acceleration split",
+    "bootstrap": "paired race-level bootstrap versus A0"
+  },
+  "models": {
+    "A0": "current M3-like baseline",
+    "A1": "A0 + acceleration capacity",
+    "A2": "A0 + sustain capacity",
+    "A3": "A0 + back-5F push capacity",
+    "A4": "A0 + acceleration + sustain",
+    "A5": "A0 + acceleration + sustain + back-5F push + peak-speed + deceleration-resistance"
+  },
+  "results": {
+    "A0": {
+      "2024":{"races":400,"top1":0.1275,"top3_overlap":0.3200,"spearman":0.2801,"pairwise":0.6000,"mae":0.6573},
+      "2025":{"races":403,"top1":0.1365,"top3_overlap":0.3011,"spearman":0.2703,"pairwise":0.5980,"mae":0.6494},
+      "2026":{"races":297,"top1":0.1279,"top3_overlap":0.3008,"spearman":0.2418,"pairwise":0.5866,"mae":0.6527}
+    },
+    "A1": {
+      "2024":{"top1":0.1175,"top3_overlap":0.3133,"spearman":0.2870,"pairwise":0.6027,"mae":0.6559},
+      "2025":{"top1":0.1241,"top3_overlap":0.3135,"spearman":0.2767,"pairwise":0.6006,"mae":0.6478},
+      "2026":{"top1":0.1347,"top3_overlap":0.3008,"spearman":0.2459,"pairwise":0.5888,"mae":0.6504}
+    },
+    "A2": {
+      "2024":{"top1":0.1275,"top3_overlap":0.3158,"spearman":0.2837,"pairwise":0.6016,"mae":0.6546},
+      "2025":{"top1":0.1290,"top3_overlap":0.2945,"spearman":0.2648,"pairwise":0.5961,"mae":0.6478},
+      "2026":{"top1":0.1246,"top3_overlap":0.3187,"spearman":0.2502,"pairwise":0.5888,"mae":0.6493}
+    },
+    "A3": {
+      "2024":{"top1":0.1200,"top3_overlap":0.3183,"spearman":0.2766,"pairwise":0.5986,"mae":0.6573},
+      "2025":{"top1":0.1340,"top3_overlap":0.3036,"spearman":0.2681,"pairwise":0.5969,"mae":0.6489},
+      "2026":{"top1":0.1313,"top3_overlap":0.3064,"spearman":0.2456,"pairwise":0.5876,"mae":0.6530}
+    },
+    "A4": {
+      "2024":{"top1":0.1300,"top3_overlap":0.3208,"spearman":0.2883,"pairwise":0.6036,"mae":0.6538},
+      "2025":{"top1":0.1241,"top3_overlap":0.2978,"spearman":0.2698,"pairwise":0.5983,"mae":0.6470},
+      "2026":{"top1":0.1414,"top3_overlap":0.3131,"spearman":0.2517,"pairwise":0.5903,"mae":0.6481}
+    },
+    "A5": {
+      "2024":{"top1":0.1225,"top3_overlap":0.3233,"spearman":0.2885,"pairwise":0.6043,"mae":0.6538},
+      "2025":{"top1":0.1340,"top3_overlap":0.3019,"spearman":0.2748,"pairwise":0.5994,"mae":0.6466},
+      "2026":{"top1":0.1414,"top3_overlap":0.3075,"spearman":0.2492,"pairwise":0.5885,"mae":0.6486}
+    }
+  },
+  "pooled_2024_2026_delta_vs_A0": {
+    "A1": {"top1":-0.0064,"top3_overlap":0.0021,"spearman":0.0060,"pairwise":0.0025,"mae":-0.0017,"spearman_ci95":[0.0022,0.0097],"pairwise_ci95":[0.0010,0.0040],"mae_ci95":[-0.0023,-0.0011]},
+    "A4": {"top1":0.0000,"top3_overlap":0.0024,"spearman":0.0055,"pairwise":0.0024,"mae":-0.0034,"spearman_ci95":[0.0010,0.0100],"pairwise_ci95":[0.0005,0.0043],"mae_ci95":[-0.0043,-0.0025]},
+    "A5": {"top1":0.0009,"top3_overlap":0.0033,"spearman":0.0067,"pairwise":0.0026,"mae":-0.0034,"spearman_ci95":[0.0010,0.0122],"pairwise_ci95":[0.0004,0.0048],"mae_ci95":[-0.0045,-0.0022]}
+  },
+  "decision": {
+    "hard_finishscore_adoption": "NO",
+    "hard_probability_correction": "NO",
+    "beta_context_layer": "YES",
+    "reason": "A5 shows small pooled OOS improvements in rank correlation, pairwise ordering and MAE, but yearly winner/top3 gains are not stable enough for a hard score change.",
+    "recommended_display": ["加速力β","持続力β","最高速β","後半5F押上β"],
+    "probability_layer": "unchanged"
+  }
+}
