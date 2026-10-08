@@ -1,0 +1,49 @@
+{
+  "version": "scenario_component_validation_v1",
+  "created": "2026-10-08",
+  "scope": {
+    "source": "umade.csv",
+    "flat_only": true,
+    "minimum_field_size": 12,
+    "classes": "3-win and above",
+    "rows": 62215,
+    "races": 4134,
+    "training_years": [2019, 2020, 2021, 2022, 2023],
+    "oos_years": [2024, 2025, 2026]
+  },
+  "notes": [
+    "The scenario-specific top3 test is an oracle conditional test: realized pace scenario is supplied. It tests whether pace-conditioned horse relationships exist, not whether the live pace forecast is accurate enough to monetize them.",
+    "The remaining-600m structural model uses only pre-race historical horse/race features; the scenario-conditioned extension also uses realized pace scenario and is therefore oracle-only.",
+    "Pack-shape scenario-conditioned results are also oracle conditional results.",
+    "Favorite scenario-tolerance tests whether probability spread across four hypothetical scenarios adds information beyond popularity and mean structural probability."
+  ],
+  "scenario_specific_top3": {
+    "status": "not_adopted_as_probability_correction",
+    "metric": "log_loss",
+    "2024": {"base": 0.444110, "scenario": 0.443681, "race_bootstrap_delta": -0.000646, "ci95": [-0.002179, 0.000872]},
+    "2025": {"base": 0.445594, "scenario": 0.445134, "race_bootstrap_delta": -0.000574, "ci95": [-0.002141, 0.000990]},
+    "2026": {"base": 0.446700, "scenario": 0.448059, "race_bootstrap_delta": 0.002128, "ci95": [0.000227, 0.004202]}
+  },
+  "remaining_600m_position": {
+    "status": "structural_model_supported",
+    "metric": "MAE_seconds",
+    "2024": {"history_course": 0.4093, "structural": 0.3924, "oracle_scenario": 0.3810, "structural_delta_ci95": [-0.02384, -0.01158], "scenario_extra_delta_ci95": [-0.01796, -0.00512]},
+    "2025": {"history_course": 0.4093, "structural": 0.3878, "oracle_scenario": 0.3739, "structural_delta_ci95": [-0.02884, -0.01665], "scenario_extra_delta_ci95": [-0.01974, -0.00677]},
+    "2026": {"history_course": 0.4026, "structural": 0.3843, "oracle_scenario": 0.3707, "structural_delta_ci95": [-0.02667, -0.01175], "scenario_extra_delta_ci95": [-0.01945, -0.00619]}
+  },
+  "pack_shape": {
+    "status": "pre_race_structure_unstable_scenario_conditioning_promising",
+    "metric": "MAE_seconds_of_race_median_remaining600_gap",
+    "2024": {"course_baseline": 0.2365, "structural": 0.2355, "oracle_scenario": 0.2180, "structural_delta_ci95": [-0.00548, 0.00340], "scenario_extra_delta_ci95": [-0.03104, -0.00421]},
+    "2025": {"course_baseline": 0.2155, "structural": 0.2190, "oracle_scenario": 0.1999, "structural_delta_ci95": [-0.00078, 0.00772], "scenario_extra_delta_ci95": [-0.03218, -0.00548]},
+    "2026": {"course_baseline": 0.2185, "structural": 0.2159, "oracle_scenario": 0.1897, "structural_delta_ci95": [-0.00707, 0.00189], "scenario_extra_delta_ci95": [-0.04053, -0.01223]}
+  },
+  "favorite_scenario_tolerance": {
+    "status": "not_adopted_as_failure_signal",
+    "comparison": "popularity + mean structural probability vs plus scenario spread",
+    "metric": "log_loss",
+    "2024": {"base": 0.67398, "plus_tolerance": 0.67403, "race_bootstrap_delta": 0.000442, "ci95": [-0.000810, 0.001672]},
+    "2025": {"base": 0.67381, "plus_tolerance": 0.67425, "race_bootstrap_delta": 0.000538, "ci95": [-0.000810, 0.001849]},
+    "2026": {"base": 0.67442, "plus_tolerance": 0.67399, "race_bootstrap_delta": -0.000447, "ci95": [-0.002074, 0.001192]}
+  }
+}
