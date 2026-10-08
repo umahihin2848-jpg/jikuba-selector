@@ -1,0 +1,64 @@
+{
+  "version": "lap_ability_validation_protocol_v1",
+  "created": "2026-10-09",
+  "purpose": "Test whether race-lap derived acceleration, sustained-speed and back-5F push features add stable out-of-sample predictive value beyond the current remaining-600m/relative-closing model.",
+  "source_theory": {
+    "reference3": ["速力", "超速力", "加速力", "持続力", "消耗戦", "追走力"],
+    "principle": "Do not treat raw 200m seconds as horse ability. First convert race-level lap demands into condition-relative features, then estimate what each horse has previously demonstrated under those demands."
+  },
+  "required_lap_data": {
+    "preferred": "TARGET Time Analysis race-list CSV",
+    "required_fields": ["race_id", "date", "venue", "track_code", "distance", "going", "class", "field_size", "front5f", "back5f", "front3f", "back3f", "lap1..lap18"],
+    "alternate": "Kaggle 19860105-20210731_laptime.csv for historical prototyping only"
+  },
+  "race_level_features": {
+    "acceleration": "Within the final 4F, maximum positive acceleration = previous split seconds - next split seconds. Residualize against the starting split level and race conditions so a trivial 13.0->12.0 move is not treated the same as 11.8->10.8.",
+    "peak_speed": "Fastest final-4F split, converted to a time-aware condition-relative z score.",
+    "sustain": "Low dispersion / low fade across the final 4F, while controlling for the mean level of those splits. A uniformly slow 4F is not high sustain.",
+    "back5_push": "For races where non-overlapping front/back 5F are meaningful, front5F - back5F; positive means the race accelerated strongly into the latter half. Use a separate shorter-distance analogue rather than overlapping 5F windows.",
+    "depletion": "Late fade shape after the fastest point, condition-relative. Used only as a supporting feature, not a standalone negative score."
+  },
+  "horse_level_pre_race_features": {
+    "window": "previous 5 starts only; strictly before the target race",
+    "capacity_features": [
+      "best demonstrated acceleration demand in a non-poor prior performance",
+      "best demonstrated sustained-speed demand in a non-poor prior performance",
+      "best demonstrated back-5F push demand in a non-poor prior performance",
+      "recent demand-weighted relative performance"
+    ],
+    "leakage_rule": "All condition standardization and imputation for a target date must be fit using earlier races only. Current-race realized laps are never inputs."
+  },
+  "ablation": {
+    "A0": "current M3 rank core only",
+    "A1": "A0 + acceleration capacity",
+    "A2": "A0 + sustain capacity",
+    "A3": "A0 + back-5F push capacity",
+    "A4": "A0 + acceleration + sustain",
+    "A5": "A0 + all accepted lap-capacity features"
+  },
+  "time_split": {
+    "feature_history": "2016 onward",
+    "train": "2019-2023",
+    "model_selection": "2024 only",
+    "confirmation": "2025",
+    "final_holdout": "2026"
+  },
+  "primary_metrics": [
+    "winner_top1_rate",
+    "top3_overlap",
+    "pairwise_order_accuracy",
+    "spearman_rank"
+  ],
+  "secondary_metrics": ["finish_gap_mae"],
+  "inference": {
+    "bootstrap_unit": "race",
+    "comparison": "paired delta versus A0 on the identical race cohort",
+    "report": "point estimate + 95% race-bootstrap CI"
+  },
+  "adoption_rule": {
+    "required": "Directionally positive in 2024, reproduced in 2025, and still positive in 2026 on the primary ranking metrics without a material finish-gap degradation.",
+    "not_enough": "A visually appealing theory, an in-sample gain, or one favorable subgroup is not sufficient.",
+    "production": "Only accepted features may alter FinishScore. Rejected/uncertain features may be shown as beta/context labels only."
+  },
+  "status": "protocol_frozen_waiting_for_1F_lap_csv"
+}
