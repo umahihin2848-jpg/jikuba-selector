@@ -45,7 +45,8 @@ async function boot(){const files=[
   'term-guide-v1.js?v=20261009g',
   'analysis-transition-v2.js?v=20261009h',
   'mobile-stability-v1.js?v=20261009i',
-  'ios-resume-v1.js?v=20261009k'
+  'ios-resume-v1.js?v=20261009k',
+  'ios-paint-lite-v1.js?v=20261009l'
 ];for(const f of files){try{await add(f)}catch(e){console.warn('addon',f)}}window.addEventListener('calibrated-probability-ready',schedulePaceFix);window.addEventListener('joint-pair-probability-ready',schedulePaceFix);window.addEventListener('rsa-addons-ready',schedulePaceFix);document.getElementById('analyzeBtn')?.addEventListener('click',schedulePaceFix);window.dispatchEvent(new CustomEvent('rsa-addons-ready'));schedulePaceFix()}
 function kick(){setTimeout(boot,60)}
 if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',kick,{once:true});else kick();
