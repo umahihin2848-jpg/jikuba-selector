@@ -1,0 +1,334 @@
+{
+  "version": "reference4_validation_v1",
+  "data": {
+    "runner_file": "umade.csv",
+    "runner_rows": 74007,
+    "all_races": 5368,
+    "reference_comparison_period": "2020-01-01 through 2026-03-15",
+    "primary_grades": [
+      "G1",
+      "G2",
+      "G3"
+    ],
+    "comparable_races": 803,
+    "payout_file": "2026_haitou.txt",
+    "oos_2026_races": 98
+  },
+  "definitions": {
+    "primary_turbulence": "winner final popularity >= 7",
+    "secondary_turbulence": "at least one top-3 finisher final popularity >= 7",
+    "distance_bins": [
+      "<=1400",
+      "1401-1800",
+      "1801-2200",
+      "2201-2600",
+      ">=2601"
+    ],
+    "field_bins": [
+      "<=11",
+      "12-14",
+      ">=15"
+    ],
+    "front_candidate": "current final popularity >=7 AND immediately previous start 4C position <=3"
+  },
+  "task1_structure": {
+    "primary_events": 143,
+    "secondary_events": 502,
+    "omnibus_lrt_primary": {
+      "venue": 0.6193279100883443,
+      "dist_bin": 0.21804489220244125,
+      "field_bin": 0.0007988525011698653,
+      "going": 0.656373374372095,
+      "surface": 0.027329893400401303,
+      "grade": 0.34701324621539226,
+      "year": 0.2633804821469623
+    },
+    "omnibus_lrt_secondary": {
+      "venue": 0.5153277672302263,
+      "dist_bin": 0.7406842005325864,
+      "field_bin": 2.547758981258334e-08,
+      "going": 0.05345039003576791,
+      "surface": 0.12514589458954856,
+      "grade": 0.032818388087721764,
+      "year": 0.1523976065892487
+    },
+    "field_size_primary_raw": [
+      {
+        "field_bin": ">=15",
+        "n": 530,
+        "events": 106,
+        "rate": 0.2,
+        "lo": 0.16815874937586855,
+        "hi": 0.23615877833640053
+      },
+      {
+        "field_bin": "12-14",
+        "n": 179,
+        "events": 31,
+        "rate": 0.17318435754189945,
+        "lo": 0.1247734801266136,
+        "hi": 0.23532788444006503
+      },
+      {
+        "field_bin": "<=11",
+        "n": 94,
+        "events": 6,
+        "rate": 0.06382978723404255,
+        "lo": 0.029579735297574024,
+        "hi": 0.13232973550994373
+      }
+    ],
+    "field_size_primary_adjusted_OR": {
+      "12-14_vs_<=11": {
+        "OR": 3.5745669993444524,
+        "CI95": [
+          1.4050712994985062,
+          9.093865369937397
+        ],
+        "p": 0.007499437033947784
+      },
+      ">=15_vs_<=11": {
+        "OR": 4.390447582129236,
+        "CI95": [
+          1.8037546082187035,
+          10.686614400647594
+        ],
+        "p": 0.0011156083302268993
+      }
+    },
+    "surface_primary_adjusted_OR_turf_vs_dirt": {
+      "OR": 2.1307124151248376,
+      "CI95": [
+        1.0468229216000011,
+        4.336870450857266
+      ],
+      "p": 0.036964073921576864
+    }
+  },
+  "task2_chukyo_longshot_front": {
+    "period": "2020-01-01 through 2026-03-15",
+    "longshot_runners": 831,
+    "races": 90,
+    "raw_top3_rate_prev4c_le3": 0.1282051282051282,
+    "raw_top3_rate_other": 0.08018867924528301,
+    "adjusted_OR_top3": 1.8148593023157893,
+    "CI95": [
+      1.0059842914565313,
+      3.274120992916593
+    ],
+    "p": 0.04772791762174947
+  },
+  "task3_jockey_correct_denominator": {
+    "overall_longshot_top3_rate": 0.08906882591093117,
+    "overall_longshot_starts": 7163,
+    "jockeys": [
+      {
+        "jockey": "団野大成",
+        "longshot_starts": 145,
+        "top3": 22,
+        "top3_rate": 0.15172413793103448,
+        "wilson95": [
+          0.10238165283718528,
+          0.21904397144621837
+        ],
+        "adjusted_expected_rate": 0.09188471375726637,
+        "observed_expected_ratio": 1.6512446056244685,
+        "approx_z": 2.545827372607511
+      },
+      {
+        "jockey": "菅原明良",
+        "longshot_starts": 143,
+        "top3": 18,
+        "top3_rate": 0.1258741258741259,
+        "wilson95": [
+          0.08112491035257627,
+          0.1901980466696904
+        ],
+        "adjusted_expected_rate": 0.08335878370261107,
+        "observed_expected_ratio": 1.5100283411426874,
+        "approx_z": 1.873227796178756
+      },
+      {
+        "jockey": "幸英明",
+        "longshot_starts": 181,
+        "top3": 17,
+        "top3_rate": 0.09392265193370165,
+        "wilson95": [
+          0.059468661997519275,
+          0.1452552081889973
+        ],
+        "adjusted_expected_rate": 0.09469312827320656,
+        "observed_expected_ratio": 0.9918634397917244,
+        "approx_z": -0.03609741372316167
+      },
+      {
+        "jockey": "岩田康誠",
+        "longshot_starts": 164,
+        "top3": 23,
+        "top3_rate": 0.1402439024390244,
+        "wilson95": [
+          0.09530391957245063,
+          0.20165166679396682
+        ],
+        "adjusted_expected_rate": 0.10546796479440257,
+        "observed_expected_ratio": 1.329729863588564,
+        "approx_z": 1.47629213086264
+      },
+      {
+        "jockey": "西村淳也",
+        "longshot_starts": 127,
+        "top3": 15,
+        "top3_rate": 0.11811023622047244,
+        "wilson95": [
+          0.07289704388252156,
+          0.18574772457019534
+        ],
+        "adjusted_expected_rate": 0.09754844427698063,
+        "observed_expected_ratio": 1.2107854420016,
+        "approx_z": 0.7968172105256297
+      },
+      {
+        "jockey": "鮫島克駿",
+        "longshot_starts": 129,
+        "top3": 17,
+        "top3_rate": 0.13178294573643412,
+        "wilson95": [
+          0.08393284433229287,
+          0.20092896881424543
+        ],
+        "adjusted_expected_rate": 0.0935878692582204,
+        "observed_expected_ratio": 1.4081199495292367,
+        "approx_z": 1.5150116046124222
+      },
+      {
+        "jockey": "松山弘平",
+        "longshot_starts": 163,
+        "top3": 26,
+        "top3_rate": 0.15950920245398773,
+        "wilson95": [
+          0.11123935488469554,
+          0.22345838280835234
+        ],
+        "adjusted_expected_rate": 0.10990378390562972,
+        "observed_expected_ratio": 1.4513531453198405,
+        "approx_z": 2.0576106415392883
+      },
+      {
+        "jockey": "三浦皇成",
+        "longshot_starts": 176,
+        "top3": 11,
+        "top3_rate": 0.0625,
+        "wilson95": [
+          0.03525401379661893,
+          0.10843620641260784
+        ],
+        "adjusted_expected_rate": 0.09358240850367966,
+        "observed_expected_ratio": 0.6678605626776799,
+        "approx_z": -1.4388973231849866
+      },
+      {
+        "jockey": "横山典弘",
+        "longshot_starts": 146,
+        "top3": 14,
+        "top3_rate": 0.0958904109589041,
+        "wilson95": [
+          0.057981179774590684,
+          0.15451981341713206
+        ],
+        "adjusted_expected_rate": 0.09972894311779619,
+        "observed_expected_ratio": 0.9615103495646379,
+        "approx_z": -0.1572123157201854
+      },
+      {
+        "jockey": "川田将雅",
+        "longshot_starts": 37,
+        "top3": 8,
+        "top3_rate": 0.21621621621621623,
+        "wilson95": [
+          0.11386511993385587,
+          0.37195148391969146
+        ],
+        "adjusted_expected_rate": 0.12447935332714401,
+        "observed_expected_ratio": 1.7369644879820245,
+        "approx_z": 1.70739701175623
+      },
+      {
+        "jockey": "ルメール",
+        "longshot_starts": 31,
+        "top3": 1,
+        "top3_rate": 0.03225806451612903,
+        "wilson95": [
+          0.005717221525416816,
+          0.16194105164724912
+        ],
+        "adjusted_expected_rate": 0.13522004208497998,
+        "observed_expected_ratio": 0.23855978757835491,
+        "approx_z": -1.6828988082888963
+      }
+    ]
+  },
+  "task4_2026_oos": {
+    "structure_model_train_period": "2020-2025",
+    "outcome": "any top3 finisher popularity >=7",
+    "features": [
+      "venue",
+      "distance_bin",
+      "field_bin",
+      "going",
+      "surface",
+      "grade"
+    ],
+    "high_turbulence_threshold": "training predicted probability 75th percentile",
+    "threshold": 0.7252650885117544,
+    "oos_auc": 0.7979390681003584,
+    "oos_auc_bootstrap95": [
+      0.6957859462659516,
+      0.8870566379564522
+    ],
+    "high_turbulence_rate": 0.8461538461538461,
+    "high_turbulence_n": 26,
+    "low_turbulence_rate": 0.5555555555555556,
+    "low_turbulence_n": 72,
+    "fisher_p": 0.009193970170523903,
+    "baseline_bet_rule": "If a race has >=1 popularity>=7 horse whose immediately previous start had 4C<=3, pair the most popular such horse with current 1st favorite; buy 100 yen quinella + 100 yen wide. Final popularity used.",
+    "all_eligible": {
+      "n_bets": 81,
+      "quinella_hits": 1,
+      "quinella_roi": 0.5617283950617284,
+      "wide_hits": 8,
+      "wide_roi": 1.054320987654321,
+      "combo_roi": 0.8080246913580247
+    },
+    "high_turbulence_only": {
+      "n_bets": 22,
+      "quinella_hits": 1,
+      "quinella_roi": 2.0681818181818183,
+      "wide_hits": 2,
+      "wide_roi": 1.1681818181818182,
+      "combo_roi": 1.6181818181818182
+    },
+    "low_turbulence_only": {
+      "n_bets": 59,
+      "quinella_hits": 0,
+      "quinella_roi": 0.0,
+      "wide_hits": 6,
+      "wide_roi": 1.011864406779661,
+      "combo_roi": 0.5059322033898305
+    },
+    "high_combo_roi_bootstrap95": [
+      0.0,
+      4.615909090909091
+    ],
+    "high_vs_low_combo_roi_diff_bootstrap95": [
+      -0.7033898305084745,
+      4.170993836671803
+    ]
+  },
+  "decision": {
+    "hard_probability_correction": "NO",
+    "beta_structure_layer": "YES",
+    "jockey_hard_bonus": "NO",
+    "chukyo_longshot_front_beta": "YES",
+    "oos_betting_claim": "PROMISING_BUT_TOO_SMALL_AND_HEAVY_TAILED"
+  }
+}
