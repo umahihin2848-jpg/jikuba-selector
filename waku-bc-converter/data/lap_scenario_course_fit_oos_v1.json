@@ -1,0 +1,106 @@
+{
+  "version": "lap_scenario_course_fit_oos_v1",
+  "created": "2026-10-09",
+  "inputs": {
+    "lap_csv": "lap2016_2026.csv",
+    "lap_rows": 35857,
+    "matched_flat_high_class_races": 4647,
+    "runner_source": "umade.csv"
+  },
+  "question": "Does matching a horse's demonstrated lap/RPCI profile to the pre-race expected RPCI and course demand improve OOS ranking beyond the current M3-like baseline?",
+  "protocol": {
+    "train": "2019-2023",
+    "selection": "2024",
+    "confirmation": "2025",
+    "final_holdout": "2026",
+    "target_universe": "JRA flat 3-win class or higher, field size >=12, races with matched lap data and pre-race course history",
+    "race_counts": {"2024": 346, "2025": 348, "2026": 264},
+    "model": "ridge alpha=0.1, median imputation, standardized features",
+    "horse_history": "previous 5 starts only, strictly before target date",
+    "expected_rpci": "past-only expanding mean by venue x surface x distance x going, fallback venue x surface x distance",
+    "expected_course_demand": "past-only lap-demand profile for the same course, preferentially within the expected RPCI band; no current-race realized laps used",
+    "rpci_bands": ["<45", "45-49.9", "50-54.9", ">=55"],
+    "bootstrap": "paired race-level bootstrap"
+  },
+  "expected_rpci_quality": {
+    "2024": {"mae": 2.467, "band_accuracy": 0.5636, "correlation": 0.7076},
+    "2025": {"mae": 2.367, "band_accuracy": 0.5690, "correlation": 0.7278},
+    "2026": {"mae": 2.151, "band_accuracy": 0.6061, "correlation": 0.7974}
+  },
+  "models": {
+    "M0": "current M3-like baseline using pre-race position/closing-history features and validated remaining-600m gap",
+    "MCAP": "M0 + generic lap-capacity history (acceleration, sustain, peak speed, deceleration resistance, back-5F push)",
+    "FRPCI": "M0 + generic lap capacity + pre-race course context + performance in prior starts from the same expected RPCI band",
+    "FULL": "FRPCI + direct acceleration/sustain/peak-speed course-demand interaction terms"
+  },
+  "results": {
+    "M0": {
+      "2024": {"top1": 0.1156, "top3_overlap": 0.3073, "spearman": 0.2669, "pairwise": 0.5961},
+      "2025": {"top1": 0.1351, "top3_overlap": 0.2998, "spearman": 0.2585, "pairwise": 0.5930},
+      "2026": {"top1": 0.1136, "top3_overlap": 0.2841, "spearman": 0.2298, "pairwise": 0.5818}
+    },
+    "FRPCI": {
+      "2024": {"top1": 0.1358, "top3_overlap": 0.3198, "spearman": 0.2910, "pairwise": 0.6045},
+      "2025": {"top1": 0.1207, "top3_overlap": 0.3132, "spearman": 0.2850, "pairwise": 0.6025},
+      "2026": {"top1": 0.1136, "top3_overlap": 0.3157, "spearman": 0.2611, "pairwise": 0.5932}
+    },
+    "FULL": {
+      "2024": {"top1": 0.1358, "top3_overlap": 0.3189, "spearman": 0.2930, "pairwise": 0.6052},
+      "2025": {"top1": 0.1121, "top3_overlap": 0.3151, "spearman": 0.2840, "pairwise": 0.6020},
+      "2026": {"top1": 0.1212, "top3_overlap": 0.3182, "spearman": 0.2596, "pairwise": 0.5929}
+    }
+  },
+  "paired_delta_FRPCI_minus_M0": {
+    "2024": {
+      "top1": {"delta": 0.0202, "ci95": [-0.0173, 0.0578]},
+      "top3_overlap": {"delta": 0.0125, "ci95": [-0.0087, 0.0337]},
+      "spearman": {"delta": 0.0241, "ci95": [0.0089, 0.0389]},
+      "pairwise": {"delta": 0.0084, "ci95": [0.0024, 0.0144]}
+    },
+    "2025": {
+      "top1": {"delta": -0.0144, "ci95": [-0.0546, 0.0259]},
+      "top3_overlap": {"delta": 0.0134, "ci95": [-0.0077, 0.0335]},
+      "spearman": {"delta": 0.0265, "ci95": [0.0114, 0.0415]},
+      "pairwise": {"delta": 0.0095, "ci95": [0.0036, 0.0153]}
+    },
+    "2026": {
+      "top1": {"delta": 0.0000, "ci95": [-0.0379, 0.0379]},
+      "top3_overlap": {"delta": 0.0316, "ci95": [0.0088, 0.0556]},
+      "spearman": {"delta": 0.0313, "ci95": [0.0148, 0.0476]},
+      "pairwise": {"delta": 0.0114, "ci95": [0.0050, 0.0178]}
+    },
+    "pooled_2024_2026": {
+      "top1": {"delta": 0.0021, "ci95": [-0.0198, 0.0240]},
+      "top3_overlap": {"delta": 0.0181, "ci95": [0.0063, 0.0303]},
+      "spearman": {"delta": 0.0269, "ci95": [0.0182, 0.0362]},
+      "pairwise": {"delta": 0.0096, "ci95": [0.0062, 0.0131]}
+    }
+  },
+  "paired_delta_FRPCI_minus_MCAP_pooled_2024_2026": {
+    "top1": {"delta": 0.0084, "ci95": [-0.0115, 0.0271]},
+    "top3_overlap": {"delta": 0.0115, "ci95": [0.0000, 0.0226]},
+    "spearman": {"delta": 0.0134, "ci95": [0.0060, 0.0210]},
+    "pairwise": {"delta": 0.0046, "ci95": [0.0017, 0.0075]}
+  },
+  "simple_descriptive_flag": {
+    "definition": "within previous 5 starts, at least one start in the expected RPCI band, with positive race-relative final-3F and average finish percentile <=0.5",
+    "2024": {"flag_top3_rate": 0.2476, "other_top3_rate": 0.1725},
+    "2025": {"flag_top3_rate": 0.2440, "other_top3_rate": 0.1765},
+    "2026": {"flag_top3_rate": 0.2496, "other_top3_rate": 0.1721},
+    "note": "Flagged horses were also more popular on average, so these raw rates are descriptive only; the paired ranking-model comparison above is the main evidence."
+  },
+  "interpretation": [
+    "The stable additional signal is stronger for RPCI-regime matching than for raw acceleration/sustain interaction alone.",
+    "Spearman and pairwise ranking improve in 2024, 2025 and 2026; pooled confidence intervals are fully positive.",
+    "Top-3 overlap improves in all three years and is clearly positive in the 2026 holdout; pooled improvement is about +1.8 percentage points.",
+    "Winner top-1 is not stable: it improves in 2024, declines in 2025 and is unchanged in 2026 for FRPCI.",
+    "Therefore this should not yet alter calibrated win/top2/top3 probabilities or replace the M3 FinishScore core."
+  ],
+  "decision": {
+    "hard_finishscore_adoption": "NO",
+    "probability_correction": "NO",
+    "beta_rank_support": "YES",
+    "recommended_label": "RPCI適性一致 β",
+    "recommended_use": "show expected RPCI band and prior same-band performance; use as auxiliary/tie-break context only until a future untouched season confirms winner/top1 stability"
+  }
+}
