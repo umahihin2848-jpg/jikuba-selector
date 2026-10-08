@@ -27,7 +27,7 @@ async function boot(){const files=[
   'scenario-ui-v1.js?v=20261008a',
   'validated-queue-model-v1.js?v=20261008j',
   'queue-analysis-v1.js?v=20261008b',
-  'queue-realistic-v1.js?v=20261008m',
+  'queue-realistic-v1.js?v=20261008n',
   'queue-validated-visual-v1.js?v=20261008j',
   'dashboard-polish-v1.js?v=20261008d',
   'statistical-ui-v1.js?v=20261008g',
@@ -35,8 +35,8 @@ async function boot(){const files=[
   'structure-validation-ui-v1.js?v=20261008i',
   'ui-refresh-v2.js?v=20261008k',
   'ui-fix-v3.js?v=20261008l',
-  'scenario-statistics-v1.js?v=20261008m',
-  'ui-fix-v4.js?v=20261008m'
+  'scenario-statistics-v1.js?v=20261008n',
+  'ui-fix-v4.js?v=20261008n'
 ];for(const f of files){try{await add(f)}catch(e){console.warn('addon',f)}}window.addEventListener('calibrated-probability-ready',schedulePaceFix);window.addEventListener('joint-pair-probability-ready',schedulePaceFix);window.addEventListener('rsa-addons-ready',schedulePaceFix);document.getElementById('analyzeBtn')?.addEventListener('click',schedulePaceFix);window.dispatchEvent(new CustomEvent('rsa-addons-ready'));schedulePaceFix()}
 function kick(){setTimeout(boot,60)}
 if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',kick,{once:true});else kick();
