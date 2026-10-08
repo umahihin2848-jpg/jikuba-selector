@@ -1,0 +1,67 @@
+{
+  "version": "scenario_component_validation_v2",
+  "created": "2026-10-08",
+  "universe": "JRA flat, field_size>=12, 3-win class or higher",
+  "training_protocol": {
+    "outcome_model_train_years": [2019, 2020, 2021, 2022, 2023],
+    "oos_years": [2024, 2025, 2026],
+    "oos_races_total": 1142,
+    "oos_runners_total": 17186,
+    "bootstrap_unit": "race"
+  },
+  "race_quality_rpci_fit": {
+    "definition": "Last 10 prior runs; Gaussian similarity to pre-race expected target RPCI, bandwidth=3.0; weighted finish-percentile shrunk to overall history with k=3.",
+    "structural_model_logloss_delta_vs_base": {
+      "win": {"2024": -0.000347, "2025": -0.000417, "2026": -0.000601, "pooled": -0.000441, "pooled_ci95": [-0.000747, -0.000135]},
+      "top3": {"2024": -0.000944, "2025": -0.000640, "2026": -0.000965, "pooled": -0.000838, "pooled_ci95": [-0.001243, -0.000449]}
+    },
+    "market_plus_model_logloss_delta_vs_base": {
+      "win": {"2024": 0.000253, "2025": 0.000044, "2026": -0.000100, "pooled": 0.000082, "pooled_ci95": [-0.000047, 0.000211]},
+      "top3": {"2024": 0.000166, "2025": -0.000019, "2026": 0.000020, "pooled": 0.000059, "pooled_ci95": [-0.000072, 0.000190]}
+    },
+    "decision": "ADOPT_FOR_STRUCTURAL_SCENARIO_ONLY",
+    "probability_correction": "NO"
+  },
+  "remaining600_position": {
+    "deployable_model": {
+      "type": "Ridge linear regression",
+      "inputs": ["hist_gap_median_last5", "hist_frontness_mean_last5", "field_size", "gate_fraction"],
+      "fallback_medians": {"hist_gap_median_last5": 0.7, "hist_frontness_mean_last5": 0.5528647823, "field_size": 16.0, "gate_fraction": 0.5},
+      "formula": {
+        "intercept": 0.5560463792,
+        "coefficients": {
+          "hist_gap_median_last5": 0.2174501265,
+          "hist_frontness_mean_last5": -0.8403902528,
+          "field_size": 0.03463418921,
+          "gate_fraction": 0.03744118348
+        }
+      },
+      "output": "predicted seconds behind leader at remaining 600m"
+    },
+    "oos_mae": {
+      "2024": {"n": 4972, "races": 392, "model": 0.394520, "history_median": 0.419741, "delta": -0.025477, "ci95": [-0.032092, -0.019004]},
+      "2025": {"n": 4977, "races": 395, "model": 0.391118, "history_median": 0.416134, "delta": -0.027116, "ci95": [-0.033845, -0.020419]},
+      "2026": {"n": 3680, "races": 289, "model": 0.390147, "history_median": 0.414538, "delta": -0.026067, "ci95": [-0.036676, -0.016249]}
+    },
+    "relative_position_oos_pooled": {
+      "front25pct": {"n": 3971, "win_rate": 0.0791, "top3_rate": 0.2251, "market_expected_win": 0.0743, "market_expected_top3": 0.2189},
+      "middle25to65pct": {"n": 6670, "win_rate": 0.0768, "top3_rate": 0.2237, "market_expected_win": 0.0751, "market_expected_top3": 0.2181},
+      "back35pct": {"n": 6545, "win_rate": 0.0484, "top3_rate": 0.1598, "market_expected_win": 0.0534, "market_expected_top3": 0.1693}
+    },
+    "decision": "ADOPT_AS_STRUCTURAL_POSITION_FEATURE",
+    "probability_correction": "NO"
+  },
+  "combined_structural_features": {
+    "logloss_delta_vs_structural_base": {
+      "win": {"pooled": -0.001390, "ci95": [-0.002051, -0.000711]},
+      "top3": {"pooled": -0.002049, "ci95": [-0.002887, -0.001149]}
+    },
+    "note": "The combination improves a no-market structural model, but does not materially improve a market-inclusive probability model. Keep it in the scenario/structure layer."
+  },
+  "caveats": [
+    "Current market baseline uses final popularity rank, not a T-15 odds snapshot.",
+    "Race-quality fit uses pre-race expected RPCI from historical condition medians; it is not the realized target-race RPCI.",
+    "Remaining-600 model predicts front-back gap only; lateral lane/path is not validated.",
+    "No buy rule or ROI claim is established by this validation."
+  ]
+}
