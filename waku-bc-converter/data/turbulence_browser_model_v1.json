@@ -1,0 +1,59 @@
+{
+  "version": "turbulence-browser-v1",
+  "trained_on": "JRA G1-G3 2020-2023",
+  "outcome": "at least one final-popularity >=7 horse finishes top3",
+  "method": "binomial logistic regression",
+  "intercept": 1.0942354612603091,
+  "thresholds": {
+    "high": 0.7100207282007605,
+    "low": 0.5
+  },
+  "baselines": {
+    "venue": "中京",
+    "dist_bin": "1401-1800",
+    "field_bin": "<=11",
+    "going": "不",
+    "surface": "ダート",
+    "grade": "Ｇ１"
+  },
+  "coefficients": {
+    "venue": {
+      "中山": -0.3145014978467128,
+      "京都": -0.6374255617889939,
+      "函館": 0.6557394259478382,
+      "小倉": 0.09483244204739197,
+      "新潟": 0.01044849553370009,
+      "札幌": -0.8750630510928905,
+      "東京": -0.5159031575848271,
+      "福島": -0.6313973418336154,
+      "阪神": -0.43221793671931213
+    },
+    "dist_bin": {
+      "1801-2200": 0.01092611960073403,
+      "2201-2600": -0.3061847100536432,
+      "<=1400": -0.11475194653385334,
+      ">=2601": -0.48836305739349184
+    },
+    "field_bin": {
+      "12-14": 1.1383355099326413,
+      ">=15": 1.4013244062244856
+    },
+    "going": {
+      "稍": -2.135137988303814,
+      "良": -2.227016913415543,
+      "重": -1.956123320323087
+    },
+    "surface": {
+      "芝": 0.4000195502134942
+    },
+    "grade": {
+      "Ｇ２": 0.19387702639459417,
+      "Ｇ３": 0.6509464485769136
+    }
+  },
+  "validation_notes": {
+    "field_size_primary": "The strongest robust structural factor in the reference4 validation was field size.",
+    "attackability": "Attackability is beta only; pooled 2024-2026 shortlist hit was 43.5% vs 28.8%, Fisher p=0.295, so it is not used as a hard probability correction or hard skip rule.",
+    "probability_correction": false
+  }
+}
