@@ -1,0 +1,108 @@
+{
+  "version": "market_free_structure_validation_v1",
+  "created": "2026-10-08",
+  "purpose": "Test whether market-free strength/course/pace/position proxies can identify popular-horse collapse and lower-popularity top3 rise beyond market popularity.",
+  "source": "alpha_horse_predictions.csv",
+  "features_market_free": [
+    "strength5",
+    "top3rate5",
+    "course_resid_shrunk",
+    "forward5",
+    "pci_range5",
+    "c4_std5",
+    "field",
+    "distance",
+    "track",
+    "surface",
+    "class"
+  ],
+  "definitions": {
+    "collapse_rule": "popularity 1-3 and market-free structural rank is at least 3 places worse than popularity rank",
+    "rise_rule": "popularity 4-8 and market-free structural rank is top 4",
+    "collapse_outcome": "miss top3",
+    "rise_outcome": "finish top3"
+  },
+  "design": {
+    "check_2025H2": "train structural top3 model on 2025-01-01 through 2025-06-30, evaluate 2025-07-01 onward",
+    "oos_2026": "train structural top3 model on all 2025, evaluate 2026",
+    "bootstrap": "race-level bootstrap",
+    "note": "2026 has been inspected in prior research, so it is OOS to this fit but not a pristine untouched final holdout."
+  },
+  "results": {
+    "2025H2": {
+      "collapse": {
+        "flag_n": 318,
+        "flag_miss_top3": 0.5094339623,
+        "control_n": 381,
+        "control_miss_top3": 0.5275590551,
+        "popularity_adjusted_diff": -0.0047114546,
+        "adjusted_bootstrap_95": [-0.07127897, 0.06251644]
+      },
+      "rise": {
+        "flag_n": 391,
+        "flag_top3": 0.2583120205,
+        "control_n": 766,
+        "control_top3": 0.2297650131,
+        "popularity_adjusted_diff": 0.0015033810,
+        "adjusted_bootstrap_95": [-0.05069155, 0.05571463]
+      }
+    },
+    "2026": {
+      "collapse": {
+        "flag_n": 470,
+        "flag_miss_top3": 0.5425531915,
+        "control_n": 599,
+        "control_miss_top3": 0.4908180301,
+        "popularity_adjusted_diff": 0.0543445706,
+        "adjusted_bootstrap_95": [-0.00816461, 0.11687083]
+      },
+      "rise": {
+        "flag_n": 583,
+        "flag_top3": 0.2538593482,
+        "control_n": 1183,
+        "control_top3": 0.2104818259,
+        "popularity_adjusted_diff": 0.0280159657,
+        "adjusted_bootstrap_95": [-0.01272431, 0.07068746]
+      },
+      "split": {
+        "H1": {
+          "collapse_adjusted_diff": 0.0758588524,
+          "rise_adjusted_diff": 0.0534117720
+        },
+        "H2": {
+          "collapse_adjusted_diff": 0.0125739993,
+          "rise_adjusted_diff": -0.0189043907
+        }
+      }
+    },
+    "incremental_vs_market_2026": {
+      "top1_3": {
+        "n": 1069,
+        "market_logloss": 0.6618433656,
+        "market_plus_structure_logloss": 0.6634638572,
+        "delta_logloss": 0.0016204916,
+        "delta_logloss_bootstrap_95": [-0.00138734, 0.00469096]
+      },
+      "pop4_8": {
+        "n": 1766,
+        "market_logloss": 0.5245121309,
+        "market_plus_structure_logloss": 0.5243463456,
+        "delta_logloss": -0.0001657853,
+        "delta_logloss_bootstrap_95": [-0.00238480, 0.00204568]
+      },
+      "pop4_plus": {
+        "n": 3904,
+        "market_logloss": 0.3765652844,
+        "market_plus_structure_logloss": 0.3762592741,
+        "delta_logloss": -0.0003060103,
+        "delta_logloss_bootstrap_95": [-0.00159330, 0.00095372]
+      }
+    }
+  },
+  "verdict": {
+    "favorite_collapse": "not validated",
+    "lower_popularity_rise": "weak exploratory signal only; not stable across periods",
+    "app_status": "display as analysis/reference, not as calibrated risk probability or betting signal"
+  },
+  "limitation": "Historical proxy features do not yet contain the newly added real-time first-turn lane/inside-outside interaction and full expected-pace-by-horse interaction. Those need a separate historical reconstruction before the complete scenario engine can be validated."
+}
