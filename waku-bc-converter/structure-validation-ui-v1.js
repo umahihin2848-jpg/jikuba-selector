@@ -1,0 +1,10 @@
+(()=>{'use strict';
+const $=id=>document.getElementById(id);let V=null,busy=false;
+const css=document.createElement('style');css.textContent=`.svValidationNote{margin-top:8px;padding:8px 9px;border:1px solid #314d5d;border-radius:10px;background:#0a1c29;color:#8faab8;font-size:9px;line-height:1.55}.svValidationNote b{color:#d7e6ed}.svResearchTag{display:inline-block;margin-left:5px;padding:2px 6px;border-radius:999px;border:1px solid #5d526d;color:#cbbcf0;font-size:8px;font-weight:900}`;document.head.appendChild(css);
+function patchPopular(){const box=$('s5');if(!box)return;const h=box.querySelector('h2');if(h)h.textContent='⑥ 人気馬の注意材料';for(const t of box.querySelectorAll('.tag')){const s=t.textContent||'';if(s.includes('不安あり'))t.textContent='注意材料あり';else if(s.trim()==='注意')t.textContent='注意材料'}let n=box.querySelector('.svValidationNote');if(!n){n=document.createElement('div');n.className='svValidationNote';box.appendChild(n)}n.innerHTML='<b>注意材料＝凡走確率ではありません。</b> 地力・条件・ペース・位置取りのズレを整理した参考表示です。2025後半→2026の検証では、上位人気の凡走判別はまだ安定していません。'}
+function patchUpset(){const box=$('s6');if(!box)return;const h=box.querySelector('h2');if(h)h.innerHTML='⑦ 逆転候補 <span class="svResearchTag">検証中</span>';let sub=box.querySelector(':scope>.sub');if(sub)sub.textContent='市場より構造評価が上の馬を整理します。現時点では買い推奨・好走確率の上方補正には使いません。';let n=box.querySelector('.svValidationNote');if(!n){n=document.createElement('div');n.className='svValidationNote';box.appendChild(n)}n.innerHTML='<b>現状：</b> 4〜8人気で構造評価上位の馬は2026全体でやや良化したものの、人気順位調整後の差は+2.8ptで95%区間が0を跨ぎ、2026後半では再現しませんでした。参考候補として表示します。'}
+function render(){if(busy)return;busy=true;try{patchPopular();patchUpset()}finally{busy=false}}
+function go(){[150,450,900,1800,3200,4700].forEach(t=>setTimeout(render,t))}
+fetch('data/market_free_structure_validation_v1.json',{cache:'no-store'}).then(r=>r.json()).then(x=>{V=x;go()}).catch(()=>go());
+['independent-analysis-ready','race-coherent-probability-ready','rsa-addons-ready'].forEach(e=>addEventListener(e,go));addEventListener('load',go);document.getElementById('analyzeBtn')?.addEventListener('click',go);if(document.readyState!=='loading')go();
+})();
