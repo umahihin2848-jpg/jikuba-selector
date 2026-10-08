@@ -1,0 +1,47 @@
+{
+  "version": "validated_queue_model_v1",
+  "created": "2026-10-08",
+  "purpose": "Predict normalized front-back position at the first available corner from pre-race history, gate and race composition. Used for scenario visualization only, not win/top3 probability correction.",
+  "target": "early_pos_frac=(corner_position-1)/(field_size-1), lower is farther forward",
+  "training": {
+    "years": [2019, 2020, 2021, 2022, 2023],
+    "flat_course_conditions": 87,
+    "minimum_prior_corner_runs": 2,
+    "model": "StandardScaler + Ridge(alpha=10), stored below as equivalent raw-space linear coefficients"
+  },
+  "history_medians": {
+    "frontness5": 0.5550293007645948,
+    "lead_rate5": 0.0,
+    "frontness_std5": 0.1859431077026305
+  },
+  "formula": {
+    "intercept": 0.48252380749281654,
+    "coefficients": {
+      "frontness5": -0.7513962383154694,
+      "lead_rate5": -0.08686753239077462,
+      "frontness_std5": -0.0718688936188672,
+      "hist_n5": 0.008399320251016838,
+      "gate_frac": -0.005829912741151215,
+      "turn_urgency": -0.051376742198870985,
+      "front_pressure_loo": 0.6728702872594011,
+      "lead_pressure_loo": 0.06494849904150533,
+      "front_share_loo": 0.026707922110092038,
+      "outer_tuck_risk": 0.15378451079858396,
+      "outer_burn_risk": 0.22903887873515655,
+      "inner_front_edge": 0.0478711849095209,
+      "crowding_urgency": -0.051231107510032965,
+      "field_size": 0.00031644758112971155,
+      "no_turn": 0.015387173238983365
+    }
+  },
+  "oos_validation": [
+    {"year": 2024, "n_horses": 5337, "n_races": 452, "history_mae": 0.202612, "scenario_mae": 0.198058, "history_rmse": 0.249421, "scenario_rmse": 0.244548, "race_bootstrap_mae_delta": -0.0041043, "ci95": [-0.0056552, -0.0025573]},
+    {"year": 2025, "n_horses": 5443, "n_races": 464, "history_mae": 0.203997, "scenario_mae": 0.199257, "history_rmse": 0.250612, "scenario_rmse": 0.246324, "race_bootstrap_mae_delta": -0.0041061, "ci95": [-0.0055669, -0.0025979]},
+    {"year": 2026, "n_horses": 4054, "n_races": 345, "history_mae": 0.203003, "scenario_mae": 0.197369, "history_rmse": 0.250432, "scenario_rmse": 0.244355, "race_bootstrap_mae_delta": -0.0062416, "ci95": [-0.0078806, -0.0046162]}
+  ],
+  "caveats": [
+    "Validation supports front-back first-corner position refinement, not exact top-3-at-corner classification.",
+    "Historical source has corner order but no measured lateral rail/path lane. Inside/outside lane remains a heuristic estimate.",
+    "This model does not alter calibrated win/top2/top3 probabilities."
+  ]
+}
