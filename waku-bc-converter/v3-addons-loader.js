@@ -41,6 +41,7 @@ async function boot(){const files=[
   'rpci-fit-addon-v1.js?v=20261009a',
   'ui-fix-v4.js?v=20261008n',
   'analysis-output-polish-v1.js?v=20261009b',
+  'turbulence-attackability-addon-v1.js?v=20261009n',
   'final-decision-card-v1.js?v=20261009d',
   'term-guide-v1.js?v=20261009g',
   'analysis-transition-v2.js?v=20261009h',
