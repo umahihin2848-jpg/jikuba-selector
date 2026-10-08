@@ -1,0 +1,70 @@
+{
+  "version": "attackability_validation_v1",
+  "purpose": "Separate high-turbulence races into attackable vs high-turbulence-but-unpickable races using only pre-race/proxy information.",
+  "important_caveat": "Historical current popularity is final popularity, not T-15. 2026 has already been inspected in related turbulence work, so this is temporal OOS-like confirmation, not a pristine untouched holdout.",
+  "data": {
+    "runner_file": "umade.csv",
+    "rows": 74007,
+    "grades": ["G1", "G2", "G3"],
+    "years": "2020-2026-10-04"
+  },
+  "wave_layer": {
+    "train": "2020-2023",
+    "features": ["venue", "distance_bin", "field_size_bin", "going", "surface", "grade"],
+    "outcome": "any top3 finisher final popularity >=7",
+    "high_threshold": "training predicted probability 75th percentile",
+    "threshold": 0.7067999969049867
+  },
+  "longshot_candidate_model": {
+    "train": "2020-2023",
+    "population": "final popularity >=7 runners",
+    "outcome": "top3",
+    "model": "logistic regression; one-hot current context + standardized past-only history",
+    "features_numeric": ["pop", "field_size", "distance", "p_wave", "hist_n", "h5_top3_rate", "h5_finish_pct_mean", "h5_front4c_mean", "h5_rel3f_mean", "h5_上3F地点差_n_mean", "h5_RPCI_n_mean", "h5_PCI_n_mean", "prev_front", "prev_finish_pct", "prev_rel3f"],
+    "features_categorical": ["場所", "dist_bin", "field_bin", "馬場状態", "芝・ダ", "クラス名"],
+    "annual_auc": {"2024": 0.668399101700353, "2025": 0.7004980028012657, "2026": 0.6617591707924375}
+  },
+  "attackability_layer": {
+    "population": "high-wave races only",
+    "target": "at least one of the top-2 predicted longshot candidates finishes top3",
+    "train": "2020-2023",
+    "features": ["p1", "p2", "gap12", "mass1", "mass2", "p_wave", "n_long", "top1_pop", "場所", "dist_bin", "field_bin", "馬場状態", "芝・ダ", "クラス名"],
+    "high_threshold": "top third of training p_attack",
+    "threshold": 0.4387687273661994,
+    "annual": {
+      "2024": {"n": 31, "high_n": 10, "high_shortlist_hit": 0.5, "low_shortlist_hit": 0.2380952381, "auc": 0.6333333333},
+      "2025": {"n": 28, "high_n": 8, "high_shortlist_hit": 0.375, "low_shortlist_hit": 0.3, "auc": 0.5204678363},
+      "2026": {"n": 23, "high_n": 5, "high_shortlist_hit": 0.4, "low_shortlist_hit": 0.3333333333, "auc": 0.65}
+    },
+    "pooled_2024_2026": {
+      "high_n": 23,
+      "high_hits": 10,
+      "high_rate": 0.43478260869565216,
+      "low_n": 59,
+      "low_hits": 17,
+      "low_rate": 0.288135593220339,
+      "odds_ratio": 1.9004524886877827,
+      "fisher_p": 0.29524529892075024,
+      "auc": 0.6013468013468013,
+      "auc_bootstrap95": [0.46109937081793667, 0.7333333333333334],
+      "rate_diff": 0.14664701547531317,
+      "rate_diff_bootstrap95": [-0.08821755207691358, 0.3908072100313479]
+    }
+  },
+  "2026_exploratory_betting": {
+    "rule": "Within high-wave races, pair current 1st favorite with each of top-2 predicted longshot candidates; buy 100 yen quinella + 100 yen wide for each candidate.",
+    "attack_high": {"races": 5, "shortlist_hit_rate": 0.4, "combo_roi": 1.935, "bootstrap95": [0.0, 5.805]},
+    "attack_low": {"races": 18, "shortlist_hit_rate": 0.3333333333333333, "combo_roi": 1.4541666666666666, "bootstrap95": [0.14583333333333334, 3.463888888888889]},
+    "roi_diff_bootstrap95": [-2.752986111111111, 4.746666666666666]
+  },
+  "decision": {
+    "hard_skip_filter": "NO",
+    "beta_attackability_layer": "YES",
+    "recommended_labels": {
+      "high_wave_and_high_attack": "🌪 波乱高 × 🎯 攻略可能性高 = 穴狙い候補 β",
+      "high_wave_and_low_attack": "🌪 波乱高 × 🎯 攻略可能性低 = 見送り候補 β",
+      "low_wave": "本線寄り/波乱狙い不要"
+    },
+    "reason": "Direction is consistent but pooled difference is not statistically conclusive; 2025 discrimination is weak and 2026 sample is small/heavy-tailed."
+  }
+}
