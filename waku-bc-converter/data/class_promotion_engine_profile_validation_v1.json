@@ -1,0 +1,73 @@
+{
+  "version": "class_promotion_engine_profile_validation_v1",
+  "created": "2026-10-09",
+  "source": "umade.csv",
+  "question": "Which 3-win to open-class promotion horses show evidence that stronger opposition elicits more of their latent output?",
+  "scope": {
+    "period": "2016-01-05 to 2026-10-04",
+    "transition": "consecutive 3-win -> open-class starts within 365 days",
+    "same_surface_and_exact_distance": true,
+    "n": 867,
+    "time_split": {
+      "train": "2016-2022, n=531",
+      "validation": "2023-2024, n=176",
+      "holdout": "2025-2026, n=160"
+    }
+  },
+  "engine_profile": {
+    "definition": "previous-race RPCI >= 50 AND previous-race final-3F at least 0.5 sec faster than that race field median",
+    "meaning": "back-loaded/slow-side race shape plus clearly superior relative late speed",
+    "note": "This is intentionally a simple interpretable profile, not a fitted seconds correction."
+  },
+  "top3_results": {
+    "2016_2022": {"profile_n":78,"profile_top3":0.4103,"others_top3":0.2450,"fisher_p":0.0035},
+    "2023_2024": {"profile_n":22,"profile_top3":0.5000,"others_top3":0.2987,"fisher_p":0.0862},
+    "2025_2026_holdout": {"profile_n":26,"profile_top3":0.5000,"profile_top3_wilson95":[0.3206,0.6794],"others_top3":0.2612,"odds_ratio_raw":2.8286,"fisher_p":0.0199}
+  },
+  "adjusted_association_all_years": {
+    "controls": ["previous field-relative time", "recent field-relative form", "days since previous start", "distance", "surface", "field size", "year"],
+    "cluster": "horse",
+    "profile_odds_ratio_top3": 1.8561,
+    "profile_odds_ratio_95ci": [1.2054, 2.8582],
+    "p": 0.0050,
+    "with_current_popularity_control": {
+      "profile_odds_ratio_top3": 1.8259,
+      "profile_odds_ratio_95ci": [1.1625, 2.8677],
+      "p": 0.0090
+    }
+  },
+  "heldout_probability_model": {
+    "baseline_2025_2026": {"auc":0.7537,"logloss":0.53254,"brier":0.17779},
+    "plus_engine_profile_2025_2026": {"auc":0.7526,"logloss":0.52942,"brier":0.17609},
+    "paired_bootstrap_delta_profile_minus_baseline": {
+      "logloss_median": -0.00307,
+      "logloss_95ci": [-0.01597, 0.00972],
+      "brier_median": -0.00169,
+      "brier_95ci": [-0.00763, 0.00421]
+    },
+    "interpretation": "Calibration losses improve slightly but the paired holdout confidence intervals cross zero, so this is not yet strong enough for a hard probability correction."
+  },
+  "strict_clock_sensitivity": {
+    "condition": "same venue, surface, exact distance, course division and going between 3-win and open starts",
+    "profile_n": 18,
+    "other_n": 124,
+    "profile_own_time_change_seconds": 0.1667,
+    "other_own_time_change_seconds": -0.3734,
+    "difference_seconds": 0.5401,
+    "sign_convention": "positive = horse itself ran faster after promotion",
+    "welch_p": 0.0874,
+    "bootstrap95_difference": [0.0055, 1.1536],
+    "interpretation": "Suggestive but small-n and unstable; it is notable that the profile mean is close to +0.2 sec, but this is not precise enough to justify a universal +0.2-sec correction."
+  },
+  "model_search": {
+    "continuous_engine_features": "Adding RPCI, PCI-RPCI, relative final-3F, remaining-600m gap and position to a regularized performance model produced only a modest 2025-2026 gain (Spearman about 0.246 -> 0.278; MAE about 0.538 -> 0.531), with paired bootstrap uncertainty crossing zero.",
+    "nearby_threshold_sensitivity": "RPCI thresholds 49-51 and relative final-3F thresholds 0.4-0.6 sec generally preserved a positive top-3 lift, suggesting the signal is not dependent on one exact cut point."
+  },
+  "decision": {
+    "hard_class_seconds_correction": "reject_for_now",
+    "hard_probability_correction": "reject_for_now",
+    "beta_flag": "supported",
+    "recommended_label": "昇級エンジン候補 β",
+    "recommended_use": "context/ranking-support only; do not alter win/top2/top3 probabilities or FinishScore yet"
+  }
+}
