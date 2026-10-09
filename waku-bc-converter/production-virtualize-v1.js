@@ -1,6 +1,7 @@
 (()=>{'use strict';
 let parked=[],timers=[],epoch=0,minGeneration=0,lastBeginAt=0,lastRestoreAt=0;
 const KEEP=new Set(['finalDecisionCard','scenarioView','xPostCard','turbulenceStructureBox']);
+const INPUT_IDS=new Set(['raceDate','venue','raceName','fieldSize','surface','distance','grade','going','oddsPaste','csvFile']);
 function result(){return document.getElementById('result')}
 function clearTimers(){for(const t of timers)clearTimeout(t);timers=[]}
 function later(fn,ms){const id=setTimeout(()=>{timers=timers.filter(x=>x!==id);fn()},ms);timers.push(id);return id}
@@ -10,6 +11,9 @@ function schedulePark(){const token=epoch;later(()=>park(token),120);later(()=>p
 function beginAnalyze(){lastBeginAt=Date.now();const g=Number(window.RSAAnalysisTransitionState?.generation||0);restore();minGeneration=g+1;schedulePark()}
 function restoreOnly(){lastRestoreAt=Date.now();restore();minGeneration=0}
 function auxiliaryTarget(id){return ['parseCsvBtn','applyOddsBtn','scenarioToggle'].includes(id)}
+function restoreForInput(e){if(INPUT_IDS.has(e.target?.id)&&parked.length)restoreOnly()}
+document.addEventListener('change',restoreForInput,true);
+document.addEventListener('input',restoreForInput,true);
 document.addEventListener('pointerdown',e=>{const id=e.target?.id;if(id==='analyzeBtn')beginAnalyze();else if(auxiliaryTarget(id))restoreOnly()},true);
 document.addEventListener('click',e=>{const id=e.target?.id,now=Date.now();if(id==='analyzeBtn'){if(now-lastBeginAt>700)beginAnalyze();else schedulePark()}else if(auxiliaryTarget(id)&&now-lastRestoreAt>700)restoreOnly()},true);
 ['rsa-analysis-complete','final-decision-ready','calibrated-probability-ready'].forEach(e=>addEventListener(e,schedulePark));
