@@ -42,6 +42,25 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - name: Syntax check V5 scripts
+        run: |
+          for f in \
+            waku-bc-converter/v5-ui.js \
+            waku-bc-converter/v5-goal-map-v1.js \
+            waku-bc-converter/v5-ux-polish-v1.js \
+            waku-bc-converter/v5-layout-fix-v1.js \
+            waku-bc-converter/v5-decision-scenario-v1.js \
+            waku-bc-converter/v5-op-market-v1.js \
+            waku-bc-converter/v5-horse-kart-v2.js \
+            waku-bc-converter/v5-analysis-stability-v1.js \
+            waku-bc-converter/v4-app.js \
+            waku-bc-converter/v4-m3-engine-v1.js \
+            waku-bc-converter/v4-validated-flow-v1.js \
+            waku-bc-converter/v4-candidate-classifier-v1.js \
+            waku-bc-converter/v4-webkit-stability-v1.js; do
+            echo "checking $f"
+            node --check "$f"
+          done
       - name: Install Playwright
         run: |
           npm install --no-save playwright@latest
