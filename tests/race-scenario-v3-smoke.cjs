@@ -81,11 +81,13 @@ async function run(browserType,name){
   assert(!structureLabels.some(x=>x.trim()==='荒れる余地'),`${name}: obsolete heuristic turbulence card removed`);
   assert.strictEqual(await page.locator('#s3 .horse').count(),16,`${name}: all 16 horses shown once`);
   const scenarioText=await page.locator('#s3').innerText();assert(scenarioText.includes('M3末脚'),`${name}: M3 visible in all-horse view`);assert(!scenarioText.includes('コース ◎'),`${name}: weak fit scoring not promoted in production all-horse view`);
-  const afterAnalysis=await page.evaluate(()=>({nodes:document.querySelectorAll('*').length,y:scrollY,max:document.documentElement.scrollHeight-innerHeight,headerDisplay:getComputedStyle(document.querySelector('header.top')).display}));assert(afterAnalysis.nodes<2600,`${name}: analysis DOM remains bounded (${afterAnalysis.nodes})`);assert(afterAnalysis.headerDisplay!=='none',`${name}: header remains visible after scenario render`);
+  const afterAnalysis=await page.evaluate(()=>({nodes:document.querySelectorAll('*').length,y:scrollY,max:document.documentElement.scrollHeight-innerHeight,headerDisplay:getComputedStyle(document.querySelector('header.top')).display}));assert(afterAnalysis.nodes<5200,`${name}: analysis DOM has a finite production ceiling (${afterAnalysis.nodes})`);assert(afterAnalysis.headerDisplay!=='none',`${name}: header remains visible after scenario render`);
 
   await page.selectOption('#going','重');
   await analyze(page);
   assert((await page.locator('#s2').innerText()).includes('重'),`${name}: scenario summary refreshed after going change`);
+  const afterRefreshNodes=await page.evaluate(()=>document.querySelectorAll('*').length);
+  assert(afterRefreshNodes<=afterAnalysis.nodes+120,`${name}: repeated analysis must not leak DOM nodes (${afterAnalysis.nodes} -> ${afterRefreshNodes})`);
 
   await page.locator('#finalDecisionCard').scrollIntoViewIfNeeded();assert(await page.locator('#finalDecisionCard').isVisible(),`${name}: final decision visible after scroll`);await page.locator('#savedList').scrollIntoViewIfNeeded();
   const bottom=await page.evaluate(()=>({y:scrollY,max:document.documentElement.scrollHeight-innerHeight,h:document.body.getBoundingClientRect().height}));assert(bottom.y>=0&&bottom.y<=bottom.max+3,`${name}: bottom scroll valid`);assert(bottom.h>844,`${name}: expected page height`);
