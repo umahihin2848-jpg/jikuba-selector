@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const BUILD='20261009q8',LABEL='Scenario v1 · Q8 · 安定版';
+const BUILD='20261009q9',LABEL='Scenario v1 · Q9 · 安定版';
 const css=document.createElement('style');css.textContent=`
 #result:not(.rsaCalcPending) #finalDecisionCard{display:block!important;visibility:visible!important;opacity:1!important;content-visibility:visible!important}
 #result:not(.rsaCalcPending) #turbulenceStructureBox{visibility:visible!important;opacity:1!important}
