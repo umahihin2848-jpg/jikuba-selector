@@ -3,6 +3,8 @@ const BUILD='20261009q10',LABEL='Scenario v1 · Q10 · 安定版';
 const css=document.createElement('style');css.textContent=`
 #result:not(.rsaCalcPending) #finalDecisionCard{display:block!important;visibility:visible!important;opacity:1!important;content-visibility:visible!important}
 #result:not(.rsaCalcPending) #turbulenceStructureBox{visibility:visible!important;opacity:1!important}
+#result:not(.rsaCalcPending) #scenarioView{display:grid!important;visibility:visible!important;opacity:1!important;content-visibility:visible!important}
+#result:not(.rsaCalcPending) #scenarioView>.sv{display:block!important;visibility:visible!important;opacity:1!important;content-visibility:visible!important}
 `;document.head.appendChild(css);
 function apply(){const result=document.getElementById('result'),decision=document.getElementById('finalDecisionCard');if(decision){decision.classList.remove('legacy','uiMovedTechnical','hidden');decision.removeAttribute('hidden');if(result&&result.firstElementChild!==decision)result.insertBefore(decision,result.firstElementChild)}const badge=document.querySelector('.brand .badge');if(badge&&badge.textContent!==LABEL)badge.textContent=LABEL;document.documentElement.dataset.rsaBuild=BUILD;document.documentElement.dataset.rsaAutoResume='off'}
 function schedule(){[0,80,220,520,1100].forEach(t=>setTimeout(apply,t))}
