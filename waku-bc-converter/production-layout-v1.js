@@ -1,12 +1,15 @@
 (()=>{'use strict';
-const BUILD='20261009q6',LABEL='Scenario v1 · Q6 · 安定版';
-let timer=0;
+const BUILD='20261009q7',LABEL='Scenario v1 · Q7 · 安定版';
+const css=document.createElement('style');css.textContent=`
+#result:not(.rsaCalcPending) #finalDecisionCard{display:block!important;visibility:visible!important;opacity:1!important;content-visibility:visible!important}
+#result:not(.rsaCalcPending) #turbulenceStructureBox{visibility:visible!important;opacity:1!important}
+`;document.head.appendChild(css);
 function apply(){
   const result=document.getElementById('result');
   const decision=document.getElementById('finalDecisionCard');
   if(decision){
-    decision.classList.remove('legacy','uiMovedTechnical');
-    decision.style.display='';
+    decision.classList.remove('legacy','uiMovedTechnical','hidden');
+    decision.removeAttribute('hidden');
     if(result&&result.firstElementChild!==decision)result.insertBefore(decision,result.firstElementChild);
   }
   const badge=document.querySelector('.brand .badge');
@@ -14,8 +17,8 @@ function apply(){
   document.documentElement.dataset.rsaBuild=BUILD;
   document.documentElement.dataset.rsaAutoResume='off';
 }
-function schedule(){clearTimeout(timer);[0,80,240,650,1400].forEach(t=>setTimeout(apply,t))}
-['final-decision-ready','turbulence-structure-ready','calibrated-probability-ready','rsa-addons-ready'].forEach(ev=>addEventListener(ev,schedule));
+function schedule(){[0,80,220,520,1100].forEach(t=>setTimeout(apply,t))}
+['final-decision-ready','turbulence-structure-ready','calibrated-probability-ready','rsa-addons-ready','rsa-analysis-complete'].forEach(ev=>addEventListener(ev,schedule));
 document.addEventListener('click',e=>{if(['analyzeBtn','parseCsvBtn','applyOddsBtn'].includes(e.target?.id))schedule()});
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',schedule,{once:true});else schedule();
 })();
