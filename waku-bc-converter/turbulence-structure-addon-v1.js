@@ -1,6 +1,6 @@
 (()=>{'use strict';
 const $=id=>document.getElementById(id);let MODEL=null,busy=false;
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const logistic=z=>1/(1+Math.exp(-z));
 function addGoingInput(){if($('going'))return;const grade=$('grade');if(!grade)return;const host=grade.closest('.grid3')||grade.parentElement?.parentElement;if(!host)return;const wrap=document.createElement('div');wrap.className='field';wrap.id='turbGoingField';wrap.innerHTML='<label>馬場状態</label><select id="going"><option>良</option><option>稍</option><option>重</option><option>不</option></select>';host.appendChild(wrap);try{const v=localStorage.getItem('rsaGoingV1');if(v&&['良','稍','重','不'].includes(v))$('going').value=v}catch{}$('going')?.addEventListener('change',()=>{try{localStorage.setItem('rsaGoingV1',$('going').value)}catch{};schedule()})}
 function gradeKey(){const g=$('grade')?.value||'';return g==='G1'?'Ｇ１':g==='G2'?'Ｇ２':g==='G3'?'Ｇ３':g}
