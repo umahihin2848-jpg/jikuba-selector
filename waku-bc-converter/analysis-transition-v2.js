@@ -1,4 +1,5 @@
 (()=>{'use strict';
+if(window.__RSA_ANALYSIS_TRANSITION_V2_LOADED)return;window.__RSA_ANALYSIS_TRANSITION_V2_LOADED=true;
 const $=id=>document.getElementById(id),C=window.ShapeCore;
 let active=false,started=0,g=0,hard=0,ready=0,lastCoreKey='';
 // Only production-critical modules gate the result. Research/reference beta modules may arrive later.
@@ -13,15 +14,11 @@ function panel(){const r=$('result');if(!r)return null;let p=$('rsaCalcPanel');i
 function progress(t){if($('rsaCalcText'))$('rsaCalcText').textContent=t;const n=req.filter(x=>seen.has(x)).length;if($('rsaProgBar'))$('rsaProgBar').style.width=`${8+n/req.length*88}%`;state('running')}
 function restore(){document.body.classList.remove('rsaAnalysisBusy');const b=$('analyzeBtn');if(b){b.textContent=b.dataset.oldText||'このレースを分析';b.removeAttribute('aria-busy')}}
 function seedReusableCore(){if(!lastCoreKey||lastCoreKey!==coreKey())return;if(window.CalibratedProbabilityState?.ready)seen.add('calibrated-probability-ready');if(window.ScenarioStatisticsState?.ready)seen.add('scenario-statistics-ready')}
-// Completion is event-driven. Once every production-critical module has emitted its ready event,
-// finish synchronously instead of depending on a presentation timer. This also makes repeated
-// analyses reliable in WebKit/background-throttled environments where a short timer can be delayed.
-function scheduleFinish(id){if(!active||id!==g)return;if(!req.every(x=>seen.has(x)))return;finish(id)}
-function begin(){const r=$('result'),b=$('analyzeBtn');if(!r)return;document.getElementById('rsaPreflightNotice')?.remove();g++;active=true;started=performance.now();seen.clear();seedReusableCore();clearTimeout(hard);clearTimeout(ready);panel();r.classList.add('rsaCalcPending');document.body.classList.add('rsaAnalysisBusy');if(b){b.dataset.oldText=b.textContent||'';b.textContent='分析中…';b.setAttribute('aria-busy','true')}progress(seen.size?'既存の基礎結果を確認中':'基礎モデルを計算中');const id=g;hard=setTimeout(()=>fail(id),6500);check()}
 function finish(id){if(!active||id!==g)return;active=false;lastCoreKey=coreKey();clearTimeout(hard);clearTimeout(ready);$('result')?.classList.remove('rsaCalcPending');$('rsaCalcPanel')?.remove();restore();state('ready');dispatchEvent(new CustomEvent('rsa-analysis-complete',{detail:window.RSAAnalysisTransitionState}));requestAnimationFrame(()=>requestAnimationFrame(()=>{const c=$('finalDecisionCard');if(c)window.scrollTo({top:Math.max(0,c.getBoundingClientRect().top+scrollY-64),behavior:'smooth'})}))}
+function check(id=g){if(!active||id!==g)return;const complete=req.every(x=>seen.has(x));if(complete)finish(id)}
+function begin(){const r=$('result'),b=$('analyzeBtn');if(!r)return;document.getElementById('rsaPreflightNotice')?.remove();g++;active=true;started=performance.now();seen.clear();seedReusableCore();clearTimeout(hard);clearTimeout(ready);panel();r.classList.add('rsaCalcPending');document.body.classList.add('rsaAnalysisBusy');if(b){b.dataset.oldText=b.textContent||'';b.textContent='分析中…';b.setAttribute('aria-busy','true')}progress(seen.size?'既存の基礎結果を確認中':'基礎モデルを計算中');const id=g;hard=setTimeout(()=>fail(id),6500);check(id);queueMicrotask(()=>check(id))}
 function fail(id){if(!active||id!==g)return;const m=req.filter(x=>!seen.has(x));if(!m.length){finish(id);return}active=false;clearTimeout(hard);clearTimeout(ready);restore();state('error');const p=panel();if(!p)return;p.classList.add('rsaCalcError');p.innerHTML=`<div class="rsaErr">!</div><div class="rsaCalcBody"><b>分析が最後まで完了しませんでした</b><span>${m.map(x=>name[x]).join('・')} が未完了です。</span><small>未完成の途中結果は表示しません。入力条件を確認して再分析してください。</small><button id="rsaRetryBtn">もう一度分析</button></div>`;$('rsaRetryBtn')?.addEventListener('click',()=>$('analyzeBtn')?.click());dispatchEvent(new CustomEvent('rsa-analysis-error',{detail:window.RSAAnalysisTransitionState}))}
-function check(){if(!active)return;const core=req.every(x=>seen.has(x));if(core)scheduleFinish(g)}
-req.forEach(ev=>addEventListener(ev,()=>{if(!active)return;seen.add(ev);progress(name[ev]+'を更新中');check()}));
+req.forEach(ev=>addEventListener(ev,()=>{if(!active)return;seen.add(ev);progress(name[ev]+'を更新中');check(g)}));
 ['rpci-fit-beta-ready','turbulence-structure-ready','remaining600-validated-ready'].forEach(ev=>addEventListener(ev,()=>{if(active)progress(name[ev]||'補助情報を更新中')}));
 document.addEventListener('click',e=>{if(e.target?.id!=='analyzeBtn')return;const a=miss();if(a.length){e.preventDefault();e.stopImmediatePropagation();notice(a);return}begin()},true);
 state();
