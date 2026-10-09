@@ -1,0 +1,100 @@
+{
+  "version": "threewin-market-structure-v1",
+  "scope": "JRA flat 3勝 only; class=3勝; obstacle races excluded by class",
+  "outcome": "at least one final-popularity >=7 horse finishes top3",
+  "predictor": "field size only",
+  "selection_note": "Field-size-only was selected over the fuller venue+distance+field+going+surface logistic model because OOS discrimination was similar while Brier/logloss were slightly better and the rule is simpler.",
+  "development": {
+    "years": "2020-2023",
+    "n_races": 841,
+    "events": 526,
+    "rate": 0.6254458977407847
+  },
+  "oos": {
+    "years": "2024-2026 through 2026-10-04",
+    "n_races": 587,
+    "events": 342,
+    "rate": 0.5826235093696763
+  },
+  "bands": {
+    "le11": {
+      "field_rule": "<=11",
+      "level": "low",
+      "label": "低",
+      "action": "本線寄り",
+      "train_n": 122,
+      "train_events": 46,
+      "train_rate": 0.3770491803278688,
+      "oos_n": 91,
+      "oos_events": 29,
+      "oos_rate": 0.31868131868131866,
+      "oos_ci95_wilson": [0.23196000154381535, 0.42009090097984436],
+      "yearly": {
+        "2024": {"n": 29, "events": 6, "rate": 0.20689655172413793},
+        "2025": {"n": 33, "events": 10, "rate": 0.30303030303030304},
+        "2026": {"n": 29, "events": 13, "rate": 0.4482758620689655}
+      }
+    },
+    "12_14": {
+      "field_rule": "12-14",
+      "level": "standard",
+      "label": "標準",
+      "action": "中立",
+      "train_n": 203,
+      "train_events": 121,
+      "train_rate": 0.5960591133004927,
+      "oos_n": 170,
+      "oos_events": 95,
+      "oos_rate": 0.5588235294117647,
+      "oos_ci95_wilson": [0.4837022802241812, 0.6313450746224477],
+      "yearly": {
+        "2024": {"n": 72, "events": 45, "rate": 0.625},
+        "2025": {"n": 61, "events": 28, "rate": 0.45901639344262296},
+        "2026": {"n": 37, "events": 22, "rate": 0.5945945945945946}
+      }
+    },
+    "ge15": {
+      "field_rule": ">=15",
+      "level": "high",
+      "label": "高",
+      "action": "人気薄を無視しない",
+      "train_n": 516,
+      "train_events": 359,
+      "train_rate": 0.6957364341085271,
+      "oos_n": 326,
+      "oos_events": 218,
+      "oos_rate": 0.6687116564417178,
+      "oos_ci95_wilson": [0.6159141345441811, 0.7175794183684544],
+      "yearly": {
+        "2024": {"n": 111, "events": 76, "rate": 0.6846846846846847},
+        "2025": {"n": 122, "events": 82, "rate": 0.6721311475409836},
+        "2026": {"n": 93, "events": 60, "rate": 0.6451612903225806}
+      }
+    }
+  },
+  "oos_tests": {
+    "three_band_chi_square_p": 1.2459404060575843e-08,
+    "low_vs_mid_fisher_p": 0.00025721733659013604,
+    "low_vs_high_fisher_p": 3.351976031490573e-09,
+    "mid_vs_high_fisher_p": 0.018624483100835657
+  },
+  "model_comparison_oos": {
+    "field_size_only": {
+      "auc": 0.6204738035565103,
+      "brier": 0.22942388454393958,
+      "logloss": 0.6513742708409671
+    },
+    "full_logistic_same_family": {
+      "auc": 0.6273063611409476,
+      "brier": 0.2302633396571773,
+      "logloss": 0.6538745421750791
+    }
+  },
+  "usage": {
+    "role": "validated auxiliary race-structure layer for 3勝 only",
+    "probability_correction": false,
+    "horse_ranking_change": false,
+    "display": "OOS empirical rate by field-size band; not a per-race calibrated probability",
+    "prospective_confirmation_start": "after 2026-10-04"
+  }
+}
