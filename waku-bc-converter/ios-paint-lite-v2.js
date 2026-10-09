@@ -15,12 +15,10 @@ body.iosPaintLiteV2 .iosPaintReady #result *,body.iosPaintLiteV2 .iosPaintReady 
  body.iosPaintLiteV2 #qRealTrack,body.iosPaintLiteV2 .rtCourse,body.iosPaintLiteV2 .rtHorse{transform:none!important;will-change:auto!important;box-shadow:none!important;background-image:none!important}
 }
 `;document.head.appendChild(css);
-let paintTimer=0;
-function repaint(){clearTimeout(paintTimer);paintTimer=setTimeout(()=>{const y=window.scrollY||0;document.body.classList.remove('rsaResumeRepaint');const root=document.querySelector('.app')||document.body;const old=root.style.opacity;root.style.opacity='.999';void root.offsetHeight;requestAnimationFrame(()=>{root.style.opacity=old||'';window.scrollTo({left:0,top:y,behavior:'auto'})})},90)}
-let scrollTimer=0;addEventListener('scroll',()=>{clearTimeout(scrollTimer);scrollTimer=setTimeout(repaint,140)},{passive:true});
-addEventListener('final-decision-ready',()=>{document.body.classList.add('iosPaintReady');repaint()});
+function settle(){document.body.classList.remove('rsaResumeRepaint');void document.documentElement.offsetHeight;void document.body.offsetHeight}
+addEventListener('final-decision-ready',()=>{document.body.classList.add('iosPaintReady');setTimeout(settle,40)});
 document.getElementById('analyzeBtn')?.addEventListener('click',()=>document.body.classList.remove('iosPaintReady'));
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')repaint()});
-addEventListener('pageshow',repaint);addEventListener('orientationchange',()=>setTimeout(repaint,180));
-setTimeout(repaint,350);setTimeout(repaint,1200);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(settle,80)});
+addEventListener('pageshow',()=>setTimeout(settle,80));addEventListener('orientationchange',()=>setTimeout(settle,180));
+setTimeout(settle,350);
 })();
