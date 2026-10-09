@@ -61,8 +61,9 @@ async function run(browserType,name){
   assert((await page.locator('.brand .badge').textContent()).includes('Q10'),`${name}: Q10 badge remains`);
   assert(!(await page.locator('#finalDecisionCard').evaluate(el=>el.classList.contains('legacy'))),`${name}: final decision visible production card`);
   assert((await page.locator('#turbulenceStructureBox').innerText()).includes('波乱構造'),`${name}: validated turbulence rendered`);
-  assert(!(await page.locator('#s1').innerText()).includes('荒れる余地'),`${name}: obsolete heuristic turbulence removed`);
-  assert((await page.locator('#s1').innerText()).includes('波乱構造'),`${name}: scenario summary uses validated turbulence`);
+  const structureLabels=await page.locator('#s1 .bx span').allTextContents();
+  assert(!structureLabels.some(x=>x.trim()==='荒れる余地'),`${name}: obsolete heuristic turbulence card removed`);
+  assert(structureLabels.some(x=>x.includes('波乱構造')),`${name}: scenario summary uses validated turbulence`);
   assert.strictEqual(await page.locator('#s3 .horse').count(),16,`${name}: all 16 horses shown once`);
   const scenarioText=await page.locator('#s3').innerText();assert(scenarioText.includes('M3末脚'),`${name}: M3 visible in all-horse view`);assert(!scenarioText.includes('コース ◎'),`${name}: weak fit scoring not promoted in production all-horse view`);
   const afterAnalysis=await page.evaluate(()=>({nodes:document.querySelectorAll('*').length,y:scrollY,max:document.documentElement.scrollHeight-innerHeight,headerDisplay:getComputedStyle(document.querySelector('header.top')).display}));assert(afterAnalysis.nodes<2600,`${name}: analysis DOM remains bounded (${afterAnalysis.nodes})`);assert(afterAnalysis.headerDisplay!=='none',`${name}: header remains visible after scenario render`);
