@@ -1,7 +1,7 @@
 (()=>{'use strict';
 const isiOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);if(!isiOS)return;
 document.body.classList.add('iosPaintLite');
-const badge=document.querySelector('.brand .badge');if(badge)badge.textContent='Scenario v1 · iOS Lite N';
+const badge=document.querySelector('.brand .badge');if(badge)badge.textContent='Scenario v1 · iOS Lite O';
 const css=document.createElement('style');css.textContent=`
 body.iosPaintLite,body.iosPaintLite.rsaResumeRepaint{transform:none!important;filter:none!important;perspective:none!important;background:#06111b!important}
 @media(max-width:620px){
