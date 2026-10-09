@@ -12,6 +12,8 @@ on:
       - "waku-bc-converter/v5-layout-fix-v1.js"
       - "waku-bc-converter/v5-decision-scenario-v1.js"
       - "waku-bc-converter/v5-op-market-v1.js"
+      - "waku-bc-converter/v5-popularity-range-v1.js"
+      - "waku-bc-converter/v5-quick-view-v1.js"
       - "waku-bc-converter/v5-horse-kart-v2.js"
       - "waku-bc-converter/v5-analysis-stability-v1.js"
       - "waku-bc-converter/v4-app.js"
@@ -51,6 +53,8 @@ jobs:
             waku-bc-converter/v5-layout-fix-v1.js \
             waku-bc-converter/v5-decision-scenario-v1.js \
             waku-bc-converter/v5-op-market-v1.js \
+            waku-bc-converter/v5-popularity-range-v1.js \
+            waku-bc-converter/v5-quick-view-v1.js \
             waku-bc-converter/v5-horse-kart-v2.js \
             waku-bc-converter/v5-analysis-stability-v1.js \
             waku-bc-converter/v4-app.js \
