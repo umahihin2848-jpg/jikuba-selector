@@ -12,7 +12,7 @@ on:
       - "waku-bc-converter/v5-layout-fix-v1.js"
       - "waku-bc-converter/v5-decision-scenario-v1.js"
       - "waku-bc-converter/v5-op-market-v1.js"
-      - "waku-bc-converter/v5-horse-kart-v1.js"
+      - "waku-bc-converter/v5-horse-kart-v2.js"
       - "waku-bc-converter/v5-analysis-stability-v1.js"
       - "waku-bc-converter/v4-app.js"
       - "waku-bc-converter/v4-m3-engine-v1.js"
