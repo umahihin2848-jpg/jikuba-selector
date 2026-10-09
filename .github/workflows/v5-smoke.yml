@@ -7,6 +7,7 @@ on:
       - "waku-bc-converter/v5.html"
       - "waku-bc-converter/v5.css"
       - "waku-bc-converter/v5-ui.js"
+      - "waku-bc-converter/v5-goal-map-v1.js"
       - "waku-bc-converter/v4-app.js"
       - "waku-bc-converter/v4-m3-engine-v1.js"
       - "waku-bc-converter/v4-validated-flow-v1.js"
