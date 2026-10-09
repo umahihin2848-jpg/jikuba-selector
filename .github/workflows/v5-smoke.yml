@@ -11,6 +11,8 @@ on:
       - "waku-bc-converter/v5-ux-polish-v1.js"
       - "waku-bc-converter/v5-layout-fix-v1.js"
       - "waku-bc-converter/v5-decision-scenario-v1.js"
+      - "waku-bc-converter/v5-op-market-v1.js"
+      - "waku-bc-converter/v5-horse-kart-v1.js"
       - "waku-bc-converter/v5-analysis-stability-v1.js"
       - "waku-bc-converter/v4-app.js"
       - "waku-bc-converter/v4-m3-engine-v1.js"
@@ -22,7 +24,7 @@ on:
       - "waku-bc-converter/v3-addons-loader-p.js"
       - "waku-bc-converter/remaining600-validated-v1.js"
       - "waku-bc-converter/finish600-simulator-v2.js"
-      - "tests/race-scenario-v5-a6-smoke.cjs"
+      - "tests/race-scenario-v5-a9-smoke.cjs"
       - ".github/workflows/v5-smoke.yml"
   workflow_dispatch:
 
@@ -49,4 +51,4 @@ jobs:
           python3 -m http.server 4173 > /tmp/jikuba-v5-server.log 2>&1 &
           sleep 2
       - name: Run V5 iPhone race flow test
-        run: node tests/race-scenario-v5-a6-smoke.cjs
+        run: node tests/race-scenario-v5-a9-smoke.cjs
