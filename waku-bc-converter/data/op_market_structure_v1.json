@@ -1,0 +1,85 @@
+{
+  "version": "op-market-structure-v1",
+  "scope": "JRA flat OP only; class=ｵｰﾌﾟﾝ; obstacle races excluded",
+  "outcome": "at least one final-popularity >=7 horse finishes top3",
+  "predictor": "field size only",
+  "development": {
+    "train_years": "2020-2023",
+    "oos_years": "2024-2026",
+    "train_n": 307,
+    "oos_n": 230
+  },
+  "bands": {
+    "le10": {
+      "field_min": 1,
+      "field_max": 10,
+      "level": "low",
+      "label": "低",
+      "action": "本線寄り",
+      "train_n": 50,
+      "train_events": 8,
+      "train_rate": 0.16,
+      "oos_n": 37,
+      "oos_events": 6,
+      "oos_rate": 0.1621621622,
+      "oos_ci95_wilson": [0.0765120723, 0.3113648370],
+      "oos_years": {
+        "2024": {"n": 14, "events": 1, "rate": 0.0714285714},
+        "2025": {"n": 11, "events": 2, "rate": 0.1818181818},
+        "2026": {"n": 12, "events": 3, "rate": 0.25}
+      }
+    },
+    "11_15": {
+      "field_min": 11,
+      "field_max": 15,
+      "level": "standard",
+      "label": "標準",
+      "action": "中立",
+      "train_n": 125,
+      "train_events": 66,
+      "train_rate": 0.528,
+      "oos_n": 94,
+      "oos_events": 55,
+      "oos_rate": 0.5851063830,
+      "oos_ci95_wilson": [0.4840802053, 0.6794496541],
+      "oos_years": {
+        "2024": {"n": 33, "events": 16, "rate": 0.4848484848},
+        "2025": {"n": 34, "events": 22, "rate": 0.6470588235},
+        "2026": {"n": 27, "events": 17, "rate": 0.6296296296}
+      }
+    },
+    "ge16": {
+      "field_min": 16,
+      "field_max": 30,
+      "level": "high",
+      "label": "高",
+      "action": "人気薄を無視しない",
+      "train_n": 132,
+      "train_events": 91,
+      "train_rate": 0.6893939394,
+      "oos_n": 99,
+      "oos_events": 69,
+      "oos_rate": 0.6969696970,
+      "oos_ci95_wilson": [0.6004873886, 0.7787371037],
+      "oos_years": {
+        "2024": {"n": 34, "events": 20, "rate": 0.5882352941},
+        "2025": {"n": 39, "events": 31, "rate": 0.7948717949},
+        "2026": {"n": 26, "events": 18, "rate": 0.6923076923}
+      }
+    }
+  },
+  "oos_tests": {
+    "three_band_chi_square_p": 1.3720578736e-7,
+    "high_vs_low_fisher_odds_ratio": 11.8833333333,
+    "high_vs_low_fisher_p": 1.9819279954e-8,
+    "mid_vs_low_fisher_odds_ratio": 7.2863247863,
+    "mid_vs_low_fisher_p": 1.2210276308e-5,
+    "high_vs_mid_fisher_p": 0.1329062947
+  },
+  "usage": {
+    "role": "validated auxiliary race-structure layer for OP only",
+    "probability_correction": false,
+    "horse_ranking_change": false,
+    "display_as": "OOS empirical rate, not per-race probability"
+  }
+}
