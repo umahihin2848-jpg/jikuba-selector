@@ -1,0 +1,17 @@
+(()=>{'use strict';
+if(window.__V5_ANALYSIS_STABILITY_V1)return;window.__V5_ANALYSIS_STABILITY_V1=true;
+const $=id=>document.getElementById(id);
+let innerRetry=0,lastOuterStart=0,timer=null;
+const css=document.createElement('style');css.id='v5-analysis-stability-v1-css';css.textContent=`
+body.v5AnalysisPending #v5ResultShell,body.v5AnalysisPending #v5Tabs,body.v5AnalysisFailed #v5ResultShell,body.v5AnalysisFailed #v5Tabs{display:none!important}
+.v5Recovery{display:grid;gap:8px}.v5Recovery b{font-size:12px}.v5Recovery span{font-size:9px;line-height:1.65;color:#d9a8a8}.v5Recovery small{font-size:8px;line-height:1.55;color:#9b7f82}.v5Recovery button{margin-top:3px;min-height:42px;border:1px solid #4c7da4;border-radius:12px;background:#102b43;color:#eaf6ff;font-weight:850}
+`;document.head.appendChild(css);
+function outerRunning(){const s=$('modelStatus')?.textContent||'';return /起動中|解析中|計算中|再試行中/.test(s)}
+function startOuter(){innerRetry=0;lastOuterStart=Date.now();document.body.classList.add('v5AnalysisPending');document.body.classList.remove('v5AnalysisFailed');window.V5AnalysisStabilityState={ready:true,build:'20261009v5a7',status:'running',innerRetry}}
+function retryInner(){const frame=$('engineHost')?.querySelector('iframe');if(!frame)return false;let w,d,t;try{w=frame.contentWindow;d=frame.contentDocument;t=w?.RSAAnalysisTransitionState}catch{return false}if(!t||t.status!=='error'||innerRetry>=1)return false;const diag={calibrated:!!w.CalibratedProbabilityState?.ready,m3:!!w.Finish600State?.ready,queue:!!w.ValidatedQueueState?.ready};if(diag.calibrated&&diag.m3&&diag.queue)return false;const b=d?.getElementById('analyzeBtn');if(!b)return false;innerRetry++;if($('modelStatus'))$('modelStatus').textContent='解析エンジン再試行中';window.V5AnalysisStabilityState={ready:true,build:'20261009v5a7',status:'inner-retry',innerRetry,transition:t.status};setTimeout(()=>{try{b.click()}catch(e){console.warn('v5 inner retry',e)}},220);return true}
+function showRecovery(){const box=$('errorBox');if(!box)return;const technical=box.textContent||'解析モデルの初期化に失敗しました。';box.classList.remove('hidden');box.innerHTML=`<div class="v5Recovery"><b>解析エンジンを準備できませんでした</b><span>保存済みのCSV・オッズは消えていません。最新版の解析部品を読み直してから、もう一度解析してください。</span><small>${technical.replace(/[<>&]/g,'')}</small><button type="button" id="v5ReloadLatest">保存データを残して最新版を再読込</button></div>`;document.body.classList.remove('v5AnalysisPending');document.body.classList.add('v5AnalysisFailed');window.V5AnalysisStabilityState={ready:true,build:'20261009v5a7',status:'failed',innerRetry}}
+function success(){document.body.classList.remove('v5AnalysisPending','v5AnalysisFailed');window.V5AnalysisStabilityState={ready:true,build:'20261009v5a7',status:'success',innerRetry}}
+function tick(){const s=$('modelStatus')?.textContent||'';if(outerRunning())retryInner();if(s==='解析完了')success();else if(s==='解析エラー'&&Date.now()-lastOuterStart>500)showRecovery()}
+function bind(){document.addEventListener('click',e=>{if(e.target.closest?.('#analyzeBtn'))startOuter();if(e.target.closest?.('#v5ReloadLatest')){const u=new URL(location.href);u.searchParams.set('build',window.RSA_V5_BUILD||'20261009v5a7');u.searchParams.set('_cb',Date.now().toString());location.replace(u.toString())}},true);timer=setInterval(tick,180);window.V5AnalysisStabilityState={ready:true,build:'20261009v5a7',status:'idle',innerRetry:0}}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});else bind();
+})();
