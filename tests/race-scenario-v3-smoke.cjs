@@ -44,7 +44,7 @@ async function run(browserType,name){
   await page.waitForFunction(()=>window.RSAAddonHealth?.ready===true,{timeout:20000});
 
   assert((await page.title()).includes('Race Scenario Analyzer'),`${name}: title`);
-  assert((await page.locator('.brand .badge').textContent()).includes('Q5'),`${name}: Q5 badge`);
+  assert.strictEqual(await page.evaluate(()=>document.documentElement.dataset.rsaBuild),'20261009q5',`${name}: Q5 build marker`);
   assert.strictEqual(await page.evaluate(()=>document.documentElement.dataset.rsaAutoResume),'off',`${name}: auto resume disabled`);
   assert(!requests.some(u=>u.includes('/v2.html')),`${name}: standalone page must not fetch v2 wrapper`);
   assert(!requests.some(u=>u.includes('ios-resume-v1.js')),`${name}: old iOS auto-resume must not load`);
@@ -69,7 +69,6 @@ async function run(browserType,name){
   assert(csvPosition.scrollY>=0 && csvPosition.scrollY<=csvPosition.max+2,`${name}: valid scroll position after CSV`);
   assert(csvPosition.bottom>0 && csvPosition.top<844,`${name}: CSV card remains paintable after parse`);
 
-  // Controls must remain interactive after the file picker / CSV parse cycle.
   await page.selectOption('#venue','東京');
   assert.strictEqual(await page.inputValue('#venue'),'東京',`${name}: controls remain interactive after CSV`);
   await page.selectOption('#venue','阪神');
