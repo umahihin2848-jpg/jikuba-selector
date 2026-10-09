@@ -1,11 +1,10 @@
 (()=>{'use strict';
-const BUILD='20261009q12',LABEL='Scenario v1 · Q12 · iPhone軽量版';
+const BUILD='20261009q13',LABEL='Scenario v1 · Q13 · iPhone安定版';
 const css=document.createElement('style');css.textContent=`
 #result:not(.rsaCalcPending) #finalDecisionCard{display:block!important;visibility:visible!important;opacity:1!important;content-visibility:visible!important}
 #result:not(.rsaCalcPending) #turbulenceStructureBox{visibility:visible!important;opacity:1!important}
 #result:not(.rsaCalcPending) #scenarioView{display:grid!important;visibility:visible!important;opacity:1!important;content-visibility:visible!important}
-#result:not(.rsaCalcPending) #scenarioView>.sv:not(.mrtHidden){display:block!important;visibility:visible!important;opacity:1!important;content-visibility:visible!important}
-#result:not(.rsaCalcPending) #scenarioView>.sv.mrtHidden{display:none!important;visibility:hidden!important;opacity:0!important}
+#result:not(.rsaCalcPending) #scenarioView>.sv{display:block!important;visibility:visible!important;opacity:1!important;content-visibility:visible!important}
 `;document.head.appendChild(css);
 function syncScenarioWave(){
  const s=document.getElementById('s1');if(!s)return;
