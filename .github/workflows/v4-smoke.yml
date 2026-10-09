@@ -8,7 +8,13 @@ on:
       - "waku-bc-converter/v4.css"
       - "waku-bc-converter/v4-app.js"
       - "waku-bc-converter/v4-m3-engine-v1.js"
+      - "waku-bc-converter/v4-validated-flow-v1.js"
       - "waku-bc-converter/v4-webkit-stability-v1.js"
+      - "waku-bc-converter/v3q.html"
+      - "waku-bc-converter/v3-addons-loader-p.js"
+      - "waku-bc-converter/remaining600-validated-v1.js"
+      - "waku-bc-converter/finish600-simulator-v2.js"
+      - "waku-bc-converter/analysis-transition-v2.js"
       - "tests/race-scenario-v4-smoke.cjs"
       - ".github/workflows/v4-smoke.yml"
   workflow_dispatch:
