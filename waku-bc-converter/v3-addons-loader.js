@@ -22,7 +22,7 @@ async function boot(){const files=[
   'race-review-addon-v1.js',
   'v28-live-fix-v1.js?v=20261007b',
   'running-marks-light-refresh-v1.js?v=20261007a',
-  'race-workspace-store-v1.js?v=20261007a',
+  'race-workspace-store-v1.js?v=20261009o',
   'v3-ui-final.js?v=20261007a',
   'scenario-ui-v1.js?v=20261008a',
   'validated-queue-model-v1.js?v=20261008j',
@@ -41,13 +41,13 @@ async function boot(){const files=[
   'rpci-fit-addon-v1.js?v=20261009a',
   'ui-fix-v4.js?v=20261008n',
   'analysis-output-polish-v1.js?v=20261009b',
-  'turbulence-attackability-addon-v1.js?v=20261009n',
   'final-decision-card-v1.js?v=20261009d',
-  'term-guide-v1.js?v=20261009n',
+  'turbulence-structure-addon-v1.js?v=20261009o',
+  'term-guide-v1.js?v=20261009o',
   'analysis-transition-v2.js?v=20261009h',
   'mobile-stability-v1.js?v=20261009i',
-  'ios-resume-v1.js?v=20261009k',
-  'ios-paint-lite-v1.js?v=20261009n'
+  'ios-resume-v1.js?v=20261009o',
+  'ios-paint-lite-v1.js?v=20261009o'
 ];for(const f of files){try{await add(f)}catch(e){console.warn('addon',f)}}window.addEventListener('calibrated-probability-ready',schedulePaceFix);window.addEventListener('joint-pair-probability-ready',schedulePaceFix);window.addEventListener('rsa-addons-ready',schedulePaceFix);document.getElementById('analyzeBtn')?.addEventListener('click',schedulePaceFix);window.dispatchEvent(new CustomEvent('rsa-addons-ready'));schedulePaceFix()}
 function kick(){setTimeout(boot,60)}
 if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',kick,{once:true});else kick();
