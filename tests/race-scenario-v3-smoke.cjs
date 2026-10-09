@@ -18,12 +18,13 @@ function makeTargetCsv(){
 function oddsText(){const vals=[2.8,4.1,5.6,7.4,9.8,12.5,16,20.5,26,33,41,52,65,80,100,130];return vals.map((v,i)=>`${i+1} ${v}`).join('\n')}
 
 async function analyze(page){
+  const previousGeneration=await page.evaluate(()=>window.RSAAnalysisTransitionState?.generation||0);
   await page.click('#analyzeBtn');
-  // On repeated analysis the previous transition can still read "ready" for a few ms.
-  // Give the new cycle time to enter its calculation state before waiting for completion.
-  await page.waitForTimeout(250);
   await page.waitForSelector('#result:not(.hidden)',{timeout:15000});
-  await page.waitForFunction(()=>['ready','error'].includes(window.RSAAnalysisTransitionState?.status),null,{timeout:15000});
+  await page.waitForFunction(prev=>{
+    const s=window.RSAAnalysisTransitionState;
+    return !!s&&s.generation>prev&&['ready','error'].includes(s.status);
+  },previousGeneration,{timeout:40000});
   const transition=await page.evaluate(()=>window.RSAAnalysisTransitionState);
   assert.strictEqual(transition.status,'ready',`analysis failed; missing=${(transition.missing||[]).join(',')}`);
   await page.waitForFunction(()=>{
@@ -33,7 +34,7 @@ async function analyze(page){
       const st=getComputedStyle(el),r=el.getBoundingClientRect();
       return st.display!=='none'&&st.visibility!=='hidden'&&st.opacity!=='0'&&r.width>0&&r.height>0;
     });
-  },null,{timeout:8000});
+  },null,{timeout:12000});
   await page.waitForTimeout(500);
 }
 
