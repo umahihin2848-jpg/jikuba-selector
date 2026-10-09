@@ -1,12 +1,13 @@
 {
-  "version": "turbulence-browser-v1",
-  "trained_on": "JRA G1-G3 2020-2023",
+  "version": "turbulence-browser-v2",
+  "trained_on": "JRA G1-G3 2020-2025",
   "outcome": "at least one final-popularity >=7 horse finishes top3",
   "method": "binomial logistic regression",
-  "intercept": 1.0942354612603091,
+  "intercept": 0.4253826300605367,
   "thresholds": {
-    "high": 0.7100207282007605,
-    "low": 0.5
+    "high": 0.7252650885117544,
+    "low": 0.551355231900355,
+    "definition": "high=training 75th percentile, low=training 25th percentile"
   },
   "baselines": {
     "venue": "中京",
@@ -18,42 +19,54 @@
   },
   "coefficients": {
     "venue": {
-      "中山": -0.3145014978467128,
-      "京都": -0.6374255617889939,
-      "函館": 0.6557394259478382,
-      "小倉": 0.09483244204739197,
-      "新潟": 0.01044849553370009,
-      "札幌": -0.8750630510928905,
-      "東京": -0.5159031575848271,
-      "福島": -0.6313973418336154,
-      "阪神": -0.43221793671931213
+      "中山": -0.02118581750360167,
+      "京都": 0.06093662273059183,
+      "函館": 0.953849849408731,
+      "小倉": 0.6557110719370569,
+      "新潟": 0.49598915591164744,
+      "札幌": -0.36837814885143483,
+      "東京": -0.1392268122617403,
+      "福島": 0.054952827956074236,
+      "阪神": -0.055754129765841764
     },
     "dist_bin": {
-      "1801-2200": 0.01092611960073403,
-      "2201-2600": -0.3061847100536432,
-      "<=1400": -0.11475194653385334,
-      ">=2601": -0.48836305739349184
+      "1801-2200": 0.07247271599138154,
+      "2201-2600": -0.2225969672571262,
+      "<=1400": -0.09867152952334649,
+      ">=2601": -0.5137179811083048
     },
     "field_bin": {
-      "12-14": 1.1383355099326413,
-      ">=15": 1.4013244062244856
+      "12-14": 0.9414362486595318,
+      ">=15": 1.3671619810869846
     },
     "going": {
-      "稍": -2.135137988303814,
-      "良": -2.227016913415543,
-      "重": -1.956123320323087
+      "稍": -1.6369865140883126,
+      "良": -1.64472711962871,
+      "重": -1.6324868576583733
     },
     "surface": {
-      "芝": 0.4000195502134942
+      "芝": 0.37896407501801066
     },
     "grade": {
-      "Ｇ２": 0.19387702639459417,
-      "Ｇ３": 0.6509464485769136
+      "Ｇ２": 0.09165991600301299,
+      "Ｇ３": 0.5019566173816026
     }
   },
-  "validation_notes": {
-    "field_size_primary": "The strongest robust structural factor in the reference4 validation was field size.",
-    "attackability": "Attackability is beta only; pooled 2024-2026 shortlist hit was 43.5% vs 28.8%, Fisher p=0.295, so it is not used as a hard probability correction or hard skip rule.",
-    "probability_correction": false
+  "validation": {
+    "test_year": 2026,
+    "n_races": 98,
+    "auc": 0.7979390681003584,
+    "high_n": 26,
+    "high_event_rate": 0.8461538461538461,
+    "other_n": 72,
+    "other_event_rate": 0.5555555555555556,
+    "fisher_p": 0.009193970170523903,
+    "note": "OOS test uses 2026 races in umade.csv through 2026-10-04."
+  },
+  "usage": {
+    "probability_correction": false,
+    "horse_ranking_change": false,
+    "role": "validated auxiliary race-structure layer",
+    "attackability_removed": true
   }
 }
