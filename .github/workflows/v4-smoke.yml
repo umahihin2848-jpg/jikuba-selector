@@ -1,0 +1,38 @@
+name: V4 iPhone smoke test
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "waku-bc-converter/v4.html"
+      - "waku-bc-converter/v4.css"
+      - "waku-bc-converter/v4-app.js"
+      - "waku-bc-converter/v4-webkit-stability-v1.js"
+      - "tests/race-scenario-v4-smoke.cjs"
+      - ".github/workflows/v4-smoke.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  v4-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@latest
+          npx playwright install --with-deps chromium webkit
+      - name: Start local app
+        run: |
+          python3 -m http.server 4173 > /tmp/jikuba-v4-server.log 2>&1 &
+          sleep 2
+      - name: Run v4 iPhone persistence test
+        run: node tests/race-scenario-v4-smoke.cjs
