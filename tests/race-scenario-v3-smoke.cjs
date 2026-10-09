@@ -19,7 +19,12 @@ function oddsText(){const vals=[2.8,4.1,5.6,7.4,9.8,12.5,16,20.5,26,33,41,52,65,
 
 async function analyze(page){
   const previousGeneration=await page.evaluate(()=>window.RSAAnalysisTransitionState?.generation||0);
+  const pre=await page.evaluate(()=>({transition:window.RSAAnalysisTransitionState,virt:window.ProductionVirtualizeState,venue:document.querySelector('#venue')?.value,distance:document.querySelector('#distance')?.value,field:document.querySelector('#fieldSize')?.value,csv:document.querySelector('#csvState')?.textContent,oddsCount:Object.keys(window.ShapeCore?.parseOdds(document.querySelector('#oddsPaste')?.value||'')?.odds||{}).length,busy:document.body.classList.contains('rsaAnalysisBusy'),button:document.querySelector('#analyzeBtn')?.textContent}));
+  console.log('RSA PRE',JSON.stringify(pre));
   await page.click('#analyzeBtn');
+  await page.waitForTimeout(250);
+  const post=await page.evaluate(()=>({transition:window.RSAAnalysisTransitionState,virt:window.ProductionVirtualizeState,notice:document.querySelector('#rsaPreflightNotice')?.innerText||'',busy:document.body.classList.contains('rsaAnalysisBusy'),button:document.querySelector('#analyzeBtn')?.textContent}));
+  console.log('RSA POST',JSON.stringify(post));
   await page.waitForSelector('#result:not(.hidden)',{timeout:15000});
   await page.waitForFunction(prev=>{
     const s=window.RSAAnalysisTransitionState;
