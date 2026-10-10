@@ -15,10 +15,13 @@ on:
       - "waku-bc-converter/v5-threewin-market-v1.js"
       - "waku-bc-converter/data/threewin_market_structure_v1.json"
       - "waku-bc-converter/v5-popularity-range-v1.js"
-      - "waku-bc-converter/v5-quick-view-v1.js"
-      - "waku-bc-converter/v5-horse-kart-v2.js"
+      - "waku-bc-converter/v5-quick-view-v2.js"
+      - "waku-bc-converter/v5-horse-kart-v3.js"
+      - "waku-bc-converter/v5-structural-focus-compat-v1.js"
       - "waku-bc-converter/v5-display-polish-v1.js"
+      - "waku-bc-converter/v5-confidence-course-v1.js"
       - "waku-bc-converter/v5-analysis-stability-v1.js"
+      - "waku-bc-converter/course-fit-export-v1.js"
       - "waku-bc-converter/v4-app.js"
       - "waku-bc-converter/v4-m3-engine-v1.js"
       - "waku-bc-converter/v4-validated-flow-v1.js"
@@ -29,7 +32,7 @@ on:
       - "waku-bc-converter/v3-addons-loader-p.js"
       - "waku-bc-converter/remaining600-validated-v1.js"
       - "waku-bc-converter/finish600-simulator-v2.js"
-      - "tests/race-scenario-v5-a9-smoke.cjs"
+      - "tests/race-scenario-v5-a16-smoke.cjs"
       - ".github/workflows/v5-smoke.yml"
   workflow_dispatch:
 
@@ -58,9 +61,12 @@ jobs:
             waku-bc-converter/v5-op-market-v1.js \
             waku-bc-converter/v5-threewin-market-v1.js \
             waku-bc-converter/v5-popularity-range-v1.js \
-            waku-bc-converter/v5-quick-view-v1.js \
-            waku-bc-converter/v5-horse-kart-v2.js \
+            waku-bc-converter/v5-quick-view-v2.js \
+            waku-bc-converter/v5-horse-kart-v3.js \
+            waku-bc-converter/v5-structural-focus-compat-v1.js \
             waku-bc-converter/v5-display-polish-v1.js \
+            waku-bc-converter/v5-confidence-course-v1.js \
+            waku-bc-converter/course-fit-export-v1.js \
             waku-bc-converter/v5-analysis-stability-v1.js \
             waku-bc-converter/v4-app.js \
             waku-bc-converter/v4-m3-engine-v1.js \
@@ -79,4 +85,4 @@ jobs:
           python3 -m http.server 4173 > /tmp/jikuba-v5-server.log 2>&1 &
           sleep 2
       - name: Run V5 iPhone race flow test
-        run: node tests/race-scenario-v5-a9-smoke.cjs
+        run: node tests/race-scenario-v5-a16-smoke.cjs
