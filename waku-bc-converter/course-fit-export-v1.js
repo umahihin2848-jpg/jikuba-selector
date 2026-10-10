@@ -9,10 +9,15 @@ function parseRow(el){
   const dp=String(stats['補正量']||'').match(/([+-]?\d+(?:\.\d+)?)pt/);
   return{no,name,grade,n,relation:badge.split(/\s+/)[0]||'',direction:stats['補正方向']||'',deltaPt:dp?+dp[1]:null,exact:stats['同条件']||'',source:'course-fit-addon-v1'};
 }
+function relay(state){
+  if(window.parent===window)return;
+  try{window.parent.postMessage({type:'course-fit-export-ready',version:'course-fit-export-v1',state},location.origin)}catch{}
+}
 function publish(){
   const box=document.getElementById('courseFitList');if(!box)return false;
   const rows=[...box.querySelectorAll('.horse')].map(parseRow).filter(x=>x.name&&['A','B','C'].includes(x.grade)),stateText=(document.getElementById('courseFitState')?.textContent||'').replace(/\s+/g,' ').trim(),notice=(box.querySelector('.notice')?.textContent||'').replace(/\s+/g,' ').trim(),sig=JSON.stringify(rows.map(x=>[x.no,x.name,x.grade,x.n,x.deltaPt]));
   window.CourseFitExportState={ready:true,version:'course-fit-export-v1',rows,stateText,notice,predictiveLogicChanged:false,meaning:'independent course-fit display export; A/B/C is not win probability'};
+  relay(window.CourseFitExportState);
   if(sig!==lastSig){lastSig=sig;window.dispatchEvent(new CustomEvent('course-fit-export-ready',{detail:window.CourseFitExportState}))}
   return true;
 }
