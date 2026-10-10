@@ -1,8 +1,8 @@
 (()=>{'use strict';
 if(window.__V5_MOBILE_RENDER_FIX_V1)return;window.__V5_MOBILE_RENDER_FIX_V1=true;
 const css=document.createElement('style');css.id='v5-mobile-render-fix-v1-css';css.textContent=`
-#engineHost{position:absolute!important;left:-10000px!important;top:0!important;opacity:0!important;z-index:-1!important;pointer-events:none!important}
-#engineHost iframe{display:block!important}
+#engineHost{position:fixed!important;left:0!important;top:0!important;width:1px!important;height:1px!important;overflow:hidden!important;opacity:.001!important;z-index:-1!important;pointer-events:none!important;contain:strict!important}
+#engineHost iframe{display:block!important;width:1px!important;height:1px!important;border:0!important}
 @media(max-width:560px){
   html{scroll-padding-bottom:calc(96px + env(safe-area-inset-bottom))}
   body{-webkit-overflow-scrolling:touch}
@@ -29,7 +29,7 @@ function audit(){
     if((cs.overflowY==='hidden'||cs.overflow==='hidden')&&c.scrollHeight>c.clientHeight+2)clipped++;
     if(i){const p=cards[i-1].getBoundingClientRect();maxGap=Math.max(maxGap,r.top-p.bottom)}
   }
-  window.V5RenderHealthState={ready:true,version:'v5-mobile-render-fix-v1',cards:cards.length,clipped,maxGap:Math.round(maxGap),minHeight:Number.isFinite(minHeight)?Math.round(minHeight):0,panelHeight:panel?Math.round(panel.getBoundingClientRect().height):0,webkitPaintSafe:true};
+  window.V5RenderHealthState={ready:true,version:'v5-mobile-render-fix-v1',cards:cards.length,clipped,maxGap:Math.round(maxGap),minHeight:Number.isFinite(minHeight)?Math.round(minHeight):0,panelHeight:panel?Math.round(panel.getBoundingClientRect().height):0,webkitPaintSafe:true,engineMode:'1px-live'};
 }
 function schedule(ms=70){clearTimeout(timer);timer=setTimeout(()=>requestAnimationFrame(audit),ms)}
 function init(){const p=document.getElementById('v5Panel');if(p)new MutationObserver(()=>schedule(80)).observe(p,{childList:true,subtree:true});document.addEventListener('click',e=>{if(e.target.closest?.('[data-v5-tab]')||e.target.closest?.('[data-hf]'))schedule(100)});window.addEventListener('orientationchange',()=>schedule(180));window.addEventListener('pageshow',()=>schedule(120));document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')schedule(100)});schedule()}
