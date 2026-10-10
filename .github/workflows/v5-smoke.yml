@@ -21,7 +21,9 @@ on:
       - "waku-bc-converter/v5-display-polish-v1.js"
       - "waku-bc-converter/v5-confidence-course-v2.js"
       - "waku-bc-converter/v5-runtime-guard-v1.js"
+      - "waku-bc-converter/v5-dom-write-guard-v1.js"
       - "waku-bc-converter/v5-mobile-render-fix-v1.js"
+      - "waku-bc-converter/v5-course-bridge-retry-v1.js"
       - "waku-bc-converter/v5-analysis-stability-v1.js"
       - "waku-bc-converter/course-fit-export-v1.js"
       - "waku-bc-converter/v4-app.js"
@@ -69,7 +71,9 @@ jobs:
             waku-bc-converter/v5-display-polish-v1.js \
             waku-bc-converter/v5-confidence-course-v2.js \
             waku-bc-converter/v5-runtime-guard-v1.js \
+            waku-bc-converter/v5-dom-write-guard-v1.js \
             waku-bc-converter/v5-mobile-render-fix-v1.js \
+            waku-bc-converter/v5-course-bridge-retry-v1.js \
             waku-bc-converter/course-fit-export-v1.js \
             waku-bc-converter/v5-analysis-stability-v1.js \
             waku-bc-converter/v4-app.js \
