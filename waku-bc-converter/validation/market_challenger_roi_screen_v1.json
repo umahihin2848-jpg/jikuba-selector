@@ -1,0 +1,68 @@
+{
+  "version": "market_challenger_roi_screen_v1",
+  "created": "2026-10-10",
+  "status": "SCREENING_ONLY_CLOSING_ODDS_PROXY",
+  "purpose": "Test whether the pre-specified structural-rise idea can improve quinella ROI inside the 1-4 popularity x 5-9 popularity market skeleton.",
+  "universe": "JRA flat, field size >=12, 3-win class or higher, 2024-2026 replay races with closing odds available",
+  "data_coverage": {
+    "replay_races_total": 1095,
+    "closing_odds_joined": 1033,
+    "by_year": {"2024":384,"2025":375,"2026":274}
+  },
+  "important_limitation": "The available historical odds files contain one closing-odds row per horse, not T-15 snapshots. Therefore this is not a deployable T-15 ROI validation. Popularity ranks and quinella prices here are closing-odds proxies.",
+  "development_protocol": {
+    "rule_family": "Keep the high-popularity side market-based and use scenario + finishing-performance only to identify the longshot challenger.",
+    "2024_role": "development / favorite-side selection",
+    "2025_2026_role": "confirmation",
+    "challenger_definition": "Closing-popularity 7-9, main-scenario rank <=3 and finishing-performance(M3) rank <=3; if multiple, choose lowest M3+scenario rank, then lowest max rank, then higher market popularity.",
+    "favorite_side_selected_on_2024": "closing 1st favorite",
+    "ticket": "1st favorite x one structural challenger, quinella, one point when a challenger exists"
+  },
+  "results": {
+    "2024_development": {
+      "races":384,"active":151,"tickets":151,"hits":3,"hit_rate":0.01986755,"roi":1.22649007,"avg_hit_quinella_odds":61.7333
+    },
+    "2025_confirmation": {
+      "races":375,"active":164,"tickets":164,"hits":7,"hit_rate":0.04268293,"roi":1.58292683,"avg_hit_quinella_odds":37.0857
+    },
+    "2026_confirmation": {
+      "races":274,"active":109,"tickets":109,"hits":5,"hit_rate":0.04587156,"roi":1.29908257,"avg_hit_quinella_odds":28.32
+    },
+    "2025_2026_pooled_confirmation": {
+      "races":649,"active":273,"tickets":273,"hits":12,"hit_rate":0.04395604,"roi":1.46959707,"stake_units":273,"return_units":401.2,"profit_units":128.2,"avg_hit_quinella_odds":33.4333,"max_losing_streak":64,"max_drawdown_units":64,
+      "race_bootstrap_roi_ci95":[0.6593,2.4169],
+      "bootstrap_probability_roi_gt_1":0.8505,
+      "interpretation":"Promising but not statistically conclusive; CI crosses 1.0 because there are only 12 hits."
+    }
+  },
+  "same_active_race_comparators": {
+    "2024": {
+      "structural_one_ticket_roi":1.2265,
+      "favorite_x_7th_roi":0.6633,
+      "favorite_x_8th_roi":0.4543,
+      "favorite_x_9th_roi":1.7947,
+      "favorite_x_all_7_to_9_roi":0.9715
+    },
+    "2025_2026": {
+      "structural_one_ticket_roi":1.4696,
+      "favorite_x_7th_roi":1.1458,
+      "favorite_x_8th_roi":0.9694,
+      "favorite_x_9th_roi":1.0710,
+      "favorite_x_all_7_to_9_roi":1.0623
+    },
+    "note":"On 2025-26 confirmation races, the structural selector reduced three 7-9 popularity tickets to one while increasing observed ROI. The paired bootstrap ROI-difference CI still crosses zero, so this is not yet proof of superiority."
+  },
+  "outlier_dependence": {
+    "largest_hit_share_of_total_return":0.1757,
+    "top3_hit_share_of_total_return":0.4050,
+    "roi_if_largest_hit_were_zero":1.2114,
+    "roi_if_two_largest_hits_were_zero":1.0410,
+    "roi_if_three_largest_hits_were_zero":0.8744,
+    "note":"The result is not dependent on a single jackpot, but the top three wins are still material."
+  },
+  "decision": {
+    "production_rule": "NO",
+    "candidate_for_prospective_T15": "YES",
+    "next_step": "Freeze this exact rule prospectively using real T-15 popularity snapshots and record the actual purchased quinella price. Do not retune the <=3 thresholds during the prospective phase."
+  }
+}
