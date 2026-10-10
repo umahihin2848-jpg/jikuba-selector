@@ -1,6 +1,6 @@
 const { chromium, webkit } = require('playwright');
 const assert = require('assert');
-const BUILD='20261010v5a17p1';
+const BUILD='20261010v5a17p2';
 const BASE=`http://127.0.0.1:4173/waku-bc-converter/v5.html?build=${BUILD}&test=a17`;
 const UA='Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1';
 function csv(){const h=['何走目','馬番','馬名','レースPCI','PCI','Ave-3F','上3F地点差','決手','日付','距離','開催','着順','クラス名','頭数','芝・ダ','上り3F','通過1','通過2','通過3','通過4'],a=[h.join(',')];for(let n=1;n<=16;n++){const runs=n===16?1:3;for(let k=0;k<runs;k++){const style=n<=2?'逃げ':n<=7?'先行':n<=12?'差し':'追込',p1=Math.min(16,Math.max(1,n<=7?n:8+((n+k)%8))),p4=Math.min(16,Math.max(1,p1+(style==='差し'||style==='追込'?-2:1)));a.push([k+1,n,`A17Horse${n}`,43+((n+k)%13),45+((n*2+k)%14),(34+((n+k)%9)*.2).toFixed(1),(.2+((n+k)%10)*.25).toFixed(2),style,`2026.09.${String(10-k).padStart(2,'0')}`,1800,'阪神',((n+k)%12)+1,'Ｇ３',16,'ダ',(34+((n*2+k)%10)*.18).toFixed(2),p1,p1,p4,p4].join(','))}}return a.join('\n')}
