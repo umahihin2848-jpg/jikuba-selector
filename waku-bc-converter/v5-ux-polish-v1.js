@@ -35,10 +35,10 @@ function resolveFormation(){
     for(let i=0;i<dots.length;i++){
       const nearPrev=i>0&&Math.abs(dots[i].desired-dots[i-1].desired)<34;
       const nearNext=i<dots.length-1&&Math.abs(dots[i+1].desired-dots[i].desired)<34;
-      const off=(nearPrev||nearNext)?([0,-11,11,-17,17][i%5]||0):0;
-      dots[i].el.style.top=`${ys[i].toFixed(1)}px`;
-      dots[i].el.style.setProperty('--dx',`${off}px`);
-      dots[i].el.dataset.resolved='1';
+      const off=(nearPrev||nearNext)?([0,-11,11,-17,17][i%5]||0):0,top=`${ys[i].toFixed(1)}px`,dx=`${off}px`;
+      if(dots[i].el.style.top!==top)dots[i].el.style.top=top;
+      if(dots[i].el.style.getPropertyValue('--dx')!==dx)dots[i].el.style.setProperty('--dx',dx);
+      if(dots[i].el.dataset.resolved!=='1')dots[i].el.dataset.resolved='1';
     }
   });
   const shell=grid.closest('.v5TrackShell');
@@ -59,21 +59,32 @@ function readLabel(cls,base,m3){
   return{badge:'＝ 一致',title:'市場基礎とM3が概ね一致',text:`基礎 ${base??'—'}位 → M3 ${m3??'—'}位。大きなモデル間乖離なし。`};
 }
 let horseFilter='all';
-function applyHorseFilter(){document.querySelectorAll('#v5Panel .v5HorseCard').forEach(card=>{const c=card.dataset.readClass||'align';card.dataset.v5Hidden=(horseFilter==='all'||horseFilter===c)?'0':'1'});document.querySelectorAll('.v5HorseFilters button').forEach(b=>b.classList.toggle('active',b.dataset.hf===horseFilter))}
+function applyHorseFilter(){
+  document.querySelectorAll('#v5Panel .v5HorseCard').forEach(card=>{const c=card.dataset.readClass||'align',v=(horseFilter==='all'||horseFilter===c)?'0':'1';if(card.dataset.v5Hidden!==v)card.dataset.v5Hidden=v});
+  document.querySelectorAll('.v5HorseFilters button').forEach(b=>{const on=b.dataset.hf===horseFilter;if(b.classList.contains('active')!==on)b.classList.toggle('active',on)})
+}
 function decorateHorses(){
   const wrap=document.querySelector('#v5Panel .v5HorseCards');if(!wrap)return;
   if(!wrap.previousElementSibling?.classList?.contains('v5HorseFilters')){
     const f=document.createElement('div');f.className='v5HorseFilters';f.innerHTML='<button type="button" data-hf="all" class="active">全頭</button><button type="button" data-hf="rise">M3浮上</button><button type="button" data-hf="caution">要注意</button><button type="button" data-hf="align">一致</button>';wrap.parentNode.insertBefore(f,wrap);f.addEventListener('click',e=>{const b=e.target.closest('[data-hf]');if(!b)return;horseFilter=b.dataset.hf;applyHorseFilter()});
   }
   wrap.querySelectorAll('.v5HorseCard').forEach(card=>{
-    const no=card.querySelector('.v5No')?.textContent?.trim();if(!no)return;const {base,m3}=horseData(no),cls=readClass(base,m3),l=readLabel(cls,base,m3);card.dataset.readClass=cls;
+    const no=card.querySelector('.v5No')?.textContent?.trim();if(!no)return;const {base,m3}=horseData(no),cls=readClass(base,m3),l=readLabel(cls,base,m3);
+    if(card.dataset.readClass!==cls)card.dataset.readClass=cls;
     let ro=card.querySelector('.v5HorseReadout');if(!ro){ro=document.createElement('div');card.querySelector('.v5HorseTop')?.after(ro)}
-    ro.className=`v5HorseReadout ${cls}`;ro.innerHTML=`<div><strong>${l.title}</strong><small>${l.text}</small></div><span class="v5ReadBadge">${l.badge}</span>`;
+    const klass=`v5HorseReadout ${cls}`,html=`<div><strong>${l.title}</strong><small>${l.text}</small></div><span class="v5ReadBadge">${l.badge}</span>`,sig=`${cls}|${base}|${m3}`;
+    if(ro.className!==klass)ro.className=klass;
+    if(ro.dataset.sig!==sig){ro.dataset.sig=sig;ro.innerHTML=html}
   });
   applyHorseFilter();
 }
-function polish(){resolveFormation();decorateHorses();window.V5UxPolishState={ready:true,version:'v5-ux-polish-v1',theme:'black-blue',collision:true,horseCards:true}}
-let raf=0;function schedule(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>setTimeout(polish,20))}
-function init(){const p=document.getElementById('v5Panel');if(p)new MutationObserver(schedule).observe(p,{childList:true,subtree:true});document.addEventListener('click',e=>{if(e.target.closest('[data-v5-tab]')||e.target.closest('[data-form]')||e.target.closest('#analyzeBtn'))setTimeout(schedule,80)});setInterval(polish,900);schedule()}
+function polish(){resolveFormation();decorateHorses();if(!window.V5UxPolishState?.ready)window.V5UxPolishState={ready:true,version:'v5-ux-polish-v1',theme:'black-blue',collision:true,horseCards:true,eventDriven:true}}
+let raf=0,timer=0;function schedule(){cancelAnimationFrame(raf);clearTimeout(timer);raf=requestAnimationFrame(()=>{timer=setTimeout(polish,20)})}
+function relevantMutation(r){const t=r.target;return !(t?.closest?.('.v5HorseReadout,.v5TrustStrip,.v5KartSummary,.v5HorseFilters'))}
+function init(){
+  const p=document.getElementById('v5Panel');if(p)new MutationObserver(rs=>{if(rs.some(relevantMutation))schedule()}).observe(p,{childList:true,subtree:true});
+  document.addEventListener('click',e=>{if(e.target.closest('[data-v5-tab]')||e.target.closest('[data-form]')||e.target.closest('#analyzeBtn'))setTimeout(schedule,80)});
+  setTimeout(schedule,450);setTimeout(schedule,1600);schedule()
+}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
