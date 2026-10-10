@@ -19,15 +19,9 @@
     "ticket": "1st favorite x one structural challenger, quinella, one point when a challenger exists"
   },
   "results": {
-    "2024_development": {
-      "races":384,"active":151,"tickets":151,"hits":3,"hit_rate":0.01986755,"roi":1.22649007,"avg_hit_quinella_odds":61.7333
-    },
-    "2025_confirmation": {
-      "races":375,"active":164,"tickets":164,"hits":7,"hit_rate":0.04268293,"roi":1.58292683,"avg_hit_quinella_odds":37.0857
-    },
-    "2026_confirmation": {
-      "races":274,"active":109,"tickets":109,"hits":5,"hit_rate":0.04587156,"roi":1.29908257,"avg_hit_quinella_odds":28.32
-    },
+    "2024_development": {"races":384,"active":151,"tickets":151,"hits":3,"hit_rate":0.01986755,"roi":1.22649007,"avg_hit_quinella_odds":61.7333},
+    "2025_confirmation": {"races":375,"active":164,"tickets":164,"hits":7,"hit_rate":0.04268293,"roi":1.58292683,"avg_hit_quinella_odds":37.0857},
+    "2026_confirmation": {"races":274,"active":109,"tickets":109,"hits":5,"hit_rate":0.04587156,"roi":1.29908257,"avg_hit_quinella_odds":28.32},
     "2025_2026_pooled_confirmation": {
       "races":649,"active":273,"tickets":273,"hits":12,"hit_rate":0.04395604,"roi":1.46959707,"stake_units":273,"return_units":401.2,"profit_units":128.2,"avg_hit_quinella_odds":33.4333,"max_losing_streak":64,"max_drawdown_units":64,
       "race_bootstrap_roi_ci95":[0.6593,2.4169],
@@ -36,21 +30,28 @@
     }
   },
   "same_active_race_comparators": {
-    "2024": {
-      "structural_one_ticket_roi":1.2265,
-      "favorite_x_7th_roi":0.6633,
-      "favorite_x_8th_roi":0.4543,
-      "favorite_x_9th_roi":1.7947,
-      "favorite_x_all_7_to_9_roi":0.9715
-    },
-    "2025_2026": {
-      "structural_one_ticket_roi":1.4696,
-      "favorite_x_7th_roi":1.1458,
-      "favorite_x_8th_roi":0.9694,
-      "favorite_x_9th_roi":1.0710,
-      "favorite_x_all_7_to_9_roi":1.0623
-    },
+    "2024": {"structural_one_ticket_roi":1.2265,"favorite_x_7th_roi":0.6633,"favorite_x_8th_roi":0.4543,"favorite_x_9th_roi":1.7947,"favorite_x_all_7_to_9_roi":0.9715},
+    "2025_2026": {"structural_one_ticket_roi":1.4696,"favorite_x_7th_roi":1.1458,"favorite_x_8th_roi":0.9694,"favorite_x_9th_roi":1.0710,"favorite_x_all_7_to_9_roi":1.0623},
     "note":"On 2025-26 confirmation races, the structural selector reduced three 7-9 popularity tickets to one while increasing observed ROI. The paired bootstrap ROI-difference CI still crosses zero, so this is not yet proof of superiority."
+  },
+  "confirmation_subgroups": {
+    "surface": {
+      "turf": {"active":164,"hits":8,"roi":1.6854},
+      "dirt": {"active":109,"hits":4,"roi":1.1450}
+    },
+    "main_scenario": {
+      "HIGH": {"active":180,"hits":7,"roi":1.1572},
+      "MIDDLE": {"active":78,"hits":4,"roi":2.1115},
+      "SLOW": {"active":15,"hits":1,"roi":1.8800}
+    },
+    "grade": {
+      "3win": {"active":136,"hits":5,"roi":1.0926},
+      "OP": {"active":60,"hits":2,"roi":0.9767},
+      "G3": {"active":49,"hits":3,"roi":1.9714},
+      "G2": {"active":19,"hits":2,"roi":5.1263},
+      "G1": {"active":9,"hits":0,"roi":0.0}
+    },
+    "note":"Surface and scenario splits are directionally encouraging, but grade-level samples are too small for production exclusions or overrides."
   },
   "outlier_dependence": {
     "largest_hit_share_of_total_return":0.1757,
