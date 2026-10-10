@@ -8,6 +8,7 @@ on:
       - "waku-bc-converter/v5.css"
       - "waku-bc-converter/v5-ui.js"
       - "waku-bc-converter/v5-goal-map-v1.js"
+      - "waku-bc-converter/v5-goal-map-labels-v1.js"
       - "waku-bc-converter/v5-ux-polish-v1.js"
       - "waku-bc-converter/v5-layout-fix-v1.js"
       - "waku-bc-converter/v5-decision-scenario-v1.js"
@@ -17,6 +18,7 @@ on:
       - "waku-bc-converter/v5-popularity-range-v1.js"
       - "waku-bc-converter/v5-quick-view-v2.js"
       - "waku-bc-converter/v5-horse-kart-v3.js"
+      - "waku-bc-converter/v5-win-value-candidate-v1.js"
       - "waku-bc-converter/v5-structural-focus-compat-v1.js"
       - "waku-bc-converter/v5-display-polish-v1.js"
       - "waku-bc-converter/v5-confidence-course-v2.js"
@@ -59,6 +61,7 @@ jobs:
           for f in \
             waku-bc-converter/v5-ui.js \
             waku-bc-converter/v5-goal-map-v1.js \
+            waku-bc-converter/v5-goal-map-labels-v1.js \
             waku-bc-converter/v5-ux-polish-v1.js \
             waku-bc-converter/v5-layout-fix-v1.js \
             waku-bc-converter/v5-decision-scenario-v1.js \
@@ -67,6 +70,7 @@ jobs:
             waku-bc-converter/v5-popularity-range-v1.js \
             waku-bc-converter/v5-quick-view-v2.js \
             waku-bc-converter/v5-horse-kart-v3.js \
+            waku-bc-converter/v5-win-value-candidate-v1.js \
             waku-bc-converter/v5-structural-focus-compat-v1.js \
             waku-bc-converter/v5-display-polish-v1.js \
             waku-bc-converter/v5-confidence-course-v2.js \
