@@ -13,7 +13,7 @@ const css=document.createElement('style');css.id='v5-mobile-render-fix-v1-css';c
   .v5Status,.v5BottomNav{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
   .v5Setup,.v5Storage,.v5RaceHero,.v5Card{box-shadow:0 8px 24px rgba(0,0,0,.18)!important}
   #v5Panel,.v5HorseCards,.v5HorseCard,.v5KartCard{content-visibility:visible!important;contain:none!important;will-change:auto!important}
-  .v5KartCard{overflow:visible!important;transform:none!important}
+  .v5HorseCard.v5KartCard{overflow:visible!important;overflow-x:visible!important;overflow-y:visible!important;transform:none!important}
   .v5KartCard:before{border-radius:18px 0 0 18px}
   .v5HorseCards{overflow:visible!important}
   .v5BottomNav{box-shadow:0 10px 30px rgba(0,0,0,.34)!important}
