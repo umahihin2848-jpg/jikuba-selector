@@ -1,0 +1,80 @@
+{
+  "version": "m3_front_position_bias_validation_v1",
+  "created": "2026-10-11",
+  "question": "Does current M3 systematically under-evaluate escape/front-running horses, and is a structural probability correction justified?",
+  "universe": "JRA flat, field_size>=12, 3-win class or higher; exact M3 validation universe",
+  "protocol": {
+    "development_year": 2024,
+    "confirmation_year": 2025,
+    "final_oos_year": 2026,
+    "history": "strictly prior starts only; up to 5 starts for position features",
+    "baseline_probability": "m3_history_amount_correction_v1",
+    "bootstrap_unit": "race",
+    "target": "finish<=3"
+  },
+  "feature_definitions": {
+    "hist_front_mean": "Mean normalized first-available-corner frontness over up to 5 strictly prior starts: (field_size - corner_position)/(field_size - 1). Higher means more forward.",
+    "lead_rate5": "Fraction of up to 5 strictly prior starts in which first available corner position was 1.",
+    "hist_cov5": "min(number of strictly prior starts used, 5)/5.",
+    "escape_candidate": "lead_rate5>=0.20 with at least 2 strictly prior starts.",
+    "strong_escape": "lead_rate5>=0.40 with at least 2 strictly prior starts.",
+    "forward_type": "hist_front_mean>=0.70 with at least 2 strictly prior starts.",
+    "back_type": "hist_front_mean<0.45 with at least 2 strictly prior starts."
+  },
+  "descriptive_2026": {
+    "escape_candidate": {"n": 762, "observed_top3": 0.187664, "m3_predicted": 0.166473, "market_predicted": 0.198066, "observed_minus_m3": 0.021191, "race_bootstrap_ci95": [-0.003250, 0.046578]},
+    "strong_escape": {"n": 339, "observed_top3": 0.188791, "m3_predicted": 0.170109, "market_predicted": 0.202476, "observed_minus_m3": 0.018681, "race_bootstrap_ci95": [-0.022435, 0.058787]},
+    "forward_type": {"n": 1077, "observed_top3": 0.207057, "m3_predicted": 0.180659, "market_predicted": 0.215216, "observed_minus_m3": 0.026397, "race_bootstrap_ci95": [0.005388, 0.047197]},
+    "back_type": {"n": 1329, "observed_top3": 0.146727, "m3_predicted": 0.192401, "market_predicted": 0.149759, "observed_minus_m3": -0.045674, "race_bootstrap_ci95": [-0.062136, -0.028432]}
+  },
+  "candidate_models_trained_2024": {
+    "front_only": {
+      "features": ["base_logit", "hist_front_mean", "hist_cov5"],
+      "type": "StandardScaler + LogisticRegression(C=0.1, liblinear) + race common-logit projection sum=3",
+      "scaler_mean": [-1.4740637734762134, 0.5550316573918362, 0.7458154151505128],
+      "scaler_scale": [0.5195551114807244, 0.23014866396637806, 0.3561865528120338],
+      "intercept": -1.477595220364207,
+      "coef": [0.5639497104307865, 0.2535775155176123, 0.03699857059550411]
+    },
+    "front_plus_lead": {
+      "features": ["base_logit", "hist_front_mean", "lead_rate5", "hist_cov5"],
+      "type": "StandardScaler + LogisticRegression(C=0.1, liblinear) + race common-logit projection sum=3",
+      "scaler_mean": [-1.4740637734762134, 0.5550316573918362, 0.07214963060976955, 0.7458154151505128],
+      "scaler_scale": [0.5195551114807244, 0.23014866396637806, 0.18839466757846254, 0.3561865528120338],
+      "intercept": -1.479424902387783,
+      "coef": [0.5626312054421461, 0.29704905830372835, -0.07605838314682056, 0.04155985176919026]
+    }
+  },
+  "oos_logloss": {
+    "2025": {
+      "published_m3_history": 0.4812391784,
+      "front_only": 0.4775323587,
+      "front_only_delta": -0.0037068197,
+      "front_only_ci95": [-0.00615053, -0.00128847],
+      "front_plus_lead": 0.4771697002,
+      "front_plus_lead_delta": -0.0040694782,
+      "front_plus_lead_ci95": [-0.00659922, -0.00142389]
+    },
+    "2026": {
+      "published_m3_history": 0.4788112297,
+      "front_only": 0.4756199054,
+      "front_only_delta": -0.0031913243,
+      "front_only_ci95": [-0.00600959, -0.00038797],
+      "front_plus_lead": 0.4752841453,
+      "front_plus_lead_delta": -0.0035270844,
+      "front_plus_lead_ci95": [-0.00648401, -0.00060404]
+    }
+  },
+  "market_increment_test_trained_2024": {
+    "2025": {"market_plus_m3_logloss": 0.4163245516, "plus_front_lead_logloss": 0.4162344061, "delta": -0.0000901455, "ci95": [-0.00082128, 0.00065219]},
+    "2026": {"market_plus_m3_logloss": 0.4139705519, "plus_front_lead_logloss": 0.4139688407, "delta": -0.0000017112, "ci95": [-0.00078860, 0.00080556]}
+  },
+  "interpretation": {
+    "escape_specific": "NOT_ESTABLISHED. lead_rate5 alone does not give a reliable OOS improvement and escape-only residual CIs cross zero.",
+    "front_position_bias": "ESTABLISHED_FOR_STRUCTURAL_M3. Higher prior frontness is underweighted by current M3, while deep-closing types are overpredicted. A pre-race frontness correction improves top-3 logloss in both 2025 and 2026 OOS.",
+    "market": "Closing market probability already absorbs most of this information. Adding frontness/lead to market+M3 does not yield a reliable OOS improvement.",
+    "recommended_name": "前方位置補正, not 逃げ残り補正",
+    "recommended_scope": "Structural M3 probability layer only. Do not convert this into a betting/value signal and do not alter core M3 rank without separate ranking validation."
+  },
+  "decision": "VALIDATED_CANDIDATE_FOR_STRUCTURAL_PROBABILITY_CORRECTION"
+}
