@@ -1,0 +1,23 @@
+{
+  "version": "m3_universe_audit_v1",
+  "created": "2026-10-11",
+  "question": "Why did the apparent 2024-2026 eligible count fall from 1,152 to the M3 validation 1,100 races?",
+  "raw_rule": "class_code>=67 and field_size>=12 before obstacle exclusion",
+  "years": [
+    {"year": 2024, "raw_3win_plus_12plus": 421, "obstacle": 21, "flat_eligible": 400},
+    {"year": 2025, "raw_3win_plus_12plus": 424, "obstacle": 21, "flat_eligible": 403},
+    {"year": 2026, "raw_3win_plus_12plus": 307, "obstacle": 10, "flat_eligible": 297}
+  ],
+  "total": {"raw_3win_plus_12plus": 1152, "obstacle": 52, "flat_eligible": 1100},
+  "obstacle_breakdown": [
+    {"year": 2024, "obstacle_reason": "障害OP", "races": 17},
+    {"year": 2024, "obstacle_reason": "障害重賞(JG)", "races": 4},
+    {"year": 2025, "obstacle_reason": "障害OP", "races": 17},
+    {"year": 2025, "obstacle_reason": "障害重賞(JG)", "races": 4},
+    {"year": 2026, "obstacle_reason": "障害OP", "races": 8},
+    {"year": 2026, "obstacle_reason": "障害重賞(JG)", "races": 2}
+  ],
+  "finding": "The entire 52-race difference is obstacle racing: 10 JG graded races plus 42 obstacle open races. After excluding obstacle races, the flat eligible universe is exactly 1,100 races = 2024:400, 2025:403, 2026:297.",
+  "selection_bias_assessment": "No flat race was lost from the 2024-2026 M3 universe because of PCI/RPCI/-3F missingness. The earlier 1,152 count was not a flat-race denominator; it accidentally included obstacle races.",
+  "excluded_races_csv": "validation/m3_universe_excluded_52_obstacle.csv"
+}
