@@ -1,0 +1,44 @@
+{
+  "version": "m3_market_mismatch_oos_v1",
+  "created": "2026-10-11",
+  "question": "Does history-corrected M3 structural top-3 probability identify horses underpriced by the closing win-odds market?",
+  "universe": "Exact M3 validation universe: JRA flat, field>=12, 3-win or higher, complete current PCI/RPCI/-3F; 2024=400 races, 2025=403, 2026=297.",
+  "market_probability": {
+    "target": "top3",
+    "training": "2016-2023 only",
+    "development_selection": "2024 only",
+    "selected_candidate": "odds_simple",
+    "features": ["market_rank", "field_size", "rank_fraction", "log_win_odds", "normalized_reciprocal_win_share", "logit_normalized_win_share", "surface", "grade"],
+    "race_coherence": "projected to sum 3.0 per race",
+    "2024_logloss": 0.41051646991558227,
+    "2025_logloss": 0.41624804090991113,
+    "2026_logloss": 0.4141154393153775
+  },
+  "incremental_test": {
+    "development": "Fit logistic market+M3 combiner on 2024 using logit(market top3) + logit(history-corrected M3 top3), then freeze.",
+    "scaler_mean": [-1.7945617402213454, -1.4738167222772094],
+    "scaler_scale": [1.2285354476417822, 0.5187017527427309],
+    "intercept": -1.8015915621382919,
+    "coef": [1.2344277305574898, 0.01580287972827975],
+    "metrics": {
+      "2024": {"n_runners": 6046, "n_races": 400, "market_logloss": 0.41051646991558227, "combined_logloss": 0.41049398836620093, "delta_logloss_combined_minus_market": -0.00002248154938133684, "market_auc": 0.7874893557054707, "combined_auc": 0.7874538675630645},
+      "2025": {"n_runners": 6095, "n_races": 403, "market_logloss": 0.41624804090991113, "combined_logloss": 0.41628174694969583, "delta_logloss_combined_minus_market": 0.00003370603978469777, "market_auc": 0.7774739126585196, "combined_auc": 0.7774739126585196, "race_bootstrap_ci95_delta": [-0.0001234496466275742, 0.00019079150028937506]},
+      "2026": {"n_runners": 4528, "n_races": 297, "market_logloss": 0.4141154393153775, "combined_logloss": 0.41403449260226055, "delta_logloss_combined_minus_market": -0.00008094671311692503, "market_auc": 0.7743343841110569, "combined_auc": 0.7743843330521393, "race_bootstrap_ci95_delta": [-0.0002563650790833608, 0.00009038536323932705]}
+    },
+    "pooled_2025_2026_race_bootstrap_ci95_delta": [-0.00013315585030203859, 0.00009867495975514755]
+  },
+  "difference_screen_4_to_9_popularity": [
+    {"edge_threshold": 0.0, "oos_2025_2026": {"n": 2083, "hit3": 0.16658665386461835, "market_expected_top3": 0.17042100103443222, "place_roi": 0.7443110897743639}},
+    {"edge_threshold": 0.05, "oos_2025_2026": {"n": 1213, "hit3": 0.16817807089859851, "market_expected_top3": 0.16116898839757163, "place_roi": 0.79719703215169}},
+    {"edge_threshold": 0.10, "oos_2025_2026": {"n": 585, "hit3": 0.1641025641025641, "market_expected_top3": 0.14905788983666207, "place_roi": 0.8524786324786324}},
+    {"edge_threshold": 0.15, "oos_2025_2026": {"n": 230, "hit3": 0.15217391304347827, "market_expected_top3": 0.14221501535295894, "place_roi": 0.88}},
+    {"edge_threshold": 0.20, "oos_2025_2026": {"n": 67, "hit3": 0.07462686567164178, "market_expected_top3": 0.137373091580699, "place_roi": 0.46567164179104475},
+    {"edge_threshold": 0.25, "oos_2025_2026": {"n": 22, "hit3": 0.09090909090909091, "market_expected_top3": 0.1272578707733315, "place_roi": 0.6545454545454545}}
+  ],
+  "decision": {
+    "market_underpriced_buy_rule": "REJECT",
+    "reason": "Adding corrected M3 to an odds-derived market top3 model produced essentially zero incremental OOS logloss; pooled race-bootstrap CI crosses zero. Raw M3-minus-market difference threshold sweeps also failed to produce stable place ROI above 100%.",
+    "ui": "May display structural-vs-market probability difference as a diagnostic only. Do not label as undervalued/value/buy signal."
+  },
+  "timing_caveat": "Historical market input is final win odds. Production app is intended for pre-race use; T-15 validation remains required before any betting-edge claim."
+}
