@@ -1,0 +1,51 @@
+{
+  "version": "odds_simple_top3_v2",
+  "created": "2026-10-11",
+  "purpose": "Runtime-reproducible market top-3 probability from win odds only, aligned with app inputs.",
+  "universe": "JRA flat, field>=12, 3-win class or higher.",
+  "training_years": [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023],
+  "development_year": 2024,
+  "confirmation_years": [2025, 2026],
+  "rank_definition": "Sort win odds ascending; ties by horse number ascending; ordinal rank starts at 1.",
+  "features": ["market_rank", "field_size", "rank_fraction", "log_win_odds", "normalized_reciprocal_win_share", "logit_normalized_win_share", "surface", "grade"],
+  "rank_fraction": "market_rank / field_size",
+  "normalized_reciprocal_win_share": "(1/win_odds) / sum_race(1/win_odds)",
+  "race_coherence": "Common logit shift per race so top3 probabilities sum exactly to 3.0.",
+  "model_type": "StandardScaler(numeric) + one-hot categorical + LogisticRegression(L2, liblinear)",
+  "candidate_C_grid": [0.03, 0.1, 0.3, 1.0, 3.0, 10.0, 100.0],
+  "selected_C_by_2024_logloss": 1.0,
+  "development_grid": [
+    {"C": 0.03, "logloss_2024": 0.41067245416453657},
+    {"C": 0.1, "logloss_2024": 0.4105534898396682},
+    {"C": 0.3, "logloss_2024": 0.41052411555506063},
+    {"C": 1.0, "logloss_2024": 0.4105221560368934},
+    {"C": 3.0, "logloss_2024": 0.41052816448893803},
+    {"C": 10.0, "logloss_2024": 0.4105332673366076},
+    {"C": 100.0, "logloss_2024": 0.4105360990683188}
+  ],
+  "numeric_features": ["market_rank", "field_size", "rank_fraction", "log_win_odds", "normalized_reciprocal_win_share", "logit_normalized_win_share"],
+  "scaler_mean": [8.184986844862511, 15.45519104053645, 0.5299894875308875, 3.2057204706615807, 0.06589210458916389, -3.3623580675383615],
+  "scaler_scale": [4.530825241232277, 1.645749622373364, 0.286716313508145, 1.2871488486457936, 0.08085321415566431, 1.3650638178538506],
+  "intercept": -1.0799742336647637,
+  "numeric_coef": [-0.12414037686136403, -0.03829469801824426, 0.08008325050381428, -0.06693480516395439, -0.0363244179658044, 1.1338624357544864],
+  "categorical_coefficients": [
+    {"feature": "surface_model", "category": "ダ", "coef": -0.5286326687892616},
+    {"feature": "surface_model", "category": "芝", "coef": -0.5513415649087616},
+    {"feature": "grade", "category": "3勝", "coef": -0.17889805814235357},
+    {"feature": "grade", "category": "G1", "coef": -0.0652681827925612},
+    {"feature": "grade", "category": "G2", "coef": -0.11730740363471481},
+    {"feature": "grade", "category": "G3", "coef": -0.18543399793383902},
+    {"feature": "grade", "category": "L", "coef": -0.19982644589400242},
+    {"feature": "grade", "category": "OP", "coef": -0.18251114216302888},
+    {"feature": "grade", "category": "重賞", "coef": -0.15072900311509685}
+  ],
+  "surface_categories": ["ダ", "芝"],
+  "grade_categories": ["3勝", "G1", "G2", "G3", "L", "OP", "重賞"],
+  "metrics": {
+    "2024": {"races": 400, "runners": 6046, "logloss": 0.4105221560368934, "brier": 0.13096196864654652, "auc": 0.7875556059664761, "race_probability_sum_min": 2.9999999999999996, "race_probability_sum_max": 3.000000000000001},
+    "2025": {"races": 403, "runners": 6095, "logloss": 0.4162927928849633, "brier": 0.13298357371522596, "auc": 0.7774237284469795, "race_probability_sum_min": 2.999999999999999, "race_probability_sum_max": 3.0000000000000013},
+    "2026": {"races": 297, "runners": 4528, "logloss": 0.4139164815381946, "brier": 0.13108260155913878, "auc": 0.774511363692423, "race_probability_sum_min": 2.999999999999999, "race_probability_sum_max": 3.000000000000001}
+  },
+  "status": "DISPLAY_DIAGNOSTIC_ONLY",
+  "note": "2025-2026 were not used to choose C or features. This v2 is a reproducible runtime model; it supersedes the undocumented-coefficient odds_simple v1 for UI display alignment."
+}
