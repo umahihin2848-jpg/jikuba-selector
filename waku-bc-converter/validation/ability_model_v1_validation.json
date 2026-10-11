@@ -1,0 +1,106 @@
+{
+  "version": "ability_model_v1_validation",
+  "created": "2026-10-12",
+  "universe": "Same flat >=12 runners, 3-win+ 2024-2026 universe used by M3 validation; 2024=400 races, 2025=403, 2026=297.",
+  "model": "data/ability_model_v1.json",
+  "oos_metrics": {
+    "2025": {
+      "races": 403,
+      "runners": 6095,
+      "ability_logloss": 0.4644621096350773,
+      "ability_brier": 0.1482206518517599,
+      "ability_auc": 0.685871420953277,
+      "ability_ece10": 0.012458932830756431,
+      "m3_reconstructed_logloss": 0.48100915391437565,
+      "m3_reconstructed_auc": 0.6341214451160455,
+      "ability_top3_overlap": 0.3705541770057899,
+      "ability_winner_top1": 0.17866004962779156
+    },
+    "2026": {
+      "races": 297,
+      "runners": 4528,
+      "ability_logloss": 0.4620897999680952,
+      "ability_brier": 0.14680722206407268,
+      "ability_auc": 0.6837677041246726,
+      "ability_ece10": 0.011916410330841776,
+      "m3_reconstructed_logloss": 0.47917750969717143,
+      "m3_reconstructed_auc": 0.6309167912306927,
+      "ability_top3_overlap": 0.36363636363636365,
+      "ability_winner_top1": 0.18181818181818182
+    },
+    "pooled_2025_2026": {
+      "races": 700,
+      "runners": 10623,
+      "ability_logloss": 0.4634509246428815,
+      "ability_brier": 0.14761818455639628,
+      "ability_auc": 0.6849489477111552,
+      "ability_ece10": 0.011370519654975677
+    }
+  },
+  "official_m3_reference": {
+    "source": "data/m3_top3_probability_v1.json",
+    "2025": {
+      "logloss": 0.4828333657091356,
+      "brier": 0.15409464014097457,
+      "auc": 0.6258892067785521
+    },
+    "2026": {
+      "logloss": 0.48117347339556443,
+      "brier": 0.15332479852028888,
+      "auc": 0.6187002668876753
+    },
+    "pooled_2025_2026": {
+      "logloss": 0.48212584500915906,
+      "brier": 0.15376649904538342,
+      "auc": 0.6229181795378437
+    },
+    "note": "Standalone metric comparison only. Ability and M3 estimate different structures; do not infer a betting edge."
+  },
+  "ability_rank_oos_pooled": [
+    {"ability_rank":"1","n":700,"top3_rate":0.41714285714285715,"win_rate":0.18,"mean_ability_top3":0.3897479171216994},
+    {"ability_rank":"2","n":700,"top3_rate":0.3314285714285714,"win_rate":0.11142857142857143,"mean_ability_top3":0.3240959722090805},
+    {"ability_rank":"3","n":700,"top3_rate":0.35428571428571426,"win_rate":0.12285714285714286,"mean_ability_top3":0.28198404817540823},
+    {"ability_rank":"4-6","n":2100,"top3_rate":0.23761904761904762,"win_rate":0.08238095238095237,"mean_ability_top3":0.23767032368721414},
+    {"ability_rank":"7-9","n":2100,"top3_rate":0.17285714285714285,"win_rate":0.05,"mean_ability_top3":0.18713677031636414},
+    {"ability_rank":"10+","n":4323,"top3_rate":0.1087207957436965,"win_rate":0.030765671987046033,"mean_ability_top3":0.11816459549806939}
+  ],
+  "m3_disagreement_diagnostic": {
+    "definition": "Ability ranks from frozen v1; M3 ranks reconstructed from the current finish600 model and strictly-prior history for diagnostic disagreement only. No probability correction is derived from these buckets.",
+    "years": {
+      "2025": {
+        "ability_top3_m3_rank7plus": {"n":409,"top3_rate":0.32273838630806845,"win_rate":0.12224938875305623},
+        "ability_rank1_m3_rank7plus": {"n":125,"top3_rate":0.36,"win_rate":0.16},
+        "m3_top3_ability_rank7plus": {"n":404,"top3_rate":0.2004950495049505,"win_rate":0.06188118811881188}
+      },
+      "2026": {
+        "ability_top3_m3_rank7plus": {"n":323,"top3_rate":0.3126934984520124,"win_rate":0.13003095975232198},
+        "ability_rank1_m3_rank7plus": {"n":91,"top3_rate":0.38461538461538464,"win_rate":0.17582417582417584},
+        "m3_top3_ability_rank7plus": {"n":326,"top3_rate":0.1901840490797546,"win_rate":0.0705521472392638}
+      },
+      "pooled_2025_2026": {
+        "ability_top3_m3_rank7plus": {"n":732,"top3_rate":0.31830601092896177,"win_rate":0.12568306010928962},
+        "ability_rank1_m3_rank7plus": {"n":216,"top3_rate":0.37037037037037035,"win_rate":0.16666666666666666},
+        "m3_top3_ability_rank7plus": {"n":730,"top3_rate":0.1958904109589041,"win_rate":0.06575342465753424}
+      }
+    }
+  },
+  "incremental_diagnostic_2026": {
+    "protocol": "Freeze Ability v1 from 2024; fit a simple combiner on 2025 using reconstructed M3 and Ability logits; evaluate once on 2026.",
+    "m3_recal_logloss": 0.4791717012178655,
+    "ability_recal_logloss": 0.4613476441247762,
+    "combined_logloss": 0.4591018397961919,
+    "combined_delta_vs_ability": -0.002245804328584289,
+    "race_bootstrap_ci95_delta_vs_ability": [-0.004041660379021354,-0.00042477034089318774],
+    "combined_delta_vs_m3": -0.020069861421673607,
+    "race_bootstrap_ci95_delta_vs_m3": [-0.026833796052314365,-0.013797646475649235],
+    "status": "DIAGNOSTIC_ONLY",
+    "caveat": "M3 runner-level predictions were reconstructed rather than read from the original frozen validation artifact; do not deploy this combiner from this diagnostic alone."
+  },
+  "decision": {
+    "display": "ADOPT",
+    "replace_m3": "NO",
+    "merge_probabilities": "NO",
+    "betting_signal": "NO",
+    "recommended_use": "Show Ability rank/index/top3 alongside M3 rank so ability-high/M3-low and M3-high/ability-low horses are visible."
+  }
+}
