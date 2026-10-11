@@ -1,0 +1,55 @@
+{
+  "version": "m3_front_position_correction_v1",
+  "created": "2026-10-11",
+  "purpose": "Correct the market-independent M3 structural top-3 probability for systematic front-position bias without changing M3 rank.",
+  "source_validation": "validation/m3_front_position_bias_validation_v1.json",
+  "baseline_probability": "m3_history_amount_correction_v1",
+  "universe": "JRA flat, field_size>=12, 3-win class or higher; exact M3 validation universe",
+  "protocol": {
+    "development_year": 2024,
+    "confirmation_year": 2025,
+    "final_oos_year": 2026,
+    "target": "finish<=3",
+    "history": "strictly prior starts only; up to 5 starts for position features",
+    "race_coherence": "After correction, apply one common logit shift within each race so probabilities sum to exactly 3.0."
+  },
+  "feature_definitions": {
+    "base_logit": "logit of M3 history-amount-corrected structural top-3 probability",
+    "hist_front_mean": "Mean normalized first-available-corner frontness over up to 5 strictly prior starts; higher means more forward.",
+    "hist_cov5": "min(number of strictly prior starts used for frontness,5)/5"
+  },
+  "model": {
+    "type": "StandardScaler + LogisticRegression(C=0.1, liblinear)",
+    "features": ["base_logit", "hist_front_mean", "hist_cov5"],
+    "scaler_mean": [-1.4740637734762134, 0.5550316573918362, 0.7458154151505128],
+    "scaler_scale": [0.5195551114807244, 0.23014866396637806, 0.3561865528120338],
+    "intercept": -1.477595220364207,
+    "coef": [0.5639497104307865, 0.2535775155176123, 0.03699857059550411]
+  },
+  "oos": {
+    "2025": {
+      "baseline_logloss": 0.4812391784,
+      "corrected_logloss": 0.4775323587,
+      "delta_logloss": -0.0037068197,
+      "race_bootstrap_ci95": [-0.00615053, -0.00128847]
+    },
+    "2026": {
+      "baseline_logloss": 0.4788112297,
+      "corrected_logloss": 0.4756199054,
+      "delta_logloss": -0.0031913243,
+      "race_bootstrap_ci95": [-0.00600959, -0.00038797]
+    }
+  },
+  "runtime_guard": {
+    "rule": "Apply only when m3_history_amount_correction_v1 is actually applied and Finish600State contains the same race with hist_front_mean/hist_n inputs.",
+    "reason": "The correction was validated on top of the history-amount-corrected M3 probability. Applying it to a different baseline would be outside the validated protocol."
+  },
+  "decision": "ADOPT_AS_STRUCTURAL_PROBABILITY_CORRECTION",
+  "naming": "Use 前方位置補正, not 逃げ残り補正.",
+  "caveats": [
+    "Do not change M3 rank with this model.",
+    "Do not interpret the correction as a betting or value signal.",
+    "Escape/lead rate alone was not established as a reliable correction; this model uses general prior frontness instead.",
+    "Closing market already absorbs most of this information, so do not blend it into market probability without separate validation."
+  ]
+}
