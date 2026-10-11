@@ -1,26 +1,26 @@
 (()=>{'use strict';
 if(window.__RSA_ANALYSIS_TRANSITION_V4_LOADED)return;window.__RSA_ANALYSIS_TRANSITION_V4_LOADED=true;
 const $=id=>document.getElementById(id),C=window.ShapeCore;
-let active=false,started=0,g=0,hard=0,lastCoreKey='';
+let active=false,started=0,g=0,hard=0,lastCoreKey='',reuseCore=false;
 const req=['finish600-ready','four-axis-integration-ready','m3-race-lab-ready'];
 const name={'finish600-ready':'M3末脚','four-axis-integration-ready':'M3構造確率','m3-race-lab-ready':'M3表示','rpci-fit-beta-ready':'RPCI適性（参考）','turbulence-structure-ready':'波乱構造','validated-queue-ready':'隊列','market-odds-top3-ready':'市場'};
 const seen=new Set();
 function oddsCount(){try{return Object.keys(C?.parseOdds($('oddsPaste')?.value||'')?.odds||{}).length}catch{return 0}}
 function marketMode(){const f=+$('fieldSize')?.value,n=oddsCount();return f>=2&&n>=f?'full':n>0?'partial':'none'}
-function coreKey(){const f=$('csvFile')?.files?.[0],fk=f?`${f.name}:${f.size}:${f.lastModified}`:'';return[$('venue')?.value,$('surface')?.value,$('distance')?.value,$('fieldSize')?.value,$('grade')?.value,$('csvState')?.textContent||'',fk].join('|')}
+function coreKey(){const f=$('csvFile')?.files?.[0],fk=f?`${f.name}:${f.size}:${f.lastModified}`:'';return[$('raceDate')?.value,$('venue')?.value,$('surface')?.value,$('distance')?.value,$('fieldSize')?.value,$('grade')?.value,$('going')?.value,$('csvState')?.textContent||'',fk].join('|')}
 function state(status='idle'){window.RSAAnalysisTransitionState={status,active,generation:g,required:[...req],seen:[...seen],missing:req.filter(x=>!seen.has(x)),startedAt:started||null,version:'analysis-transition-v4',marketMode:marketMode()}}
 function miss(){const a=[];if(!$('venue')?.value)a.push('競馬場を選択');const d=+$('distance')?.value;if(!(d>0))a.push('距離を入力');const f=+$('fieldSize')?.value;if(!(f>=2))a.push('頭数を入力');if(!String($('csvState')?.textContent||'').includes('解析済'))a.push('CSVを解析');return a}
 function notice(a){$('rsaPreflightNotice')?.remove();const b=$('analyzeBtn');if(!b)return;const x=document.createElement('div');x.id='rsaPreflightNotice';x.className='rsaPreflightNotice';x.innerHTML=`<b>分析前に確認してください</b><span>${a.join(' / ')}</span>`;b.insertAdjacentElement('afterend',x)}
 function panel(){const r=$('result');if(!r)return null;let p=$('rsaCalcPanel');if(p)return p;p=document.createElement('div');p.id='rsaCalcPanel';p.innerHTML='<div class="rsaSpin"></div><div class="rsaCalcBody"><b>レースを分析しています</b><span id="rsaCalcText">M3の基礎計算中</span><div class="rsaProg"><i id="rsaProgBar"></i></div><small>オッズなしでもM3・展開・隊列まで解析します</small></div>';r.prepend(p);return p}
 function progress(t){if($('rsaCalcText'))$('rsaCalcText').textContent=t;const n=req.filter(x=>seen.has(x)).length;if($('rsaProgBar'))$('rsaProgBar').style.width=`${8+n/req.length*88}%`;state('running')}
 function restore(){document.body.classList.remove('rsaAnalysisBusy');const b=$('analyzeBtn');if(b){b.textContent=b.dataset.oldText||'レース構造を解析';b.removeAttribute('aria-busy')}}
-function seedReusableCore(){if(!lastCoreKey||lastCoreKey!==coreKey())return}
+function seedReusableCore(){reuseCore=Boolean(lastCoreKey&&lastCoreKey===coreKey())}
 function finish(id){if(!active||id!==g)return;active=false;lastCoreKey=coreKey();clearTimeout(hard);const r=$('result');r?.classList.remove('rsaCalcPending');$('rsaCalcPanel')?.remove();restore();state('ready');dispatchEvent(new CustomEvent('rsa-analysis-complete',{detail:window.RSAAnalysisTransitionState}))}
 function check(id=g){if(!active||id!==g)return;if(req.every(x=>seen.has(x)))finish(id)}
 function begin(){const r=$('result'),b=$('analyzeBtn');if(!r)return;$('rsaPreflightNotice')?.remove();g++;active=true;started=performance.now();seen.clear();seedReusableCore();clearTimeout(hard);const mm=marketMode();window.RSAStructuralOnlyMode=mm!=='full';window.RSAMarketMode=mm;r.classList.remove('m3LabReady','m3LabLegacy');panel();r.classList.add('rsaCalcPending');document.body.classList.add('rsaAnalysisBusy');document.body.classList.toggle('rsaStructuralOnly',mm!=='full');if(b){b.dataset.oldText=b.textContent||'';b.textContent='分析中…';b.setAttribute('aria-busy','true')}progress(mm==='full'?'M3と市場入力を確認中':'M3構造を計算中（市場は後から追加可）');const id=g;hard=setTimeout(()=>fail(id),12000);check(id);queueMicrotask(()=>check(id))}
 function fail(id){if(!active||id!==g)return;const m=req.filter(x=>!seen.has(x));if(!m.length){finish(id);return}active=false;clearTimeout(hard);restore();state('error');const r=$('result');r?.classList.remove('m3LabReady','m3LabLegacy');const p=panel();if(!p)return;p.classList.add('rsaCalcError');p.innerHTML=`<div class="rsaErr">!</div><div class="rsaCalcBody"><b>分析が最後まで完了しませんでした</b><span>${m.map(x=>name[x]).join('・')} が未完了です。</span><small>途中結果は表示せず、入力条件を確認して再分析してください。</small><button id="rsaRetryBtn">もう一度分析</button></div>`;$('rsaRetryBtn')?.addEventListener('click',()=>$('analyzeBtn')?.click());dispatchEvent(new CustomEvent('rsa-analysis-error',{detail:window.RSAAnalysisTransitionState}))}
 addEventListener('finish600-ready',()=>{if(!active)return;seen.add('finish600-ready');progress('M3末脚を更新中');check(g)});
-addEventListener('four-axis-integration-ready',()=>{if(!active)return;seen.add('four-axis-integration-ready');seen.delete('m3-race-lab-ready');progress('M3構造確率を更新中');check(g)});
+addEventListener('four-axis-integration-ready',()=>{if(!active)return;seen.add('four-axis-integration-ready');seen.delete('m3-race-lab-ready');if(reuseCore&&window.M3RaceLabState?.ready)seen.add('m3-race-lab-ready');progress('M3構造確率を更新中');check(g)});
 addEventListener('m3-race-lab-ready',()=>{if(!active||!seen.has('four-axis-integration-ready'))return;seen.add('m3-race-lab-ready');progress('M3表示を仕上げています');check(g)});
 ['rpci-fit-beta-ready','turbulence-structure-ready','validated-queue-ready','market-odds-top3-ready'].forEach(ev=>addEventListener(ev,()=>{if(active)progress(name[ev]||'補助情報を更新中')}));
 document.addEventListener('click',e=>{if(e.target?.id!=='analyzeBtn')return;const a=miss();if(a.length){e.preventDefault();e.stopImmediatePropagation();notice(a);return}begin()},true);
