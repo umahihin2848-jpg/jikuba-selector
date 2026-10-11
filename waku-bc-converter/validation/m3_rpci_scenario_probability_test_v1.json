@@ -1,0 +1,49 @@
+{
+  "version": "m3_rpci_scenario_probability_test_v1",
+  "created": "2026-10-11",
+  "question": "Does RPCI scenario-specific suitability/stability improve M3 calibrated top-3 probability beyond non-scenario history coverage?",
+  "universe": "JRA flat, field>=12, 3-win or higher; M3 validation universe",
+  "protocol": {
+    "m3_base": "m3_top3_probability_v1; developed on 2024, OOS 2025-2026",
+    "rpci_scenario_model": "multinomial logistic; trained 2018-2022; temperature calibration 2023 only",
+    "horse_scenario_fit": "last 10 strictly prior starts; Gaussian RPCI similarity at anchors 42.5/47.5/52.5/57.5, bandwidth 3.0; finish-percentile shrinkage k=3",
+    "correction_development": "2024 GroupKFold by race",
+    "confirmation": "2025",
+    "final_oos": "2026",
+    "race_coherence": "probabilities projected within race to sum exactly 3"
+  },
+  "features_tested": {
+    "history_coverage": "valid prior-run count / 10",
+    "scenario_adv": "scenario-probability-weighted suitability minus overall historical suitability",
+    "scenario_stability_sd": "scenario-probability-weighted SD of suitability across four RPCI bands"
+  },
+  "development_cv_2024": {
+    "m3_base": {"logloss": 0.480483, "brier": 0.153359, "auc": 0.633889, "ece10": 0.005866},
+    "m3_plus_history_coverage": {"logloss": 0.478183, "brier": 0.152670, "auc": 0.642177, "ece10": 0.004627},
+    "m3_plus_history_coverage_plus_rpci_scenario": {"logloss": 0.478710, "brier": 0.152851, "auc": 0.640314, "ece10": 0.002923}
+  },
+  "oos": {
+    "2025": {
+      "m3_base": {"logloss": 0.4828333657, "brier": 0.1540946401, "auc": 0.6258892068, "ece10": 0.0058413806},
+      "history_coverage_only": {"logloss": 0.4812216242, "brier": 0.1536192340, "auc": 0.6319089466, "ece10": 0.0056437463, "delta_logloss_vs_base": -0.0016690515, "race_bootstrap_ci95": [-0.0028158928, -0.0004849859]},
+      "history_plus_rpci_scenario": {"logloss": 0.4813782345, "brier": 0.1536805707, "auc": 0.6311732494, "ece10": 0.0052481312},
+      "scenario_increment_vs_history_only": {"delta_logloss": 0.0001444581, "race_bootstrap_ci95": [-0.0000149120, 0.0002991249]}
+    },
+    "2026": {
+      "m3_base": {"logloss": 0.4811734734, "brier": 0.1533247985, "auc": 0.6187002669, "ece10": 0.0125663236},
+      "history_coverage_only": {"logloss": 0.4787977443, "brier": 0.1526308046, "auc": 0.6287276710, "ece10": 0.0024424067, "delta_logloss_vs_base": -0.0023300689, "race_bootstrap_ci95": [-0.0037091929, -0.0009575168]},
+      "history_plus_rpci_scenario": {"logloss": 0.4787940683, "brier": 0.1526405850, "auc": 0.6290440143, "ece10": 0.0031571750},
+      "scenario_increment_vs_history_only": {"delta_logloss": -0.0000118686, "race_bootstrap_ci95": [-0.0001861, 0.00016014]}
+    }
+  },
+  "decision": {
+    "rpci_probability_correction": "REJECT",
+    "history_coverage_calibration": "SUPPORTED_SEPARATELY",
+    "reason": "RPCI scenario-specific advantage/stability did not improve over history-coverage-only calibration in 2024 CV, and incremental OOS deltas versus history-only were essentially zero in 2025 and 2026 with CIs crossing zero.",
+    "ui": "Keep RPCI scenario support/stability as structural/display information; do not alter M3 structural top-3 probability with it."
+  },
+  "caveats": [
+    "The RPCI mixture model used for this test is a conservative pre-race model trained only through 2022 and calibrated on 2023; it is separate from the richer production RPCI v2.",
+    "Because the scenario-specific incremental effect was null even against this clean pre-race setup, no probability correction is deployed."
+  ]
+}
