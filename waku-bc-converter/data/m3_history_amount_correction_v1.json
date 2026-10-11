@@ -1,0 +1,83 @@
+{
+  "version": "m3_history_amount_correction_v1",
+  "created": "2026-10-11",
+  "purpose": "Post-calibration correction of the market-independent M3 structural top-3 probability using pre-race career-history amount only. No odds/popularity/RPCI scenario correction.",
+  "source_probability_model": "m3_top3_probability_v1",
+  "universe": "JRA flat, field_size>=12, 3-win class or higher; exact M3 validation universe (all runners in races with complete current-race PCI/RPCI/-3F fields).",
+  "protocol": {
+    "development_year": 2024,
+    "development_races": 400,
+    "development_runners": 6046,
+    "development_selection": "5-fold GroupKFold by race. Compare M3 base probability with a logistic recalibrator using logit(M3 base probability) + prior_start_coverage10. C=0.1 fixed for regularized shrinkage.",
+    "confirmation_year": 2025,
+    "confirmation_races": 403,
+    "confirmation_runners": 6095,
+    "final_oos_year": 2026,
+    "final_oos_races": 297,
+    "final_oos_runners": 4528,
+    "target": "finish<=3",
+    "race_coherence": "After correction, apply one common logit shift within each race so probabilities sum to exactly 3.0."
+  },
+  "feature_definitions": {
+    "base_logit": "logit of M3 structural top-3 probability after m3_top3_probability_v1 race-coherence projection",
+    "prior_start_coverage10": "min(number of strictly prior starts available for the horse, 10)/10. This is a predictive career-history amount feature, not a confidence score."
+  },
+  "model": {
+    "type": "StandardScaler + LogisticRegression",
+    "C": 0.1,
+    "features": ["base_logit", "prior_start_coverage10"],
+    "scaler_mean": [-1.4659124069672256, 0.5811445583857054],
+    "scaler_scale": [0.4908431595905443, 0.3669505991983991],
+    "intercept": -1.475680844810616,
+    "coef": [0.47173038039410337, -0.14823516364211164]
+  },
+  "development_oof_2024": {
+    "base": {"logloss": 0.4796199265133188, "brier": 0.15308910761503966, "auc": 0.6368679695025388, "ece10": 0.008211736647217166},
+    "corrected": {"logloss": 0.4774909446872918, "brier": 0.1524471456022384, "auc": 0.6445859960181101, "ece10": 0.004755590055740401}
+  },
+  "oos": {
+    "2025": {
+      "base": {"logloss": 0.4828333657091356, "brier": 0.15409464014097457, "auc": 0.6258889533229383, "ece10": 0.005841380607722217},
+      "corrected": {"logloss": 0.4812338407977122, "brier": 0.15362318214713983, "auc": 0.6318842768978925, "ece10": 0.00581636392140512},
+      "delta_logloss": -0.0015995249114233092,
+      "race_bootstrap_ci95_delta_logloss": [-0.002762992930682124, -0.00045964637281561705]
+    },
+    "2026": {
+      "base": {"logloss": 0.48117347339556443, "brier": 0.15332479852028888, "auc": 0.6187002668876753, "ece10": 0.012566323648236231},
+      "corrected": {"logloss": 0.47880513857457824, "brier": 0.15263513236566773, "auc": 0.6286882051433843, "ece10": 0.0025795582781069216},
+      "delta_logloss": -0.0023683348209862054,
+      "race_bootstrap_ci95_delta_logloss": [-0.00374999511784001, -0.001048959114807153]
+    },
+    "pooled_2025_2026": {
+      "races": 700,
+      "runners": 10623,
+      "base": {"logloss": 0.48212584500915906, "brier": 0.15376649904538342, "auc": 0.6229180958510545, "ece10": 0.007196091554036314},
+      "corrected": {"logloss": 0.4801986187637905, "brier": 0.1532020309270979, "auc": 0.6304950977394748, "ece10": 0.004436691893460596},
+      "delta_logloss": -0.0019272262453685967,
+      "race_bootstrap_ci95_delta_logloss": [-0.0028094346602794314, -0.001046123692594377]
+    }
+  },
+  "coverage_bins_pooled_2025_2026": [
+    {"prior_starts": "0-2", "n": 2814, "observed_top3": 0.23347547974413646, "base_mean": 0.2247978316754536, "corrected_mean": 0.24051867248757713},
+    {"prior_starts": "3-5", "n": 2185, "observed_top3": 0.23569794050343248, "base_mean": 0.20171619098236981, "corrected_mean": 0.21118555273535924},
+    {"prior_starts": "6-8", "n": 1785, "observed_top3": 0.19831932773109243, "base_mean": 0.18514663668821532, "corrected_mean": 0.18212180231385733},
+    {"prior_starts": "9-10", "n": 3839, "observed_top3": 0.15056004167752018, "base_mean": 0.18134469337857032, "corrected_mean": 0.1658381364321341}
+  ],
+  "subgroup_monitoring": {
+    "note": "Global OOS improvement is significant in both years. Subgroup effects are not used to retune production thresholds.",
+    "2026_G3": {"delta_logloss": 0.004130537642413494, "race_bootstrap_ci95": [0.001759247902554663, 0.006624551632113508], "action": "monitor drift; do not create a post-hoc G3 exception without new future validation"}
+  },
+  "runtime_guard": {
+    "rule": "Apply only when the uploaded history source demonstrably contains more than five strictly prior starts for at least one runner in the race; otherwise fall back to m3_top3_probability_v1.",
+    "reason": "The correction was validated with up to 10 prior starts. A truncated five-start export would make prior_start_coverage10 indistinguishable from a genuinely lightly raced horse.",
+    "validation_status": "operational safeguard, not part of the pristine OOS performance claim"
+  },
+  "decision": "ADOPT_AS_M3_HISTORY_AMOUNT_CORRECTION",
+  "naming": "Use 履歴量補正, not 履歴信頼度補正. Lower or higher history amount can move probability either direction; it is a predictive covariate, not a monotone confidence score.",
+  "caveats": [
+    "No odds or popularity are used.",
+    "No RPCI scenario correction is applied; that incremental correction was rejected separately.",
+    "This is not a betting signal and has no standalone ROI claim.",
+    "Do not introduce class-specific exceptions using the 2025-2026 OOS results without a new future holdout."
+  ]
+}
