@@ -6,14 +6,14 @@ const BASE='http://127.0.0.1:4173/waku-bc-converter/v3.html?test=r30';
 const IPHONE_UA='Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1';
 
 function makeTargetCsv(){
-  const head=['何走目','馬番','馬名','レースPCI','PCI','Ave-3F','上3F地点差','決手','日付','距離','開催','着順','クラス名','頭数','芝・ダ','上り3F','通過1','通過2','通過3','通過4'];
+  const head=['何走目','馬番','馬名','レースPCI','PCI','Ave-3F','上3F地点差','決手','日付','距離','開催','着順','着差','クラス名','頭数','芝・ダ','上り3F','通過1','通過2','通過3','通過4'];
   const rows=[head.join(',')];
   for(let h=1;h<=16;h++){
     for(let k=0;k<8;k++){
       const style=h<=2?'逃げ':h<=7?'先行':h<=12?'差し':'追込';
-      const rpci=43+((h+k)%13),pci=45+((h*2+k)%14),ave=(34+((h+k)%9)*.2).toFixed(1),gap=(.2+((h+k)%10)*.25).toFixed(2),last3=(34+((h*2+k)%10)*.18).toFixed(2);
+      const rpci=43+((h+k)%13),pci=45+((h*2+k)%14),ave=(34+((h+k)%9)*.2).toFixed(1),gap=(.2+((h+k)%10)*.25).toFixed(2),last3=(34+((h*2+k)%10)*.18).toFixed(2),margin=(((h+k)%9)*.18-.25).toFixed(2);
       const month=String(9-k).padStart(2,'0'),p1=Math.min(16,Math.max(1,h<=7?h:8+((h+k)%8))),p4=Math.min(16,Math.max(1,p1+(style==='差し'||style==='追込'?-2:1)));
-      rows.push([k+1,h,`TestHorse${h}`,rpci,pci,ave,gap,style,`2026.${month}.10`,1800,'阪神',((h+k)%12)+1,'Ｇ３',16,'ダ',last3,p1,p1,p4,p4].join(','));
+      rows.push([k+1,h,`TestHorse${h}`,rpci,pci,ave,gap,style,`2026.${month}.10`,1800,'阪神',((h+k)%12)+1,margin,'Ｇ３',16,'ダ',last3,p1,p1,p4,p4].join(','));
     }
   }
   return rows.join('\n');
@@ -44,12 +44,17 @@ async function currentSnapshot(page){return page.evaluate(()=>({
   labs:document.querySelectorAll('#m3RaceLab').length,
   repro:document.querySelectorAll('#m3PrevRunRepro').length,
   narrative:document.querySelectorAll('#m3NarrativeAnalysis').length,
+  abilityPanels:document.querySelectorAll('#m3AbilityCompareV1').length,
+  abilityInline:document.querySelectorAll('.m3AbilityInline').length,
+  abilityNarrative:document.querySelectorAll('.m3AbilityNarrativeText').length,
   cache:window.RSATargetCsvCache?.stats||null,
   health:window.RSAAddonHealth||null,
   transition:window.RSAAnalysisTransitionState||null,
   front:window.M3FrontPositionState||null,
   prev:window.M3PrevRunReproducibilityState||null,
-  append:window.M3NarrativeReproAppendState||null
+  append:window.M3NarrativeReproAppendState||null,
+  ability:window.M3PureAbilityState||null,
+  abilityNarrativeState:window.M3AbilityNarrativeState||null
 }))}
 async function run(browserType,name){
   const browser=await browserType.launch({headless:true});
@@ -88,10 +93,17 @@ async function run(browserType,name){
   const full1=await analyze(page,`${name} full-1`);
   await page.waitForFunction(()=>window.M3PrevRunReproducibilityState?.ready===true&&window.M3NarrativeReproAppendState?.ready===true,null,{timeout:6000});
   await page.waitForFunction(()=>window.M3FrontPositionState?.ready===true,null,{timeout:6000});
+  await page.waitForFunction(()=>window.M3PureAbilityState?.ready===true&&window.M3AbilityNarrativeState?.ready===true,null,{timeout:7000});
   const first=await currentSnapshot(page);
   assert.strictEqual(first.labs,1,`${name}: duplicate lab after full analysis`);
   assert(first.repro<=1,`${name}: duplicate reproducibility panel`);
   assert(first.narrative<=1,`${name}: duplicate narrative panel`);
+  assert.strictEqual(first.abilityPanels,1,`${name}: Ability comparison panel missing/duplicated`);
+  assert.strictEqual(first.abilityInline,16,`${name}: Ability rows not attached to all horses (${first.abilityInline})`);
+  assert.strictEqual(first.ability?.rows?.length,16,`${name}: Ability state must contain 16 runners`);
+  const abilitySum=(first.ability?.rows||[]).reduce((s,r)=>s+(Number(r.top3)||0),0);
+  assert(Math.abs(abilitySum-3)<1e-6,`${name}: Ability top3 race coherence failed (${abilitySum})`);
+  assert(first.abilityNarrative>=1,`${name}: Ability narrative missing`);
 
   await page.selectOption('#going','稍');const full2=await analyze(page,`${name} full-2`);
   await page.selectOption('#going','重');const full3=await analyze(page,`${name} full-3`);
@@ -100,10 +112,12 @@ async function run(browserType,name){
   assert.strictEqual(last.labs,1,`${name}: duplicate lab after repeated analysis`);
   assert(last.repro<=1,`${name}: reproducibility panel leaked`);
   assert(last.narrative<=1,`${name}: narrative panel leaked`);
-  assert(last.nodes<=first.nodes+220,`${name}: repeated analysis DOM leak ${first.nodes} -> ${last.nodes}`);
+  assert.strictEqual(last.abilityPanels,1,`${name}: Ability comparison panel leaked`);
+  assert.strictEqual(last.abilityInline,16,`${name}: Ability inline rows leaked/duplicated (${last.abilityInline})`);
+  assert(last.nodes<=first.nodes+240,`${name}: repeated analysis DOM leak ${first.nodes} -> ${last.nodes}`);
   assert.strictEqual(last.cache?.rawReads,1,`${name}: TARGET file re-read during repeat analysis (${last.cache?.rawReads})`);
   assert.deepStrictEqual(pageErrors,[],`${name}: page errors ${pageErrors.join(' | ')}`);
-  console.log('PASS',name,{bootMs:health.bootMs,structuralMs,full1,full2,full3,cache:last.cache,nodes:[first.nodes,last.nodes]});
+  console.log('PASS',name,{bootMs:health.bootMs,structuralMs,full1,full2,full3,cache:last.cache,nodes:[first.nodes,last.nodes],abilityTop3Sum:abilitySum});
   await browser.close();
 }
 (async()=>{await run(chromium,'chromium iPhone');await run(webkit,'webkit iPhone')})().catch(err=>{console.error(err);process.exit(1)});
