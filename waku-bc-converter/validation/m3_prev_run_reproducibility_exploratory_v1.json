@@ -1,0 +1,70 @@
+{
+  "version": "m3_prev_run_reproducibility_exploratory_v1",
+  "created": "2026-10-11",
+  "universe": "JRA flat, field_size>=12, 3-win class or higher; exact M3 validation universe",
+  "baseline": "m3_front_position_correction_v1 structural top-3 probability",
+  "protocol": {
+    "development_year": 2024,
+    "diagnostic_years": [2025, 2026],
+    "target": "finish<=3",
+    "note": "Candidate selection was informed by 2025-2026 diagnostic results. These are exploratory diagnostics, not pristine future-holdout validation and therefore are not eligible for automatic probability correction."
+  },
+  "signals": {
+    "previous_escape_bad": {
+      "definition": "Previous strictly-prior start: first available corner position=1 and finish>=4",
+      "pooled_2025_2026": {"n": 437, "hits": 67, "observed_top3": 0.153318, "baseline_predicted": 0.202989, "residual": -0.049671},
+      "candidate_recalibration_delta_logloss": {"2025": -0.000015, "2026": -0.000358, "pooled": -0.000161},
+      "decision": "WARNING_ONLY"
+    },
+    "previous_slow_escape": {
+      "definition": "Previous strictly-prior start: first available corner position=1 and RPCI>=55",
+      "pooled_2025_2026": {"n": 104, "hits": 13, "observed_top3": 0.125, "baseline_predicted": 0.277302, "residual": -0.152302},
+      "candidate_recalibration_delta_logloss": {
+        "2025": -0.000160,
+        "2025_ci95": [-0.000493, 0.000183],
+        "2026": -0.000559,
+        "2026_ci95": [-0.001013, -0.000099],
+        "pooled": -0.000330,
+        "pooled_ci95": [-0.000602, -0.000047]
+      },
+      "decision": "MONITOR_WARNING_ONLY"
+    },
+    "previous_front_hold_good": {
+      "definition": "Previous strictly-prior start: normalized first-corner frontness>=0.70, fourth-corner position no worse than first-corner position+1, finish<=3",
+      "pooled_2025_2026": {"n": 1003, "hits": 328, "observed_top3": 0.327019, "baseline_predicted": 0.270172, "residual": 0.056847},
+      "candidate_recalibration_delta_logloss": {
+        "2025": -0.000989,
+        "2025_ci95": [-0.002009, -0.000013],
+        "2026": -0.001190,
+        "2026_ci95": [-0.002334, -0.000075],
+        "pooled": -0.001075,
+        "pooled_ci95": [-0.001815, -0.000321]
+      },
+      "decision": "POSITIVE_MONITOR_ONLY",
+      "reason": "Despite two-year diagnostic improvement, the feature was selected after inspecting 2025-2026 outcomes, so it must remain descriptive until future prospective validation."
+    },
+    "previous_generic_pace_fit_good": {
+      "definition": "Good previous finish with coarse pace-style match",
+      "decision": "REJECT_FOR_UI_RULE",
+      "reason": "Direction was not stable from 2024 development to 2025-2026 diagnostics."
+    },
+    "previous_inner_forward_good": {
+      "definition": "Inner-third gate plus forward position plus top-3 previous finish",
+      "decision": "NO_NEGATIVE_PENALTY",
+      "reason": "Diagnostics did not support treating the proxy as a next-run negative factor."
+    }
+  },
+  "combined_exploratory_model": {
+    "features": ["baseline_logit", "previous_escape_bad", "previous_slow_escape", "previous_front_hold_good"],
+    "delta_logloss": {
+      "2025": -0.001389,
+      "2025_ci95": [-0.002486, -0.000326],
+      "2026": -0.002141,
+      "2026_ci95": [-0.003421, -0.000861],
+      "pooled": -0.001709,
+      "pooled_ci95": [-0.002538, -0.000893]
+    },
+    "status": "EXPLORATORY_ONLY_NOT_PRODUCTION_CORRECTION"
+  },
+  "ui_policy": "Show reproducibility warnings/positive monitoring tags only. Do not change M3 rank or structural top-3 probability from these exploratory signals until a new prospective holdout confirms them."
+}
