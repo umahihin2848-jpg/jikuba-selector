@@ -36,5 +36,6 @@ jobs:
           node tests/race-role-parallel-smoke.cjs
           node tests/market-independent-center-smoke.cjs
           node tests/prospective-ledger-smoke.cjs
+          node tests/prospective-ticket-types-smoke.cjs
           node tests/race-scenario-v4-smoke.cjs
           node tests/waku-bc-scanner-smoke.cjs
