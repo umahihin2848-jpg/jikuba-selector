@@ -1,8 +1,8 @@
 const { chromium, webkit } = require('playwright');
 const assert = require('assert');
 
-const EXPECTED_BUILD='20261012r66';
-const BASE='http://127.0.0.1:4173/waku-bc-converter/v3.html?test=r30';
+const EXPECTED_BUILD='20261012r67';
+const BASE='http://127.0.0.1:4173/waku-bc-converter/v3.html?test=r67';
 const IPHONE_UA='Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1';
 
 function makeTargetCsv(){
@@ -20,7 +20,7 @@ function makeTargetCsv(){
 }
 function oddsText(){const vals=[2.8,4.1,5.6,7.4,9.8,12.5,16,20.5,26,33,41,52,65,80,100,130];return vals.map((v,i)=>`${i+1} ${v}`).join('\n')}
 async function ensureCsvParsed(page){
-  await page.locator('#csvFile').setInputFiles({name:'r30-target.csv',mimeType:'text/csv',buffer:Buffer.from(makeTargetCsv(),'utf8')});
+  await page.locator('#csvFile').setInputFiles({name:'r67-target.csv',mimeType:'text/csv',buffer:Buffer.from(makeTargetCsv(),'utf8')});
   await page.waitForTimeout(500);
   if(!/^解析済\s+16頭$/.test(await page.locator('#csvState').innerText())){
     await page.click('#parseCsvBtn');
@@ -47,6 +47,8 @@ async function currentSnapshot(page){return page.evaluate(()=>({
   abilityPanels:document.querySelectorAll('#m3AbilityCompareV1').length,
   abilityInline:document.querySelectorAll('.m3AbilityInline').length,
   abilityNarrative:document.querySelectorAll('.m3AbilityNarrativeText').length,
+  v2ValidationNotes:document.querySelectorAll('#abilityV2FinalValidationNote').length,
+  v2ValidationMsgs:document.querySelectorAll('.v2ValidationMsg').length,
   cache:window.RSATargetCsvCache?.stats||null,
   health:window.RSAAddonHealth||null,
   transition:window.RSAAnalysisTransitionState||null,
@@ -54,6 +56,7 @@ async function currentSnapshot(page){return page.evaluate(()=>({
   prev:window.M3PrevRunReproducibilityState||null,
   append:window.M3NarrativeReproAppendState||null,
   ability:window.M3PureAbilityState||null,
+  v2Validation:window.AbilityV2ValidationStatusState||null,
   abilityNarrativeState:window.M3AbilityNarrativeState||null
 }))}
 async function run(browserType,name){
@@ -71,7 +74,7 @@ async function run(browserType,name){
 
   await page.fill('#raceDate','2026-10-11');
   await page.selectOption('#venue','阪神');
-  await page.fill('#raceName','R30 Smoke Stakes');
+  await page.fill('#raceName','R67 Smoke Stakes');
   await page.fill('#fieldSize','16');
   await page.selectOption('#surface','ダート');
   await page.fill('#distance','1800');
@@ -94,6 +97,7 @@ async function run(browserType,name){
   await page.waitForFunction(()=>window.M3PrevRunReproducibilityState?.ready===true&&window.M3NarrativeReproAppendState?.ready===true,null,{timeout:6000});
   await page.waitForFunction(()=>window.M3FrontPositionState?.ready===true,null,{timeout:6000});
   await page.waitForFunction(()=>window.M3PureAbilityState?.ready===true&&window.M3AbilityNarrativeState?.ready===true,null,{timeout:7000});
+  await page.waitForFunction(()=>window.AbilityV2ValidationStatusState?.ready===true,null,{timeout:4000});
   const first=await currentSnapshot(page);
   assert.strictEqual(first.labs,1,`${name}: duplicate lab after full analysis`);
   assert(first.repro<=1,`${name}: duplicate reproducibility panel`);
@@ -101,6 +105,9 @@ async function run(browserType,name){
   assert.strictEqual(first.abilityPanels,1,`${name}: Ability comparison panel missing/duplicated`);
   assert.strictEqual(first.abilityInline,16,`${name}: Ability rows not attached to all horses (${first.abilityInline})`);
   assert.strictEqual(first.ability?.rows?.length,16,`${name}: Ability state must contain 16 runners`);
+  assert.strictEqual(first.v2ValidationNotes,1,`${name}: Ability v2 validation note missing/duplicated`);
+  assert.strictEqual(first.v2ValidationMsgs,16,`${name}: Ability v2 per-horse validation messages missing/duplicated (${first.v2ValidationMsgs})`);
+  assert.strictEqual(first.v2Validation?.status,'release_candidate_frozen_parallel',`${name}: Ability v2 validation status mismatch`);
   const abilitySum=(first.ability?.rows||[]).reduce((s,r)=>s+(Number(r.top3)||0),0);
   assert(Math.abs(abilitySum-3)<1e-6,`${name}: Ability top3 race coherence failed (${abilitySum})`);
   assert(first.abilityNarrative>=1,`${name}: Ability narrative missing`);
@@ -114,10 +121,12 @@ async function run(browserType,name){
   assert(last.narrative<=1,`${name}: narrative panel leaked`);
   assert.strictEqual(last.abilityPanels,1,`${name}: Ability comparison panel leaked`);
   assert.strictEqual(last.abilityInline,16,`${name}: Ability inline rows leaked/duplicated (${last.abilityInline})`);
-  assert(last.nodes<=first.nodes+240,`${name}: repeated analysis DOM leak ${first.nodes} -> ${last.nodes}`);
+  assert.strictEqual(last.v2ValidationNotes,1,`${name}: Ability v2 validation note leaked/duplicated`);
+  assert.strictEqual(last.v2ValidationMsgs,16,`${name}: Ability v2 validation messages leaked/duplicated (${last.v2ValidationMsgs})`);
+  assert(last.nodes<=first.nodes+280,`${name}: repeated analysis DOM leak ${first.nodes} -> ${last.nodes}`);
   assert.strictEqual(last.cache?.rawReads,1,`${name}: TARGET file re-read during repeat analysis (${last.cache?.rawReads})`);
   assert.deepStrictEqual(pageErrors,[],`${name}: page errors ${pageErrors.join(' | ')}`);
-  console.log('PASS',name,{bootMs:health.bootMs,structuralMs,full1,full2,full3,cache:last.cache,nodes:[first.nodes,last.nodes],abilityTop3Sum:abilitySum});
+  console.log('PASS',name,{bootMs:health.bootMs,structuralMs,full1,full2,full3,cache:last.cache,nodes:[first.nodes,last.nodes],abilityTop3Sum:abilitySum,v2Validation:last.v2Validation?.status});
   await browser.close();
 }
 (async()=>{await run(chromium,'chromium iPhone');await run(webkit,'webkit iPhone')})().catch(err=>{console.error(err);process.exit(1)});
