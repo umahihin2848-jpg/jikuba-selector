@@ -1,0 +1,1 @@
+(()=>{'use strict';if(window.__RACE_INDEPENDENT_PARENT_SYNC_V1)return;window.__RACE_INDEPENDENT_PARENT_SYNC_V1=true;addEventListener('race-overall-summary-ready',()=>{try{window.RaceIndependentLayerRefresh?.()}catch(e){console.warn('independent parent sync',e)}})})();
