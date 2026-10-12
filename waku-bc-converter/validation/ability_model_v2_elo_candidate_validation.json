@@ -1,0 +1,101 @@
+{
+  "version": "ability_model_v2_elo_candidate_validation",
+  "created": "2026-10-12",
+  "status": "CANDIDATE_ONLY_NOT_DEPLOYED",
+  "purpose": "Test one strictly-prior opponent-adjusted Elo feature on top of frozen Ability v1 without market, M3, PCI/RPCI, or current-race scenario inputs.",
+  "universe": {
+    "definition": "JRA flat, field_size>=12, 3-win class or higher",
+    "2024": {"races": 400, "runners": 6046, "role": "development_only"},
+    "2025": {"races": 403, "runners": 6095, "role": "OOS_confirmation"},
+    "2026": {"races": 297, "runners": 4528, "role": "OOS_final_for_frozen_parameters"},
+    "pooled_2025_2026": {"races": 700, "runners": 10623}
+  },
+  "candidate": {
+    "base_model": "data/ability_model_v1.json",
+    "base_coefficients_changed": false,
+    "added_feature": "strictly-prior opponent-adjusted Elo only",
+    "elo": {
+      "initial_rating": 1500.0,
+      "pairwise_scale": 400.0,
+      "K": 512,
+      "expected_score": "mean pairwise probability of finishing ahead of each opponent",
+      "actual_score": "normalized proportion of opponents beaten; tied finish=0.5",
+      "update": "R_new = R_old + K * (actual_score - expected_score)",
+      "history": "strictly prior flat 3-win-or-higher starts only"
+    },
+    "standardization_on_2024_only": {"mean": 1654.6417183994847, "sd": 269.3542999616647},
+    "formula": {
+      "elo_z": "(pre_race_elo - 2024_mean) / 2024_sd",
+      "v2_logit": "ability_v1_logit + 0.406228440465921 * elo_z",
+      "beta": 0.4062284404659212,
+      "race_projection": "same common-logit shift as v1 so projected top3 probabilities sum to exactly 3.0"
+    },
+    "selection_protocol": {
+      "K": "selected by 5-fold GroupKFold by race on 2024 only; search range expanded because the initial optimum was at the boundary",
+      "beta": "fit on all 2024 only after K was frozen",
+      "no_2025_2026_parameter_tuning": true
+    }
+  },
+  "oos_metrics_reconstructed_same_700_races": {
+    "2025": {
+      "v1": {"logloss": 0.4644621094, "brier": 0.1482206518, "auc": 0.6858714210, "ece10": 0.0124589309},
+      "v2": {"logloss": 0.4620270608, "brier": 0.1474848587, "auc": 0.6903814101, "ece10": 0.0074148119}
+    },
+    "2026": {
+      "v1": {"logloss": 0.4621107960, "brier": 0.1468156762, "auc": 0.6836835309, "ece10": 0.0117836845},
+      "v2": {"logloss": 0.4602166978, "brier": 0.1459540190, "auc": 0.6860380685, "ece10": 0.0120982298}
+    },
+    "pooled_2025_2026": {
+      "v1": {"logloss": 0.4634598740, "brier": 0.1476217880, "auc": 0.6849100055, "ece10": 0.0113655123},
+      "v2": {"logloss": 0.4612554027, "brier": 0.1468323460, "auc": 0.6886174697, "ece10": 0.0090903629},
+      "delta_v2_minus_v1": {"logloss": -0.0022044712, "brier": -0.0007894420, "auc": 0.0037074642, "ece10": -0.0022751494}
+    }
+  },
+  "race_cluster_bootstrap_1000_pooled_delta_ci95": {
+    "logloss": [-0.0041457016, -0.0002253848],
+    "brier": [-0.0013957367, -0.0001152852],
+    "auc": [0.0004619885, 0.0066534000],
+    "ece10": [-0.0122323787, 0.0093702171]
+  },
+  "rank_diagnostic_pooled": {
+    "v1_rank1": {"n": 700, "top3_rate": 0.4214285714, "win_rate": 0.1814285714},
+    "v2_rank1": {"n": 700, "top3_rate": 0.4357142857, "win_rate": 0.1842857143},
+    "rank1_delta": {"top3_rate": 0.0142857143, "win_rate": 0.0028571429, "bootstrap_ci95_top3": [-0.01142857, 0.04000000], "bootstrap_ci95_win": [-0.01571429, 0.02285714]},
+    "top3_set_actual_top3_rate": {"v1": 0.3657142857, "v2": 0.3690476190, "delta": 0.0033333333, "bootstrap_ci95_delta": [-0.00809524, 0.01429762]},
+    "winner_captured_by_ability_top3": {"v1": 0.4128571429, "v2": 0.4242857143}
+  },
+  "m3_disagreement_near_reproduction": {
+    "status": "DIAGNOSTIC_ONLY_NEAR_REPRODUCTION",
+    "note": "M3 ranks reconstructed from the current finish600 model using strictly-prior all-class history. Stored r32 pooled v1 mismatch counts are reproduced within at most 3 runners per bucket, but not byte-identically; do not use these counts as a probability correction.",
+    "stored_r32_v1_counts": {"ability_top3_m3_rank7plus": 732, "ability_rank1_m3_rank7plus": 216, "m3_top3_ability_rank7plus": 730},
+    "reconstructed_v1": {
+      "ability_top3_m3_rank7plus": {"n": 729, "top3_rate": 0.3168724280, "win_rate": 0.1248285322},
+      "ability_rank1_m3_rank7plus": {"n": 217, "top3_rate": 0.3732718894, "win_rate": 0.1658986175},
+      "m3_top3_ability_rank7plus": {"n": 732, "top3_rate": 0.1953551913, "win_rate": 0.0683060109}
+    },
+    "candidate_v2": {
+      "ability_top3_m3_rank7plus": {"n": 786, "top3_rate": 0.3206106870, "win_rate": 0.1297709924},
+      "ability_rank1_m3_rank7plus": {"n": 225, "top3_rate": 0.3955555556, "win_rate": 0.1733333333},
+      "m3_top3_ability_rank7plus": {"n": 755, "top3_rate": 0.1986754967, "win_rate": 0.0662251656}
+    }
+  },
+  "interpretation": {
+    "primary": "Elo adds small but consistent OOS information to Ability v1: pooled AUC rises and LogLoss/Brier fall, with race-cluster 95% intervals excluding zero in the favorable direction.",
+    "calibration": "ECE is lower pooled, but its bootstrap CI crosses zero; no statistically resolved calibration-improvement claim.",
+    "rank1": "Rank1 top3 rate rises about 1.4 percentage points, but its CI crosses zero; evidence for v2 comes from full-distribution metrics rather than rank1 alone.",
+    "m3": "Ability and M3 remain separate layers; do not average their probabilities directly."
+  },
+  "decision": {
+    "ability_v2_candidate": "PROMISING_FREEZE_CANDIDATE",
+    "deploy_now": "NO",
+    "replace_m3": "NO",
+    "merge_with_m3_probability": "NO",
+    "betting_signal": "NO",
+    "next": "Freeze this Elo specification and prospectively validate on genuinely unseen future races before production promotion."
+  },
+  "caveats": [
+    "K and beta use 2024 only, but the idea to add Elo was motivated after prior inspection of 2025/2026 behavior. Thus 2025/2026 are parameter-OOS, not a pristine idea-selection holdout.",
+    "The current 2026 source snapshot yields tiny differences from the stored r32 Ability v1 artifact. Comparisons here use the same current 700-race reconstruction for v1 and v2.",
+    "M3 cross-diagnostic is near-reproduced rather than exact and is diagnostic only."
+  ]
+}
