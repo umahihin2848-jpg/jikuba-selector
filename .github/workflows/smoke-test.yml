@@ -32,5 +32,6 @@ jobs:
           node tests/smoke.cjs
           node tests/quinella-range-smoke.cjs
           node tests/race-scenario-v3-r32-smoke.cjs
+          node tests/race-ux-semantics-v2-smoke.cjs
           node tests/race-scenario-v4-smoke.cjs
           node tests/waku-bc-scanner-smoke.cjs
