@@ -1,0 +1,41 @@
+const {chromium,webkit}=require('playwright');
+const assert=require('assert');
+const BASE='http://127.0.0.1:4173/waku-bc-converter/v3.html?test=prospective-ticket-types';
+const UA='Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1';
+async function run(type,name){
+  const browser=await type.launch({headless:true});
+  const context=await browser.newContext({viewport:{width:390,height:844},userAgent:UA,isMobile:true,hasTouch:true});
+  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.goto(BASE,{waitUntil:'networkidle',timeout:30000});
+  await page.waitForFunction(()=>window.RSAAddonHealth?.ready===true&&window.ProspectiveLedgerTicketTypesState?.ready===true,null,{timeout:25000});
+  assert.deepStrictEqual(await page.locator('#plBetType option').allTextContents(),['単勝','複勝','馬連','馬単','ワイド'],`${name}: ticket type order`);
+  await page.evaluate(()=>{localStorage.removeItem('rsa_prospective_ledger_v1');localStorage.removeItem('rsa_prospective_ledger_v1_backup')});
+  await page.fill('#raceDate','2027-02-07');await page.selectOption('#venue','東京');await page.fill('#raceName','Ticket Types Smoke');await page.fill('#fieldSize','3');await page.selectOption('#surface','芝');await page.fill('#distance','1600');await page.selectOption('#grade','G3');await page.fill('#oddsPaste','1 3.0\n2 5.0\n3 9.0');
+  await page.evaluate(()=>{
+    const base=[{no:'1',name:'H1',abilityRank:1,top3:.5,elo:1700,eloMatched:4,eloTotal:4},{no:'2',name:'H2',abilityRank:2,top3:.35,elo:1600,eloMatched:4,eloTotal:4},{no:'3',name:'H3',abilityRank:3,top3:.2,elo:1500,eloMatched:3,eloTotal:4}];
+    window.M3PureAbilityState={ready:true,version:'v1',rows:base.map(x=>({...x}))};
+    window.M3PureAbilityV2State={ready:true,version:'v2',status:'candidate_parallel_not_replacement',rows:base.map(x=>({...x,v1Rank:x.abilityRank,v2Rank:x.abilityRank}))};
+    window.FourAxisIntegrationState={p:[.2,.3,.3,.2]};
+    window.Finish600State={ready:true,version:'m3',rows:[{no:'1',name:'H1',finishRank:1,sc:[{rank:1},{rank:1},{rank:2},{rank:2}]},{no:'2',name:'H2',finishRank:2,sc:[{rank:2},{rank:2},{rank:3},{rank:3}]},{no:'3',name:'H3',finishRank:3,sc:[{rank:3},{rank:3},{rank:1},{rank:1}]}]};
+    window.M3NarrativeRoleSyncState={ready:true,axisNo:'1',upliftNo:'3',cautionNo:null};
+    window.RaceIndependentLayerState={ready:true,stale:false,ground:{label:'強い'},structure:{label:'中立'},market:{label:'一致'},dataConfidence:{grade:'A'}};
+    window.MarketIndependentCenterState={ready:true,version:'market-independent-center-v1',anchorNo:'1',axisNo:'1',hasAxis:true,policy:'ability-v2-m3-axis-v1',marketUsedForAnchor:false};
+    dispatchEvent(new CustomEvent('market-independent-center-ready'));
+  });
+  await page.waitForFunction(()=>window.ProspectiveLedgerState?.canFreeze===true&&document.querySelector('#plBetType option[value="複勝"]')&&document.querySelector('#plBetType option[value="馬単"]'),null,{timeout:5000});
+  await page.selectOption('#plBetType','複勝');assert((await page.getAttribute('#plSelection','placeholder')).includes('馬番'),`${name}: place hint`);await page.fill('#plSelection','1');await page.fill('#plStake','1000');await page.fill('#plOdds','1.8');await page.fill('#plHitP','60');await page.click('#plAddBet');
+  await page.selectOption('#plBetType','馬単');assert((await page.getAttribute('#plSelection','placeholder')).includes('1着→2着'),`${name}: exacta hint`);await page.fill('#plSelection','1→2');await page.fill('#plStake','500');await page.fill('#plOdds','12.0');await page.fill('#plHitP','10');await page.click('#plAddBet');
+  await page.waitForFunction(()=>document.querySelectorAll('#plDraftList .plDraftRow').length===2,null,{timeout:3000});
+  await page.click('#plFreeze');await page.waitForFunction(()=>JSON.parse(localStorage.getItem('rsa_prospective_ledger_v1')||'[]').length===1,null,{timeout:3000});
+  let rec=await page.evaluate(()=>JSON.parse(localStorage.getItem('rsa_prospective_ledger_v1')||'[]')[0]);
+  assert.deepStrictEqual(rec.bets.map(b=>b.type),['複勝','馬単'],`${name}: frozen ticket types`);assert.strictEqual(rec.bets[0].selection,'1');assert.strictEqual(rec.bets[1].selection,'1→2');
+  await page.fill('[data-pl-place="1"]','1');await page.fill('[data-pl-place="2"]','2');await page.fill('[data-pl-place="3"]','3');await page.fill('[data-pl-return="b1"]','1800');await page.fill('[data-pl-return="b2"]','6000');await page.click('[data-pl-settle]');
+  await page.waitForFunction(()=>JSON.parse(localStorage.getItem('rsa_prospective_ledger_v1')||'[]')[0]?.status==='settled',null,{timeout:3000});
+  rec=await page.evaluate(()=>JSON.parse(localStorage.getItem('rsa_prospective_ledger_v1')||'[]')[0]);assert.strictEqual(rec.outcome.betReturns.b1,1800);assert.strictEqual(rec.outcome.betReturns.b2,6000);
+  await page.waitForFunction(()=>[...document.querySelectorAll('.plTypes>div')].some(x=>x.querySelector('span')?.textContent==='複勝'&&x.textContent.includes('1件'))&&[...document.querySelectorAll('.plTypes>div')].some(x=>x.querySelector('span')?.textContent==='馬単'&&x.textContent.includes('1件')),null,{timeout:5000});
+  const labels=await page.locator('.plTypes>div>span').allTextContents();assert.deepStrictEqual(labels,['単勝','複勝','馬連','馬単','ワイド'],`${name}: stats order`);
+  await page.reload({waitUntil:'networkidle',timeout:30000});await page.waitForFunction(()=>window.RSAAddonHealth?.ready===true&&window.ProspectiveLedgerTicketTypesState?.ready===true,null,{timeout:25000});
+  assert.deepStrictEqual(await page.locator('#plBetType option').allTextContents(),['単勝','複勝','馬連','馬単','ワイド'],`${name}: options after reload`);assert.deepStrictEqual(errors,[],`${name}: page errors ${errors.join(' | ')}`);
+  console.log('PASS',name,'place + exacta freeze -> settle -> stats -> reload');await browser.close();
+}
+(async()=>{await run(chromium,'Chromium iPhone');await run(webkit,'WebKit iPhone')})().catch(e=>{console.error(e);process.exit(1)});
