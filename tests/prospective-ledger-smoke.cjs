@@ -1,6 +1,6 @@
 const {chromium,webkit}=require('playwright');
 const assert=require('assert');
-const BASE='http://127.0.0.1:4173/waku-bc-converter/v3.html?test=prospective-r72';
+const BASE='http://127.0.0.1:4173/waku-bc-converter/v3.html?test=prospective-v2-audit';
 const IPHONE_UA='Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1';
 async function run(type,name){
   const browser=await type.launch({headless:true});
@@ -10,7 +10,7 @@ async function run(type,name){
   await page.waitForFunction(()=>window.RSAAddonHealth?.ready===true,null,{timeout:25000});
   assert.strictEqual(await page.evaluate(()=>window.RSA_BUILD),'20261012r72',`${name}: build mismatch`);
   assert.strictEqual(await page.locator('#prospectiveLedger').count(),1,`${name}: ledger root missing`);
-  await page.evaluate(()=>localStorage.removeItem('rsa_prospective_ledger_v1'));
+  await page.evaluate(()=>{localStorage.removeItem('rsa_prospective_ledger_v1');localStorage.removeItem('rsa_prospective_ledger_v1_backup')});
   await page.fill('#raceDate','2027-01-10');
   await page.selectOption('#venue','東京');
   await page.fill('#raceName','Prospective Smoke');
@@ -26,7 +26,7 @@ async function run(type,name){
       {no:'3',name:'Horse3',abilityRank:3,top3:.20,index:48,elo:1500,eloMatched:1,eloTotal:2,historyStatus:'少なめ'}
     ];
     window.M3PureAbilityState={ready:true,version:'ability_model_v1',rows:base.map(x=>({...x}))};
-    window.M3PureAbilityV2State={ready:true,version:'ability_v2_elo_candidate_runtime_v1',status:'candidate_parallel_not_replacement',rows:base.map(x=>({...x,v1Rank:x.abilityRank,abilityRank:x.abilityRank,top3:x.top3}))};
+    window.M3PureAbilityV2State={ready:true,version:'ability_v2_elo_candidate_runtime_v1',status:'candidate_parallel_not_replacement',rows:base.map(x=>({...x,v1Rank:x.abilityRank,v2Rank:x.abilityRank,abilityRank:x.abilityRank,top3:x.top3}))};
     window.FourAxisIntegrationState={p:[.1,.2,.4,.3]};
     window.Finish600State={ready:true,version:'smoke',rows:[
       {no:'1',name:'Horse1',finishRank:1,sc:[{rank:1},{rank:1},{rank:2},{rank:2}]},
@@ -34,10 +34,11 @@ async function run(type,name){
       {no:'3',name:'Horse3',finishRank:3,sc:[{rank:4},{rank:2},{rank:1},{rank:1}]}
     ]};
     window.M3NarrativeRoleSyncState={ready:true,axisNo:'1',upliftNo:'3',cautionNo:'2'};
-    window.RaceIndependentLayerState={ready:true,ground:{label:'強い'},structure:{label:'中立'},market:{label:'概ね一致'},dataConfidence:{grade:'A'}};
-    dispatchEvent(new CustomEvent('m3-pure-ability-v2-ready'));
+    window.RaceIndependentLayerState={ready:true,stale:false,ground:{label:'強い'},structure:{label:'中立'},market:{label:'概ね一致'},dataConfidence:{grade:'A'}};
+    window.MarketIndependentCenterState={ready:true,version:'market-independent-center-v1',anchorNo:'1',axisNo:'1',hasAxis:true,policy:'ability-v2-m3-axis-v1',marketUsedForAnchor:false};
+    dispatchEvent(new CustomEvent('market-independent-center-ready'));
   });
-  await page.waitForFunction(()=>window.ProspectiveLedgerState?.ready===true&&document.querySelector('#plFreeze')&&!document.querySelector('#plFreeze').disabled,null,{timeout:5000});
+  await page.waitForFunction(()=>window.ProspectiveLedgerState?.ready===true&&window.ProspectiveLedgerState?.canFreeze===true&&document.querySelector('#plFreeze')&&!document.querySelector('#plFreeze').disabled,null,{timeout:5000});
   await page.selectOption('#plBetType','単勝');
   await page.fill('#plSelection','1');
   await page.fill('#plStake','1000');
@@ -46,17 +47,28 @@ async function run(type,name){
   await page.click('#plAddBet');
   await page.waitForFunction(()=>document.querySelectorAll('#plDraftList .plDraftRow').length===1,null,{timeout:3000});
   await page.click('#plFreeze');
+  await page.waitForFunction(()=>JSON.parse(localStorage.getItem('rsa_prospective_ledger_v1')||'[]').length===1,null,{timeout:3000});
   let rec=await page.evaluate(()=>JSON.parse(localStorage.getItem('rsa_prospective_ledger_v1')||'[]')[0]);
   assert(rec,`${name}: snapshot not stored`);
+  assert.strictEqual(rec.schema,2);
+  assert.strictEqual(rec.version,'prospective-ledger-v2-audit');
   assert.strictEqual(rec.status,'frozen');
   assert.strictEqual(rec.build,'20261012r72');
   assert.strictEqual(rec.holdout2027,true,`${name}: 2027 holdout flag missing`);
   assert.strictEqual(rec.prospectiveEligible,true,`${name}: prospective flag missing`);
   assert.strictEqual(rec.horses.length,3);
   assert.strictEqual(rec.roles.axisNo,'1');
+  assert.strictEqual(rec.center.axisNo,'1');
+  assert.strictEqual(rec.center.marketUsedForAnchor,false);
   assert.strictEqual(rec.bets.length,1);
+  assert.strictEqual(typeof rec.predictionHash,'string');
+  assert.strictEqual(rec.predictionHash.length,64,`${name}: prediction hash missing`);
+  assert.deepStrictEqual(rec.scenario.p,[.1,.2,.4,.3]);
+  assert(Math.abs(rec.scenario.effectiveN-(1/.3))<1e-9,`${name}: scenario effective N wrong`);
+  assert.deepStrictEqual(rec.horses[0].scenarioRanks,[1,1,2,2]);
   assert(Math.abs(rec.bets[0].ev-1.25)<1e-9,`${name}: EV wrong`);
   assert(Math.abs(rec.bets[0].breakEvenP-.2)<1e-9,`${name}: break-even wrong`);
+  const hashBefore=rec.predictionHash;
   await page.click('#plFreeze');
   assert.strictEqual(await page.evaluate(()=>JSON.parse(localStorage.getItem('rsa_prospective_ledger_v1')||'[]').length),1,`${name}: duplicate snapshot allowed`);
   await page.waitForTimeout(150);
@@ -69,15 +81,23 @@ async function run(type,name){
   assert.strictEqual(rec.status,'settled');
   assert.deepStrictEqual(rec.outcome.top3,['1','2','3']);
   assert.strictEqual(rec.outcome.betReturns.b1,5000);
-  const st=await page.evaluate(()=>window.ProspectiveLedgerState);
+  assert.strictEqual(rec.predictionHash,hashBefore,`${name}: prediction hash changed after settlement`);
+  let st=await page.evaluate(()=>window.ProspectiveLedgerState);
   assert.strictEqual(st.holdout2027,1);
   assert.strictEqual(st.settled,1);
   assert(Math.abs(st.roi-5)<1e-9,`${name}: ROI wrong ${st.roi}`);
+  assert.strictEqual(await page.locator('[data-pl-void]').count(),0,`${name}: destructive void control still exists`);
+  await page.click('[data-pl-flag]');
+  st=await page.evaluate(()=>window.ProspectiveLedgerState);
+  assert(Math.abs(st.roi-5)<1e-9,`${name}: ITT ROI changed after protocol flag`);
+  rec=await page.evaluate(()=>JSON.parse(localStorage.getItem('rsa_prospective_ledger_v1')||'[]')[0]);
+  assert.strictEqual(rec.protocolStatus,'flagged');
+  assert.strictEqual(rec.predictionHash,hashBefore);
   await page.reload({waitUntil:'networkidle',timeout:30000});
   await page.waitForFunction(()=>window.RSAAddonHealth?.ready===true&&window.ProspectiveLedgerState?.ready===true,null,{timeout:25000});
   assert.strictEqual(await page.evaluate(()=>JSON.parse(localStorage.getItem('rsa_prospective_ledger_v1')||'[]').length),1,`${name}: persistence failed`);
   assert.deepStrictEqual(errors,[],`${name}: page errors ${errors.join(' | ')}`);
-  console.log('PASS',name,'prospective ledger freeze -> settle -> ROI -> reload');
+  console.log('PASS',name,'prospective ledger v2 freeze -> hash -> settle -> ITT -> reload');
   await browser.close();
 }
 (async()=>{await run(chromium,'Chromium iPhone');await run(webkit,'WebKit iPhone')})().catch(e=>{console.error(e);process.exit(1)});
