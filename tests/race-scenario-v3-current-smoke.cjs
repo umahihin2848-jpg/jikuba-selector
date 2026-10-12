@@ -1,8 +1,8 @@
 const { chromium, webkit } = require('playwright');
 const assert = require('assert');
 
-const EXPECTED_BUILD='20261012r70';
-const BASE='http://127.0.0.1:4173/waku-bc-converter/v3.html?test=r70';
+const EXPECTED_BUILD='20261012r71';
+const BASE='http://127.0.0.1:4173/waku-bc-converter/v3.html?test=r71';
 const IPHONE_UA='Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1';
 
 function makeTargetCsv(){
@@ -20,7 +20,7 @@ function makeTargetCsv(){
 }
 function oddsText(){const vals=[2.8,4.1,5.6,7.4,9.8,12.5,16,20.5,26,33,41,52,65,80,100,130];return vals.map((v,i)=>`${i+1} ${v}`).join('\n')}
 async function ensureCsvParsed(page){
-  await page.locator('#csvFile').setInputFiles({name:'r70-target.csv',mimeType:'text/csv',buffer:Buffer.from(makeTargetCsv(),'utf8')});
+  await page.locator('#csvFile').setInputFiles({name:'r71-target.csv',mimeType:'text/csv',buffer:Buffer.from(makeTargetCsv(),'utf8')});
   await page.waitForTimeout(500);
   if(!/^解析済\s+16頭$/.test(await page.locator('#csvState').innerText())){
     await page.click('#parseCsvBtn');
@@ -74,7 +74,7 @@ async function run(browserType,name){
 
   await page.fill('#raceDate','2026-10-11');
   await page.selectOption('#venue','阪神');
-  await page.fill('#raceName','R70 Smoke Stakes');
+  await page.fill('#raceName','R71 Smoke Stakes');
   await page.fill('#fieldSize','16');
   await page.selectOption('#surface','ダート');
   await page.fill('#distance','1800');
