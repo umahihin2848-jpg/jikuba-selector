@@ -1,7 +1,7 @@
 const { chromium, webkit } = require('playwright');
 const assert = require('assert');
 
-const EXPECTED_BUILD='20261011r30';
+const EXPECTED_BUILD='20261012r66';
 const BASE='http://127.0.0.1:4173/waku-bc-converter/v3.html?test=r30';
 const IPHONE_UA='Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1';
 
