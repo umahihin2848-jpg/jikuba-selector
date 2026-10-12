@@ -4,7 +4,7 @@ const KEY='rsa_prospective_ledger_v1';
 const ORDER=['単勝','複勝','馬連','馬単','ワイド'];
 const EXTRA=['複勝','馬単'];
 const FORM_IDS=['plBetType','plSelection','plStake','plOdds','plHitP'];
-let queued=false,observer=null,applying=false;
+let queued=false,observer=null,observedRoot=null,applying=false;
 const num=v=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(Number(v))?Number(v):NaN;
 function load(){try{const x=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(x)?x:[]}catch{return[]}}
 function fmtYen(v){return Number.isFinite(Number(v))?`${Math.round(Number(v)).toLocaleString('ja-JP')}円`:'—'}
@@ -16,12 +16,13 @@ function restoreForm(o){if(!o)return;for(const id of FORM_IDS){const el=document
 function ensureOptions(){const s=document.getElementById('plBetType');if(!s)return false;const current=s.value||'単勝',have=[...s.options].map(o=>o.textContent);if(have.join('|')!==ORDER.join('|')){s.replaceChildren(...ORDER.map(x=>new Option(x,x)));s.value=ORDER.includes(current)?current:'単勝'}const sel=document.getElementById('plSelection');if(sel)sel.placeholder=hint(s.value);return true}
 function ensureStats(){const d=document.querySelector('#prospectiveLedger .plTypes');if(!d)return false;let rows=[...d.querySelectorAll(':scope > div')],byType=new Map();for(const row of rows){const t=row.querySelector('span')?.textContent?.trim();if(t)byType.set(t,row)}for(const t of EXTRA){let row=byType.get(t);if(!row){row=document.createElement('div');row.dataset.plExtraType=t;row.innerHTML=`<span>${t}</span><b></b>`;d.appendChild(row);byType.set(t,row)}const z=stats(t),text=`${z.n}件｜的中 ${z.hit}｜${fmtYen(z.stake)} → ${fmtYen(z.ret)}｜ROI ${Number.isFinite(z.roi)?pct(z.roi):'—'}`;const b=row.querySelector('b');if(b&&b.textContent!==text)b.textContent=text}
 rows=[...d.querySelectorAll(':scope > div')];const current=rows.map(row=>row.querySelector('span')?.textContent?.trim()).filter(Boolean);if(current.join('|')!==ORDER.join('|'))for(const t of ORDER){const row=byType.get(t);if(row)d.appendChild(row)}return true}
-function apply(){queued=false;if(applying)return;const snap=formSnapshot();applying=true;observer?.disconnect();try{const ok1=ensureOptions(),ok2=ensureStats();restoreForm(snap);window.ProspectiveLedgerTicketTypesState={ready:ok1||ok2,version:'prospective-ledger-ticket-types-v1',types:ORDER.slice(),at:Date.now()}}finally{applying=false;observe()}}
+function stopObserve(){observer?.disconnect();observer=null;observedRoot=null}
+function observe(){const root=document.getElementById('prospectiveLedger');if(!root)return;if(observer&&observedRoot===root)return;stopObserve();observedRoot=root;observer=new MutationObserver(schedule);observer.observe(root,{childList:true,subtree:true})}
+function apply(){queued=false;if(applying)return;const snap=formSnapshot();applying=true;stopObserve();try{const ok1=ensureOptions(),ok2=ensureStats();restoreForm(snap);window.ProspectiveLedgerTicketTypesState={ready:ok1||ok2,version:'prospective-ledger-ticket-types-v1',types:ORDER.slice(),at:Date.now()}}finally{applying=false;observe()}}
 function schedule(){if(queued||applying)return;queued=true;requestAnimationFrame(apply)}
-function observe(){if(observer||!document.getElementById('prospectiveLedger'))return;observer=new MutationObserver(schedule);observer.observe(document.getElementById('prospectiveLedger'),{childList:true,subtree:true})}
 document.addEventListener('change',e=>{if(e.target?.id==='plBetType'){const sel=document.getElementById('plSelection');if(sel)sel.placeholder=hint(e.target.value)}},true);
 const start=()=>{observe();schedule();[80,220,700,1400].forEach(ms=>setTimeout(schedule,ms))};
 ['rsa-addons-ready','m3-pure-ability-v2-ready','finish600-ready','rsa-analysis-complete'].forEach(ev=>addEventListener(ev,schedule));
-new MutationObserver(()=>{if(!observer&&document.getElementById('prospectiveLedger')){observe();schedule()}}).observe(document.documentElement,{childList:true,subtree:true});
+new MutationObserver(()=>{const root=document.getElementById('prospectiveLedger');if(root!==observedRoot){observe();schedule()}}).observe(document.documentElement,{childList:true,subtree:true});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
