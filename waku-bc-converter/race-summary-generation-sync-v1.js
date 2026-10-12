@@ -1,23 +1,26 @@
 (()=>{'use strict';
 if(window.__RACE_SUMMARY_GENERATION_SYNC_V1)return;window.__RACE_SUMMARY_GENERATION_SYNC_V1=true;
-let lastGeneration=0;
+let lastGeneration=0,lastNudged=0;
 function generation(){return Number(window.RSAAnalysisTransitionState?.generation)||0}
+function readyTransition(){const t=window.RSAAnalysisTransitionState;return !t||t.status==='ready'}
 function sync(){
-  const t=window.RSAAnalysisTransitionState;
-  if(t&&t.status!=='ready')return false;
+  if(!readyTransition())return false;
   if(window.RaceOverallSummaryState?.ready!==true)return false;
   if(window.M3PureAbilityV2State?.ready!==true||window.Finish600State?.ready!==true)return false;
-  try{window.RaceIndependentLayerRefresh?.();lastGeneration=generation();return true}catch(e){console.warn('race summary generation sync',e);return false}
+  try{window.RaceIndependentLayerRefresh?.();const st=window.RaceIndependentLayerState;if(st?.ready===true&&!st?.stale&&st.generation===generation()){lastGeneration=generation();return true}return false}catch(e){console.warn('race summary generation sync',e);return false}
+}
+function nudgeParent(gen){
+  if(generation()!==gen||!readyTransition()||window.RaceOverallSummaryState?.ready===true)return;
+  if(lastNudged===gen)return;
+  if(window.M3RaceLabState?.ready===true){lastNudged=gen;dispatchEvent(new CustomEvent('m3-race-lab-ready',{detail:window.M3RaceLabState}));return}
+  if(window.FinalDecisionState?.ready===true){lastNudged=gen;dispatchEvent(new CustomEvent('final-decision-ready',{detail:window.FinalDecisionState}))}
 }
 addEventListener('race-overall-summary-ready',sync);
 addEventListener('rsa-analysis-complete',()=>{
+  const gen=generation();
   if(sync())return;
-  // Parent summary has its own short post-analysis render. These checks do not
-  // reset one another, so event storms cannot postpone the completed generation.
-  [80,220,520,1000].forEach(ms=>setTimeout(()=>{
-    if(lastGeneration===generation()&&window.RaceIndependentLayerState?.ready===true&&!window.RaceIndependentLayerState?.stale)return;
-    sync();
-  },ms));
+  [120,420,820].forEach(ms=>setTimeout(()=>{if(generation()!==gen)return;if(sync())return;nudgeParent(gen)},ms));
+  [1050,1300].forEach(ms=>setTimeout(()=>{if(generation()!==gen)return;sync()},ms));
 });
 addEventListener('market-odds-top3-ready',sync);
 addEventListener('four-axis-market-sync-ready',sync);
