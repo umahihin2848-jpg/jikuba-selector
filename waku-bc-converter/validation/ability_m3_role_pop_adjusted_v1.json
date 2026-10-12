@@ -1,0 +1,56 @@
+{
+  "version": "ability_m3_role_pop_adjusted_v1",
+  "created": "2026-10-12",
+  "status": "DIAGNOSTIC_ROLE_COMPARISON_NOT_BETTING_PROBABILITY",
+  "definitions": {
+    "ground_keep": "Ability v2 rank <= 3 and M3 rank >= 7",
+    "structure_rise": "M3 rank <= 3 and Ability v2 rank >= 7",
+    "outcome": "finish <= 3",
+    "popularity_adjustment": "final popularity rank used only as an adjustment covariate; it is not an Ability or M3 model input"
+  },
+  "oos_2025_2026": {
+    "ground_keep": {
+      "n": 776,
+      "raw_top3_rate": 0.3247422680412371,
+      "raw_win_rate": 0.13530927835051546,
+      "mean_popularity": 4.912371134020619
+    },
+    "structure_rise": {
+      "n": 766,
+      "raw_top3_rate": 0.20496083550913838,
+      "raw_win_rate": 0.0587467362924282,
+      "mean_popularity": 7.943864229765013
+    },
+    "popularity_adjusted_exact_rank": {
+      "ground_keep_top3": 0.2756459467882019,
+      "structure_rise_top3": 0.2509393001814118,
+      "difference": 0.024706646606790117
+    },
+    "race_cluster_bootstrap_5000_difference": {
+      "mean": 0.024692928678603503,
+      "ci95": [-0.022759626153601414, 0.06838302116621295],
+      "p_difference_gt_zero": 0.8544
+    },
+    "popularity_adjusted_logistic_regression": {
+      "odds_ratio_ground_keep_vs_structure_rise": 1.1682117438454225,
+      "ci95": [0.8985276131293412, 1.518838885435471],
+      "p_value": 0.24564289548663498
+    },
+    "year_check": {
+      "2025_adjusted_exact_difference": 0.039161983813061796,
+      "2026_adjusted_exact_difference": -0.0003348993841669756
+    }
+  },
+  "interpretation": {
+    "raw": "Ground-keep horses have a much higher unadjusted top-3 rate, but they are also substantially more popular on average.",
+    "adjusted": "After comparing at the same popularity rank, the estimated top-3 difference shrinks to about +2.5 percentage points for ground-keep.",
+    "uncertainty": "The race-cluster 95% interval crosses zero and the adjusted logistic-regression confidence interval includes OR=1, so a fixed statistical ordering between the two opponent types is not established.",
+    "ui_policy": "Display ground-keep and structure-rise as parallel opponent types. Do not label either A/B or automatically rank one above the other. Use current market price and EV separately for purchase decisions."
+  },
+  "caveats": [
+    "The Ability v2 and M3 historical reconstruction is near, not byte-identical, to stored OOS diagnostics.",
+    "2025-2026 are parameter-OOS but not a pristine idea-selection holdout because the Elo idea was motivated after prior inspection.",
+    "These rates describe historical role groups and must not be shown as the current horse's predicted top-3 probability.",
+    "A genuinely untouched prospective 2027 sample is still needed for final confirmation."
+  ]
+}
