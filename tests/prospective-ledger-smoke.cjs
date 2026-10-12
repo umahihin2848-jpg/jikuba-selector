@@ -44,6 +44,7 @@ async function run(type,name){
   await page.fill('#plOdds','5.0');
   await page.fill('#plHitP','25');
   await page.click('#plAddBet');
+  await page.waitForFunction(()=>document.querySelectorAll('#plDraftList .plDraftRow').length===1,null,{timeout:3000});
   await page.click('#plFreeze');
   let rec=await page.evaluate(()=>JSON.parse(localStorage.getItem('rsa_prospective_ledger_v1')||'[]')[0]);
   assert(rec,`${name}: snapshot not stored`);
