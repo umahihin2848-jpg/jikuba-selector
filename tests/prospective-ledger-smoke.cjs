@@ -1,6 +1,6 @@
 const {chromium,webkit}=require('playwright');
 const assert=require('assert');
-const BASE='http://127.0.0.1:4173/waku-bc-converter/v3.html?test=prospective-r71';
+const BASE='http://127.0.0.1:4173/waku-bc-converter/v3.html?test=prospective-r72';
 const IPHONE_UA='Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1';
 async function run(type,name){
   const browser=await type.launch({headless:true});
@@ -8,7 +8,7 @@ async function run(type,name){
   const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto(BASE,{waitUntil:'networkidle',timeout:30000});
   await page.waitForFunction(()=>window.RSAAddonHealth?.ready===true,null,{timeout:25000});
-  assert.strictEqual(await page.evaluate(()=>window.RSA_BUILD),'20261012r71',`${name}: build mismatch`);
+  assert.strictEqual(await page.evaluate(()=>window.RSA_BUILD),'20261012r72',`${name}: build mismatch`);
   assert.strictEqual(await page.locator('#prospectiveLedger').count(),1,`${name}: ledger root missing`);
   await page.evaluate(()=>localStorage.removeItem('rsa_prospective_ledger_v1'));
   await page.fill('#raceDate','2027-01-10');
@@ -49,7 +49,7 @@ async function run(type,name){
   let rec=await page.evaluate(()=>JSON.parse(localStorage.getItem('rsa_prospective_ledger_v1')||'[]')[0]);
   assert(rec,`${name}: snapshot not stored`);
   assert.strictEqual(rec.status,'frozen');
-  assert.strictEqual(rec.build,'20261012r71');
+  assert.strictEqual(rec.build,'20261012r72');
   assert.strictEqual(rec.holdout2027,true,`${name}: 2027 holdout flag missing`);
   assert.strictEqual(rec.prospectiveEligible,true,`${name}: prospective flag missing`);
   assert.strictEqual(rec.horses.length,3);
