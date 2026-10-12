@@ -1,0 +1,118 @@
+{
+  "version": "ability_model_v2_final_validation_20261012",
+  "created": "2026-10-12",
+  "status": "FREEZE_RELEASE_CANDIDATE_NOT_FULL_PROMOTION",
+  "scope": {
+    "evaluation": "JRA flat, field size >=12, 3-win or higher",
+    "years": {
+      "2024": "development only",
+      "2025": "OOS confirmation",
+      "2026": "OOS frozen-parameter confirmation"
+    },
+    "oos_races": 700,
+    "oos_runners": 10623,
+    "important_note": "2025/2026 are parameter-OOS but not pristine idea-selection holdout; do not retune from these findings. Preserve 2027 as prospective holdout."
+  },
+  "check_1_runtime_vs_exact": {
+    "verdict": "PASS",
+    "elo": {
+      "correlation": 0.9984180703781502,
+      "mae_points": 11.354762106720896,
+      "bias_runtime_minus_exact": 0.6286058361929614,
+      "rmse": 16.365162506343125,
+      "abs_error_p95": 34.265057439078525,
+      "abs_error_p99": 51.630641023567094,
+      "max_abs_error": 102.03516688090531
+    },
+    "top3_probability": {
+      "mean_abs_difference": 0.0021955825312572194,
+      "median_abs_difference": 0.0014146383561996212,
+      "p95_abs_difference": 0.0068638452640335775,
+      "p99_abs_difference": 0.010482339142607083,
+      "max_abs_difference": 0.021490469808540913
+    },
+    "ranking": {
+      "runner_rank_changed_fraction": 0.08914619222441872,
+      "top1_changed_races": 17,
+      "top1_changed_fraction": 0.024285714285714285,
+      "top3_set_changed_races": 31,
+      "top3_set_changed_fraction": 0.04428571428571428
+    },
+    "oos_metric_exact": {
+      "logloss": 0.46123645492805904,
+      "brier": 0.1468309487324312,
+      "auc": 0.6886920067288642,
+      "ece10": 0.00906284004859057
+    },
+    "oos_metric_runtime": {
+      "logloss": 0.4612093817468653,
+      "brier": 0.14681329817889943,
+      "auc": 0.6886094915547756,
+      "ece10": 0.008304486161039373
+    },
+    "cluster_bootstrap_runtime_minus_exact_ci95": {
+      "logloss": [-0.00019377637189749026, 0.00013653415219756215],
+      "brier": [-0.00007275019424053883, 0.00003496918178857928],
+      "auc": [-0.0004623089575269745, 0.00027802809149456707],
+      "ece10": [-0.0025144257233813733, 0.0011097747896704551]
+    }
+  },
+  "check_2_calibration": {
+    "verdict": "PASS_WITH_CAUTION",
+    "exact_v2": {
+      "pooled": {
+        "intercept": -0.11836016072605911,
+        "slope": 0.9036916471452943,
+        "ece10": 0.00906284004859057,
+        "intercept_ci95": [-0.2111389902199717, -0.029213356754983922],
+        "slope_ci95": [0.8315066951056986, 0.9751361077922879]
+      },
+      "2025": {"intercept": -0.1142823, "slope": 0.90590305},
+      "2026": {"intercept": -0.12395686, "slope": 0.90066795}
+    },
+    "runtime_v2": {
+      "pooled": {
+        "intercept": -0.10512970860510527,
+        "slope": 0.9143575433918599,
+        "ece10": 0.008304486161039373,
+        "intercept_ci95": [-0.19727831568996468, -0.015442311727574284],
+        "slope_ci95": [0.8418185428730645, 0.9860651241451407]
+      }
+    },
+    "interpretation": "ECE is low (~0.8-0.9%), but slope below 1 with negative intercept indicates mild overconfidence. Do not recalibrate using 2025/2026 because that would tune the holdout."
+  },
+  "check_3_K_stability": {
+    "verdict": "PASS_FOR_ELO_SIGNAL_NOT_FOR_RETUNING_K",
+    "protocol": "For each diagnostic K, standardize Elo on 2024 only and refit beta on 2024 only; evaluate frozen result on 2025+2026. OOS results are diagnostic only and must not be used to choose a new K.",
+    "v1_pooled": {"logloss": 0.4634170306696801, "brier": 0.1476103384304018, "auc": 0.6850859150893752, "ece10": 0.011414544422272313},
+    "grid": [
+      {"K":128,"beta_fit_2024":0.3179057819931918,"elo_mean_2024":1555.4456428282392,"elo_sd_2024":101.23187927687482,"dev_2024_logloss":0.45584737739585757,"oos_2025_2026":{"logloss":0.460484279654362,"brier":0.1467332526476836,"auc":0.6892981780381763,"ece10":0.007090495971412871}},
+      {"K":256,"beta_fit_2024":0.3784348667470107,"elo_mean_2024":1595.062976599571,"elo_sd_2024":165.50199174200088,"dev_2024_logloss":0.4550654756711484,"oos_2025_2026":{"logloss":0.46063551624182447,"brier":0.14672258734515808,"auc":0.6894951767398039,"ece10":0.007824780761912831}},
+      {"K":384,"beta_fit_2024":0.40060034699711855,"elo_mean_2024":1626.8459273061637,"elo_sd_2024":219.51081665934123,"dev_2024_logloss":0.45483973509495473,"oos_2025_2026":{"logloss":0.46095617878688594,"brier":0.14677501447436372,"auc":0.6891232168576883,"ece10":0.008158788074854153}},
+      {"K":512,"beta_fit_2024":0.40508672502148624,"elo_mean_2024":1654.6364547216647,"elo_sd_2024":269.35052168026897,"dev_2024_logloss":0.4548516492002456,"oos_2025_2026":{"logloss":0.46123051284577726,"brier":0.14682948716651184,"auc":0.6886924530584062,"ece10":0.008924765400818819}},
+      {"K":640,"beta_fit_2024":0.40132972761571833,"elo_mean_2024":1680.4564142872364,"elo_sd_2024":317.670270762878,"dev_2024_logloss":0.4549630618195578,"oos_2025_2026":{"logloss":0.46143697113366966,"brier":0.14687637029650474,"auc":0.6882385917053226,"ece10":0.008452350329863877}},
+      {"K":768,"beta_fit_2024":0.39391128369348194,"elo_mean_2024":1705.4087532137337,"elo_sd_2024":365.78117208378325,"dev_2024_logloss":0.45511208497044986,"oos_2025_2026":{"logloss":0.4615883182007368,"brier":0.14691509127480157,"auc":0.6879924409628756,"ece10":0.007929164904651205}},
+      {"K":1024,"beta_fit_2024":0.3765857863882103,"elo_mean_2024":1754.794716524027,"elo_sd_2024":463.48455940719305,"dev_2024_logloss":0.45541566922290255,"oos_2025_2026":{"logloss":0.4617871775788607,"brier":0.14697367833023353,"auc":0.6875312151723479,"ece10":0.0071057465563527265}}
+    ]
+  },
+  "check_4_fallback_and_history": {
+    "verdict": "LOGIC_PASS_UI_CAUTION",
+    "full_source_history_key_matching": "In the controlled full-source reconstruction, historical high-class flat records had available race-strength keys; history-present/key-miss fallback was not required.",
+    "runtime_logic": "If history exists but zero opponent-strength records match, v2Logit equals v1 logit for that horse. If there is no high-class history at all, runtime uses initial Elo=1500 rather than fallback.",
+    "oos_history_counts": {"hist0":1076,"hist1_2":1739,"hist3_5":7808},
+    "subgroup_metrics": {
+      "hist0": {"n":1076,"actual_top3_rate":0.23048327137546468,"v1_logloss":0.5330979743304819,"v2_logloss":0.5335630278319442,"v1_ece10":0.014296778680191042,"v2_ece10":0.02044157899803345},
+      "hist1_2": {"n":1739,"actual_top3_rate":0.2351926394479586,"v1_logloss":0.5248376525293189,"v2_logloss":0.5308185901102759,"v1_ece10":0.02832337505933306,"v2_ece10":0.04468110046992028},
+      "hist3_5": {"n":7808,"actual_top3_rate":0.18532274590163936,"v1_logloss":0.4401348640722244,"v2_logloss":0.43577196651534705,"v1_ece10":0.019736147572395016,"v2_ece10":0.007031896044104688}
+    },
+    "interpretation": "Overall v2 gain is concentrated in runners with 3-5 prior high-class starts. Limited-history horses should remain visibly history-limited; this finding is post-hoc and must not be converted into a new gating rule without future validation."
+  },
+  "decision": {
+    "ability_v1": "KEEP_STABLE_BASELINE",
+    "ability_v2": "FREEZE_AS_RELEASE_CANDIDATE_PARALLEL_TO_V1",
+    "promote_to_full_replacement_now": false,
+    "change_K_from_512_using_2025_2026": false,
+    "recalibrate_using_2025_2026": false,
+    "next": "Prospective 2027 validation with parameters and interpretation rules frozen. Promote only if discrimination and calibration remain acceptable on genuinely unseen races."
+  }
+}
