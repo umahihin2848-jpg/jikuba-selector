@@ -25,6 +25,13 @@
     return document.querySelectorAll('#plDraftList .plDraftRow').length;
   }
 
+  function clearDraftFields() {
+    formState.plSelection = '';
+    formState.plStake = '';
+    formState.plOdds = '';
+    formState.plHitP = '';
+  }
+
   function settlementBucket(id) {
     const key = String(id || '');
     if (!key) return null;
@@ -120,7 +127,7 @@
     knownDraftCount = countDraft();
     window.ProspectiveLedgerFormGuardState = {
       ready: true,
-      version: 'prospective-ledger-form-stability-v6-readable',
+      version: 'prospective-ledger-form-stability-v7-microtask-clear',
       draftCount: knownDraftCount,
       settlementDrafts: settlementState.size,
       at: Date.now()
@@ -190,30 +197,24 @@
 
     if (target?.id === 'plAddBet') {
       const before = knownDraftCount;
-      setTimeout(() => {
+      queueMicrotask(() => {
         const current = countDraft();
         if (current > before) {
-          formState.plSelection = '';
-          formState.plStake = '';
-          formState.plOdds = '';
-          formState.plHitP = '';
+          clearDraftFields();
           knownDraftCount = current;
           schedule();
         }
-      }, 0);
+      });
       return;
     }
 
     if (target?.id === 'plFreeze') {
-      setTimeout(() => {
+      queueMicrotask(() => {
         if (countDraft() === 0) {
-          formState.plSelection = '';
-          formState.plStake = '';
-          formState.plOdds = '';
-          formState.plHitP = '';
+          clearDraftFields();
           schedule();
         }
-      }, 0);
+      });
       return;
     }
 
