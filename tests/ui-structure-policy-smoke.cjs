@@ -1,0 +1,48 @@
+const {chromium,webkit}=require('playwright');
+const assert=require('assert');
+const BASE='http://127.0.0.1:4173/waku-bc-converter/v3.html?test=structure-policy-r81';
+const UA='Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1';
+async function run(type,name){
+  const browser=await type.launch({headless:true});
+  const context=await browser.newContext({viewport:{width:390,height:844},userAgent:UA,isMobile:true,hasTouch:true});
+  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.goto(BASE,{waitUntil:'networkidle',timeout:30000});
+  await page.waitForFunction(()=>window.RSAAddonHealth?.ready===true&&window.ProspectiveLedgerPolicy?.version==='prospective-ledger-policy-v2',null,{timeout:25000});
+  const base=await page.evaluate(()=>({
+    types:[...document.querySelectorAll('#plBetType option')].map(x=>x.textContent),
+    native:window.ProspectiveLedgerTicketTypesState?.version,
+    oldAddonLoaded:(window.RSAAddonHealth?.loaded||[]).some(x=>x.includes('prospective-ledger-ticket-types-v1.js')),
+    boundary:['2026-12-31','2027-01-01','2027-12-31','2028-01-01'].map(d=>window.ProspectiveLedgerPolicy.isHoldout2027Date(d)),
+    marketAfterReliability:!!(document.getElementById('reliabilitySection')?.compareDocumentPosition(document.getElementById('marketSection'))&Node.DOCUMENT_POSITION_FOLLOWING),
+    marketTitle:document.querySelector('#marketSection h2')?.textContent||''
+  }));
+  assert.deepStrictEqual(base.types,['単勝','複勝','馬連','馬単','ワイド'],`${name}: native five ticket types`);
+  assert.strictEqual(base.native,'prospective-ledger-v2-native-ticket-types',`${name}: ticket types not integrated into ledger core`);
+  assert.strictEqual(base.oldAddonLoaded,false,`${name}: legacy ticket addon still loaded`);
+  assert.deepStrictEqual(base.boundary,[false,true,true,false],`${name}: 2027 holdout boundary wrong`);
+  assert.strictEqual(base.marketAfterReliability,true,`${name}: market is not after reliability`);
+  assert(/最後に照合/.test(base.marketTitle),`${name}: market-last label missing`);
+  await page.evaluate(()=>{
+    window.RSAAnalysisTransitionState={generation:91,status:'ready'};
+    window.FourAxisIntegrationState={p:[.1,.2,.5,.2]};
+    window.M3PureAbilityV2State={ready:true,generation:91,rows:[
+      {no:'1',name:'A',v2Rank:1},{no:'2',name:'B',v2Rank:2},{no:'3',name:'C',v2Rank:3},{no:'4',name:'D',v2Rank:4}
+    ]};
+    window.Finish600State={ready:true,rows:[
+      {no:'1',name:'A',finishRank:1,sc:[{rank:1},{rank:1},{rank:1},{rank:2}]},
+      {no:'2',name:'B',finishRank:2,sc:[{rank:2},{rank:2},{rank:2},{rank:3}]},
+      {no:'3',name:'C',finishRank:3,sc:[{rank:3},{rank:3},{rank:3},{rank:3}]},
+      {no:'4',name:'D',finishRank:4,sc:[{rank:4},{rank:4},{rank:4},{rank:4}]}
+    ]};
+    window.RaceOverallSummaryState={ready:true,generation:91,version:'test'};
+    dispatchEvent(new CustomEvent('race-overall-summary-ready'));
+  });
+  await page.waitForFunction(()=>window.RaceOverallSummaryState?.anchorPolicy==='ability-v2-m3-axis-v1'&&window.MarketIndependentCenterState?.generation===91,null,{timeout:5000});
+  const cls=await page.evaluate(()=>window.RaceOverallSummaryState.classification);
+  assert.strictEqual(cls,'構造一致・安定',`${name}: structural classification wrong: ${cls}`);
+  assert(!/買い検討型|見送り寄り/.test(cls),`${name}: betting-style classification remains`);
+  assert.deepStrictEqual(errors,[],`${name}: page errors ${errors.join(' | ')}`);
+  console.log('PASS',name,'market-last + structural labels + native 5 tickets + bounded 2027 holdout');
+  await browser.close();
+}
+(async()=>{await run(chromium,'Chromium iPhone');await run(webkit,'WebKit iPhone')})().catch(e=>{console.error(e);process.exit(1)});
