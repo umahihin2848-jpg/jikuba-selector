@@ -1,6 +1,6 @@
 const {chromium,webkit}=require('playwright');
 const assert=require('assert');
-const BASE='http://127.0.0.1:4173/waku-bc-converter/v3.html?test=structure-policy-r81';
+const BASE='http://127.0.0.1:4173/waku-bc-converter/v3.html?test=structure-policy-r84';
 const UA='Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1';
 async function run(type,name){
   const browser=await type.launch({headless:true});
@@ -8,19 +8,23 @@ async function run(type,name){
   const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto(BASE,{waitUntil:'networkidle',timeout:30000});
   await page.waitForFunction(()=>window.RSAAddonHealth?.ready===true&&window.ProspectiveLedgerPolicy?.version==='prospective-ledger-policy-v2',null,{timeout:25000});
-  const base=await page.evaluate(()=>({
-    types:[...document.querySelectorAll('#plBetType option')].map(x=>x.textContent),
-    native:window.ProspectiveLedgerTicketTypesState?.version,
-    oldAddonLoaded:(window.RSAAddonHealth?.loaded||[]).some(x=>x.includes('prospective-ledger-ticket-types-v1.js')),
-    boundary:['2026-12-31','2027-01-01','2027-12-31','2028-01-01'].map(d=>window.ProspectiveLedgerPolicy.isHoldout2027Date(d)),
-    marketAfterReliability:!!(document.getElementById('reliabilitySection')?.compareDocumentPosition(document.getElementById('marketSection'))&Node.DOCUMENT_POSITION_FOLLOWING),
-    marketTitle:document.querySelector('#marketSection h2')?.textContent||''
-  }));
+  const base=await page.evaluate(()=>{
+    const result=document.getElementById('result'),children=result?[...result.children]:[],reliability=document.getElementById('reliabilitySection'),market=document.getElementById('marketSection');
+    const reliabilityIndex=children.indexOf(reliability),marketIndex=children.indexOf(market);
+    return{
+      types:[...document.querySelectorAll('#plBetType option')].map(x=>x.textContent),
+      native:window.ProspectiveLedgerTicketTypesState?.version,
+      oldAddonLoaded:(window.RSAAddonHealth?.loaded||[]).some(x=>x.includes('prospective-ledger-ticket-types-v1.js')),
+      boundary:['2026-12-31','2027-01-01','2027-12-31','2028-01-01'].map(d=>window.ProspectiveLedgerPolicy.isHoldout2027Date(d)),
+      reliabilityIndex,marketIndex,marketAfterReliability:reliabilityIndex>=0&&marketIndex>reliabilityIndex,
+      marketTitle:document.querySelector('#marketSection h2')?.textContent||''
+    }
+  });
   assert.deepStrictEqual(base.types,['単勝','複勝','馬連','馬単','ワイド'],`${name}: native five ticket types`);
   assert.strictEqual(base.native,'prospective-ledger-v2-native-ticket-types',`${name}: ticket types not integrated into ledger core`);
   assert.strictEqual(base.oldAddonLoaded,false,`${name}: legacy ticket addon still loaded`);
   assert.deepStrictEqual(base.boundary,[false,true,true,false],`${name}: 2027 holdout boundary wrong`);
-  assert.strictEqual(base.marketAfterReliability,true,`${name}: market is not after reliability`);
+  assert.strictEqual(base.marketAfterReliability,true,`${name}: market is not after reliability (${base.reliabilityIndex} -> ${base.marketIndex})`);
   assert(/最後に照合/.test(base.marketTitle),`${name}: market-last label missing`);
   await page.evaluate(()=>{
     window.RSAAnalysisTransitionState={generation:91,status:'ready'};
