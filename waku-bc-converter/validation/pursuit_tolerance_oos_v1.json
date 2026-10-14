@@ -1,0 +1,63 @@
+{
+  "version": "pursuit_tolerance_oos_v1",
+  "created": "2026-10-15",
+  "purpose": "Validate whether past ability to hold a forward position under a fast first-3F adds information beyond the existing first-corner queue model.",
+  "universe": "JRA flat, field_size>=12, 3-win class or higher",
+  "history_rule": {
+    "same_surface_distance_only": true,
+    "max_prior_runs": 8,
+    "strictly_prior_to_target_race": true,
+    "fast_first3f_definition": "condition-specific first quartile fixed from pre-OOS data through 2023",
+    "grade_A": "at least one fast-first3F prior run and mean normalized frontness in those fast runs >= 0.70",
+    "grade_B": "at least one fast-first3F prior run but grade_A threshold not met",
+    "grade_C": "no qualifying fast-first3F prior run; treated as unknown, not negative"
+  },
+  "fast_first3f_threshold_seconds": {
+    "turf_1200": 33.2,
+    "turf_1400": 34.0,
+    "dirt_1400": 34.3
+  },
+  "oos_period": [2024, 2025, 2026],
+  "target": "queue-model residual in normalized early-position fraction; negative means the horse actually raced farther forward than the baseline queue model predicted",
+  "cluster_bootstrap": "race-level, 95% CI",
+  "results": {
+    "turf_1200": {
+      "grade_A_horses": 350,
+      "grade_A_races": 89,
+      "mean_residual": -0.0666687157,
+      "race_mean_residual": -0.0768890454,
+      "ci95_race_mean_residual": [-0.10074005, -0.05222257],
+      "decision": "adopt_as_queue_auxiliary_signal"
+    },
+    "turf_1400": {
+      "grade_A_horses": 161,
+      "grade_A_races": 65,
+      "mean_residual": -0.0520149015,
+      "race_mean_residual": -0.0429940155,
+      "ci95_race_mean_residual": [-0.07829270, -0.00624594],
+      "decision": "adopt_as_queue_auxiliary_signal"
+    },
+    "dirt_1400": {
+      "grade_A_horses": 116,
+      "grade_A_races": 53,
+      "mean_residual": -0.0329742387,
+      "race_mean_residual": -0.0235457345,
+      "ci95_race_mean_residual": [-0.07607507, 0.03292193],
+      "decision": "reference_only"
+    }
+  },
+  "deployment_policy": {
+    "changes_m3_rank": false,
+    "changes_win_probability": false,
+    "changes_top3_probability": false,
+    "penalizes_grade_B": false,
+    "penalizes_grade_C": false,
+    "officially_adopted_conditions": ["turf_1200", "turf_1400"],
+    "reference_only_conditions": ["dirt_1400"]
+  },
+  "notes": [
+    "This is a one-sided auxiliary signal: only Grade A has validated positive interpretation.",
+    "Grade C means insufficient fast-pace evidence, not poor pursuit ability.",
+    "The signal belongs to the queue/early-position layer and must not be merged directly into M3 or market probabilities without a separate OOS validation."
+  ]
+}
