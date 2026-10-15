@@ -1,6 +1,6 @@
 (()=>{'use strict';
 const C=window.ShapeCore,$=id=>document.getElementById(id);if(!C)return;
-let lastCtx=null,busy=false;
+let lastCtx=null,busy=false,raf=0,fallback=0;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pct=v=>Number.isFinite(Number(v))?`${Math.round(Number(v)*100)}%`:'—';
 const shortName=s=>String(s||'').replace(/\s+/g,'').trim();
@@ -74,7 +74,7 @@ function ensureX(){
 function updateCount(){const t=$('xPostText')?.value||'';const n=Array.from(t).length;const el=$('xPostCount');if(el)el.textContent=`${n}文字（目安）`}
 function renderX(){ensureX();const ta=$('xPostText');if(!ta)return;ta.value=makePost();updateCount()}
 function render(){if(busy)return;busy=true;try{clarifyM3();strictRPCI();renderX()}finally{busy=false}}
-function schedule(){[100,260,600,1100,1900,3200].forEach(t=>setTimeout(render,t))}
+function schedule(){if(!raf)raf=requestAnimationFrame(()=>{raf=0;render()});clearTimeout(fallback);fallback=setTimeout(()=>{fallback=0;render()},220)}
 const css=document.createElement('style');css.textContent=`#xPostCard{margin-top:12px}.xph{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.xph h2{margin:0 0 4px}.xph>span{font-size:9px;border:1px solid #355d70;color:#9fc3d4;border-radius:999px;padding:4px 7px;white-space:nowrap}#xPostText{width:100%;box-sizing:border-box;margin-top:9px;min-height:170px;border-radius:12px;border:1px solid #315568;background:#071b29;color:#eef8fb;padding:11px;font:500 13px/1.65 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;resize:vertical}.xpActions{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:8px}.xpActions button{border:1px solid #315568;background:#0d2a3a;color:#dff3fb;border-radius:9px;padding:8px 10px;font-weight:800}.xpActions button.primary{background:#1b6177;border-color:#2c819b}.xpActions span,.xpFoot{font-size:9px;color:#7898a8}.xpFoot{margin-top:7px;line-height:1.5}`;document.head.appendChild(css);
 const old=C.analyze;C.analyze=function(meta,odds,horses,M){const a=old(meta,odds,horses,M);lastCtx={meta,analysis:a};schedule();return a};
 ['finish600-ready','rpci-fit-beta-ready','final-probability-ready','calibrated-probability-ready','scenario-statistics-ready','rsa-addons-ready'].forEach(ev=>addEventListener(ev,schedule));
