@@ -49,6 +49,13 @@ async function currentSnapshot(page){return page.evaluate(()=>({
   abilityNarrative:document.querySelectorAll('.m3AbilityNarrativeText').length,
   v2ValidationNotes:document.querySelectorAll('#abilityV2FinalValidationNote').length,
   v2ValidationMsgs:document.querySelectorAll('.v2ValidationMsg').length,
+  shapeBiasPanels:document.querySelectorAll('#raceShapeBias').length,
+  shapeNarrativeLines:document.querySelectorAll('#m3NarrativeAnalysis [data-rsb-summary="1"]').length,
+  shapeNarrativeTags:document.querySelectorAll('#m3NarrativeAnalysis [data-rsb-tag="1"]').length,
+  shapeUxMetrics:document.querySelectorAll('#raceUXSummary [data-rsb-ux-metric="1"]').length,
+  shapeUxReadouts:document.querySelectorAll('#raceUXSummary [data-rsb-ux-readout="1"]').length,
+  shapeNarrativeText:document.querySelector('#m3NarrativeAnalysis [data-rsb-summary="1"]')?.textContent||'',
+  shapeUxText:document.querySelector('#raceUXSummary [data-rsb-ux-readout="1"]')?.textContent||'',
   cache:window.RSATargetCsvCache?.stats||null,
   health:window.RSAAddonHealth||null,
   transition:window.RSAAnalysisTransitionState||null,
@@ -57,7 +64,9 @@ async function currentSnapshot(page){return page.evaluate(()=>({
   append:window.M3NarrativeReproAppendState||null,
   ability:window.M3PureAbilityState||null,
   v2Validation:window.AbilityV2ValidationStatusState||null,
-  abilityNarrativeState:window.M3AbilityNarrativeState||null
+  abilityNarrativeState:window.M3AbilityNarrativeState||null,
+  shapeBiasState:window.RaceShapeBiasState||null,
+  shapeBridge:window.RaceShapeSummaryBridgeState||null
 }))}
 async function run(browserType,name){
   const browser=await browserType.launch({headless:true});
@@ -99,6 +108,7 @@ async function run(browserType,name){
   await page.waitForFunction(()=>window.M3PureAbilityState?.ready===true&&window.M3AbilityNarrativeState?.ready===true,null,{timeout:7000});
   await page.waitForFunction(()=>window.AbilityV2ValidationStatusState?.ready===true,null,{timeout:4000});
   await page.waitForFunction(()=>window.AbilityV2ValidationStatusState?.uiReady===true&&document.querySelectorAll('#abilityV2FinalValidationNote').length===1&&document.querySelectorAll('.v2ValidationMsg').length===16,null,{timeout:5000});
+  await page.waitForFunction(()=>window.RaceShapeBiasState?.ready===true&&window.RaceShapeSummaryBridgeState?.ready===true&&document.querySelectorAll('#m3NarrativeAnalysis [data-rsb-summary="1"]').length===1&&document.querySelectorAll('#raceUXSummary [data-rsb-ux-metric="1"]').length===1&&document.querySelectorAll('#raceUXSummary [data-rsb-ux-readout="1"]').length===1,null,{timeout:7000});
   const first=await currentSnapshot(page);
   assert.strictEqual(first.labs,1,`${name}: duplicate lab after full analysis`);
   assert(first.repro<=1,`${name}: duplicate reproducibility panel`);
@@ -112,10 +122,19 @@ async function run(browserType,name){
   const abilitySum=(first.ability?.rows||[]).reduce((s,r)=>s+(Number(r.top3)||0),0);
   assert(Math.abs(abilitySum-3)<1e-6,`${name}: Ability top3 race coherence failed (${abilitySum})`);
   assert(first.abilityNarrative>=1,`${name}: Ability narrative missing`);
+  assert.strictEqual(first.shapeBiasPanels,1,`${name}: Race Shape panel missing/duplicated`);
+  assert.strictEqual(first.shapeNarrativeLines,1,`${name}: Race Shape narrative missing/duplicated`);
+  assert.strictEqual(first.shapeNarrativeTags,1,`${name}: Race Shape narrative tag missing/duplicated`);
+  assert.strictEqual(first.shapeUxMetrics,1,`${name}: Race Shape summary metric missing/duplicated`);
+  assert.strictEqual(first.shapeUxReadouts,1,`${name}: Race Shape summary readout missing/duplicated`);
+  assert(first.shapeBridge?.ready===true&&first.shapeBridge?.narrative===true&&first.shapeBridge?.ux===true,`${name}: Race Shape bridge not ready`);
+  assert(first.shapeNarrativeText.includes(first.shapeBiasState?.label||'__missing__'),`${name}: Race Shape narrative label mismatch`);
+  assert(first.shapeUxText.includes(first.shapeBiasState?.label||'__missing__'),`${name}: Race Shape UX label mismatch`);
 
   await page.selectOption('#going','稍');const full2=await analyze(page,`${name} full-2`);
   await page.selectOption('#going','重');const full3=await analyze(page,`${name} full-3`);
   await page.waitForFunction(()=>window.AbilityV2ValidationStatusState?.uiReady===true&&document.querySelectorAll('#abilityV2FinalValidationNote').length===1&&document.querySelectorAll('.v2ValidationMsg').length===16,null,{timeout:5000});
+  await page.waitForFunction(()=>window.RaceShapeSummaryBridgeState?.ready===true&&document.querySelectorAll('#m3NarrativeAnalysis [data-rsb-summary="1"]').length===1&&document.querySelectorAll('#raceUXSummary [data-rsb-ux-metric="1"]').length===1&&document.querySelectorAll('#raceUXSummary [data-rsb-ux-readout="1"]').length===1,null,{timeout:5000});
   await page.waitForTimeout(300);
   const last=await currentSnapshot(page);
   assert.strictEqual(last.labs,1,`${name}: duplicate lab after repeated analysis`);
@@ -125,10 +144,15 @@ async function run(browserType,name){
   assert.strictEqual(last.abilityInline,16,`${name}: Ability inline rows leaked/duplicated (${last.abilityInline})`);
   assert.strictEqual(last.v2ValidationNotes,1,`${name}: Ability v2 validation note leaked/duplicated`);
   assert.strictEqual(last.v2ValidationMsgs,16,`${name}: Ability v2 validation messages leaked/duplicated (${last.v2ValidationMsgs})`);
+  assert.strictEqual(last.shapeBiasPanels,1,`${name}: Race Shape panel leaked/duplicated`);
+  assert.strictEqual(last.shapeNarrativeLines,1,`${name}: Race Shape narrative leaked/duplicated`);
+  assert.strictEqual(last.shapeNarrativeTags,1,`${name}: Race Shape narrative tag leaked/duplicated`);
+  assert.strictEqual(last.shapeUxMetrics,1,`${name}: Race Shape summary metric leaked/duplicated`);
+  assert.strictEqual(last.shapeUxReadouts,1,`${name}: Race Shape summary readout leaked/duplicated`);
   assert(last.nodes<=first.nodes+280,`${name}: repeated analysis DOM leak ${first.nodes} -> ${last.nodes}`);
   assert.strictEqual(last.cache?.rawReads,1,`${name}: TARGET file re-read during repeat analysis (${last.cache?.rawReads})`);
   assert.deepStrictEqual(pageErrors,[],`${name}: page errors ${pageErrors.join(' | ')}`);
-  console.log('PASS',name,{bootMs:health.bootMs,structuralMs,full1,full2,full3,cache:last.cache,nodes:[first.nodes,last.nodes],abilityTop3Sum:abilitySum,v2Validation:last.v2Validation?.status});
+  console.log('PASS',name,{bootMs:health.bootMs,structuralMs,full1,full2,full3,cache:last.cache,nodes:[first.nodes,last.nodes],abilityTop3Sum:abilitySum,v2Validation:last.v2Validation?.status,raceShape:last.shapeBiasState?.label});
   await browser.close();
 }
 (async()=>{await run(chromium,'chromium iPhone');await run(webkit,'webkit iPhone')})().catch(err=>{console.error(err);process.exit(1)});
