@@ -5,7 +5,7 @@ const median=a=>{a=a.filter(Number.isFinite).sort((x,y)=>x-y);if(!a.length)retur
 const quantile=(a,q)=>{a=a.filter(Number.isFinite).sort((x,y)=>x-y);if(!a.length)return NaN;const p=(a.length-1)*q,i=Math.floor(p),f=p-i;return a[i]+((a[i+1]??a[i])-a[i])*f};
 let mid=null,active='flow',raf=0,initialized=false,loadingMid=false;
 const generation=()=>Number(window.RSAAnalysisTransitionState?.generation)||0;
-function componentFresh(key,S){if(!S?.ready)return false;const g=generation(),cg=Number(window.RSAComponentGenerationState?.components?.[key]);return !g||!Number.isFinite(cg)||cg===g}
+function componentFresh(key,S){if(!S?.ready)return false;const g=generation(),G=window.RSAComponentGenerationState;if(!g||!G)return true;return Number(G.components?.[key])===g}
 function surface(){return String($('surface')?.value||'').includes('ダ')?'ダ':'芝'}
 function meta(){return{venue:String($('venue')?.value||'').trim(),surface:surface(),distance:Number($('distance')?.value)||0}}
 function corePressure(){const ms=[...document.querySelectorAll('#queueMetrics .metric')],m=ms.find(x=>/隊列評価|先行圧/.test(x.querySelector('span')?.textContent||'')),v=(m?.querySelector('b')?.textContent||'').replace(/\s+/g,'').trim();if(v==='高'||/高/.test(v))return'高';if(v==='低'||/低/.test(v))return'低';if(v==='中'||/中/.test(v))return'中';return''}
