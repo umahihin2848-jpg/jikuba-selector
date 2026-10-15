@@ -4,7 +4,7 @@ const C=window.ShapeCore;
 if(!C||typeof C.analyze!=='function')return;
 const originalAnalyze=C.analyze.bind(C);
 let latest=null,raf=0,lastSig='';
-const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
 const topLabel=i=>['<45','45〜49','50〜54','≥55'][Number(i)]||'—';
 function posFor(row){
   const hs=latest?.analysis?.hs||[];
@@ -23,12 +23,14 @@ C.analyze=function(meta,odds,horses,M){
 };
 function schedule(){if(!raf)raf=requestAnimationFrame(()=>{raf=0;render()})}
 function render(){
-  const trait=window.M3ClosingTraitState,finish=window.Finish600State;
   const panel=document.querySelector('#m3RaceLab [data-m3panel="horses"]');
-  if(!trait?.ready||!finish?.ready||!latest?.analysis||!panel)return;
+  if(!panel)return;
+  const existing=panel.querySelector('#m3TraitContextResearch');
+  const trait=window.M3ClosingTraitState,finish=window.Finish600State;
+  if(!trait?.ready||!finish?.ready||!latest?.analysis){existing?.remove();lastSig='';return}
   const raceDate=document.getElementById('raceDate')?.value||'';
-  if(!raceDate||raceDate<=String(trait.cutoff||'2026-10-04'))return;
-  if(String(latest.meta?.date||'')!==raceDate)return;
+  if(!raceDate||raceDate<=String(trait.cutoff||'2026-10-04')){existing?.remove();lastSig='';return}
+  if(String(latest.meta?.date||'')!==raceDate){existing?.remove();lastSig='';return}
   const distance=Number(latest.meta?.distance)||Number(document.getElementById('distance')?.value)||0;
   const paceTop=Number(latest.analysis?.pred?.top);
   const pace45=paceTop===1;
@@ -47,8 +49,8 @@ function render(){
     selected.push({no:String(tr.no),name:tr.name,rank,position,chips});
   }
   const sig=[raceDate,distance,paceTop,...selected.map(x=>`${x.no}:${x.rank}:${x.position}:${x.chips.map(c=>c.k).join(',')}`)].join('|');
-  if(sig===lastSig)return;lastSig=sig;
-  let root=panel.querySelector('#m3TraitContextResearch');
+  if(sig===lastSig&&existing)return;lastSig=sig;
+  let root=existing;
   if(!root){root=document.createElement('section');root.id='m3TraitContextResearch';const anchor=panel.querySelector('#m3ClosingTrait');anchor?anchor.insertAdjacentElement('afterend',root):(panel.querySelector('.m3HorseList')||panel).before(root)}
   const raceChips=[`事前RPCI本線 ${topLabel(paceTop)}`,distance?`${distance}m`:'距離—'];
   const rows=selected.length?selected.map(r=>{
