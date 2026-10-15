@@ -17,12 +17,12 @@ const normalizeDate=v=>{const s=String(v||'').trim();const m=s.match(/(20\d{2})\
 const isObstacle=(r,iRaceName,iRaceType)=>{
   const race=iRaceName>=0?String(r[iRaceName]||'').trim():'';
   const type=iRaceType>=0?String(r[iRaceType]||'').normalize('NFKC').trim():'';
-  return type==='18'||race.includes('障害');
+  return type==='18'||type==='19'||race.includes('障害');
 };
 const isNonFinish=(r,iFinish)=>{
   if(iFinish<0)return false;
   const s=String(r[iFinish]||'').normalize('NFKC').trim();
-  return ['止','中止','取','取消','除','除外','失','失格'].includes(s);
+  return ['止','中止','取','取消','消','除','除外','外','失','失格'].includes(s);
 };
 function transform(buf){
   stats.transforms++;
@@ -59,7 +59,7 @@ File.prototype.arrayBuffer=function(){return cachedBuffer(this)};
 File.prototype.__rsaTargetCompat=true;
 C.decode=function(buf){if(buf&&typeof buf==='object'){const hit=decodeCache.get(buf);if(hit!==undefined){stats.decodeHits++;return hit}const text=origDecode(buf);decodeCache.set(buf,text);return text}return origDecode(buf)};
 C.parseCSV=function(text){if(typeof text==='string'&&text===lastCsvText&&lastCsvGrid){stats.parseHits++;return lastCsvGrid}const grid=origParseCSV(text);if(typeof text==='string'&&text.length>256){lastCsvText=text;lastCsvGrid=grid}return grid};
-window.RSATargetCsvCache={version:'target-csv-cache-v3',stats,arrayBuffer:cachedBuffer,clear(){lastCsvText=null;lastCsvGrid=null}};
-function note(){setTimeout(()=>{const f=document.getElementById('csvFile'),info=document.getElementById('csvInfo');if(!f?.files?.[0]||!info)return;const n=f.files[0].name||'';if(!/\.csv$/i.test(n))return;if(!info.querySelector('[data-target-compat]')){const d=document.createElement('div');d.dataset.targetCompat='1';d.className='tiny';d.style.marginTop='6px';d.textContent='TARGET全馬一括CSVを共有キャッシュ：レースPCI→RPCI／決手→脚質／開催→競馬場／日付正規化／障害・競走中止等を除外／全馬出力順→今回馬番';info.appendChild(d)}},180)}
+window.RSATargetCsvCache={version:'target-csv-cache-v4',stats,arrayBuffer:cachedBuffer,clear(){lastCsvText=null;lastCsvGrid=null}};
+function note(){setTimeout(()=>{const f=document.getElementById('csvFile'),info=document.getElementById('csvInfo');if(!f?.files?.[0]||!info)return;const n=f.files[0].name||'';if(!/\.csv$/i.test(n))return;if(!info.querySelector('[data-target-compat]')){const d=document.createElement('div');d.dataset.targetCompat='1';d.className='tiny';d.style.marginTop='6px';d.textContent='TARGET全馬一括CSVを共有キャッシュ：レースPCI→RPCI／決手→脚質／開催→競馬場／日付正規化／障害・取消・除外・競走中止・失格を除外／全馬出力順→今回馬番';info.appendChild(d)}},180)}
 if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',()=>{document.getElementById('csvFile')?.addEventListener('change',note)});else document.getElementById('csvFile')?.addEventListener('change',note);
 })();
