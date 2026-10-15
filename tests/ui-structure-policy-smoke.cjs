@@ -25,7 +25,7 @@ async function run(type,name){
   assert.strictEqual(base.oldAddonLoaded,false,`${name}: legacy ticket addon still loaded`);
   assert.deepStrictEqual(base.boundary,[false,true,true,false],`${name}: 2027 holdout boundary wrong`);
   assert.strictEqual(base.marketAfterReliability,true,`${name}: market is not after reliability (${base.reliabilityIndex} -> ${base.marketIndex})`);
-  assert(/最後に照合/.test(base.marketTitle),`${name}: market-last label missing`);
+  assert(/最後に照合/.test(base.marketTitle),`${name}: market-last label missing; actual=${JSON.stringify(base.marketTitle)}`);
   await page.evaluate(()=>{
     window.RSAAnalysisTransitionState={generation:91,status:'ready'};
     window.FourAxisIntegrationState={p:[.1,.2,.5,.2]};
