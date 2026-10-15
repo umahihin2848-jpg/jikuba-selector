@@ -1,0 +1,75 @@
+{
+  "version": "race_shape_bias_oos_v1",
+  "created": "2026-10-15",
+  "purpose": "Pre-race structural bias label: front-favouring / neutral / rear-has-a-chance. Display-only; does not alter M3 or calibrated probabilities.",
+  "universe": "JRA flat, field_size>=12, 3-win class or higher",
+  "target": {
+    "front_group": "actual first-available-corner position fraction <= 0.25",
+    "rear_group": "actual first-available-corner position fraction > 0.65",
+    "front_advantage": "mean finish percentile of rear group minus mean finish percentile of front group",
+    "strong_front_advantage": "front_advantage >= 0.20"
+  },
+  "protocol": {
+    "train": "2019-2023",
+    "oos": [2024, 2025, 2026],
+    "runner_history": "strictly prior starts only",
+    "pressure": "ShapeCore priors: escape=0.08, front=0.33, prior_weight=3, recent_window=5",
+    "queue_features": "race median and population SD of each runner's prior-corner frontness; runners without prior corner history are omitted from queue aggregation",
+    "model": "median imputation + StandardScaler + LogisticRegression(C=1)",
+    "bootstrap": "paired race-level bootstrap, 5000 resamples"
+  },
+  "features": [
+    "distance",
+    "field",
+    "surface_dirt",
+    "escape_exp",
+    "front_pressure",
+    "queue_med",
+    "queue_spread"
+  ],
+  "imputer_median": [1600.0, 16.0, 0.0, 1.133, 0.33451923076923074, 0.4502564102564103, 0.2295883839402883],
+  "scaler_mean": [1736.6197890507283, 15.250125565042692, 0.38623807132094423, 1.184527588433666, 0.33737143989501345, 0.44837861531106127, 0.22847897827029418],
+  "scaler_scale": [514.9229368840911, 1.6655937818724964, 0.48688625322884344, 0.4125063542234428, 0.04867469240701163, 0.10743934444953633, 0.04134274364526977],
+  "intercept": -0.7943941558669653,
+  "coef": [0.00845367595093264, -0.22958581755168914, 0.03936939391693216, -0.058883574023880225, -0.04169716818815293, 0.11170541214703167, -0.11700219035007316],
+  "band_cutpoints_train_only": {
+    "rear_chance_max": 0.27974393443237355,
+    "front_favour_min": 0.3422014015696588
+  },
+  "oos_validation": {
+    "race_count": 1140,
+    "conditions_only": {
+      "auc": 0.5231095194021191,
+      "brier": 0.22312734056137923,
+      "log_loss": 0.6387861714624299
+    },
+    "pressure_plus_queue": {
+      "auc": 0.566809183715758,
+      "brier": 0.22041870672125327,
+      "log_loss": 0.6325082410066619
+    },
+    "paired_delta": {
+      "auc": 0.04369711,
+      "auc_ci95": [0.01867838, 0.06695106],
+      "brier": -0.00271602,
+      "brier_ci95": [-0.00523139, -0.00016083]
+    },
+    "by_year": {
+      "2024": {"n": 416, "auc": 0.5714506769825918, "brier": 0.22199095312955994},
+      "2025": {"n": 419, "auc": 0.5730034040324692, "brier": 0.21392397721180703},
+      "2026": {"n": 305, "auc": 0.5548003398470689, "brier": 0.22719653347076932}
+    },
+    "band_observed_strong_front_rate": {
+      "rear_chance": {"n": 377, "rate": 0.278515, "mean_front_advantage": 0.060938},
+      "neutral": {"n": 363, "rate": 0.338843, "mean_front_advantage": 0.089481},
+      "front_favour": {"n": 400, "rate": 0.385, "mean_front_advantage": 0.099787}
+    }
+  },
+  "decision": {
+    "display_layer": "YES",
+    "m3_correction": "NO",
+    "probability_correction": "NO",
+    "betting_edge_claim": "NO",
+    "use": "structural consistency check for candidate horses; do not use as a standalone selection rule"
+  }
+}
