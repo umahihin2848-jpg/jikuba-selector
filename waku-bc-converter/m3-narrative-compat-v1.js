@@ -1,0 +1,11 @@
+(()=>{'use strict';
+if(window.__M3_NARRATIVE_COMPAT_V1)return;window.__M3_NARRATIVE_COMPAT_V1=true;
+let raf=0;
+const num=v=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(Number(v));
+const rank=v=>num(v)?`${Math.round(Number(v))}位`:'—';
+function rowMap(){const A=window.M3PureAbilityV2State?.rows||[],F=window.Finish600State?.rows||[],fm=new Map(F.map(x=>[String(x.no),x]));return new Map(A.map(a=>{const f=fm.get(String(a.no)),ar=num(a.v2Rank)?Number(a.v2Rank):num(a.abilityRank)?Number(a.abilityRank):NaN,mr=num(f?.finishRank)?Number(f.finishRank):NaN;return[String(a.no),{no:String(a.no),name:String(a.name||f?.name||''),ar,mr}]}))}
+function horse(r){return r?`${r.no}番${r.name}`:''}
+function patch(){raf=0;const st=window.M3NarrativeRoleSyncState,first=document.querySelector('#m3NarrativeAnalysis .m3NarrativeBody p');if(!st?.ready||!first)return;const m=rowMap(),a=m.get(String(st.axisNo||'')),u=m.get(String(st.upliftNo||'')),c=m.get(String(st.cautionNo||'')),parts=[];if(a)parts.push(`分析上の軸候補は${horse(a)}（Ability ${rank(a.ar)}×M3 ${rank(a.mr)}）`);if(c&&c.no!==a?.no)parts.push(`地力上位・構造慎重の「地力残し候補」は${horse(c)}（Ability ${rank(c.ar)}→M3 ${rank(c.mr)}）`);if(u&&u.no!==a?.no&&u.no!==c?.no)parts.push(`構造浮上馬の「構造浮上候補」は${horse(u)}（Ability ${rank(u.ar)}→M3 ${rank(u.mr)}）`);const text=parts.length?`役割を分けて見ると、${parts.join('。')}。地力残しと構造浮上には固定の上下関係を付けません。相手の最終優先は現在のオッズとEVで判断します。`:'AbilityとM3を分けて確認します。明確な役割馬は抽出されていません。';if(first.textContent!==text)first.textContent=text;first.dataset.roleSync='1';st.internalVersion=st.version;st.version='ability-m3-role-sync-v1';st.compatibilityVersion='m3-narrative-compat-v1'}
+function schedule(){if(!raf)raf=requestAnimationFrame(patch)}
+['m3-narrative-role-sync-ready','m3-analysis-narrative-ready','m3-pure-ability-v2-ready','finish600-ready','rsa-analysis-complete'].forEach(ev=>addEventListener(ev,schedule));document.addEventListener('click',e=>{if(['analyzeBtn','applyOddsBtn','parseCsvBtn'].includes(e.target?.id))schedule()},true);if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule,{once:true});else schedule();
+})();
