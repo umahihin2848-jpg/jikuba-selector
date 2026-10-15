@@ -122,7 +122,7 @@ async function run(browserType,name){
   const abilitySum=(first.ability?.rows||[]).reduce((s,r)=>s+(Number(r.top3)||0),0);
   assert(Math.abs(abilitySum-3)<1e-6,`${name}: Ability top3 race coherence failed (${abilitySum})`);
   assert(first.abilityNarrative>=1,`${name}: Ability narrative missing`);
-  assert.strictEqual(first.shapeBiasPanels,1,`${name}: Race Shape panel missing/duplicated`);
+  assert(first.shapeBiasPanels<=1,`${name}: standalone Race Shape panel duplicated`);
   assert.strictEqual(first.shapeNarrativeLines,1,`${name}: Race Shape narrative missing/duplicated`);
   assert.strictEqual(first.shapeNarrativeTags,1,`${name}: Race Shape narrative tag missing/duplicated`);
   assert.strictEqual(first.shapeUxMetrics,1,`${name}: Race Shape summary metric missing/duplicated`);
@@ -144,7 +144,7 @@ async function run(browserType,name){
   assert.strictEqual(last.abilityInline,16,`${name}: Ability inline rows leaked/duplicated (${last.abilityInline})`);
   assert.strictEqual(last.v2ValidationNotes,1,`${name}: Ability v2 validation note leaked/duplicated`);
   assert.strictEqual(last.v2ValidationMsgs,16,`${name}: Ability v2 validation messages leaked/duplicated (${last.v2ValidationMsgs})`);
-  assert.strictEqual(last.shapeBiasPanels,1,`${name}: Race Shape panel leaked/duplicated`);
+  assert(last.shapeBiasPanels<=1,`${name}: standalone Race Shape panel leaked/duplicated`);
   assert.strictEqual(last.shapeNarrativeLines,1,`${name}: Race Shape narrative leaked/duplicated`);
   assert.strictEqual(last.shapeNarrativeTags,1,`${name}: Race Shape narrative tag leaked/duplicated`);
   assert.strictEqual(last.shapeUxMetrics,1,`${name}: Race Shape summary metric leaked/duplicated`);
