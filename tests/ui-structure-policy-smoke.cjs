@@ -6,17 +6,6 @@ async function run(type,name){
   const browser=await type.launch({headless:true});
   const context=await browser.newContext({viewport:{width:390,height:844},userAgent:UA,isMobile:true,hasTouch:true});
   const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.addInitScript(()=>{
-    window.__rsaHeadingWrites=[];
-    const hit=(kind,value)=>{if(typeof value==='string'&&value.includes('人気の割れ方'))window.__rsaHeadingWrites.push({kind,value,stack:String(new Error('heading-write').stack||'')})};
-    const patchSetter=(proto,key)=>{const d=Object.getOwnPropertyDescriptor(proto,key);if(!d?.set||!d?.get)return;Object.defineProperty(proto,key,{configurable:d.configurable,enumerable:d.enumerable,get:d.get,set(v){hit(key,v);return d.set.call(this,v)}})};
-    try{patchSetter(Node.prototype,'textContent')}catch{}
-    try{patchSetter(Element.prototype,'innerHTML')}catch{}
-    try{patchSetter(HTMLElement.prototype,'innerText')}catch{}
-    try{patchSetter(Element.prototype,'outerHTML')}catch{}
-    const oldInsert=Element.prototype.insertAdjacentHTML;
-    if(oldInsert)Element.prototype.insertAdjacentHTML=function(pos,html){hit('insertAdjacentHTML',html);return oldInsert.call(this,pos,html)};
-  });
   await page.goto(BASE,{waitUntil:'networkidle',timeout:30000});
   await page.waitForFunction(()=>window.RSAAddonHealth?.ready===true&&window.ProspectiveLedgerPolicy?.version==='prospective-ledger-policy-v2',null,{timeout:25000});
   const base=await page.evaluate(()=>{
@@ -28,11 +17,9 @@ async function run(type,name){
       oldAddonLoaded:(window.RSAAddonHealth?.loaded||[]).some(x=>x.includes('prospective-ledger-ticket-types-v1.js')),
       boundary:['2026-12-31','2027-01-01','2027-12-31','2028-01-01'].map(d=>window.ProspectiveLedgerPolicy.isHoldout2027Date(d)),
       reliabilityIndex,marketIndex,marketAfterReliability:reliabilityIndex>=0&&marketIndex>reliabilityIndex,
-      marketTitle:document.querySelector('#marketSection h2')?.textContent||'',
-      headingWrites:window.__rsaHeadingWrites||[]
+      marketTitle:document.querySelector('#marketSection h2')?.textContent||''
     }
   });
-  if(!/最後に照合/.test(base.marketTitle))console.log('HEADING_DIAG',name,JSON.stringify(base.headingWrites,null,2));
   assert.deepStrictEqual(base.types,['単勝','複勝','馬連','馬単','ワイド'],`${name}: native five ticket types`);
   assert.strictEqual(base.native,'prospective-ledger-v2-native-ticket-types',`${name}: ticket types not integrated into ledger core`);
   assert.strictEqual(base.oldAddonLoaded,false,`${name}: legacy ticket addon still loaded`);
