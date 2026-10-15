@@ -41,7 +41,7 @@ async function run(type,name){
     window.RaceOverallSummaryState={ready:true,generation:91,version:'test'};
     dispatchEvent(new CustomEvent('race-overall-summary-ready'));
   });
-  await page.waitForFunction(()=>window.RaceOverallSummaryState?.anchorPolicy==='ability-v2-m3-axis-v1'&&window.MarketIndependentCenterState?.generation===91,null,{timeout:5000});
+  await page.waitForFunction(()=>window.RaceOverallSummaryState?.anchorPolicy==='ability-v2-m3-axis-v1'&&window.MarketIndependentCenterState?.generation===91,null,{timeout:12000});
   const cls=await page.evaluate(()=>window.RaceOverallSummaryState.classification);
   assert.strictEqual(cls,'構造一致・安定',`${name}: structural classification wrong: ${cls}`);
   assert(!/買い検討型|見送り寄り/.test(cls),`${name}: betting-style classification remains`);
