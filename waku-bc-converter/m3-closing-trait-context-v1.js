@@ -4,7 +4,7 @@ const C=window.ShapeCore;
 if(!C||typeof C.analyze!=='function')return;
 const originalAnalyze=C.analyze.bind(C);
 let latest=null,raf=0,lastSig='';
-const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const topLabel=i=>['<45','45〜49','50〜54','≥55'][Number(i)]||'—';
 function posFor(row){
   const hs=latest?.analysis?.hs||[];
