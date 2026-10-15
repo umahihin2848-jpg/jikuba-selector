@@ -1,0 +1,63 @@
+{
+  "version": "pipeline_drop_audit_2024_2026_v1",
+  "created": "2026-10-15",
+  "universe": {
+    "definition": "JRA flat, field_size>=12, 3-win class or higher, 2024-2026; obstacle races excluded using the audited 52-race exclusion universe",
+    "races": 1100,
+    "races_by_year": {"2024": 400, "2025": 403, "2026": 297},
+    "runner_events": 16669,
+    "actual_top3_events": 3305
+  },
+  "replay": {
+    "ability": "Production Ability v3 coefficients with documented opponent-strength median fallback; strict-prior history only",
+    "queue": "Production validated_queue_model_v1 formula; strict-prior history only",
+    "remaining600": "Production scenario_component_validation_v2 deployable remaining-600 formula",
+    "m3": "Production finish600_model_v1 core M3 formula",
+    "m3_top3_recall": {"all": 0.3065052950, "2024": 0.3172356370, "2025": 0.3019801980, "2026": 0.2982062780},
+    "note": "M3 replay closely reproduces the stored production validation overlap figures (2024 0.3175, 2025 0.301902, 2026 0.298541), which is an internal reproduction check."
+  },
+  "diagnostic_first_mismatch": [
+    {"stage": "Ability weak or history insufficient", "n": 1275, "share": 0.3857791225},
+    {"stage": "Queue predicted materially farther back than actual early position", "threshold_rank_fraction": 0.20, "n": 364, "share": 0.1101361573},
+    {"stage": "Remaining-600 predicted materially farther back than actual -3F position", "threshold_rank_fraction": 0.20, "n": 261, "share": 0.0789712557},
+    {"stage": "M3 finish conversion left horse outside top 3", "n": 866, "share": 0.2620272315},
+    {"stage": "M3 top 3 captured", "n": 539, "share": 0.1630862330}
+  ],
+  "important_architecture_note": "Ability and validated queue do not feed the production M3 score directly. The first-mismatch table is a diagnostic trace, not a literal causal pipeline.",
+  "m3_counterfactual_decomposition": {
+    "baseline_top3_recall": 0.3065052950,
+    "if_actual_remaining600_gap_were_known": 0.3267776097,
+    "if_actual_closing_strength_were_known": 0.5328290469,
+    "if_both_were_known": 0.9307110439,
+    "interpretation": "The larger uncertainty is the remaining-600-to-finish closing-strength forecast, not the remaining-600 position forecast. These are oracle diagnostics, not deployable predictors."
+  },
+  "candidate_set_comparison": {
+    "m3_top3": {"avg_candidates": 3.0, "top3_horse_recall": 0.3065052950},
+    "m3_top5": {"avg_candidates": 5.0, "top3_horse_recall": 0.4544629349},
+    "m3_top6": {"avg_candidates": 6.0, "top3_horse_recall": 0.5237518911},
+    "ability_A_union_m3_top3": {"avg_candidates": 5.0218181818, "top3_horse_recall": 0.5089258699},
+    "fixed5_m3top3_plus_best2_ability_outside": {"avg_candidates": 5.0, "top3_horse_recall": 0.5086232980, "avg_top3_caught_per_race": 1.5281818182},
+    "fixed5_m3top2_plus_best3_ability_outside": {"avg_candidates": 5.0, "top3_horse_recall": 0.5146747352, "avg_top3_caught_per_race": 1.5463636364}
+  },
+  "exploratory_fixed5_comparison": {
+    "reference": "M3 Top5",
+    "challenger": "M3 Top3 + best 2 Ability horses outside M3 Top3",
+    "mean_extra_actual_top3_per_race": 0.1627272727,
+    "race_bootstrap_95ci": [0.12181818, 0.20363636],
+    "yearly_extra_hits_per_race": {"2024": 0.1600, "2025": 0.1736972705, "2026": 0.1515151515},
+    "status": "exploratory_only",
+    "warning": "This rescue rule was identified after inspecting the 2024-2026 audit and must not be promoted to probability or betting logic without a new prospective/future holdout."
+  },
+  "rescue_observation": {
+    "m3_missed_actual_top3_events": 2292,
+    "ability_A_among_m3_misses": 669,
+    "ability_B_among_m3_misses": 588,
+    "m3_rank_4_to_6_among_m3_misses": 718,
+    "interpretation": "Ability and M3 contain complementary information; a strong Ability horse should not be visually treated as disproven merely because M3 ranks it below third."
+  },
+  "deployment_decision": {
+    "change_probability_logic": false,
+    "change_betting_logic": false,
+    "recommended_ui_only_change": "Optionally expose an Ability rescue/watch label for strong-Ability horses that M3 demotes, clearly marked non-scoring and prospective-validation pending."
+  }
+}
