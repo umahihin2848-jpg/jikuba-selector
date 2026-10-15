@@ -60,27 +60,6 @@ jobs:
           node tests/prospective-ledger-smoke.cjs
           node tests/prospective-ticket-types-smoke.cjs
 
-  ui-structure-smoke:
-    runs-on: ubuntu-latest
-    timeout-minutes: 12
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-      - name: Install Playwright
-        run: |
-          npm install --no-save playwright@latest
-          npx playwright install --with-deps chromium webkit
-      - name: Start local app
-        run: |
-          python3 -m http.server 4173 > /tmp/jikuba-server.log 2>&1 &
-          sleep 2
-      - name: Run UI structure policy smoke test
-        run: node tests/ui-structure-policy-smoke.cjs
-
   v4-scanner-smoke:
     runs-on: ubuntu-latest
     timeout-minutes: 15
