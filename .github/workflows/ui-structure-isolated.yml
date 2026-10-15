@@ -1,0 +1,28 @@
+name: UI structure isolated
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'waku-bc-converter/**'
+      - 'tests/ui-structure-policy-smoke.cjs'
+      - '.github/workflows/ui-structure-isolated.yml'
+  workflow_dispatch:
+jobs:
+  isolated:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@latest
+          npx playwright install --with-deps chromium webkit
+      - name: Start local app
+        run: |
+          python3 -m http.server 4173 > /tmp/jikuba-server.log 2>&1 &
+          sleep 2
+      - name: Run isolated structure policy
+        run: timeout 120s node tests/ui-structure-policy-smoke.cjs
