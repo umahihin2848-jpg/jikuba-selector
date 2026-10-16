@@ -13,10 +13,13 @@ body.iosPaintLiteV2 .iosPaintReady #result *,body.iosPaintLiteV2 .iosPaintReady 
  body.iosPaintLiteV2 .card,body.iosPaintLiteV2 #scenarioView>.sv{contain:none!important;content-visibility:visible!important}
  body.iosPaintLiteV2 #s3 .horse,body.iosPaintLiteV2 #s4 .sc,body.iosPaintLiteV2 #s5 .item,body.iosPaintLiteV2 #s6 .item{contain:none!important;content-visibility:visible!important}
  body.iosPaintLiteV2 #qRealTrack,body.iosPaintLiteV2 .rtCourse,body.iosPaintLiteV2 .rtHorse{transform:none!important;will-change:auto!important;box-shadow:none!important;background-image:none!important}
+ body.iosPaintLiteV2 #m3RaceLab,body.iosPaintLiteV2 .m3labPanel,body.iosPaintLiteV2 .m3section,body.iosPaintLiteV2 #m3StartFirstTurn,body.iosPaintLiteV2 .sftWrap,body.iosPaintLiteV2 .sftList,body.iosPaintLiteV2 .sftRow{contain:none!important;content-visibility:visible!important;transform:none!important;will-change:auto!important;backface-visibility:visible!important}
 }
 `;document.head.appendChild(css);
-function settle(){document.body.classList.remove('rsaResumeRepaint');void document.documentElement.offsetHeight;void document.body.offsetHeight}
-addEventListener('final-decision-ready',()=>{document.body.classList.add('iosPaintReady');setTimeout(settle,40)});
+function settle(){document.body.classList.remove('rsaResumeRepaint');void document.documentElement.offsetHeight;void document.body.offsetHeight;const a=document.getElementById('m3RaceLab');if(a)void a.offsetHeight;const b=document.getElementById('m3StartFirstTurn');if(b)void b.offsetHeight}
+function settleSoon(){[0,80,220,520].forEach(ms=>setTimeout(settle,ms))}
+addEventListener('final-decision-ready',()=>{document.body.classList.add('iosPaintReady');settleSoon()});
+['m3-start-firstturn-visual-ready','position-risk-ready','rsa-analysis-complete','validated-queue-ready'].forEach(ev=>addEventListener(ev,settleSoon));
 document.getElementById('analyzeBtn')?.addEventListener('click',()=>document.body.classList.remove('iosPaintReady'));
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(settle,80)});
 addEventListener('pageshow',()=>setTimeout(settle,80));addEventListener('orientationchange',()=>setTimeout(settle,180));
