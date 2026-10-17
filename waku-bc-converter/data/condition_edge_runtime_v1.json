@@ -1,0 +1,93 @@
+{
+  "version": "condition_edge_runtime_v1",
+  "created": "2026-10-17",
+  "status": "research_layer_prospective_only",
+  "fit_note": "Frozen v1 factors refit on all supplied 2016-2026 historical rows available through 2026-10-17. This is a deployment fit after walk-forward validation; do not use it to claim new in-sample performance.",
+  "universe": "JRA flat, current race 3-win class or higher, field size >=12, all-2yo races excluded",
+  "features": [
+    "distance_change_band_vs_previous_high_class_start",
+    "age_band",
+    "sex_x_season"
+  ],
+  "reference_levels": {
+    "distance_change_band": "same",
+    "age_band": "4",
+    "sex_x_season": "セ_autumn"
+  },
+  "distance_change_bands_m": {
+    "shorten_400_plus": "delta < -300",
+    "shorten_about_200": "-300 <= delta < -100",
+    "same": "-100 <= delta < 100",
+    "extend_about_200": "100 <= delta < 300",
+    "extend_400_plus": "delta >= 300",
+    "missing": "no previous high-class start in uploaded history"
+  },
+  "season_definition": {
+    "winter": [12, 1, 2],
+    "spring": [3, 4, 5],
+    "summer": [6, 7, 8],
+    "autumn": [9, 10, 11]
+  },
+  "fit_rows": 56321,
+  "fit_races": 3733,
+  "win": {
+    "target_sum": 1,
+    "coefficients": {
+      "const": 0.11798718840842595,
+      "dist_band_shorten_about_200": 0.13251969473434308,
+      "dist_band_shorten_400_plus": 0.09746276054173716,
+      "dist_band_extend_about_200": 0.007751543859984774,
+      "dist_band_extend_400_plus": 0.20312166364992068,
+      "dist_band_missing": -0.03131821771415905,
+      "age_band_3": 0.05287776278669968,
+      "age_band_5": 0.08761799242622184,
+      "age_band_6+": -0.1210264758045634,
+      "age_band_missing": -1.6686049597210693e-16,
+      "sex_season_セ_spring": -0.4142923967316079,
+      "sex_season_セ_summer": -0.22634708453827335,
+      "sex_season_セ_winter": -0.08902750884103462,
+      "sex_season_牝_autumn": -0.21465538160536646,
+      "sex_season_牝_spring": -0.31771025388410173,
+      "sex_season_牝_summer": -0.08717875963858963,
+      "sex_season_牝_winter": -0.37409700110064625,
+      "sex_season_牡_autumn": -0.17715931720507466,
+      "sex_season_牡_spring": -0.07023132546254567,
+      "sex_season_牡_summer": -0.18909621780144134,
+      "sex_season_牡_winter": -0.08126336231169488
+    }
+  },
+  "top3": {
+    "target_sum": 3,
+    "market_baseline": "wide lower-odds pair market normalized to 3 winning pairs per race",
+    "coefficients": {
+      "const": 0.03526384843544526,
+      "dist_band_shorten_about_200": 0.08343714067197477,
+      "dist_band_shorten_400_plus": 0.08862167205577434,
+      "dist_band_extend_about_200": -0.011405292758446076,
+      "dist_band_extend_400_plus": 0.10992410299403474,
+      "dist_band_missing": -0.0536138015355264,
+      "age_band_3": 0.008686336960370931,
+      "age_band_5": 0.00247435863293143,
+      "age_band_6+": -0.10575811867287888,
+      "age_band_missing": 4.094519184493476e-18,
+      "sex_season_セ_spring": -0.029245579406537235,
+      "sex_season_セ_summer": -0.020162982463119997,
+      "sex_season_セ_winter": 0.05787221904412132,
+      "sex_season_牝_autumn": -0.012005162961499281,
+      "sex_season_牝_spring": -0.07085809806621654,
+      "sex_season_牝_summer": 0.06731401684901106,
+      "sex_season_牝_winter": -0.14468258747457247,
+      "sex_season_牡_autumn": -0.03675460963874449,
+      "sex_season_牡_spring": 0.01743091922097466,
+      "sex_season_牡_summer": -0.05679040456503844,
+      "sex_season_牡_winter": 0.03544324976125071
+    }
+  },
+  "policy": [
+    "Win Edge and Top3 Edge are market-relative research layers, not buy signals.",
+    "Project probabilities within each race to sum to 1 for win and 3 for top3.",
+    "Do not mix P10, M3, Ability, or QMD into these coefficients.",
+    "Top3 Edge requires a complete wide-odds pair list to reproduce the validated baseline.",
+    "Closing-price validation does not prove T-15 executable profitability."
+  ]
+}
