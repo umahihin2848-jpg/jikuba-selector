@@ -1,0 +1,60 @@
+{
+  "version": "structural_alerts_v1_validation",
+  "created": "2026-10-17",
+  "status": "DISPLAY_ONLY_PROSPECTIVE_FREEZE",
+  "source_snapshot_max_date": "2026-10-04",
+  "purpose": "Freeze two display-only structural signals: M3 x Ability v1 Top3 agreement and a front-running miss watch. Neither changes M3, Ability, probabilities, market edge, or betting decisions.",
+  "universe": "JRA flat, field size >=12, 3-win class or higher, using only pre-race information in the browser-equivalent reconstruction.",
+  "agreement_signal": {
+    "rule": "M3 rank <=3 AND Ability v1 rank <=3",
+    "primary_check": {
+      "years": [2025, 2026],
+      "races": 712,
+      "runners": 10788,
+      "both_top3": {"n": 802, "win_rate": 0.157, "top3_rate": 0.410, "market_ratio_win": 0.986, "market_ratio_top3": 1.029},
+      "m3_only_top3": {"n": 1334, "win_rate": 0.076, "top3_rate": 0.230, "market_ratio_win": 0.939, "market_ratio_top3": 0.969},
+      "ability_only_top3": {"n": 1334, "win_rate": 0.121, "top3_rate": 0.334, "market_ratio_win": 1.013, "market_ratio_top3": 1.022},
+      "neither_top3": {"n": 7318, "win_rate": 0.044, "top3_rate": 0.145, "market_ratio_win": 1.023, "market_ratio_top3": 0.996}
+    },
+    "bootstrap_differences": {
+      "both_vs_m3_only_win_rate_pp": {"estimate": 8.1, "ci95": [5.2, 11.0]},
+      "both_vs_m3_only_top3_rate_pp": {"estimate": 18.0, "ci95": [13.8, 22.0]},
+      "both_vs_ability_only_top3_rate_pp": {"estimate": 7.5, "ci95": [3.2, 12.1]}
+    },
+    "interpretation": "Useful as a stable-axis candidate marker. The market already recognizes much of the strength, so this is not an automatic value or buy signal."
+  },
+  "front_run_watch": {
+    "rule": "validated queue history AND frontness5 >=0.70 AND M3 rank >=4",
+    "diagnostic_check": {
+      "years": [2024, 2025, 2026],
+      "races": 1118,
+      "winner_first_corner_rank_1_2": {"n": 305, "m3_top1_capture": 0.075, "m3_top3_capture": 0.223, "mean_m3_rank": 7.61},
+      "winner_first_corner_rank_3_plus": {"n": 813, "m3_top1_capture": 0.156, "m3_top3_capture": 0.373, "mean_m3_rank": 5.81},
+      "m3_top3_capture_difference_pp": {"estimate": -15.0, "ci95": [-20.5, -9.2]},
+      "adjusted_logistic_or_for_early_1_2_to_enter_m3_top3": 0.51,
+      "adjusted_logistic_p": "<0.001",
+      "early_1_2_winners_with_frontness5_ge_0_70": 0.777,
+      "early_1_2_winners_missed_by_m3_top3": 237,
+      "missed_early_winners_with_frontness5_ge_0_70": 0.802
+    },
+    "interpretation": "The queue layer often recognized the horse as forward-going, while the later M3 ranking still placed many eventual forward winners outside its Top3. Therefore show a separate miss-watch rather than adding a front-running bonus to M3.",
+    "simple_bonus_test": {
+      "decision": "REJECT_AS_M3_RANK_CORRECTION",
+      "note": "A simple frontness>=0.70 bonus tuned on 2024 produced only trivial Top3-overlap change in 2025-2026 and was not stable enough to alter M3."
+    }
+  },
+  "deployment_policy": [
+    "Display only for races after the 2026-10-04 source cutoff.",
+    "Do not change M3 rank or M3 probabilities.",
+    "Do not change Ability v1/v2 rank or probabilities.",
+    "Do not change market Edge, QMD, ticket, or buy/no-buy logic.",
+    "Agreement marker uses Ability v1, not v2, because the primary agreement validation used the cleaner frozen independent v1 layer.",
+    "Front-run watch requires ValidatedQueueState.validated=true so fallback-only horses are not flagged.",
+    "No ROI claim is established by either signal."
+  ],
+  "model_dependencies": [
+    "data/finish600_model_v1.json",
+    "data/ability_model_v1.json",
+    "validated-queue-model-v1.js"
+  ]
+}
