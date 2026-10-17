@@ -1,0 +1,66 @@
+{
+  "version": "condition_edge_candidate_v1",
+  "created": "2026-10-17",
+  "status": "research_candidate_frozen_not_production",
+  "purpose": "Small market-relative horse condition correction. Not an automatic betting rule.",
+  "universe": "JRA flat, current race 3-win class or higher, field size >=12, all-2yo races excluded",
+  "market_baseline": "normalized inverse closing win odds within race",
+  "features": [
+    "distance_change_band_vs_previous_high_class_start",
+    "age_band",
+    "sex_x_season"
+  ],
+  "distance_change_bands_m": {
+    "shorten_400_plus": "delta_distance < -300",
+    "shorten_about_200": "-300 <= delta_distance < -100",
+    "same": "-100 <= delta_distance < 100",
+    "extend_about_200": "100 <= delta_distance < 300",
+    "extend_400_plus": "delta_distance >= 300",
+    "missing": "no previous start present in the 3-win+ result universe"
+  },
+  "age_bands": ["3", "4", "5", "6+"],
+  "season_definition": {
+    "winter": [12, 1, 2],
+    "spring": [3, 4, 5],
+    "summer": [6, 7, 8],
+    "autumn": [9, 10, 11]
+  },
+  "evaluation_protocol": {
+    "walk_forward": [
+      "2016-2020 -> 2021",
+      "2016-2021 -> 2022",
+      "2016-2022 -> 2023",
+      "2016-2023 -> 2024",
+      "2016-2024 -> 2025",
+      "2016-2025 -> 2026"
+    ],
+    "oos_runners": 35512,
+    "oos_races": 2354,
+    "race_probability_constraint": "within-race logit projection to sum 1"
+  },
+  "walk_forward_result": {
+    "market_logloss": 0.2030917148,
+    "condition_edge_logloss": 0.2026431108,
+    "delta_logloss": -0.0004486040,
+    "race_bootstrap_ci95_delta_logloss": [-0.00076981, -0.00012406],
+    "market_brier": 0.0556773299,
+    "condition_edge_brier": 0.0555700986,
+    "market_auc": 0.8067124325,
+    "condition_edge_auc": 0.8079864590,
+    "logloss_improved_years": "6/6"
+  },
+  "edge_quintiles": [
+    {"mean_predicted_market_multiplier": 0.8175, "observed_over_market_expected": 0.8290, "raw_closing_roi": 0.6938},
+    {"mean_predicted_market_multiplier": 0.9365, "observed_over_market_expected": 0.9322, "raw_closing_roi": 0.7218},
+    {"mean_predicted_market_multiplier": 0.9996, "observed_over_market_expected": 1.0200, "raw_closing_roi": 0.7896},
+    {"mean_predicted_market_multiplier": 1.0628, "observed_over_market_expected": 1.0232, "raw_closing_roi": 0.6691},
+    {"mean_predicted_market_multiplier": 1.1980, "observed_over_market_expected": 1.2116, "raw_closing_roi": 0.9676}
+  ],
+  "policy": [
+    "Do not optimize a buy threshold from these results.",
+    "Do not add or remove features from v1 based on future outcomes; create a new version instead.",
+    "Use as a market-mispricing research layer only until prospective confirmation.",
+    "Do not mix P10/dangerous-favorite into the v1 score; keep them as separate context layers.",
+    "Closing odds are benchmark prices, not T-15 executable prices."
+  ]
+}
