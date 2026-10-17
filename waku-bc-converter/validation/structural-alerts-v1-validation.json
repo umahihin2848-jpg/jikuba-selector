@@ -1,9 +1,9 @@
 {
-  "version": "structural_alerts_v1_validation",
+  "version": "structural_alerts_v1_1_validation",
   "created": "2026-10-17",
   "status": "DISPLAY_ONLY_PROSPECTIVE_FREEZE",
   "source_snapshot_max_date": "2026-10-04",
-  "purpose": "Freeze two display-only structural signals: M3 x Ability v1 Top3 agreement and a front-running miss watch. Neither changes M3, Ability, probabilities, market edge, or betting decisions.",
+  "purpose": "Freeze two display-only structural signals: M3 x Ability v1 Top3 agreement and a front-running miss watch conditioned on the existing Race Shape bias layer. Neither changes M3, Ability, probabilities, market edge, QMD, or betting decisions.",
   "universe": "JRA flat, field size >=12, 3-win class or higher, using only pre-race information in the browser-equivalent reconstruction.",
   "agreement_signal": {
     "rule": "M3 rank <=3 AND Ability v1 rank <=3",
@@ -11,8 +11,8 @@
       "years": [2025, 2026],
       "races": 712,
       "runners": 10788,
-      "both_top3": {"n": 802, "win_rate": 0.157, "top3_rate": 0.410, "market_ratio_win": 0.986, "market_ratio_top3": 1.029},
-      "m3_only_top3": {"n": 1334, "win_rate": 0.076, "top3_rate": 0.230, "market_ratio_win": 0.939, "market_ratio_top3": 0.969},
+      "both_top3": {"n": 802, "win_rate": 0.157, "top3_rate": 0.41, "market_ratio_win": 0.986, "market_ratio_top3": 1.029},
+      "m3_only_top3": {"n": 1334, "win_rate": 0.076, "top3_rate": 0.23, "market_ratio_win": 0.939, "market_ratio_top3": 0.969},
       "ability_only_top3": {"n": 1334, "win_rate": 0.121, "top3_rate": 0.334, "market_ratio_win": 1.013, "market_ratio_top3": 1.022},
       "neither_top3": {"n": 7318, "win_rate": 0.044, "top3_rate": 0.145, "market_ratio_win": 1.023, "market_ratio_top3": 0.996}
     },
@@ -24,7 +24,7 @@
     "interpretation": "Useful as a stable-axis candidate marker. The market already recognizes much of the strength, so this is not an automatic value or buy signal."
   },
   "front_run_watch": {
-    "rule": "validated queue history AND frontness5 >=0.70 AND M3 rank >=4",
+    "base_rule": "validated queue history AND frontness5 >=0.70 AND M3 rank >=4",
     "diagnostic_check": {
       "years": [2024, 2025, 2026],
       "races": 1118,
@@ -37,7 +37,30 @@
       "early_1_2_winners_missed_by_m3_top3": 237,
       "missed_early_winners_with_frontness5_ge_0_70": 0.802
     },
-    "interpretation": "The queue layer often recognized the horse as forward-going, while the later M3 ranking still placed many eventual forward winners outside its Top3. Therefore show a separate miss-watch rather than adding a front-running bonus to M3.",
+    "bias_conditioning": {
+      "race_shape_model": "data/race_shape_bias_oos_v1.json",
+      "display_policy": {"front": "strong_warning", "neutral": "weak_caution", "rear": "hidden"},
+      "all_2024_2026": {
+        "front_favour": {"n": 1312, "races": 456, "win_rate": 0.07469512195121951, "top3_rate": 0.21036585365853658, "mean_m3_rank": 9.479420731707316},
+        "neutral": {"n": 1422, "races": 388, "win_rate": 0.06258790436005626, "top3_rate": 0.18846694796061886, "mean_m3_rank": 10.381856540084389},
+        "rear_chance": {"n": 747, "races": 190, "win_rate": 0.06693440428380187, "top3_rate": 0.18072289156626506, "mean_m3_rank": 11.718875502008032},
+        "front_vs_nonfront_race_cluster_bootstrap": {
+          "top3_rate_difference_pp": {"estimate": 2.46, "ci95": [-0.02, 5.0]},
+          "win_rate_difference_pp": {"estimate": 1.07, "ci95": [-0.47, 2.61]}
+        }
+      },
+      "confirmation_2025_2026": {
+        "front_favour": {"n": 804, "races": 281, "win_rate": 0.07835820895522388, "top3_rate": 0.2126865671641791, "mean_m3_rank": 9.39676616915423},
+        "neutral": {"n": 905, "races": 250, "win_rate": 0.06519337016574586, "top3_rate": 0.19005524861878453, "mean_m3_rank": 10.328176795580111},
+        "rear_chance": {"n": 452, "races": 122, "win_rate": 0.06858407079646017, "top3_rate": 0.17035398230088494, "mean_m3_rank": 11.632743362831858},
+        "front_vs_nonfront_race_cluster_bootstrap": {
+          "top3_rate_difference_pp": {"estimate": 2.91, "ci95": [-0.2, 6.07]},
+          "win_rate_difference_pp": {"estimate": 1.22, "ci95": [-0.72, 3.16]}
+        }
+      },
+      "interpretation": "The ordering is directionally consistent with the proposed UI: flagged horses have the highest top3 rate in front-favouring races, intermediate in neutral races, and lowest in rear-chance races. However, race-cluster bootstrap intervals for front versus non-front cross zero, so this supports display-strength conditioning rather than a probability correction or standalone bet rule."
+    },
+    "interpretation": "The queue layer often recognized the horse as forward-going, while the later M3 ranking still placed many eventual forward winners outside its Top3. Condition the warning strength on Race Shape rather than adding a front-running bonus to M3.",
     "simple_bonus_test": {
       "decision": "REJECT_AS_M3_RANK_CORRECTION",
       "note": "A simple frontness>=0.70 bonus tuned on 2024 produced only trivial Top3-overlap change in 2025-2026 and was not stable enough to alter M3."
@@ -49,12 +72,15 @@
     "Do not change Ability v1/v2 rank or probabilities.",
     "Do not change market Edge, QMD, ticket, or buy/no-buy logic.",
     "Agreement marker uses Ability v1, not v2, because the primary agreement validation used the cleaner frozen independent v1 layer.",
-    "Front-run watch requires ValidatedQueueState.validated=true so fallback-only horses are not flagged.",
+    "Front-run base rule requires ValidatedQueueState.validated=true so fallback-only horses are not flagged.",
+    "Race Shape front band => strong warning, neutral => weak caution, rear-chance => suppress the horse-level warning.",
+    "The bias-conditioned split is directional, not statistically resolved as an independent betting edge.",
     "No ROI claim is established by either signal."
   ],
   "model_dependencies": [
     "data/finish600_model_v1.json",
     "data/ability_model_v1.json",
-    "validated-queue-model-v1.js"
+    "validated-queue-model-v1.js",
+    "data/race_shape_bias_oos_v1.json"
   ]
 }
