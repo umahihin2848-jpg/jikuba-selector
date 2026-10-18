@@ -29,14 +29,14 @@ jobs:
           sleep 2
       - name: Run core smoke tests
         run: |
+          node tests/wide-quinella-price-gate-smoke.cjs
           node tests/smoke.cjs
           node tests/numeric-normalization-smoke.cjs
           node tests/quinella-range-smoke.cjs
-          node tests/race-scenario-v3-r32-smoke.cjs
+          node tests/race-scenario-v3-r32-stable-smoke.cjs
           node tests/race-ux-semantics-v2-smoke.cjs
           node tests/race-role-parallel-smoke.cjs
           node tests/market-independent-center-smoke.cjs
-          node tests/wide-quinella-price-gate-smoke.cjs
 
   ledger-smoke:
     runs-on: ubuntu-latest
