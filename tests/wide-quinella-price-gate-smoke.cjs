@@ -49,6 +49,9 @@ async function run(type,name){
   assert((await page.locator('#wqAutoCandidateInfo').textContent()).includes('3組で停止'),`${name}: fallback status text missing`);
   assert.strictEqual(await page.locator('#wqTop3Btn').textContent(),'自動候補に戻す',`${name}: restore-auto button label missing`);
 
+  // The full-pair inputs are intentionally collapsed by the compact 3–4 pair UI.
+  // Open the advanced section here because this legacy smoke test exercises the raw textarea directly.
+  await page.evaluate(()=>{const d=document.querySelector('#candidateOddsAdvancedDetails');if(d)d.open=true});
   await page.fill('#qmdQuinellaPaste','1-2 15\n1-3 40\n2-4 60');
   await page.click('#wqCheckBtn');
   await page.waitForFunction(()=>window.WideQuinellaPriceState?.ready===true&&window.WideQuinellaPriceState?.rows?.length===3,null,{timeout:5000});
