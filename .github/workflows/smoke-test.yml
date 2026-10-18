@@ -31,6 +31,7 @@ jobs:
         run: |
           node tests/wide-quinella-price-gate-smoke.cjs
           node tests/wide-auto-candidates-smoke.cjs
+          node tests/candidate-odds-compact-smoke.cjs
           node tests/trio-third-row-smoke.cjs
           node tests/smoke.cjs
           node tests/numeric-normalization-smoke.cjs
