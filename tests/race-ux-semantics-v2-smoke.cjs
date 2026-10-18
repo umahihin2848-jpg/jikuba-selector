@@ -61,15 +61,20 @@ async function waitRoleNarrativeCompat(p){
   await p.waitForFunction(()=>{
     const st=window.M3NarrativeRoleSyncState,t=window.RSAAnalysisTransitionState;
     const first=document.querySelector('#m3NarrativeAnalysis .m3NarrativeBody p');
-    if(!st?.ready||st.generation!==t?.generation||st.compatibilityVersion!=='m3-narrative-compat-v1'||first?.dataset.roleSync!=='1')return false;
+    if(!st?.ready||st.generation!==t?.generation||st.compatibilityVersion!=='m3-narrative-compat-v1'||first?.dataset.roleSync!=='1'){
+      window.__uxRoleStableSig='';window.__uxRoleStableAt=0;return false;
+    }
     const text=first.textContent||'';
-    if(st.axisNo&&!text.includes('分析上の軸候補'))return false;
-    if(!st.axisNo&&text.includes('分析上の軸候補'))return false;
-    if(st.upliftNo&&!text.includes('構造浮上馬'))return false;
-    if(st.cautionNo&&!text.includes('地力上位・構造慎重'))return false;
-    if(!st.axisNo&&!st.upliftNo&&!st.cautionNo&&!text.includes('明確な役割馬は抽出されていません'))return false;
-    return true;
-  },null,{timeout:9000});
+    if(st.axisNo&&!text.includes('分析上の軸候補')){window.__uxRoleStableSig='';window.__uxRoleStableAt=0;return false;}
+    if(!st.axisNo&&text.includes('分析上の軸候補')){window.__uxRoleStableSig='';window.__uxRoleStableAt=0;return false;}
+    if(st.upliftNo&&!text.includes('構造浮上馬')){window.__uxRoleStableSig='';window.__uxRoleStableAt=0;return false;}
+    if(st.cautionNo&&!text.includes('地力上位・構造慎重')){window.__uxRoleStableSig='';window.__uxRoleStableAt=0;return false;}
+    if(!st.axisNo&&!st.upliftNo&&!st.cautionNo&&!text.includes('明確な役割馬は抽出されていません')){window.__uxRoleStableSig='';window.__uxRoleStableAt=0;return false;}
+    const sig=JSON.stringify([st.generation,st.axisNo||'',st.upliftNo||'',st.cautionNo||'',text]);
+    const now=performance.now();
+    if(window.__uxRoleStableSig!==sig){window.__uxRoleStableSig=sig;window.__uxRoleStableAt=now;return false;}
+    return now-window.__uxRoleStableAt>=250;
+  },null,{timeout:10000,polling:50});
 }
 
 async function run(bt,name){
