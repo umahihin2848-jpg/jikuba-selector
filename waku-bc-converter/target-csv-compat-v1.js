@@ -3,9 +3,11 @@ const C=window.ShapeCore;if(!C||!window.File||!File.prototype.arrayBuffer)return
 if(File.prototype.__rsaTargetCompat)return;
 const origArrayBuffer=File.prototype.arrayBuffer,origDecode=C.decode.bind(C),origParseCSV=C.parseCSV.bind(C);
 const fileBufferCache=new WeakMap(),fileSignatureCache=new Map(),decodeCache=new WeakMap();let lastCsvText=null,lastCsvGrid=null;
-const stats={rawReads:0,transforms:0,bufferHits:0,decodeHits:0,parseHits:0,obstacleRowsSkipped:0,nonFinishRowsSkipped:0};
+const stats={rawReads:0,transforms:0,bufferHits:0,weakHits:0,signatureHits:0,decodeHits:0,parseHits:0,obstacleRowsSkipped:0,nonFinishRowsSkipped:0,rawReadKeys:[],hitKeys:[]};
 const q=v=>{v=String(v??'');return /[",\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
-const fileSignature=f=>`${String(f?.name||'')}|${Number(f?.size)||0}|${Number(f?.lastModified)||0}|${String(f?.type||'')}`;
+const fileMeta=f=>({name:String(f?.name||''),size:Number(f?.size)||0,lastModified:Number(f?.lastModified)||0,type:String(f?.type||'')});
+const fileSignature=f=>{const m=fileMeta(f);return `${m.name}|${m.size}|${m.lastModified}|${m.type}`};
+const pushBounded=(arr,v)=>{arr.push(v);if(arr.length>8)arr.shift()};
 const venueFromMeeting=v=>{
   const s=String(v||'').trim();
   const full=['札幌','函館','福島','新潟','東京','中山','中京','京都','阪神','小倉'];
@@ -57,11 +59,12 @@ function transform(buf){
 }
 function cachedBuffer(file){
   let p=fileBufferCache.get(file);
-  if(p){stats.bufferHits++;return p}
   const key=fileSignature(file);
+  if(p){stats.bufferHits++;stats.weakHits++;pushBounded(stats.hitKeys,{kind:'weak',key,...fileMeta(file)});return p}
   p=fileSignatureCache.get(key);
-  if(p){stats.bufferHits++;fileBufferCache.set(file,p);return p}
+  if(p){stats.bufferHits++;stats.signatureHits++;pushBounded(stats.hitKeys,{kind:'signature',key,...fileMeta(file)});fileBufferCache.set(file,p);return p}
   stats.rawReads++;
+  pushBounded(stats.rawReadKeys,{key,...fileMeta(file)});
   p=origArrayBuffer.call(file).then(transform);
   fileBufferCache.set(file,p);fileSignatureCache.set(key,p);
   return p
@@ -70,7 +73,7 @@ File.prototype.arrayBuffer=function(){return cachedBuffer(this)};
 File.prototype.__rsaTargetCompat=true;
 C.decode=function(buf){if(buf&&typeof buf==='object'){const hit=decodeCache.get(buf);if(hit!==undefined){stats.decodeHits++;return hit}const text=origDecode(buf);decodeCache.set(buf,text);return text}return origDecode(buf)};
 C.parseCSV=function(text){if(typeof text==='string'&&text===lastCsvText&&lastCsvGrid){stats.parseHits++;return lastCsvGrid}const grid=origParseCSV(text);if(typeof text==='string'&&text.length>256){lastCsvText=text;lastCsvGrid=grid}return grid};
-window.RSATargetCsvCache={version:'target-csv-cache-v5-webkit-signature',stats,arrayBuffer:cachedBuffer,clear(){lastCsvText=null;lastCsvGrid=null;fileSignatureCache.clear()}};
+window.RSATargetCsvCache={version:'target-csv-cache-v5-webkit-signature-diagnostic',stats,arrayBuffer:cachedBuffer,clear(){lastCsvText=null;lastCsvGrid=null;fileSignatureCache.clear()}};
 function note(){setTimeout(()=>{const f=document.getElementById('csvFile'),info=document.getElementById('csvInfo');if(!f?.files?.[0]||!info)return;const n=f.files[0].name||'';if(!/\.csv$/i.test(n))return;if(!info.querySelector('[data-target-compat]')){const d=document.createElement('div');d.dataset.targetCompat='1';d.className='tiny';d.style.marginTop='6px';d.textContent='TARGET全馬一括CSVを共有キャッシュ：レースPCI→RPCI／決手→脚質／開催→競馬場／日付正規化／障害・取消・除外・競走中止・失格を除外／全馬出力順→今回馬番';info.appendChild(d)}},180)}
 if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',()=>{document.getElementById('csvFile')?.addEventListener('change',note)});else document.getElementById('csvFile')?.addEventListener('change',note);
 })();
