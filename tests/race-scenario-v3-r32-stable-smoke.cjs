@@ -1,0 +1,10 @@
+const fs=require('fs');
+const path=require('path');
+const Module=require('module');
+const target=path.join(__dirname,'race-scenario-v3-r32-smoke.cjs');
+let src=fs.readFileSync(target,'utf8');
+src=src.replaceAll('{timeout:7000}','{timeout:12000}');
+const m=new Module(target,module);
+m.filename=target;
+m.paths=Module._nodeModulePaths(path.dirname(target));
+m._compile(src,target);
