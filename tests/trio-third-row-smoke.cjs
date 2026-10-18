@@ -25,7 +25,7 @@ async function run(type,name){
   });
   await page.waitForFunction(()=>window.TrioThirdRowState?.ready===true&&window.TrioThirdRowState?.pairs?.length===2,null,{timeout:7000});
   const state=await page.evaluate(()=>window.TrioThirdRowState);
-  assert.strictEqual(state.version,'trio-third-row-v1.1-adaptive65',`${name}: version mismatch`);
+  assert.strictEqual(state.version,'trio-third-row-v1.2-auto-axis',`${name}: version mismatch`);
   assert.strictEqual(state.status,'forward_validation_display_only',`${name}: must remain forward-validation display only`);
   assert.strictEqual(state.displayOnly,true,`${name}: displayOnly lost`);
   assert.strictEqual(state.scoringImpact,false,`${name}: scoring impact must stay off`);
@@ -33,7 +33,9 @@ async function run(type,name){
   assert.strictEqual(state.rankingImpact,false,`${name}: ranking impact must stay off`);
   assert.strictEqual(state.bettingImpact,false,`${name}: betting impact must stay off`);
   assert.strictEqual(state.automaticBuy,false,`${name}: automatic buy must stay off`);
+  assert.strictEqual(state.automaticAxisRecommendation,true,`${name}: automatic axis recommendation missing`);
   assert.deepStrictEqual(state.selectionPolicy,{mode:'adaptive_cumulative',minimum:3,maximum:5,targetCumulative:.65,thresholdStatus:'exploratory_fixed_for_forward_validation',thresholdMeaning:'selection_coverage_not_hit_rate'},`${name}: selection policy changed`);
+  assert.deepStrictEqual(state.axisPolicy,{mode:'coverage_efficiency_per_ticket',candidateSource:'wide_candidate_pairs_only',objective:'maximize_model_covered_triple_probability_per_ticket',dispersedHandling:'exclude_when_non_dispersed_candidate_exists',usesTrioOdds:false,evClaim:false,status:'exploratory_fixed_for_forward_validation'},`${name}: axis policy changed`);
   assert(state.marginalMaxError<1e-7,`${name}: IPF marginal error too large ${state.marginalMaxError}`);
   assert(Math.abs(state.tripleSum-1)<1e-7,`${name}: triple distribution must sum to 1 (${state.tripleSum})`);
   let sawExpansion=false;
@@ -55,15 +57,50 @@ async function run(type,name){
     if(p.selectionCount>3)sawExpansion=true;
   }
   assert(sawExpansion,`${name}: synthetic case did not exercise adaptive expansion`);
+
+  const rec=state.recommendedAxis;
+  assert(rec,`${name}: recommended axis missing`);
+  const usable=state.pairs.filter(p=>!p.error);
+  const clean=usable.filter(p=>!p.dispersed);
+  const pool=(clean.length?clean:usable).map(p=>({
+    key:p.key,
+    pairP:p.pairP,
+    selectionCount:p.selectionCount,
+    coveredTripleP:p.selected.reduce((s,r)=>s+r.tripleP,0)
+  })).map(x=>({...x,coverageEfficiency:x.coveredTripleP/x.selectionCount})).sort((x,y)=>y.coverageEfficiency-x.coverageEfficiency||y.coveredTripleP-x.coveredTripleP||y.pairP-x.pairP||x.selectionCount-y.selectionCount||x.key.localeCompare(y.key));
+  assert.strictEqual(rec.key,pool[0].key,`${name}: auto axis did not maximize coverage efficiency`);
+  assert(Math.abs(rec.coveredTripleP-pool[0].coveredTripleP)<1e-12,`${name}: covered triple probability mismatch`);
+  assert(Math.abs(rec.coverageEfficiency-pool[0].coverageEfficiency)<1e-12,`${name}: coverage efficiency mismatch`);
+  if(clean.length) assert.strictEqual(rec.dispersed,false,`${name}: dispersed pair chosen while clean alternative exists`);
+  assert.strictEqual(rec.candidateCount,2,`${name}: candidate count wrong`);
+
   const p12=state.pairs.find(p=>p.key==='1-2');
   assert(p12.selected.some(r=>Number.isFinite(r.m3Rank)),`${name}: M3 annotation missing`);
   assert(p12.selected.some(r=>Number.isFinite(r.abilityV2)),`${name}: Ability annotation missing`);
   assert.strictEqual(await page.locator('#trioThirdRows .t3Pair').count(),2,`${name}: rendered pair count wrong`);
+  assert.strictEqual(await page.locator('#trioThirdRows .t3Pair.recommended').count(),1,`${name}: recommended pair highlight wrong`);
+  const recKeyText=await page.locator('#trioAxisRecommendation .t3AutoKey').textContent();
+  assert(recKeyText.includes(rec.key),`${name}: auto axis UI key mismatch`);
   const rendered=await page.locator('#trioThirdRows .t3Row').count();
   const expected=state.pairs.reduce((n,p)=>n+(p.selectionCount||0),0);
   assert.strictEqual(rendered,expected,`${name}: rendered adaptive third-row count wrong`);
   const foot=await page.locator('#trioThirdRow .t3Foot').textContent();
   assert(foot.includes('的中率65%を意味しません'),`${name}: statistical caveat missing`);
+  assert(foot.includes('EV・回収率の推定ではありません'),`${name}: EV caveat missing`);
+
+  const axisBefore={key:rec.key,coveredTripleP:rec.coveredTripleP,coverageEfficiency:rec.coverageEfficiency};
+  await page.evaluate(()=>{
+    const n=window.CalibratedProbabilityState.results.length;
+    window.Finish600State={ready:true,rows:Array.from({length:n},(_,i)=>({no:String(i+1),finishRank:n-i}))};
+    window.M3PureAbilityV2State={rows:Array.from({length:n},(_,i)=>({no:String(i+1),abilityRank:n-i,v2Rank:i+1,histN:99}))};
+    dispatchEvent(new CustomEvent('m3-race-lab-ready',{detail:window.Finish600State}));
+    dispatchEvent(new CustomEvent('m3-pure-ability-v2-ready',{detail:window.M3PureAbilityV2State}));
+  });
+  await page.waitForTimeout(180);
+  const axisAfter=await page.evaluate(()=>window.TrioThirdRowState.recommendedAxis);
+  assert.strictEqual(axisAfter.key,axisBefore.key,`${name}: M3/Ability changed automatic axis`);
+  assert(Math.abs(axisAfter.coveredTripleP-axisBefore.coveredTripleP)<1e-12,`${name}: M3/Ability changed covered probability`);
+  assert(Math.abs(axisAfter.coverageEfficiency-axisBefore.coverageEfficiency)<1e-12,`${name}: M3/Ability changed coverage efficiency`);
 
   const sourceAfter=await page.evaluate(()=>JSON.stringify(window.CalibratedProbabilityState));
   assert.strictEqual(sourceAfter,sourceBefore,`${name}: calibrated source was mutated`);
@@ -71,7 +108,7 @@ async function run(type,name){
   await page.waitForTimeout(150);
   assert.strictEqual(await page.locator('#trioThirdRow').count(),1,`${name}: trio panel duplicated after repeated events`);
   assert.deepStrictEqual(errors,[],`${name}: page errors ${errors.join(' | ')}`);
-  console.log('PASS',name,'adaptive 3-5 third-row selection with 65% forward threshold');
+  console.log('PASS',name,'automatic trio axis + adaptive 3-5 third-row selection');
   await browser.close();
 }
 
