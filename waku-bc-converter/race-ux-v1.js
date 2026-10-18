@@ -5,7 +5,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const num=v=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(Number(v));
 const rank=v=>num(v)?`${Math.round(Number(v))}位`:'—';
 const pct=v=>num(v)?`${Math.round(Number(v)*100)}%`:'—';
-let active='flow',queued=false;
+let active='flow',queued=false,parentObs=null,observedParent=null;
 const css=document.createElement('style');
 css.textContent=`
 #raceUXSummary,#raceUXTabs{display:none}
@@ -33,10 +33,12 @@ function promoteQueue(){const panel=document.querySelector('#m3RaceLab [data-m3p
 function applyPanels(){const x=shell();if(!x)return;const {r,tabs}=x;r.classList.toggle('ruxDetailMode',active==='detail');for(const ch of [...r.children]){const g=group(ch);if(g==='elab'){ch.classList.toggle('ruxHidden',active==='detail');ch.classList.add('ruxManaged');continue}ch.dataset.ruxGroup=g;ch.classList.toggle('ruxHidden',g!==active)}const lab=$('m3RaceLab');if(lab){lab.querySelectorAll('[data-m3panel]').forEach(p=>{const k=p.dataset.m3panel,on=active==='flow'?(k==='structure'||k==='scenario'):active==='horses'?k==='horses':active==='market'?k==='market':false;p.classList.toggle('ruxPanelOn',on)});promoteQueue()}tabs.querySelectorAll('[data-rux-tab]').forEach(b=>{const on=b.dataset.ruxTab===active;b.setAttribute('aria-selected',on?'true':'false')})}
 function state(){const x=shell();window.RaceUXState={ready:ready(),stale:!ready(),version:'race-ux-v1',active,generation:gen(),summaryPresent:!!$('raceUXSummary')?.classList.contains('ruxReady'),tabs:x?.tabs?.querySelectorAll('[data-rux-tab]').length||0,queueHero:!!$('m3StartFirstTurn')?.classList.contains('ruxQueueHero'),at:Date.now()}}
 function setActive(v){if(!['flow','horses','market','detail'].includes(v))return;active=v;applyPanels();state();window.dispatchEvent(new CustomEvent('race-ux-tab-change',{detail:{active}}))}
-function render(){if(!ready())return false;const x=shell(),html=summary();if(!x||!html)return false;x.s.innerHTML=html;x.s.classList.add('ruxReady');x.tabs.classList.add('ruxReady');applyPanels();state();window.dispatchEvent(new CustomEvent('race-ux-ready',{detail:window.RaceUXState}));return true}
+function render(){const x=shell();if(!x){return false}if(!ready()){state();return false}const html=summary();if(!html)return false;x.s.innerHTML=html;x.s.classList.add('ruxReady');x.tabs.classList.add('ruxReady');applyPanels();state();window.dispatchEvent(new CustomEvent('race-ux-ready',{detail:window.RaceUXState}));return true}
 function invalidate(){const x=shell();x?.s.classList.remove('ruxReady');x?.tabs.classList.remove('ruxReady');if(x?.r)[...x.r.children].forEach(e=>e.classList.remove('ruxHidden'));window.RaceUXState={ready:false,stale:true,version:'race-ux-v1',active:'flow',generation:gen(),at:Date.now()};active='flow'}
-function schedule(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;render()});[80,220,650,1300].forEach(ms=>setTimeout(render,ms))}
-['rsa-analysis-complete','final-decision-ready','m3-race-lab-ready','m3-pure-ability-v2-ready','finish600-ready','race-overall-summary-ready','race-independent-layers-ready','market-odds-top3-ready','m3-start-firstturn-visual-ready','rsa-addons-ready'].forEach(ev=>addEventListener(ev,schedule));
-$('analyzeBtn')?.addEventListener('click',()=>{invalidate();schedule()});$('applyOddsBtn')?.addEventListener('click',schedule);$('parseCsvBtn')?.addEventListener('click',schedule);
-const init=()=>{shell();const r=$('result');if(r)new MutationObserver(()=>schedule()).observe(r,{childList:true});schedule()};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+function schedule(){if(!queued){queued=true;requestAnimationFrame(()=>{queued=false;render()})}[80,220,650,1300,2600].forEach(ms=>setTimeout(render,ms))}
+function watchParent(){const r=$('result'),p=r?.parentElement;if(!p||p===observedParent)return;parentObs?.disconnect();observedParent=p;parentObs=new MutationObserver(()=>{if(!$('raceUXSummary')||!$('raceUXTabs')){shell();state();schedule()}});parentObs.observe(p,{childList:true})}
+['rsa-analysis-complete','final-decision-ready','m3-race-lab-ready','m3-pure-ability-v2-ready','finish600-ready','race-overall-summary-ready','race-independent-layers-ready','market-odds-top3-ready','m3-start-firstturn-visual-ready','rsa-addons-ready'].forEach(ev=>addEventListener(ev,()=>{watchParent();schedule()}));
+$('analyzeBtn')?.addEventListener('click',()=>{invalidate();watchParent();schedule()});$('applyOddsBtn')?.addEventListener('click',()=>{watchParent();schedule()});$('parseCsvBtn')?.addEventListener('click',()=>{watchParent();schedule()});
+window.RaceUXRefresh=()=>{watchParent();shell();return render()};
+const init=()=>{shell();state();watchParent();const r=$('result');if(r)new MutationObserver(()=>schedule()).observe(r,{childList:true});schedule()};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
