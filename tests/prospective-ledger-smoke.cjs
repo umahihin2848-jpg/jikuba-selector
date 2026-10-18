@@ -8,7 +8,7 @@ async function run(type,name){
   const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto(BASE,{waitUntil:'networkidle',timeout:30000});
   await page.waitForFunction(()=>window.RSAAddonHealth?.ready===true,null,{timeout:25000});
-  assert.strictEqual(await page.evaluate(()=>window.RSA_BUILD),'20261012r72',`${name}: build mismatch`);
+  assert.strictEqual(await page.evaluate(()=>window.RSA_BUILD),'20261017a11',`${name}: build mismatch`);
   assert.strictEqual(await page.locator('#prospectiveLedger').count(),1,`${name}: ledger root missing`);
   await page.evaluate(()=>{localStorage.removeItem('rsa_prospective_ledger_v1');localStorage.removeItem('rsa_prospective_ledger_v1_backup')});
   await page.fill('#raceDate','2027-01-10');
@@ -53,7 +53,7 @@ async function run(type,name){
   assert.strictEqual(rec.schema,2);
   assert.strictEqual(rec.version,'prospective-ledger-v2-audit');
   assert.strictEqual(rec.status,'frozen');
-  assert.strictEqual(rec.build,'20261012r72');
+  assert.strictEqual(rec.build,'20261017a11');
   assert.strictEqual(rec.holdout2027,true,`${name}: 2027 holdout flag missing`);
   assert.strictEqual(rec.prospectiveEligible,true,`${name}: prospective flag missing`);
   assert.strictEqual(rec.horses.length,3);
