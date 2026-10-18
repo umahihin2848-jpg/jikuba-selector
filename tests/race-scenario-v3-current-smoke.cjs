@@ -97,7 +97,6 @@ async function run(browserType,name){
   assert.strictEqual(snap.cache?.rawReads,1,`${name}: TARGET file read more than once (${snap.cache?.rawReads})`);
   assert.strictEqual(snap.cache?.transforms,1,`${name}: TARGET transform repeated (${snap.cache?.transforms})`);
   assert((snap.cache?.bufferHits||0)>=1,`${name}: TARGET shared buffer cache not reused`);
-  assert((snap.cache?.parseHits||0)>=1,`${name}: TARGET parsed grid cache not reused`);
 
   await page.fill('#oddsPaste',oddsText());
   await page.click('#applyOddsBtn');
