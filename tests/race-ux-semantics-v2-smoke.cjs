@@ -39,6 +39,15 @@ function assertRoleNarrative(s,name,phase='initial'){
 
 async function ensureCsvParsed(p){
   await p.locator('#csvFile').setInputFiles({name:'ux.csv',mimeType:'text/csv',buffer:Buffer.from(csv(),'utf8')});
+  await p.waitForTimeout(250);
+  let state=await p.locator('#csvState').textContent();
+  if(!/^解析済\s+16頭$/.test(state||'')&&!/^\d+行$/.test(state||'')){
+    await p.evaluate(async()=>{
+      const el=document.querySelector('#csvFile');
+      if(typeof el?.onchange==='function')await el.onchange.call(el,{type:'change',target:el});
+      else el?.dispatchEvent(new Event('change',{bubbles:true}));
+    });
+  }
   await p.waitForFunction(()=>{
     const s=document.querySelector('#csvState')?.textContent||'';
     return /^解析済\s+16頭$/.test(s)||/^\d+行$/.test(s);
