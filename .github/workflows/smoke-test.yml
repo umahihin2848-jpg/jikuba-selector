@@ -30,6 +30,7 @@ jobs:
       - name: Run core smoke tests
         run: |
           node tests/wide-quinella-price-gate-smoke.cjs
+          node tests/trio-third-row-smoke.cjs
           node tests/smoke.cjs
           node tests/numeric-normalization-smoke.cjs
           node tests/quinella-range-smoke.cjs
