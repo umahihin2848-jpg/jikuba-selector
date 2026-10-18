@@ -57,6 +57,21 @@ async function ensureCsvParsed(p){
   await p.waitForFunction(()=>/^解析済\s+16頭$/.test(document.querySelector('#csvState')?.textContent||''),null,{timeout:12000});
 }
 
+async function waitRoleNarrativeCompat(p){
+  await p.waitForFunction(()=>{
+    const st=window.M3NarrativeRoleSyncState,t=window.RSAAnalysisTransitionState;
+    const first=document.querySelector('#m3NarrativeAnalysis .m3NarrativeBody p');
+    if(!st?.ready||st.generation!==t?.generation||st.compatibilityVersion!=='m3-narrative-compat-v1'||first?.dataset.roleSync!=='1')return false;
+    const text=first.textContent||'';
+    if(st.axisNo&&!text.includes('分析上の軸候補'))return false;
+    if(!st.axisNo&&text.includes('分析上の軸候補'))return false;
+    if(st.upliftNo&&!text.includes('構造浮上馬'))return false;
+    if(st.cautionNo&&!text.includes('地力上位・構造慎重'))return false;
+    if(!st.axisNo&&!st.upliftNo&&!st.cautionNo&&!text.includes('明確な役割馬は抽出されていません'))return false;
+    return true;
+  },null,{timeout:9000});
+}
+
 async function run(bt,name){
   const b=await bt.launch({headless:true});
   const c=await b.newContext({viewport:{width:390,height:844},userAgent:UA,isMobile:true,hasTouch:true});
@@ -88,7 +103,7 @@ async function run(bt,name){
   await p.waitForFunction(x=>window.RSAAnalysisTransitionState?.generation>x&&window.RSAAnalysisTransitionState?.status==='ready',prev,{timeout:20000});
   await p.waitForFunction(()=>window.M3AbilityExplainAllState?.ready===true&&window.RaceUXState?.version==='race-ux-v2-semantics'&&window.RaceUXState?.semanticsReady===true,null,{timeout:9000});
   await p.waitForFunction(()=>document.querySelectorAll('#m3NarrativeAnalysis.ruxNarrativeCompact').length===1,null,{timeout:9000});
-  await p.waitForFunction(()=>window.M3NarrativeRoleSyncState?.ready===true&&document.querySelector('#m3NarrativeAnalysis .m3NarrativeBody p')?.dataset.roleSync==='1',null,{timeout:9000});
+  await waitRoleNarrativeCompat(p);
 
   let s=await p.evaluate(()=>({
     explain:document.querySelectorAll('.m3AbilityExplain').length,
@@ -121,7 +136,7 @@ async function run(bt,name){
   await p.click('#analyzeBtn');
   await p.waitForFunction(x=>window.RSAAnalysisTransitionState?.generation>x&&window.RSAAnalysisTransitionState?.status==='ready',before,{timeout:20000});
   await p.waitForFunction(()=>window.M3AbilityExplainAllState?.ready===true&&window.RaceUXState?.version==='race-ux-v2-semantics'&&window.M3NarrativeRoleSyncState?.ready===true,null,{timeout:9000});
-  await p.waitForFunction(()=>document.querySelector('#m3NarrativeAnalysis .m3NarrativeBody p')?.dataset.roleSync==='1',null,{timeout:9000});
+  await waitRoleNarrativeCompat(p);
 
   s=await p.evaluate(()=>({
     explain:document.querySelectorAll('.m3AbilityExplain').length,
