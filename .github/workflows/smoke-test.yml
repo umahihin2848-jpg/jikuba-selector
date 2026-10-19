@@ -33,6 +33,7 @@ jobs:
           node tests/wide-auto-candidates-smoke.cjs
           node tests/candidate-odds-compact-smoke.cjs
           node tests/trio-third-row-smoke.cjs
+          node tests/longshot-scout-smoke.cjs
           node tests/smoke.cjs
           node tests/numeric-normalization-smoke.cjs
           node tests/quinella-range-smoke.cjs
