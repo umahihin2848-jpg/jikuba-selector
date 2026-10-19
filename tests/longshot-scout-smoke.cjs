@@ -29,7 +29,9 @@ async function seed(page){
   await page.evaluate(({odds,finishRows,abilityRows})=>{
     document.getElementById('result')?.classList.remove('hidden');
     if(!document.getElementById('m3RaceLab')){
-      const r=document.getElementById('result');const x=document.createElement('div');x.id='m3RaceLab';x.innerHTML='<div class="m3labPanel" data-m3panel="horses"></div><div class="m3labPanel active" data-m3panel="market"></div>';r.prepend(x);
+      const r=document.getElementById('result');const x=document.createElement('div');x.id='m3RaceLab';
+      x.innerHTML='<div class="m3labHero"><div><small>M3 SCENARIO LAB</small><h2>fixture</h2></div><span class="m3labStatus">fixture</span></div><div class="m3labTabs"><button data-m3tab="structure">レース</button><button data-m3tab="scenario">シナリオ</button><button data-m3tab="horses">M3馬</button><button data-m3tab="market">市場</button></div><div class="m3labPanel" data-m3panel="structure"></div><div class="m3labPanel" data-m3panel="scenario"></div><div class="m3labPanel" data-m3panel="horses"></div><div class="m3labPanel active" data-m3panel="market"></div><button class="m3labLegacyBtn">研究用の詳細数値を表示</button>';
+      r.prepend(x);
     }
     document.getElementById('raceDate').value='2026-10-20';
     document.getElementById('fieldSize').value='12';
@@ -83,8 +85,7 @@ async function run(type,name){
   await page.waitForTimeout(250);
   s=await page.evaluate(()=>window.LongshotScoutState);
   assert(!s.candidates.some(x=>x.no==='11'),`${name}: single M3 support incorrectly qualified 10+ horse`);
-  const unexpected=errors.filter(x=>!x.includes("Cannot set properties of null (setting 'innerHTML')"));
-  assert.deepStrictEqual(unexpected,[],`${name}: unexpected page errors ${unexpected.join(' | ')}`);
+  assert.deepStrictEqual(errors,[],`${name}: page errors ${errors.join(' | ')}`);
   console.log('PASS',name,'longshot scout display-only rules');
   await browser.close();
 }
