@@ -1,0 +1,107 @@
+{
+  "version": "longshot_scout_v1_retrospective_validation_20261019",
+  "created": "2026-10-19",
+  "status": "RETROSPECTIVE_DIAGNOSTIC_NOT_FORWARD_PROOF",
+  "purpose": "Replay the frozen Longshot Scout v1 rule on historical races using strictly prior race history and measure candidate top-3 precision against same-popularity baselines.",
+  "frozen_rule_source": "validation/longshot_scout_v1_protocol_20261019.md",
+  "runtime_rule": {
+    "universe": "JRA flat, field>=12, 3-win class or higher",
+    "candidate_popularity": ">=5",
+    "supports": ["M3 rank<=3", "Ability v1 rank<=3", "main RPCI scenario rank<=3", "strong front-watch"],
+    "qualifies_if": ["popularity 7-9 AND M3<=3 AND main-scenario<=3", "at least two structural supports"],
+    "market_gap_alone": "never qualifies",
+    "max_display": 3,
+    "ordering": "frozen lexicographic ordering from longshot-scout-v1.js"
+  },
+  "reconstruction": {
+    "historical_runner_source": "user-supplied umade.csv",
+    "popularity_proxy": "official closing popularity in historical runner data; not a T-15 snapshot",
+    "history_policy": "strictly prior starts only",
+    "models": ["finish600_model_v1", "ability_model_v1", "rpci_browser_model_v2", "validated_queue_model_v1", "race_shape_bias_oos_v1"],
+    "race_count_crosscheck": {
+      "2024": 400,
+      "2025": 403,
+      "2026": 297,
+      "note": "These race counts match the current M3/Ability validation universe."
+    }
+  },
+  "primary_diagnostic_2024_2026": {
+    "races": 1100,
+    "active_races": 988,
+    "active_rate": 0.8981818182,
+    "displayed_candidates": 1667,
+    "avg_candidates_per_active_race": 1.687246964,
+    "candidate_top3_rate": 0.1883623275,
+    "candidate_win_rate": 0.0413917217,
+    "candidate_top3_wilson95": [0.1703166572, 0.2078410329],
+    "exact_popularity_matched_expected_top3": 0.1587574941,
+    "top3_lift_pp": 2.9604833445,
+    "top3_ratio_vs_matched": 1.186478337,
+    "race_cluster_bootstrap_lift95_pp": [1.1197724365, 4.8006015457],
+    "active_race_any_candidate_top3_rate": 0.2975708502,
+    "popularity_bands": {
+      "5-6": {"n": 522, "top3_rate": 0.2950191571, "matched_expected_top3": 0.2443247039, "lift_pp": 5.0694453224, "ratio": 1.2074880371, "cluster_bootstrap_lift95_pp": [1.4124836449, 9.0440153325]},
+      "7-9": {"n": 604, "top3_rate": 0.1788079470, "matched_expected_top3": 0.1657721740, "lift_pp": 1.3035772999, "ratio": 1.0786366776, "cluster_bootstrap_lift95_pp": [-1.7175511779, 4.3918659782]},
+      "10+": {"n": 541, "top3_rate": 0.0961182994, "matched_expected_top3": 0.0683638708, "lift_pp": 2.7754428611, "ratio": 1.4059809410, "cluster_bootstrap_lift95_pp": [0.4910009764, 5.3788845235]}
+    },
+    "display_slots": {
+      "1": {"n": 988, "top3_rate": 0.1912955466, "matched_expected_top3": 0.1606715021, "lift_pp": 3.0624044485},
+      "2": {"n": 540, "top3_rate": 0.1759259259, "matched_expected_top3": 0.1541858651, "lift_pp": 2.1740060827},
+      "3": {"n": 139, "top3_rate": 0.2158273381, "matched_expected_top3": 0.1629131759, "lift_pp": 5.2914162266}
+    }
+  },
+  "component_oos_years_2025_2026_but_combined_scout_retrospective": {
+    "races": 700,
+    "active_races": 631,
+    "displayed_candidates": 1072,
+    "candidate_top3_rate": 0.1902985075,
+    "candidate_win_rate": 0.0373134328,
+    "candidate_top3_wilson95": [0.1679218926, 0.2148868777],
+    "exact_popularity_matched_expected_top3": 0.1579585656,
+    "top3_lift_pp": 3.2339941895,
+    "top3_ratio_vs_matched": 1.2047368674,
+    "race_cluster_bootstrap_lift95_pp": [0.9540592396, 5.5255398991],
+    "active_race_any_candidate_top3_rate": 0.3011093502,
+    "popularity_bands": {
+      "5-6": {"n": 323, "top3_rate": 0.2910216718, "matched_expected_top3": 0.2411575238, "lift_pp": 4.9864148062, "ratio": 1.2067700285, "cluster_bootstrap_lift95_pp": [0.3992324079, 9.8913630025]},
+      "7-9": {"n": 396, "top3_rate": 0.1792929293, "matched_expected_top3": 0.1651225811, "lift_pp": 1.4170348151, "ratio": 1.0858171430, "cluster_bootstrap_lift95_pp": [-2.1805200083, 5.0311318453]},
+      "10+": {"n": 353, "top3_rate": 0.1104815864, "matched_expected_top3": 0.0737936543, "lift_pp": 3.6687932066, "ratio": 1.4971691997, "cluster_bootstrap_lift95_pp": [0.5923869370, 6.9014998637]}
+    },
+    "labels": {
+      "validated_pattern": {"n": 338, "top3_rate": 0.1804733728, "matched_expected_top3": 0.1646150969, "lift_pp": 1.5858275864, "ratio": 1.0963354890},
+      "m3_ability_agreement_nonvalidated": {"n": 163, "top3_rate": 0.2638036810, "matched_expected_top3": 0.2287303524, "lift_pp": 3.5073328536, "ratio": 1.1533391968},
+      "other_multilayer_pop5_9": {"n": 218, "top3_rate": 0.2798165138, "matched_expected_top3": 0.2310067528, "lift_pp": 4.8809761001, "ratio": 1.2112914900},
+      "super_longshot_pop10plus": {"n": 353, "top3_rate": 0.1104815864, "matched_expected_top3": 0.0737936543, "lift_pp": 3.6687932066, "ratio": 1.4971691997}
+    }
+  },
+  "development_period_diagnostic_2019_2023": {
+    "races": 1888,
+    "active_races": 1683,
+    "displayed_candidates": 2830,
+    "candidate_top3_rate": 0.1632508834,
+    "exact_popularity_matched_expected_top3": 0.1557757331,
+    "top3_lift_pp": 0.7475150309,
+    "top3_ratio_vs_matched": 1.0479866162,
+    "race_cluster_bootstrap_lift95_pp": [-0.579586, 2.051696]
+  },
+  "interpretation": [
+    "The frozen scout historically selected horses with a higher top-3 rate than horses of the same closing-popularity mix in 2024-2026 and 2025-2026 diagnostics.",
+    "The strongest relative lift in 2025-2026 appeared in popularity 10+ (11.05% observed vs 7.38% matched baseline), but this combined super-longshot region was created after historical diagnostics and is not clean OOS evidence.",
+    "The pre-existing 7-9 screened pattern showed only a modest top-3 precision lift; its earlier attraction was price/quinella ROI, not large top-3 accuracy improvement.",
+    "Display slot number is not a calibrated confidence rank: slot 3 had the highest observed rate but the smallest sample, so do not interpret 1/2/3 as probability ordering.",
+    "True combined-scout validation starts only after the 2026-10-19 freeze."
+  ],
+  "limitations": [
+    "Closing popularity is used as a historical proxy; the live workflow normally uses contemporaneous entered win odds/popularity.",
+    "The combined scout rule was frozen only after some 2025-2026 diagnostics had already been inspected, so these numbers are retrospective diagnostic evidence, not independent proof.",
+    "2019-2023 overlaps component-model development/training and is descriptive only.",
+    "No automatic wide or trio ROI claim is made here because a separate, pre-frozen partner/axis/addition rule is required to avoid post-hoc ticket construction."
+  ],
+  "decision": {
+    "keep_display_only": true,
+    "promote_to_automatic_bet_rule": false,
+    "retune_now": false,
+    "forward_cutoff": "2026-10-19",
+    "next_evaluation": "Accumulate prospective candidates without changing the frozen rule, then compare candidate top-3 rate and ticket-level ROI under separately frozen partner/axis rules."
+  }
+}
