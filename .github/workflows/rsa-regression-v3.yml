@@ -11,6 +11,10 @@ on:
       - '.github/workflows/rsa-regression-v3.yml'
   workflow_dispatch:
 
+concurrency:
+  group: rsa-production-regression-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   five-race-regression:
     runs-on: ubuntu-latest
