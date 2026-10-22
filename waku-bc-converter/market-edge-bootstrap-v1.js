@@ -1,6 +1,6 @@
 (()=>{'use strict';
 if(window.__MARKET_EDGE_BOOTSTRAP_V1)return;window.__MARKET_EDGE_BOOTSTRAP_V1=true;
-const BUILD='20261017a11',$=id=>document.getElementById(id);let lastSig='';
+const COMPONENT_BUILD='20261017a11',$=id=>document.getElementById(id);let lastSig='';
 function css(){if($('marketEdgeBootstrapStyle'))return;const s=document.createElement('style');s.id='marketEdgeBootstrapStyle';s.textContent=`.mmLiveSummary{margin:9px 0 10px}.mmLiveTitle{font-size:10px;font-weight:800;color:#dfeaf0;margin-bottom:6px}.mmSummaryGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.mmSummaryCard{border:1px solid #29445f;background:#081827;border-radius:12px;padding:9px}.mmSummaryLabel{font-size:9px;color:#88a3b5;margin-bottom:5px}.mmSummaryMain{font-size:13px;font-weight:800;color:#eef7fb}.mmSummaryEdge{font-size:18px;font-weight:900;margin-top:3px}.mmSummaryEdge.pos{color:#bfe7d4}.mmSummaryEdge.neg{color:#efc5cb}.mmSummaryMeta{font-size:9px;color:#89a3b4;line-height:1.45;margin-top:5px}.mmBootFallback{margin:8px 0;padding:9px 10px;border:1px dashed #36536a;border-radius:10px;color:#9eb5c5;font-size:10px}@media(max-width:560px){.mmSummaryGrid{grid-template-columns:1fr}.mmSummaryCard{padding:9px 10px}.mmSummaryMain{font-size:12px}.mmSummaryEdge{font-size:17px}}`;document.head.appendChild(s)}
 function card(label,main,edge,meta){const ok=Number.isFinite(edge);return `<div class="mmSummaryCard"><div class="mmSummaryLabel">${label}</div><div class="mmSummaryMain">${main}</div><div class="mmSummaryEdge ${ok?(edge>=0?'pos':'neg'):''}">${ok?`${edge>=0?'+':''}${(edge*100).toFixed(1)}%`:'—'}</div><div class="mmSummaryMeta">${meta}</div></div>`}
 function qmdRow(s){const rows=s?.qmd?.rows||[];if(!rows.length)return null;if(s.qmd.mode==='exact')return rows.find(r=>Number.isFinite(r.marketRank)&&r.marketRank<=30)||rows[0];return rows[0]}
@@ -10,10 +10,10 @@ function ensureInputBox(){const input=$('marketMispricingInputCard');if(!input)r
 function ensureResultBox(){const out=$('marketMispricingResultCard');if(!out)return null;let box=$('mmCompactSummary');if(!box){box=document.createElement('div');box.id='mmCompactSummary';box.style.marginTop='9px';(out.querySelector('.sectionTitle')||out.firstElementChild)?.insertAdjacentElement('afterend',box)}return box}
 function render(state){css();const s=state||window.MarketMispricingState||{};const html=summaryHtml(s),sig=signature(s);const inputBody=ensureInputBox(),resultBox=ensureResultBox();if(!inputBody&&!resultBox)return false;if(inputBody&&(sig!==lastSig||!inputBody.childElementCount))inputBody.innerHTML=html;if(resultBox&&(sig!==lastSig||!resultBox.childElementCount))resultBox.innerHTML=html;lastSig=sig;return true}
 function fallback(){css();if($('marketMispricingInputCard')){render(window.MarketMispricingState);return}if($('marketEdgeFallback'))return;const analyze=$('analyzeBtn');if(!analyze)return;const d=document.createElement('div');d.id='marketEdgeFallback';d.className='mmBootFallback';d.textContent='市場Edge：読み込み待ち';analyze.insertAdjacentElement('beforebegin',d)}
-function mark(){window.RSA_BUILD=BUILD;document.documentElement.dataset.rsaBuild=BUILD;document.body?.setAttribute('data-build',BUILD)}
+function mark(){window.MarketEdgeBootstrapBuild=COMPONENT_BUILD}
 mark();
 addEventListener('market-mispricing-ready',e=>{mark();$('marketEdgeFallback')?.remove();render(e.detail)});
 addEventListener('rsa-addons-ready',()=>{mark();$('marketEdgeFallback')?.remove();render(window.MarketMispricingState)||fallback()});
 if(document.readyState!=='loading')setTimeout(fallback,0);else addEventListener('DOMContentLoaded',()=>setTimeout(fallback,0),{once:true});
-window.MarketEdgeBootstrap={build:BUILD,render};
+window.MarketEdgeBootstrap={build:COMPONENT_BUILD,render};
 })();
