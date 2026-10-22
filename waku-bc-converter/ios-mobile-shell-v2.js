@@ -1,0 +1,80 @@
+(()=>{'use strict';
+if(window.__IOS_MOBILE_SHELL_V2)return;
+const isiOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+if(!isiOS)return;
+window.__IOS_MOBILE_SHELL_V2=true;
+const V='ios-mobile-shell-v2.0';
+const $=id=>document.getElementById(id);
+let active='ticket',ready=false,raf=0,resultObserver=null,labObserver=null,observedLab=null;
+const css=document.createElement('style');
+css.id='ios-mobile-shell-v2-css';
+css.textContent=`
+body.iosMobileShellV2{padding-bottom:calc(18px + env(safe-area-inset-bottom));-webkit-text-size-adjust:100%}
+body.iosMobileShellV2 .q5flow{display:none!important}
+body.iosMobileShellV2 .top{padding-top:max(8px,env(safe-area-inset-top))}
+body.iosMobileShellV2 .top .brand small,body.iosMobileShellV2 .top .q5build{display:none!important}
+body.iosMobileShellV2 main.view{padding-left:10px!important;padding-right:10px!important}
+body.iosMobileShellV2 main.view>section.card{margin:8px 0!important}
+body.iosMobileShellV2 #csvCard .muted,body.iosMobileShellV2 #csvCard .tiny{font-size:9px!important;line-height:1.45}
+body.iosMobileShellV2 input,body.iosMobileShellV2 select,body.iosMobileShellV2 textarea{font-size:16px!important}
+body.iosMobileShellV2 button{touch-action:manipulation}
+body.iosMobileShellV2 #analyzeBtn{min-height:50px!important;margin:10px 0 8px!important;font-size:15px!important;font-weight:900!important}
+#iosMobileShellV2{margin:0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important}
+.imsTabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;position:sticky;top:max(0px,env(safe-area-inset-top));z-index:35;padding:7px 0 8px;background:#07131f}
+.imsTab{min-height:46px!important;padding:6px 3px!important;border:1px solid #2d4c5e!important;border-radius:12px!important;background:#091a26!important;color:#819aa8!important;font-size:11px!important;font-weight:900!important;box-shadow:none!important}
+.imsTab[aria-selected="true"]{background:#12394a!important;border-color:#5b8294!important;color:#f2f9fc!important}
+.imsTab[data-ims-tab="ticket"][aria-selected="true"]{background:#12392e!important;border-color:#4e8068!important;color:#d4f8e8!important}
+.imsTab[hidden]{display:none!important}
+.imsPanel[hidden]{display:none!important}
+.imsPanel{min-width:0}
+.imsAnswer{margin:2px 0 8px;padding:12px;border:1px solid #315369;border-radius:15px;background:#091b28}
+.imsAnswer small{display:block;font-size:9px;font-weight:900;letter-spacing:.08em;color:#7895a4}
+.imsAnswer strong{display:block;margin-top:3px;font-size:23px;line-height:1.15;color:#edf7fb}
+.imsAnswer p{margin:5px 0 0;font-size:10px;line-height:1.5;color:#9bb1bd}
+.imsAnswer.buy{border-color:#3f806c;background:#0b2b23}.imsAnswer.buy strong{color:#bff2dc}
+.imsAnswer.hold{border-color:#746536;background:#292414}.imsAnswer.hold strong{color:#f1d77f}
+.imsAnswer.pass{border-color:#45525b;background:#151f25}.imsAnswer.pass strong{color:#c3cdd2}
+.imsOddsTitle{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 1px 5px}.imsOddsTitle b{font-size:13px}.imsOddsTitle small{font-size:8px;color:#7f98a6}
+#imsOddsSlot>.card,#imsTicket>.card,#imsAxis>.card,#imsPace>.card{margin:7px 0!important;box-shadow:none!important}
+body.iosMobileShellV2 #iosStableTabs,body.iosMobileShellV2 #m3RaceLab .m3labTabs,body.iosMobileShellV2 #m3RaceLab .m3labLegacyBtn{display:none!important}
+body.iosMobileShellV2 #m3RaceLab{margin:7px 0!important;transform:none!important;filter:none!important;contain:none!important}
+body.iosMobileShellV2 #m3RaceLab.iosStableManaged .m3labPanel{display:none!important;position:static!important;overflow:visible!important;content-visibility:visible!important;contain:none!important;transform:none!important;filter:none!important;will-change:auto!important}
+body.iosMobileShellV2 #m3RaceLab.imsMode-ticket .m3labPanel[data-m3panel="market"]{display:block!important}
+body.iosMobileShellV2 #m3RaceLab.imsMode-axis .m3labPanel[data-m3panel="horses"],body.iosMobileShellV2 #m3RaceLab.imsMode-axis .m3labPanel[data-m3panel="review"]{display:block!important}
+body.iosMobileShellV2 #m3RaceLab.imsMode-pace .m3labPanel[data-m3panel="structure"],body.iosMobileShellV2 #m3RaceLab.imsMode-pace .m3labPanel[data-m3panel="scenario"]{display:block!important}
+body.iosMobileShellV2 #m3RaceLab.imsMode-ticket .m3labHero{display:none!important}
+body.iosMobileShellV2 #m3RaceLab.imsMode-pace .m3labHero{display:none!important}
+body.iosMobileShellV2 #m3RaceLab.imsMode-axis .m3labHero{display:block!important}
+body.iosMobileShellV2 #result{display:none!important}
+body.iosMobileShellV2 #marketSection{margin-top:7px!important}
+body.iosMobileShellV2 #structuralTicketEngineV3{margin:6px 0!important;box-shadow:none!important}
+.imsTools{margin:8px 0;border:1px solid #294759;border-radius:12px;background:#081824}.imsTools>summary{list-style:none;min-height:44px;display:flex;align-items:center;padding:0 11px;font-size:10px;font-weight:900;color:#9eb4c0}.imsTools>summary::-webkit-details-marker{display:none}.imsTools[open]>summary{border-bottom:1px solid #294759}.imsToolsBody{padding:8px}
+body.iosMobileShellV2 .mobileSecondaryCard{margin:8px 0!important}
+body.iosMobileShellV2 #iosMobileSaved{margin-top:8px}
+@media(max-width:390px){.imsTab{font-size:10px!important}.imsAnswer strong{font-size:21px}.imsTabs{gap:4px}}
+`;
+document.head.appendChild(css);
+function closestCard(el){return el?.closest('section.card,.card')||null}
+function panel(key){return $(`ims${key[0].toUpperCase()}${key.slice(1)}`)}
+function buildShell(){let shell=$('iosMobileShellV2');if(shell)return shell;const analyze=$('analyzeBtn'),main=document.querySelector('main.view');if(!analyze||!main)return null;document.body.classList.add('iosMobileShellV2');shell=document.createElement('section');shell.id='iosMobileShellV2';shell.innerHTML=`<nav class="imsTabs" role="tablist" aria-label="レース分析"><button type="button" class="imsTab" data-ims-tab="ticket" role="tab" aria-selected="true">🎫 買い目</button><button type="button" class="imsTab" data-ims-tab="axis" role="tab" aria-selected="false" hidden>◎ 軸構造</button><button type="button" class="imsTab" data-ims-tab="pace" role="tab" aria-selected="false" hidden>🏇 展開構造</button></nav><section id="imsTicket" class="imsPanel" role="tabpanel"><div id="imsAnswer" class="imsAnswer"><small>RACE ANSWER</small><strong>分析待ち</strong><p>レース構造を解析後、オッズを入力すると最終買い目を判定します。</p></div><div class="imsOddsTitle"><b>オッズ入力</b><small>買い目判定用</small></div><div id="imsOddsSlot"></div><div id="imsTicketBody"></div></section><section id="imsAxis" class="imsPanel" role="tabpanel" hidden><div id="imsAxisBody"></div></section><section id="imsPace" class="imsPanel" role="tabpanel" hidden><div id="imsPaceBody"></div></section>`;analyze.insertAdjacentElement('afterend',shell);shell.querySelectorAll('[data-ims-tab]').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.imsTab)));
+ const odds=closestCard($('oddsPaste'));if(odds&&!$('imsOddsSlot').contains(odds))$('imsOddsSlot').appendChild(odds);
+ const saved=closestCard($('savedList'));if(saved&&!saved.closest('#iosMobileSaved')){const d=document.createElement('details');d.id='iosMobileSaved';d.className='imsTools';d.innerHTML='<summary>保存済みレース・その他</summary><div class="imsToolsBody"></div>';shell.insertAdjacentElement('afterend',d);d.querySelector('.imsToolsBody').appendChild(saved);saved.classList.add('mobileSecondaryCard')}
+ return shell}
+function move(id,to){const el=$(id),dst=$(to);if(el&&dst&&!dst.contains(el))dst.appendChild(el)}
+function placeBaseResults(){const shell=buildShell();if(!shell)return;move('marketSection','imsTicketBody');const hero=document.querySelector('#result > .hero');if(hero&&!$('imsAxisBody').contains(hero))$('imsAxisBody').appendChild(hero);move('reliabilitySection','imsAxisBody');['rpciSection','queueSection','positionSection','explainSection'].forEach(id=>move(id,'imsPaceBody'));
+ const actions=document.querySelector('#result > .actions');if(actions&&!$('imsAxisTools')){const d=document.createElement('details');d.id='imsAxisTools';d.className='imsTools';d.innerHTML='<summary>保存・コピー</summary><div class="imsToolsBody"></div>';$('imsAxisBody').appendChild(d);d.querySelector('.imsToolsBody').appendChild(actions)}
+ const engine=$('structuralTicketEngineV3');if(engine&&!engine.closest('#m3RaceLab')&&!$('imsTicketBody').contains(engine))$('imsTicketBody').prepend(engine);
+}
+function placeLab(){const lab=$('m3RaceLab');if(!lab)return;const target=active==='ticket'?$('imsTicketBody'):active==='axis'?$('imsAxisBody'):$('imsPaceBody');if(target&&!target.contains(lab))target.appendChild(lab);lab.classList.remove('imsMode-ticket','imsMode-axis','imsMode-pace');lab.classList.add(`imsMode-${active}`);if(observedLab!==lab){labObserver?.disconnect();observedLab=lab;labObserver=new MutationObserver(()=>schedule(50));labObserver.observe(lab,{childList:true,subtree:true})}}
+function setReady(v=true){ready=Boolean(v);const shell=buildShell();if(!shell)return;shell.classList.toggle('analysisReady',ready);shell.querySelectorAll('[data-ims-tab="axis"],[data-ims-tab="pace"]').forEach(b=>b.hidden=!ready);if(!ready&&active!=='ticket')setTab('ticket')}
+function renderAnswer(state=window.StructuralTicketEngineV3State){const box=$('imsAnswer');if(!box)return;box.className='imsAnswer';if(!ready){box.innerHTML='<small>RACE ANSWER</small><strong>分析待ち</strong><p>レース条件とCSVを入れて「レース構造を解析」を押してください。</p>';return}if(!state?.ready){box.classList.add('hold');box.innerHTML='<small>RACE ANSWER</small><strong>オッズ入力待ち</strong><p>軸構造・展開構造は解析済みです。単勝オッズを入力すると買い目判定へ進みます。</p>';return}const items=[['wide','ワイド'],['quinella','馬連'],['trio','三連複']],buys=items.filter(([k])=>state[k]?.status==='candidate').map(x=>x[1]),holds=items.some(([k])=>['hold','waiting_market'].includes(state[k]?.status));if(buys.length){box.classList.add('buy');box.innerHTML=`<small>RACE ANSWER</small><strong>買う｜${buys.join('・')}</strong><p>${state.reason||'条件通過'}。具体的な組み合わせと金額は下の自動買い目を確認してください。</p>`}else if(holds){box.classList.add('hold');box.innerHTML=`<small>RACE ANSWER</small><strong>判定待ち</strong><p>${state.reason||'オッズ・境界条件の確認待ちです。'}</p>`}else{box.classList.add('pass');box.innerHTML=`<small>RACE ANSWER</small><strong>見送り</strong><p>${state.reason||'本番買い条件を満たしていません。'}</p>`}}
+function setTab(key){if(!['ticket','axis','pace'].includes(key))key='ticket';if((key==='axis'||key==='pace')&&!ready)return;active=key;const shell=buildShell();if(!shell)return;shell.querySelectorAll('[data-ims-tab]').forEach(b=>b.setAttribute('aria-selected',b.dataset.imsTab===key?'true':'false'));[['ticket','imsTicket'],['axis','imsAxis'],['pace','imsPace']].forEach(([k,id])=>{const p=$(id);if(p)p.hidden=k!==key});placeBaseResults();placeLab();renderAnswer();window.IOSMobileShellV2State={ready:true,version:V,active,analysisReady:ready,at:Date.now()}}
+function syncReady(){const lab=$('m3RaceLab'),r=$('result');const v=Boolean(lab||window.M3PureAbilityState?.rows?.length||window.LongshotScoutState?.ready||(r&&!r.classList.contains('hidden')&&r.textContent.trim()));if(v)setReady(true);placeBaseResults();placeLab();renderAnswer()}
+function schedule(ms=30){clearTimeout(raf);raf=setTimeout(()=>requestAnimationFrame(syncReady),ms)}
+function watch(){const r=$('result');if(!r||resultObserver)return;resultObserver=new MutationObserver(()=>schedule(40));resultObserver.observe(r,{childList:true,subtree:true,attributes:true,attributeFilter:['class'])}
+['rsa-analysis-complete','m3-race-lab-ready','validated-queue-ready','position-risk-ready','longshot-scout-ready','structural-ticket-engine-v3-ready','structural-ticket-auto-ready','rsa-addons-ready'].forEach(ev=>addEventListener(ev,e=>{if(ev==='rsa-analysis-complete'||ev==='m3-race-lab-ready')setReady(true);if(ev==='structural-ticket-engine-v3-ready')renderAnswer(e.detail);schedule(25)}));
+document.addEventListener('click',e=>{if(e.target?.id==='analyzeBtn'){setReady(false);active='ticket';setTab('ticket');schedule(100)}},true);
+document.addEventListener('input',e=>{if(['oddsPaste','qmdWidePaste','qmdQuinellaPaste'].includes(e.target?.id))schedule(80)},true);
+function init(){if(!buildShell())return;watch();setTab('ticket');schedule(80);setTimeout(()=>schedule(350),350);setTimeout(()=>schedule(1100),1100)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+})();
