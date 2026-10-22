@@ -29,4 +29,4 @@ jobs:
           python3 -m http.server 8080 --bind 127.0.0.1 > /tmp/rsa-http.log 2>&1 &
           echo $! > /tmp/rsa-http.pid
       - name: Run five real-race regression cases
-        run: node waku-bc-converter/regression/run-regression-ci.mjs
+        run: node waku-bc-converter/regression/run-regression-ci-v31.mjs
