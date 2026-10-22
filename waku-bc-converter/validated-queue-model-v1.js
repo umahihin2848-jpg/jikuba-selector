@@ -21,7 +21,7 @@ async function parseFile(file){
     if(!m.name||!m.date||!m.field||(!m.c1&&!m.c2&&!m.c3&&!m.c4))return;
     for(const r of z.rows){
       const name=String(r[m.name]||'').trim();if(!name)continue;
-      const field=n(r[m.field]),corners=[m.c1,m.c2,m.c3,m.c4].filter(Boolean).map(k=>n(r[k])),pos=corners.find(Number.isFinite),dv=dateVal(r[m.date]);
+      const field=n(r[m.field]),corners=[m.c1,m.c2,m.c3,m.c4].filter(Boolean).map(k=>n(r[k])),pos=corners.find(x=>Number.isFinite(x)&&x>=1),dv=dateVal(r[m.date]);
       if(!Number.isFinite(field)||field<=1||!Number.isFinite(pos)||!dv)continue;
       const front=clamp((field-pos)/(field-1),0,1),lead=pos===1?1:0,surface=m.surface?surf(r[m.surface]):'',distance=m.distance?n(r[m.distance]):NaN,front3f=m.front3f?n(r[m.front3f]):NaN;
       if(!rawByHorse.has(name))rawByHorse.set(name,[]);
