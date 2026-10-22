@@ -1,0 +1,32 @@
+name: RSA production regression v3
+
+on:
+  push:
+    paths:
+      - 'waku-bc-converter/**'
+      - '.github/workflows/rsa-regression-v3.yml'
+  pull_request:
+    paths:
+      - 'waku-bc-converter/**'
+      - '.github/workflows/rsa-regression-v3.yml'
+  workflow_dispatch:
+
+jobs:
+  five-race-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install headless browser
+        run: |
+          npm install --no-save --package-lock=false playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start local app server
+        run: |
+          python3 -m http.server 8080 --bind 127.0.0.1 > /tmp/rsa-http.log 2>&1 &
+          echo $! > /tmp/rsa-http.pid
+      - name: Run five real-race regression cases
+        run: node waku-bc-converter/regression/run-regression-ci.mjs
