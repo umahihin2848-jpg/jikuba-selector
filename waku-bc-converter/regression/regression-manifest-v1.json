@@ -1,0 +1,51 @@
+{
+  "version": "regression-v3.0",
+  "created": "2026-10-22",
+  "purpose": "Five real TARGET CSV regression fixtures for production M3/Ability/structure/ticket pipeline.",
+  "notes": [
+    "Expected ranks are frozen from the same production-v1 replay definitions used by the current app.",
+    "Market inputs are synthetic and deterministic; they are only for exercising ticket branches, not historical ROI evidence.",
+    "Fidelity expectations are for the reduced fixture files stored with this suite."
+  ],
+  "cases": [
+    {
+      "id": "shosenkyo",
+      "title": "昇仙峡S",
+      "fixture": "fixtures/mini_昇仙峡.csv.gz.b64",
+      "race": {"date":"2026-10-12","venue":"東京","surface":"芝","distance":2400,"grade":"3勝","field":11,"going":"良"},
+      "market": {"winOdds":"1 2.0\n2 3.5\n3 5.0\n4 6.5\n5 8.0\n6 9.5\n7 11.0\n8 12.5\n9 14.0\n10 15.5\n11 17.0","wideOdds":"","quinellaOdds":""},
+      "expected": {
+        "eligible": false,
+        "m3Top3":[{"no":9,"name":"ヴォンフレ","rank":1},{"no":5,"name":"オメガナビゲーター","rank":2},{"no":10,"name":"ロードガレリア","rank":3}],
+        "abilityTop3":[{"no":7,"name":"バレンタインガール","rank":1},{"no":11,"name":"レッドバンデ","rank":2},{"no":9,"name":"ヴォンフレ","rank":3}],
+        "structural":[{"no":9,"name":"ヴォンフレ","m3Rank":1,"abilityRank":3}],
+        "fidelity":{"FULL":11,"PARTIAL":0,"LOW":0},
+        "ticket":{"route":"out_of_scope","structuralCount":0,"pairSurvival":false,"wide":"pass","quinella":"pass","trio":"pass"}
+      }
+    },
+    {
+      "id":"tv_shizuoka","title":"テレビ静岡賞","fixture":"fixtures/mini_テレビ静岡.csv.gz.b64",
+      "race":{"date":"2026-10-11","venue":"東京","surface":"ダート","distance":1400,"grade":"3勝","field":16,"going":"良"},
+      "market":{"winOdds":"1 2.0\n2 3.5\n3 5.0\n4 6.5\n5 8.0\n6 9.5\n7 11.0\n8 12.5\n9 14.0\n10 15.5\n11 17.0\n12 18.5\n13 20.0\n14 21.5\n15 23.0\n16 24.5","wideOdds":"","quinellaOdds":""},
+      "expected":{"eligible":true,"m3Top3":[{"no":1,"name":"キョウエイカンセ","rank":1},{"no":3,"name":"クインズデネブ","rank":2},{"no":2,"name":"アスクアイルビゼア","rank":3}],"abilityTop3":[{"no":7,"name":"カルパ","rank":1},{"no":8,"name":"セギレエルビエント","rank":2},{"no":15,"name":"ヤマニンアストロン","rank":3}],"structural":[],"fidelity":{"FULL":15,"PARTIAL":1,"LOW":0},"ticket":{"route":"no_structure","structuralCount":0,"pairSurvival":false,"wide":"pass","quinella":"pass","trio":"pass"}}
+    },
+    {
+      "id":"october","title":"オクトーバーS","fixture":"fixtures/mini_オクトーバー.csv.gz.b64",
+      "race":{"date":"2026-10-12","venue":"東京","surface":"芝","distance":2000,"grade":"L","field":18,"going":"良"},
+      "market":{"winOdds":"1 2.0\n2 3.5\n3 5.0\n4 6.5\n5 8.0\n6 9.5\n7 11.0\n8 12.5\n9 14.0\n10 15.5\n11 17.0\n12 18.5\n13 20.0\n14 21.5\n15 23.0\n16 24.5\n17 26.0\n18 27.5","wideOdds":"","quinellaOdds":""},
+      "expected":{"eligible":true,"m3Top3":[{"no":10,"name":"ジュンブロッサム","rank":1},{"no":3,"name":"ニシノレヴナント","rank":2},{"no":2,"name":"アスクセクシーモア","rank":3}],"abilityTop3":[{"no":7,"name":"シルトホルン","rank":1},{"no":2,"name":"アスクセクシーモア","rank":2},{"no":16,"name":"ミッキーゴールド","rank":3}],"structural":[{"no":2,"name":"アスクセクシーモア","m3Rank":3,"abilityRank":2}],"fidelity":{"FULL":17,"PARTIAL":1,"LOW":0},"ticket":{"route":"single_nonprod","structuralCount":1,"pairSurvival":false,"wide":"pass","quinella":"pass","trio":"pass"}}
+    },
+    {
+      "id":"uzumasa","title":"太秦S","fixture":"fixtures/mini_太秦.csv.gz.b64",
+      "race":{"date":"2026-10-11","venue":"京都","surface":"ダート","distance":1800,"grade":"OP","field":14,"going":"良"},
+      "market":{"winOdds":"1 9.0\n2 6.0\n3 12.0\n4 14.0\n5 4.0\n6 16.0\n7 18.0\n8 20.0\n9 22.0\n10 24.0\n11 26.0\n12 28.0\n13 2.0\n14 30.0","wideOdds":"13 5 5.0\n13 2 5.5","quinellaOdds":"13 5 8.0\n13 2 9.0"},
+      "expected":{"eligible":true,"m3Top3":[{"no":13,"name":"メルカントゥール","rank":1},{"no":1,"name":"モックモック","rank":2},{"no":8,"name":"シュラザック","rank":3}],"abilityTop3":[{"no":13,"name":"メルカントゥール","rank":1},{"no":5,"name":"タガノバビロン","rank":2},{"no":2,"name":"パシアンジャン","rank":3}],"structural":[{"no":13,"name":"メルカントゥール","m3Rank":1,"abilityRank":1}],"fidelity":{"FULL":13,"PARTIAL":1,"LOW":0},"ticket":{"route":"single_ability1","structuralCount":1,"pairSurvival":false,"wide":"candidate","quinella":"candidate","trio":"candidate","wideTickets":["5-13","2-13"],"quinellaTickets":["5-13","2-13"],"trioTickets":["2-5-13"]}}
+    },
+    {
+      "id":"swan","title":"スワンS","fixture":"fixtures/mini_スワン.csv.gz.b64",
+      "race":{"date":"2026-10-12","venue":"京都","surface":"芝","distance":1400,"grade":"G2","field":18,"going":"良"},
+      "market":{"winOdds":"1 10.0\n2 11.5\n3 13.0\n4 14.5\n5 16.0\n6 17.5\n7 19.0\n8 20.5\n9 22.0\n10 23.5\n11 25.0\n12 26.5\n13 5.0\n14 28.0\n15 3.0\n16 29.5\n17 31.0\n18 7.0","wideOdds":"","quinellaOdds":""},
+      "expected":{"eligible":true,"m3Top3":[{"no":13,"name":"マイネルチケット","rank":1},{"no":9,"name":"オフトレイル","rank":2},{"no":15,"name":"ジョイフルニュース","rank":3}],"abilityTop3":[{"no":15,"name":"ジョイフルニュース","rank":1},{"no":13,"name":"マイネルチケット","rank":2},{"no":18,"name":"エリカエクスプレス","rank":3}],"structural":[{"no":15,"name":"ジョイフルニュース","m3Rank":3,"abilityRank":1},{"no":13,"name":"マイネルチケット","m3Rank":1,"abilityRank":2}],"fidelity":{"FULL":16,"PARTIAL":1,"LOW":1},"ticket":{"route":"double_structural","structuralCount":2,"pairSurvival":false,"wide":"candidate","quinella":"candidate","trio":"pass","wideTickets":["13-15"],"quinellaTickets":["15-18"],"trioTickets":[]}}
+    }
+  ]
+}
