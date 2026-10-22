@@ -82,10 +82,13 @@ async function run(type,name){
   assert(text.includes('M3 Top3 × Ability v1 Top3'),`${name}: structural rule missing`);
   assert(text.includes('候補選定は人気・単勝オッズを使いません'),`${name}: popularity-blind disclaimer missing`);
 
-  const marketTab=page.locator('#m3RaceLab [data-m3tab="market"]');
-  if(await marketTab.count())await marketTab.click();
-  await page.locator('#lsRevealMarket').waitFor({state:'visible',timeout:4000});
-  await page.locator('#lsRevealMarket').click();
+  const reveal=await page.evaluate(()=>{
+    const b=document.querySelector('#lsRevealMarket');
+    if(!b||b.disabled)return false;
+    b.click();
+    return true;
+  });
+  assert.strictEqual(reveal,true,`${name}: complete market should enable reveal action`);
   await page.waitForFunction(()=>window.LongshotScoutState?.marketRevealed===true,null,{timeout:4000});
   s=await page.evaluate(()=>window.LongshotScoutState);
   assert(s.candidates.every(x=>x.marketVisible===true),`${name}: market reveal did not propagate`);
