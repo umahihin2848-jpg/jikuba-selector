@@ -14,19 +14,17 @@ on:
 jobs:
   five-race-regression:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Install headless browser
-        run: |
-          npm install --no-save --package-lock=false playwright@1.55.0
-          npx playwright install --with-deps chromium
+      - name: Install browser driver library
+        run: npm install --no-save --package-lock=false playwright-core@1.55.0
       - name: Start local app server
         run: |
           python3 -m http.server 8080 --bind 127.0.0.1 > /tmp/rsa-http.log 2>&1 &
           echo $! > /tmp/rsa-http.pid
       - name: Run five real-race regression cases
-        run: node waku-bc-converter/regression/run-regression-ci-v32.mjs
+        run: node waku-bc-converter/regression/run-regression-ci-v33.mjs
