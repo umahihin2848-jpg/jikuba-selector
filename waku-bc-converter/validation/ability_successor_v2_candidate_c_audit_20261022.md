@@ -105,7 +105,7 @@ Although v2 improves probability metrics and does not show Candidate-B-style M3 
 The Kikuka Sho diagnostic is illustrative but is **not** an acceptance test: v2 moves Robchen above the sparse-history horse, but this occurs through Elo compensation rather than removal of the contradictory base coefficients.
 
 Decision:
-- v1: keep stable production baseline for now
+- v1: retain only as the frozen production/legacy comparison baseline until the replacement protocol is completed
 - v2: keep frozen parallel / Shadow candidate
 - full replacement now: **NO**
 - ticket logic switch to v2: **NO**
@@ -133,7 +133,7 @@ Zeroed v1 direct contributions:
 
 No 2025–2026 retuning was performed after defining the formula.
 
-### Candidate C pooled diagnostic
+### Candidate C pooled probability diagnostic
 
 | Model | AUC | Log Loss | Brier | ECE10 | calibration slope |
 |---|---:|---:|---:|---:|---:|
@@ -147,16 +147,67 @@ Candidate C Ability #1:
 
 Candidate C ranks the Kikuka Sho example more naturally (Robchen #1, Audacia #2, Sea to Summit #3), but that example was **not** used as validation evidence.
 
-### Candidate C decision
+### Candidate C probability decision
 
-**REJECT AS CURRENT PRODUCTION SUCCESSOR.**
+**REJECT AS CURRENT PRODUCTION PROBABILITY SUCCESSOR.**
 
 Reason: discrimination and point-ranking improve, but calibration becomes materially more overconfident (slope about 0.82 and ECE about 1.82%). After opening 2025–2026, it would be invalid to tune a calibration correction on those same years to rescue the candidate. Record the failure and do not post-hoc repair it.
 
-## 6. Next action
+## 6. Candidate C as a rank-only Shadow model
 
-1. Keep v1 production and v2 parallel.
-2. Do not tune Candidate C using 2025–2026.
-3. Reproduce the corrected M3 runtime exactly enough to establish a new official production baseline.
-4. Re-run the existing Wide / Quinella / Trio automatic-ticket policies from the new baseline before trusting old ROI figures.
-5. Preserve any next Ability family as a genuinely frozen prospective Shadow candidate; 2027 remains decisive for full promotion.
+The production structural gate consumes **Ability rank**, not the numerical Top3 probability itself. Therefore Candidate C was also audited as a rank-only model, while keeping probability calibration as a separate problem. No formula change or 2025–2026 retuning was made for this check.
+
+### Corrected-M3 pooled rank diagnostic
+
+| Diagnostic | v1 rank | v2 rank | Candidate C rank |
+|---|---:|---:|---:|
+| Structural horses | 812 | 755 | 734 |
+| Structural Top3 | 42.24% | 43.97% | **44.55%** |
+| Structural win | 15.89% | 16.16% | **16.62%** |
+| Production-style single routes | 136 | 132 | 140 |
+| Single-axis Top3 | 47.06% | 46.21% | **50.71%** |
+| Single-axis win | 22.06% | 19.70% | 20.71% |
+| Pair Survival passes | 50 | 50 | 50 |
+| Both pair horses Top3 | 30.00% | 34.00% | 30.00% |
+
+Year split for Candidate C rank versus v1:
+- 2025 structural Top3: 40.55% -> 42.06%
+- 2025 single-axis Top3: 42.86% -> 50.59%
+- 2025 Pair both Top3: 29.03% -> 22.58%
+- 2026 structural Top3: 44.57% -> 48.04%
+- 2026 single-axis Top3: 52.54% -> 50.91%
+- 2026 Pair both Top3: 31.58% -> 42.11%
+
+Race-cluster bootstrap, 5,000 resamples, Candidate C rank minus v1 rank:
+
+| Metric | Point delta | 95% diagnostic interval |
+|---|---:|---:|
+| Structural Top3 | **+2.31 pt** | **+0.20 to +4.52 pt** |
+| Structural win | +0.74 pt | -0.56 to +2.07 pt |
+| Single-axis Top3 | +3.66 pt | -4.84 to +12.13 pt |
+| Single-axis win | -1.35 pt | -7.91 to +5.01 pt |
+| Pair both Top3 | 0.00 pt | -12.12 to +12.83 pt |
+
+Structural opportunity count is lower by 78 horses versus v1 (diagnostic bootstrap interval approximately -110 to -47), so the higher hit rate partly reflects a narrower selection set. That is acceptable only if the lost opportunities do not damage ticket economics; ROI must therefore be re-run before any ticket switch.
+
+Interpretation:
+- Candidate C is **not acceptable as the current calibrated probability model**.
+- Candidate C is **promising as an interpretable rank-only Shadow model**.
+- The positive structural-Top3 interval is encouraging, but 2025–2026 are already research-touched and therefore cannot serve as a pristine final promotion test.
+- Ranking and probability should be separated in the next architecture rather than forcing one score to serve both purposes.
+
+Rank-only decision:
+- production rank switch now: **NO**
+- keep Candidate C frozen as Shadow rank candidate: **YES**
+- exact production-runtime replay and ticket ROI revalidation: **REQUIRED**
+- pristine prospective promotion evidence: **2027**
+
+## 7. Next action
+
+1. Treat v1 as a frozen legacy/comparison baseline, not as semantic ground truth for "Ability".
+2. Keep v2 as the better-calibrated probability Shadow candidate.
+3. Keep Candidate C frozen as the interpretable rank-only Shadow candidate; do not retune it on 2025–2026.
+4. Reproduce the corrected M3 runtime exactly enough to establish a new official production baseline.
+5. Re-run the existing Wide / Quinella / Trio automatic-ticket policies from the new baseline before trusting old ROI figures.
+6. Separate the future production interfaces into **Ability Rank** and **Top3 Probability** if the rank-only candidate survives ticket revalidation.
+7. Preserve 2027 as the clean prospective promotion holdout.
