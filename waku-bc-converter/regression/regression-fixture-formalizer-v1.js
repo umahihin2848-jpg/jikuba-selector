@@ -8,14 +8,29 @@ const MAP={
  'fixtures/mini_太秦.csv.gz.b64':['fixtures/full_uzumasa.part1','fixtures/full_uzumasa.part2','fixtures/full_uzumasa.part3'],
  'fixtures/mini_スワン.csv.gz.b64':['fixtures/full_swan.part1','fixtures/full_swan.part2','fixtures/full_swan.part3','fixtures/full_swan.part4']
 };
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function fetchPart(path){
+ const url=new URL(path,location.href).href;
+ let last=null;
+ for(let attempt=1;attempt<=3;attempt++){
+  try{
+   const r=await originalFetch(url,{cache:'no-store'});
+   if(r.ok)return (await r.text()).trim();
+   last=new Error(`fixture part HTTP ${r.status}: ${path}`);
+  }catch(e){last=e}
+  if(attempt<3)await sleep(80*attempt);
+ }
+ throw new Error(`fixture part fetch failed: ${path} / ${last?.message||last||'unknown'}`);
+}
 window.fetch=async function(input,init){
  const url=typeof input==='string'?input:String(input?.url||'');
  const key=Object.keys(MAP).find(k=>url.includes(k));
  if(!key)return originalFetch(input,init);
- const parts=await Promise.all(MAP[key].map(async p=>{const r=await originalFetch(p,{cache:'no-store'});if(!r.ok)throw new Error(`fixture part HTTP ${r.status}: ${p}`);return (await r.text()).trim()}));
+ const parts=[];
+ for(const p of MAP[key])parts.push(await fetchPart(p));
  const b64=parts.join('');
  console.log(`[regression-fixture] full TARGET ${key}: ${parts.length} part(s), ${b64.length} base64 chars`);
  return new Response(b64,{status:200,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'no-store'}});
 };
-window.RSARegressionFixtureAdapter={version:'full-target-fixture-adapter-v1',cases:Object.keys(MAP).length};
+window.RSARegressionFixtureAdapter={version:'full-target-fixture-adapter-v2-sequential-retry',cases:Object.keys(MAP).length};
 })();
