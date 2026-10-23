@@ -1,6 +1,6 @@
 const {webkit}=require('playwright');
 const assert=require('assert');
-const BASE='http://127.0.0.1:4173/waku-bc-converter/v3.html?test=structure-policy-r86';
+const BASE='http://127.0.0.1:4173/waku-bc-converter/v3.html?test=structure-policy-r87';
 const UA='Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1';
 async function run(type,name){
   const browser=await type.launch({headless:true});
@@ -65,24 +65,32 @@ async function run(type,name){
     ]};
     window.RPCIFitBetaState={ready:true,expectedRPCI:51.2,rows:[]};
     window.StructuralTicketEngineV3State={ready:true,route:'single_ability1',reason:'単独Ability1軸',structuralCount:1,axis:{no:'1',name:'A',abilityRank:1,m3Rank:1},candidates:[{no:'1',name:'A',abilityRank:1,m3Rank:1}]};
+    window.PositionRiskState={ready:true,displayOnly:true,rankChanged:false,probabilityChanged:false,bettingChanged:false,rows:[{no:'1',name:'A',p10:.72}],byNo:{'1':{no:'1',name:'A',p10:.72}}};
     window.RaceOverallSummaryState={ready:true,generation:91,version:'test'};
     dispatchEvent(new CustomEvent('m3-pure-ability-ready'));
     dispatchEvent(new CustomEvent('finish600-ready'));
     dispatchEvent(new CustomEvent('four-axis-integration-ready'));
     dispatchEvent(new CustomEvent('rpci-fit-beta-ready'));
     dispatchEvent(new CustomEvent('structural-ticket-engine-v3-ready',{detail:window.StructuralTicketEngineV3State}));
+    dispatchEvent(new CustomEvent('position-risk-ready',{detail:window.PositionRiskState}));
     dispatchEvent(new CustomEvent('race-overall-summary-ready'));
   });
-  await page.waitForFunction(()=>document.querySelector('#imsAxisSummary')?.textContent.includes('1番 A')&&document.querySelector('#imsPaceSummary')?.textContent.includes('標準 50%')&&document.querySelector('#imsPaceSummary')?.textContent.includes('51.2'),null,{timeout:8000});
+  await page.waitForFunction(()=>document.querySelector('#imsAxisSummary')?.textContent.includes('1番 A')&&document.querySelector('#imsAxisSummary .imsP10Warn')?.textContent.includes('P10 72%')&&document.querySelector('#imsPaceSummary')?.textContent.includes('標準 50%')&&document.querySelector('#imsPaceSummary')?.textContent.includes('51.2'),null,{timeout:8000});
   const compact=await page.evaluate(()=>({
     axis:document.querySelector('#imsAxisSummary')?.textContent||'',
     pace:document.querySelector('#imsPaceSummary')?.textContent||'',
+    p10:document.querySelector('#imsAxisSummary .imsP10Warn')?.textContent||'',
+    p10BettingChanged:window.PositionRiskState?.bettingChanged,
     axisClosed:document.querySelector('#imsAxisDetails')?.open===false,
     paceClosed:document.querySelector('#imsPaceDetails')?.open===false
   }));
   assert(/単独軸型/.test(compact.axis),`${name}: compact axis route missing`);
   assert(/Ability #1/.test(compact.axis),`${name}: compact Ability #1 missing`);
   assert(/M3 #1/.test(compact.axis),`${name}: compact structural M3 rank missing`);
+  assert(/後方リスク高/.test(compact.p10),`${name}: P10 high-risk warning missing`);
+  assert(/P10 72%/.test(compact.p10),`${name}: P10 probability missing`);
+  assert(/買い目判定には未使用/.test(compact.p10),`${name}: P10 display-only note missing`);
+  assert.strictEqual(compact.p10BettingChanged,false,`${name}: P10 warning must not change betting`);
   assert(/想定RPCI/.test(compact.pace),`${name}: compact RPCI label missing`);
   assert(/M3 #1/.test(compact.pace),`${name}: compact M3 top missing`);
   assert.strictEqual(compact.axisClosed,true,`${name}: axis details should start closed`);
@@ -92,7 +100,7 @@ async function run(type,name){
   assert.strictEqual(cls,'構造一致・安定',`${name}: structural classification wrong: ${cls}`);
   assert(!/買い検討型|見送り寄り/.test(cls),`${name}: betting-style classification remains`);
   assert.deepStrictEqual(errors,[],`${name}: page errors ${errors.join(' | ')}`);
-  console.log('PASS',name,'mobile shell + compact axis/pace + market-last + structural labels + native 5 tickets + bounded 2027 holdout');
+  console.log('PASS',name,'mobile shell + compact axis/pace + P10 display-only warning + market-last + structural labels + native 5 tickets + bounded 2027 holdout');
   await browser.close();
 }
 run(webkit,'WebKit iPhone').catch(e=>{console.error(e);process.exit(1)});
