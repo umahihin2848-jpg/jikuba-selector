@@ -1,6 +1,6 @@
 const {webkit}=require('playwright');
 const assert=require('assert');
-const BASE='http://127.0.0.1:4173/waku-bc-converter/v3.html?test=structure-policy-r87';
+const BASE='http://127.0.0.1:4173/waku-bc-converter/v3.html?test=structure-policy-r88';
 const UA='Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1';
 async function run(type,name){
   const browser=await type.launch({headless:true});
@@ -46,7 +46,8 @@ async function run(type,name){
   assert.deepStrictEqual(base.boundary,[false,true,true,false],`${name}: 2027 holdout boundary wrong`);
   assert.strictEqual(base.marketAfterReliability,true,`${name}: market is not after reliability (${base.reliabilityIndex} -> ${base.marketIndex})`);
   assert(/最後に照合/.test(base.marketTitle),`${name}: market-last label missing; actual=${JSON.stringify(base.marketTitle)}`);
-  await page.evaluate(()=>{
+  await page.waitForFunction(()=>window.MobileStructureSummaryState?.ready===true&&window.DecisionReasonCardUI?.ready===true,null,{timeout:10000});
+  const compact=await page.evaluate(()=>{
     window.RSAAnalysisTransitionState={generation:91,status:'ready'};
     window.FourAxisIntegrationState={p:[.1,.2,.5,.2]};
     window.M3PureAbilityState={ready:true,rows:[
@@ -64,9 +65,28 @@ async function run(type,name){
       {no:'4',name:'D',finishRank:4,sc:[{rank:4},{rank:4},{rank:4},{rank:4}]}
     ]};
     window.RPCIFitBetaState={ready:true,expectedRPCI:51.2,rows:[]};
-    window.StructuralTicketEngineV3State={ready:true,route:'single_ability1',reason:'単独Ability1軸',structuralCount:1,axis:{no:'1',name:'A',abilityRank:1,m3Rank:1},candidates:[{no:'1',name:'A',abilityRank:1,m3Rank:1}]};
+    window.StructuralTicketEngineV3State={
+      ready:true,route:'single_ability1',reason:'単独Ability1軸',structuralCount:1,
+      axis:{no:'1',name:'A',abilityRank:1,m3Rank:1},candidates:[{no:'1',name:'A',abilityRank:1,m3Rank:1}],
+      marketCoverage:{complete:true,count:12,expected:12},
+      wide:{status:'stop',reason:'ワイド4.0倍未満'},
+      quinella:{status:'stop',reason:'馬連7.0倍未満'},
+      trio:{status:'stop',reason:'三連複条件未達'}
+    };
     window.PositionRiskState={ready:true,displayOnly:true,rankChanged:false,probabilityChanged:false,bettingChanged:false,rows:[{no:'1',name:'A',p10:.72}],byNo:{'1':{no:'1',name:'A',p10:.72}}};
     window.RaceOverallSummaryState={ready:true,generation:91,version:'test'};
+    window.MobileStructureSummaryState.render();
+    window.DecisionReasonCardUI.render();
+    const snap={
+      axis:document.querySelector('#imsAxisSummary')?.textContent||'',
+      pace:document.querySelector('#imsPaceSummary')?.textContent||'',
+      p10:document.querySelector('#imsAxisSummary .imsP10Warn')?.textContent||'',
+      decision:document.querySelector('#imsDecisionReason')?.textContent||'',
+      decisionState:window.DecisionReasonCardState||null,
+      p10BettingChanged:window.PositionRiskState?.bettingChanged,
+      axisClosed:document.querySelector('#imsAxisDetails')?.open===false,
+      paceClosed:document.querySelector('#imsPaceDetails')?.open===false
+    };
     dispatchEvent(new CustomEvent('m3-pure-ability-ready'));
     dispatchEvent(new CustomEvent('finish600-ready'));
     dispatchEvent(new CustomEvent('four-axis-integration-ready'));
@@ -74,16 +94,8 @@ async function run(type,name){
     dispatchEvent(new CustomEvent('structural-ticket-engine-v3-ready',{detail:window.StructuralTicketEngineV3State}));
     dispatchEvent(new CustomEvent('position-risk-ready',{detail:window.PositionRiskState}));
     dispatchEvent(new CustomEvent('race-overall-summary-ready'));
+    return snap;
   });
-  await page.waitForFunction(()=>document.querySelector('#imsAxisSummary')?.textContent.includes('1番 A')&&document.querySelector('#imsAxisSummary .imsP10Warn')?.textContent.includes('P10 72%')&&document.querySelector('#imsPaceSummary')?.textContent.includes('標準 50%')&&document.querySelector('#imsPaceSummary')?.textContent.includes('51.2'),null,{timeout:8000});
-  const compact=await page.evaluate(()=>({
-    axis:document.querySelector('#imsAxisSummary')?.textContent||'',
-    pace:document.querySelector('#imsPaceSummary')?.textContent||'',
-    p10:document.querySelector('#imsAxisSummary .imsP10Warn')?.textContent||'',
-    p10BettingChanged:window.PositionRiskState?.bettingChanged,
-    axisClosed:document.querySelector('#imsAxisDetails')?.open===false,
-    paceClosed:document.querySelector('#imsPaceDetails')?.open===false
-  }));
   assert(/単独軸型/.test(compact.axis),`${name}: compact axis route missing`);
   assert(/Ability #1/.test(compact.axis),`${name}: compact Ability #1 missing`);
   assert(/M3 #1/.test(compact.axis),`${name}: compact structural M3 rank missing`);
@@ -95,12 +107,18 @@ async function run(type,name){
   assert(/M3 #1/.test(compact.pace),`${name}: compact M3 top missing`);
   assert.strictEqual(compact.axisClosed,true,`${name}: axis details should start closed`);
   assert.strictEqual(compact.paceClosed,true,`${name}: pace details should start closed`);
+  assert(/見送り/.test(compact.decision),`${name}: decision verdict missing`);
+  assert(/主因/.test(compact.decision)&&/ワイド4.0倍未満/.test(compact.decision),`${name}: decision primary reason missing`);
+  assert(/警告/.test(compact.decision)&&/P10 72%/.test(compact.decision),`${name}: decision P10 warning missing`);
+  assert(/価格条件未達あり/.test(compact.decision),`${name}: decision price reason missing`);
+  assert.strictEqual(compact.decisionState?.verdict,'見送り',`${name}: decision state verdict wrong`);
+  assert.strictEqual(compact.decisionState?.p10,.72,`${name}: decision state P10 wrong`);
   await page.waitForFunction(()=>window.RaceOverallSummaryState?.anchorPolicy==='ability-v2-m3-axis-v1'&&window.MarketIndependentCenterState?.generation===91,null,{timeout:12000});
   const cls=await page.evaluate(()=>window.RaceOverallSummaryState.classification);
   assert.strictEqual(cls,'構造一致・安定',`${name}: structural classification wrong: ${cls}`);
   assert(!/買い検討型|見送り寄り/.test(cls),`${name}: betting-style classification remains`);
   assert.deepStrictEqual(errors,[],`${name}: page errors ${errors.join(' | ')}`);
-  console.log('PASS',name,'mobile shell + compact axis/pace + P10 display-only warning + market-last + structural labels + native 5 tickets + bounded 2027 holdout');
+  console.log('PASS',name,'mobile shell + compact axis/pace + P10 display-only warning + decision reasons + market-last + structural labels + native 5 tickets + bounded 2027 holdout');
   await browser.close();
 }
 run(webkit,'WebKit iPhone').catch(e=>{console.error(e);process.exit(1)});
