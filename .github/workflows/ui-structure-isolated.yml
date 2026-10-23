@@ -16,6 +16,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Check mobile shell syntax
+        run: node --check waku-bc-converter/ios-mobile-shell-v2.js
       - name: Install Playwright
         run: |
           npm install --no-save playwright@latest
