@@ -16,8 +16,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Check mobile shell syntax
-        run: node --check waku-bc-converter/ios-mobile-shell-v2.js
+      - name: Check mobile UI syntax
+        run: |
+          node --check waku-bc-converter/ios-mobile-shell-v2.js
+          node --check waku-bc-converter/result-simple-ui-v1.js
+          node --check waku-bc-converter/mobile-structure-summary-v1.js
       - name: Install WebKit
         run: |
           npm install --no-save playwright@latest
