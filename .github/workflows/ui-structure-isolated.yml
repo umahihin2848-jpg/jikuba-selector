@@ -21,6 +21,7 @@ jobs:
           node --check waku-bc-converter/ios-mobile-shell-v2.js
           node --check waku-bc-converter/result-simple-ui-v1.js
           node --check waku-bc-converter/mobile-structure-summary-v1.js
+          node --check waku-bc-converter/decision-reason-card-v1.js
       - name: Install WebKit
         run: |
           npm install --no-save playwright@latest
