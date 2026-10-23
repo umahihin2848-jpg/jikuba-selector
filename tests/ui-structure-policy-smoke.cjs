@@ -1,6 +1,6 @@
 const {chromium,webkit}=require('playwright');
 const assert=require('assert');
-const BASE='http://127.0.0.1:4173/waku-bc-converter/v3.html?test=structure-policy-r84';
+const BASE='http://127.0.0.1:4173/waku-bc-converter/v3.html?test=structure-policy-r85';
 const UA='Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1';
 async function run(type,name){
   const browser=await type.launch({headless:true});
@@ -8,6 +8,22 @@ async function run(type,name){
   const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto(BASE,{waitUntil:'networkidle',timeout:30000});
   await page.waitForFunction(()=>window.RSAAddonHealth?.ready===true&&window.ProspectiveLedgerPolicy?.version==='prospective-ledger-policy-v2',null,{timeout:25000});
+  const mobile=await page.evaluate(()=>({
+    innerWidth:window.innerWidth,
+    ua:navigator.userAgent,
+    touch:navigator.maxTouchPoints,
+    shellFlag:Boolean(window.__IOS_MOBILE_SHELL_V2),
+    shellState:window.IOSMobileShellV2State||null,
+    shell:Boolean(document.getElementById('iosMobileShellV2')),
+    bodyClass:document.body.className,
+    tabs:[...document.querySelectorAll('#iosMobileShellV2 [data-ims-tab]')].map(x=>({key:x.dataset.imsTab,text:x.textContent,hidden:x.hidden,selected:x.getAttribute('aria-selected')})),
+    script:[...document.scripts].map(s=>s.src).find(x=>x.includes('ios-mobile-shell-v2.js'))||''
+  }));
+  console.log('MOBILE_DEBUG',name,JSON.stringify(mobile));
+  assert.strictEqual(mobile.shellFlag,true,`${name}: mobile shell flag not set`);
+  assert.strictEqual(mobile.shell,true,`${name}: #iosMobileShellV2 missing`);
+  assert.strictEqual(mobile.tabs.length,3,`${name}: expected three mobile tabs`);
+  assert(/iosMobileShellV2/.test(mobile.bodyClass),`${name}: mobile shell body class missing`);
   const base=await page.evaluate(()=>{
     const result=document.getElementById('result'),children=result?[...result.children]:[],reliability=document.getElementById('reliabilitySection'),market=document.getElementById('marketSection');
     const reliabilityIndex=children.indexOf(reliability),marketIndex=children.indexOf(market);
@@ -46,7 +62,7 @@ async function run(type,name){
   assert.strictEqual(cls,'構造一致・安定',`${name}: structural classification wrong: ${cls}`);
   assert(!/買い検討型|見送り寄り/.test(cls),`${name}: betting-style classification remains`);
   assert.deepStrictEqual(errors,[],`${name}: page errors ${errors.join(' | ')}`);
-  console.log('PASS',name,'market-last + structural labels + native 5 tickets + bounded 2027 holdout');
+  console.log('PASS',name,'mobile shell + market-last + structural labels + native 5 tickets + bounded 2027 holdout');
   await browser.close();
 }
 (async()=>{await run(chromium,'Chromium iPhone');await run(webkit,'WebKit iPhone')})().catch(e=>{console.error(e);process.exit(1)});
