@@ -1,6 +1,6 @@
 const {webkit}=require('playwright');
 const assert=require('assert');
-const BASE='http://127.0.0.1:4173/waku-bc-converter/v3.html?test=structure-policy-r88';
+const BASE='http://127.0.0.1:4173/waku-bc-converter/v3.html?test=structure-policy-r89';
 const UA='Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1';
 async function run(type,name){
   const browser=await type.launch({headless:true});
@@ -47,6 +47,12 @@ async function run(type,name){
   assert.strictEqual(base.marketAfterReliability,true,`${name}: market is not after reliability (${base.reliabilityIndex} -> ${base.marketIndex})`);
   assert(/最後に照合/.test(base.marketTitle),`${name}: market-last label missing; actual=${JSON.stringify(base.marketTitle)}`);
   await page.waitForFunction(()=>window.MobileStructureSummaryState?.ready===true&&window.DecisionReasonCardUI?.ready===true,null,{timeout:10000});
+  const bands=await page.evaluate(()=>({
+    axis:[.19,.20,.649,.65].map(x=>window.MobileStructureSummaryState.p10Band(x)?.key),
+    decision:[.19,.20,.649,.65].map(x=>window.DecisionReasonCardUI.p10Band(x)?.key)
+  }));
+  assert.deepStrictEqual(bands.axis,['low','standard','standard','high'],`${name}: axis P10 boundaries wrong`);
+  assert.deepStrictEqual(bands.decision,['low','standard','standard','high'],`${name}: decision P10 boundaries wrong`);
   const compact=await page.evaluate(()=>{
     window.RSAAnalysisTransitionState={generation:91,status:'ready'};
     window.FourAxisIntegrationState={p:[.1,.2,.5,.2]};
@@ -109,16 +115,18 @@ async function run(type,name){
   assert.strictEqual(compact.paceClosed,true,`${name}: pace details should start closed`);
   assert(/見送り/.test(compact.decision),`${name}: decision verdict missing`);
   assert(/主因/.test(compact.decision)&&/ワイド4.0倍未満/.test(compact.decision),`${name}: decision primary reason missing`);
-  assert(/警告/.test(compact.decision)&&/P10 72%/.test(compact.decision),`${name}: decision P10 warning missing`);
+  assert(/警告/.test(compact.decision)&&/後方リスク高/.test(compact.decision)&&/P10 72%/.test(compact.decision),`${name}: decision P10 warning missing`);
   assert(/価格条件未達あり/.test(compact.decision),`${name}: decision price reason missing`);
   assert.strictEqual(compact.decisionState?.verdict,'見送り',`${name}: decision state verdict wrong`);
   assert.strictEqual(compact.decisionState?.p10,.72,`${name}: decision state P10 wrong`);
+  assert.strictEqual(compact.decisionState?.p10Band,'high',`${name}: decision P10 band wrong`);
+  assert.strictEqual(compact.decisionState?.displayOnly,true,`${name}: P10 decision card must stay display-only`);
   await page.waitForFunction(()=>window.RaceOverallSummaryState?.anchorPolicy==='ability-v2-m3-axis-v1'&&window.MarketIndependentCenterState?.generation===91,null,{timeout:12000});
   const cls=await page.evaluate(()=>window.RaceOverallSummaryState.classification);
   assert.strictEqual(cls,'構造一致・安定',`${name}: structural classification wrong: ${cls}`);
   assert(!/買い検討型|見送り寄り/.test(cls),`${name}: betting-style classification remains`);
   assert.deepStrictEqual(errors,[],`${name}: page errors ${errors.join(' | ')}`);
-  console.log('PASS',name,'mobile shell + compact axis/pace + P10 display-only warning + decision reasons + market-last + structural labels + native 5 tickets + bounded 2027 holdout');
+  console.log('PASS',name,'mobile shell + compact axis/pace + P10 low/standard/high display-only policy + decision reasons + market-last + structural labels + native 5 tickets + bounded 2027 holdout');
   await browser.close();
 }
 run(webkit,'WebKit iPhone').catch(e=>{console.error(e);process.exit(1)});
