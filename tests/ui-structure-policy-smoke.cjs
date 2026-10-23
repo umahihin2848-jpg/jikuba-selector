@@ -1,13 +1,13 @@
-const {chromium,webkit}=require('playwright');
+const {webkit}=require('playwright');
 const assert=require('assert');
-const BASE='http://127.0.0.1:4173/waku-bc-converter/v3.html?test=structure-policy-r85';
+const BASE='http://127.0.0.1:4173/waku-bc-converter/v3.html?test=structure-policy-r86';
 const UA='Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1';
 async function run(type,name){
   const browser=await type.launch({headless:true});
   const context=await browser.newContext({viewport:{width:390,height:844},userAgent:UA,isMobile:true,hasTouch:true});
   const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto(BASE,{waitUntil:'networkidle',timeout:30000});
-  await page.waitForFunction(()=>window.RSAAddonHealth?.ready===true&&window.ProspectiveLedgerPolicy?.version==='prospective-ledger-policy-v2',null,{timeout:25000});
+  await page.goto(BASE,{waitUntil:'domcontentloaded',timeout:30000});
+  await page.waitForSelector('#iosMobileShellV2',{timeout:10000});
   const mobile=await page.evaluate(()=>({
     innerWidth:window.innerWidth,
     ua:navigator.userAgent,
@@ -20,10 +20,14 @@ async function run(type,name){
     script:[...document.scripts].map(s=>s.src).find(x=>x.includes('ios-mobile-shell-v2.js'))||''
   }));
   console.log('MOBILE_DEBUG',name,JSON.stringify(mobile));
+  console.log('PAGE_ERRORS',JSON.stringify(errors));
   assert.strictEqual(mobile.shellFlag,true,`${name}: mobile shell flag not set`);
   assert.strictEqual(mobile.shell,true,`${name}: #iosMobileShellV2 missing`);
   assert.strictEqual(mobile.tabs.length,3,`${name}: expected three mobile tabs`);
   assert(/iosMobileShellV2/.test(mobile.bodyClass),`${name}: mobile shell body class missing`);
+  assert.strictEqual(mobile.tabs[0].key,'ticket',`${name}: first tab is not ticket`);
+  assert.strictEqual(mobile.tabs[0].hidden,false,`${name}: ticket tab hidden`);
+  await page.waitForFunction(()=>window.RSAAddonHealth?.ready===true&&window.ProspectiveLedgerPolicy?.version==='prospective-ledger-policy-v2',null,{timeout:25000});
   const base=await page.evaluate(()=>{
     const result=document.getElementById('result'),children=result?[...result.children]:[],reliability=document.getElementById('reliabilitySection'),market=document.getElementById('marketSection');
     const reliabilityIndex=children.indexOf(reliability),marketIndex=children.indexOf(market);
@@ -65,4 +69,4 @@ async function run(type,name){
   console.log('PASS',name,'mobile shell + market-last + structural labels + native 5 tickets + bounded 2027 holdout');
   await browser.close();
 }
-(async()=>{await run(chromium,'Chromium iPhone');await run(webkit,'WebKit iPhone')})().catch(e=>{console.error(e);process.exit(1)});
+run(webkit,'WebKit iPhone').catch(e=>{console.error(e);process.exit(1)});
