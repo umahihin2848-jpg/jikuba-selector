@@ -20,4 +20,5 @@ function schedule(ms=30){clearTimeout(timer);timer=setTimeout(()=>requestAnimati
 ['structural-ticket-engine-v3-ready','structural-ticket-auto-ready','position-risk-ready','m3-pure-ability-ready','race-overall-summary-ready','rsa-analysis-complete'].forEach(ev=>addEventListener(ev,()=>schedule(ev==='position-risk-ready'?10:40)));
 document.addEventListener('click',e=>{if(['analyzeBtn','applyOddsBtn','parseCsvBtn'].includes(e.target?.id))schedule(120)},true);document.addEventListener('input',e=>{if(['oddsPaste','qmdWidePaste','qmdQuinellaPaste'].includes(e.target?.id))schedule(100)},true);
 function boot(){css();schedule(0);setTimeout(()=>schedule(500),500);setTimeout(()=>schedule(1500),1500)}if(document.readyState==='loading')addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+window.DecisionReasonCardUI={ready:true,version:V,render,schedule};
 })();
