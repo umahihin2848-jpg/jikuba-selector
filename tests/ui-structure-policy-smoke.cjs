@@ -49,6 +49,11 @@ async function run(type,name){
   await page.evaluate(()=>{
     window.RSAAnalysisTransitionState={generation:91,status:'ready'};
     window.FourAxisIntegrationState={p:[.1,.2,.5,.2]};
+    window.M3PureAbilityState={ready:true,rows:[
+      {no:'1',name:'A',abilityRank:1,index:62,top3:.44,historyStatus:'十分'},
+      {no:'2',name:'B',abilityRank:2,index:56,top3:.34,historyStatus:'十分'},
+      {no:'3',name:'C',abilityRank:3,index:52,top3:.29,historyStatus:'十分'}
+    ]};
     window.M3PureAbilityV2State={ready:true,generation:91,rows:[
       {no:'1',name:'A',v2Rank:1},{no:'2',name:'B',v2Rank:2},{no:'3',name:'C',v2Rank:3},{no:'4',name:'D',v2Rank:4}
     ]};
@@ -58,15 +63,36 @@ async function run(type,name){
       {no:'3',name:'C',finishRank:3,sc:[{rank:3},{rank:3},{rank:3},{rank:3}]},
       {no:'4',name:'D',finishRank:4,sc:[{rank:4},{rank:4},{rank:4},{rank:4}]}
     ]};
+    window.RPCIFitBetaState={ready:true,expectedRPCI:51.2,rows:[]};
+    window.StructuralTicketEngineV3State={ready:true,route:'single_ability1',reason:'単独Ability1軸',structuralCount:1,axis:{no:'1',name:'A',abilityRank:1,m3Rank:1},candidates:[{no:'1',name:'A',abilityRank:1,m3Rank:1}]};
     window.RaceOverallSummaryState={ready:true,generation:91,version:'test'};
+    dispatchEvent(new CustomEvent('m3-pure-ability-ready'));
+    dispatchEvent(new CustomEvent('finish600-ready'));
+    dispatchEvent(new CustomEvent('four-axis-integration-ready'));
+    dispatchEvent(new CustomEvent('rpci-fit-beta-ready'));
+    dispatchEvent(new CustomEvent('structural-ticket-engine-v3-ready',{detail:window.StructuralTicketEngineV3State}));
     dispatchEvent(new CustomEvent('race-overall-summary-ready'));
   });
+  await page.waitForFunction(()=>document.querySelector('#imsAxisSummary')?.textContent.includes('1番 A')&&document.querySelector('#imsPaceSummary')?.textContent.includes('標準 50%')&&document.querySelector('#imsPaceSummary')?.textContent.includes('51.2'),null,{timeout:8000});
+  const compact=await page.evaluate(()=>({
+    axis:document.querySelector('#imsAxisSummary')?.textContent||'',
+    pace:document.querySelector('#imsPaceSummary')?.textContent||'',
+    axisClosed:document.querySelector('#imsAxisDetails')?.open===false,
+    paceClosed:document.querySelector('#imsPaceDetails')?.open===false
+  }));
+  assert(/単独軸型/.test(compact.axis),`${name}: compact axis route missing`);
+  assert(/Ability #1/.test(compact.axis),`${name}: compact Ability #1 missing`);
+  assert(/M3 #1/.test(compact.axis),`${name}: compact structural M3 rank missing`);
+  assert(/想定RPCI/.test(compact.pace),`${name}: compact RPCI label missing`);
+  assert(/M3 #1/.test(compact.pace),`${name}: compact M3 top missing`);
+  assert.strictEqual(compact.axisClosed,true,`${name}: axis details should start closed`);
+  assert.strictEqual(compact.paceClosed,true,`${name}: pace details should start closed`);
   await page.waitForFunction(()=>window.RaceOverallSummaryState?.anchorPolicy==='ability-v2-m3-axis-v1'&&window.MarketIndependentCenterState?.generation===91,null,{timeout:12000});
   const cls=await page.evaluate(()=>window.RaceOverallSummaryState.classification);
   assert.strictEqual(cls,'構造一致・安定',`${name}: structural classification wrong: ${cls}`);
   assert(!/買い検討型|見送り寄り/.test(cls),`${name}: betting-style classification remains`);
   assert.deepStrictEqual(errors,[],`${name}: page errors ${errors.join(' | ')}`);
-  console.log('PASS',name,'mobile shell + market-last + structural labels + native 5 tickets + bounded 2027 holdout');
+  console.log('PASS',name,'mobile shell + compact axis/pace + market-last + structural labels + native 5 tickets + bounded 2027 holdout');
   await browser.close();
 }
 run(webkit,'WebKit iPhone').catch(e=>{console.error(e);process.exit(1)});
