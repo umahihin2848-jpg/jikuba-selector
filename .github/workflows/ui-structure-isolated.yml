@@ -18,13 +18,13 @@ jobs:
           node-version: 22
       - name: Check mobile shell syntax
         run: node --check waku-bc-converter/ios-mobile-shell-v2.js
-      - name: Install Playwright
+      - name: Install WebKit
         run: |
           npm install --no-save playwright@latest
-          npx playwright install --with-deps chromium webkit
+          npx playwright install webkit
       - name: Start local app
         run: |
           python3 -m http.server 4173 > /tmp/jikuba-server.log 2>&1 &
           sleep 2
-      - name: Run isolated structure policy
+      - name: Run WebKit structure policy
         run: timeout 120s node tests/ui-structure-policy-smoke.cjs
