@@ -1,0 +1,37 @@
+(()=>{'use strict';
+if(window.__MOBILE_MANUAL_TICKET_V1)return;window.__MOBILE_MANUAL_TICKET_V1=true;
+const V='mobile-manual-ticket-v1.0',$=id=>document.getElementById(id),E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let raf=0,lastSig='';
+const pct=x=>Number.isFinite(Number(x))?`${(Number(x)*100).toFixed(0)}%`:'—';
+function schedule(){if(raf)return;raf=requestAnimationFrame(()=>{raf=0;render()})}
+function levelLabel(x){const l=String(x?.level||'wait');if(l==='green')return{c:'buy',t:'候補'};if(l==='yellow')return{c:'wait',t:'慎重'};if(l==='red')return{c:'stop',t:'見送り'};return{c:'wait',t:'市場待ち'}}
+function axisText(s){const a=s?.structure?.axis;return a?`${E(a.no)}番 ${E(a.name||'')}`:'軸なし'}
+function answer(state){const box=$('imsAnswer');if(!box)return;const f=state?.final||{},a=state?.structure?.axis;box.className='imsAnswer';
+ if(!state?.ready){box.classList.add('hold');box.innerHTML='<small>AXIS DECISION</small><strong>分析待ち</strong><p>レース構造を解析すると、軸候補と相手候補を表示します。</p>';return}
+ if(f.level==='red'||!a){box.classList.add('pass');box.innerHTML=`<small>AXIS DECISION</small><strong>見送り</strong><p>${E(f.reason||'軸条件を満たしていません。')}</p>`;return}
+ if(f.level==='wait'){box.classList.add('hold');box.innerHTML=`<small>AXIS DECISION</small><strong>軸候補｜${axisText(state)}</strong><p>${E(f.reason||'市場入力待ちです。')} 相手の組み合わせは自動固定しません。</p>`;return}
+ box.classList.add(f.level==='green'?'buy':'hold');box.innerHTML=`<small>AXIS DECISION</small><strong>軸候補｜${axisText(state)}</strong><p>${E(f.label||'条件付き')}｜${E(f.reason||'')} 相手は候補一覧から自分で取捨選択します。</p>`
+}
+function policyRow(label,kind,state,pool){const f=state?.final||{},a=state?.structure?.axis,m=state?.market||{},t=state?.tickets?.[kind]||{};let st,main,sub;
+ if(kind==='win'){
+   st=levelLabel(t);main=a?`${E(a.no)}番 ${E(a.name||'')}`:'—';const mk=a?m.byNo?.[String(a.no)]:null;sub=mk?`現在 ${mk.pop}人気・${Number(mk.od).toFixed(1)}倍｜${E(t.reason||'')}`:E(t.reason||'単勝オッズ待ち');
+ }else if(f.level==='red'||!a){st={c:'stop',t:'見送り'};main='—';sub='軸最終判定が見送り';
+ }else if(!m.complete){st={c:'wait',t:'市場待ち'};main='相手候補は未確定';sub=`全頭単勝オッズ ${m.rows?.length||0}/${m.field||0}`;
+ }else{st={c:'wait',t:'手動選択'};main=`相手候補 ${pool?.rows?.length||0}頭から選ぶ`;sub='組み合わせ・金額は自分で決定。自動固定なし';}
+ return `<div class="imsSimpleTicketRow ${st.c}"><strong>${E(label)}</strong><div class="imsSimpleTicketMain"><b>${main}</b><small>${sub}</small></div><span class="imsSimpleStatus">${st.t}</span></div>`
+}
+function candidateRows(pool){if(!pool?.ready){const b=pool?.structureBest;return `<div class="mmtEmpty">${E(pool?.reason||'市場入力後に相手候補を表示します。')}${b?`<br>構造参考：<b>${E(b.no)}番 ${E(b.name||'')}</b>｜Ability #${b.ar<99?b.ar:'—'}・M3 #${b.m3<99?b.m3:'—'}・P10 ${pct(b.p10)}`:''}</div>`}
+ return `<div class="mmtCandidates">${(pool.rows||[]).map((r,i)=>{const pop=Number.isFinite(Number(r.pop))?`${r.pop}人気`:'市場外',od=Number.isFinite(Number(r.odds))?`${Number(r.odds).toFixed(1)}倍`:'—';return `<div class="mmtCandidate ${r.source==='structure'?'rescue':''}"><div class="mmtNo"><b>${E(r.no)}</b><small>${i+1}</small></div><div><header><b>${E(r.name||`${r.no}番`)}</b><span>${E(r.role||'候補')}</span></header><small>${E(pop)}・${E(od)}｜Ability #${r.ar<99?r.ar:'—'}｜M3 #${r.m3<99?r.m3:'—'}｜P10 ${pct(r.p10)}</small></div></div>`}).join('')}</div>`
+}
+function render(){const shell=$('iosMobileShellV2'),root=$('imsSimpleTicket');if(!shell||!root)return;document.documentElement.classList.add('mobileManualTicketMode');const state=window.DecisionShellV2State,pool=window.OpponentCandidatePoolState||{ready:false,rows:[]};
+ const tab=shell.querySelector('[data-ims-tab="ticket"]');if(tab&&tab.textContent!=='🎫 馬券候補')tab.textContent='🎫 馬券候補';answer(state);
+ const sig=JSON.stringify([state?.ready,state?.final?.level,state?.final?.label,state?.final?.reason,state?.structure?.axis?.no,state?.market?.complete,state?.market?.rows?.map?.(x=>[x.no,x.od]),pool?.ready,pool?.rows?.map?.(x=>[x.no,x.role,x.pop,x.odds,x.ar,x.m3,x.p10])]);
+ if(sig===lastSig&&root.dataset.manualUi==='1')return;lastSig=sig;root.dataset.manualUi='1';
+ root.innerHTML=`<section class="imsSimpleBlock mmtPolicy"><div class="imsSimpleHead"><b>馬券方針</b><span>組み合わせは手動</span></div><div class="imsSimpleRows">${policyRow('単勝','win',state,pool)}${policyRow('馬連','quinella',state,pool)}${policyRow('ワイド','wide',state,pool)}</div></section><section class="imsSimpleBlock mmtPool"><div class="imsSimpleHead"><b>相手候補</b><span>最大5頭｜最終選択は自分</span></div><p class="mmtLead">市場上位4頭を土台に、Ability＋M3＋P10の構造拾いを最大1頭追加。順位＝買い順ではありません。</p>${candidateRows(pool)}</section>`;
+ window.MobileManualTicketState={ready:true,version:V,axis:state?.structure?.axis||null,final:state?.final||null,candidates:pool?.rows||[],enabledTickets:['win','quinella','wide'],autoCombination:false,autoStake:false,trio:false,at:Date.now()}
+}
+const css=document.createElement('style');css.id='mobileManualTicketStyle';css.textContent=`html.mobileManualTicketMode body.iosMobileShellV2 #structuralTicketEngineV3,html.mobileManualTicketMode body.iosMobileShellV2 #logic45StrategiesV1,html.mobileManualTicketMode body.iosMobileShellV2 #candidateOddsCompact,html.mobileManualTicketMode body.iosMobileShellV2 #trioThirdRow,html.mobileManualTicketMode body.iosMobileShellV2 #trioForwardDecomposition{display:none!important}.mmtLead{font-size:8px;line-height:1.55;color:#8ba5b2;margin:7px 0}.mmtCandidates{display:grid;gap:6px;margin-top:7px}.mmtCandidate{display:grid;grid-template-columns:34px minmax(0,1fr);gap:8px;align-items:center;border:1px solid #2d4b5b;background:#0a202b;border-radius:10px;padding:8px}.mmtCandidate.rescue{border-color:#80683e;background:#272113}.mmtNo{position:relative;width:32px;height:32px;display:grid;place-items:center;border-radius:9px;background:#123447}.mmtNo b{font-size:13px;color:#f1f8fb}.mmtNo small{position:absolute;right:-4px;top:-4px;width:13px;height:13px;display:grid;place-items:center;border-radius:50%;background:#31566a;color:#d9ebf2;font-size:6px}.mmtCandidate header{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.mmtCandidate header>b{font-size:10px;color:#edf7fb}.mmtCandidate header>span{font-size:7px;border:1px solid #36576a;border-radius:999px;padding:2px 5px;color:#a9c5d0}.mmtCandidate.rescue header>span{border-color:#7b6539;color:#efd58b}.mmtCandidate div>small{display:block;margin-top:4px;font-size:7px;line-height:1.4;color:#86a2af}.mmtEmpty{font-size:8px;line-height:1.6;color:#89a4b0;border:1px dashed #35566a;border-radius:9px;padding:9px;margin-top:7px}.mmtEmpty b{color:#d9eaf1}html.mobileManualTicketMode #imsTicketDetails{display:none!important}`;document.head.appendChild(css);
+['decision-shell-v2-ready','opponent-candidate-pool-ready','structural-ticket-engine-v3-ready','rsa-analysis-complete','rsa-addons-ready'].forEach(ev=>addEventListener(ev,()=>setTimeout(schedule,0)));
+document.addEventListener('input',e=>{if(['oddsPaste','qmdWidePaste','qmdQuinellaPaste'].includes(e.target?.id))setTimeout(schedule,60)},true);document.addEventListener('click',e=>{if(['analyzeBtn','applyOddsBtn','parseCsvBtn','clearOddsBtn'].includes(e.target?.id))setTimeout(schedule,120)},true);
+const mo=new MutationObserver(()=>schedule());function boot(){if(document.body)mo.observe(document.body,{childList:true,subtree:true});schedule();setTimeout(schedule,300);setTimeout(schedule,1100)}if(document.readyState==='loading')addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+})();
