@@ -1,45 +1,24 @@
 {
-  "version": "opponent_rank_audit_v1.1",
+  "version": "opponent_rank_audit_v1_SUPERSEDED",
   "created": "2026-10-24",
-  "purpose": "Audit partner-ranking rules for manual-bet mode using deployed Ability v1, M3 core and P10 models reconstructed from strictly prior TARGET histories.",
-  "universe": "JRA flat only, field_size>=12, 3-win class or higher; complete 2025-2026 result races available in uploaded TARGET exports",
-  "flat_filter_correction": "Obstacle OP rows were explicitly excluded in v1.1. Two obstacle races had been inadvertently included in the first v1 audit.",
-  "eligible_axis_definition": "Exactly one M3 Top3 x Ability Top3 structural horse; axis Ability rank 1 or 2; final-popularity proxy 1-6; Ability1 also P10<50%. Final popularity is used only as a historical proxy for the current market-eligibility gate.",
-  "eligible_axis_races": {"2025":88,"2026":51,"total":139,"ability1":113,"ability2":26,"axis_finished_top2":70,"axis_finished_top3":85},
-  "decision": "ADOPT_ABILITY_PRIMARY_FOR_PARTNER_RANKING",
+  "status": "SUPERSEDED_BY_opponent_rank_audit_v2",
+  "superseded_by": "data/opponent_rank_audit_v2.json",
+  "reason": "The previous retrospective audit used row-order tie breaking for tied Ability/M3 scores. TARGET result exports can be finish-order sorted, so current finish order could leak into tied ranks. Date parsing and numeric race-ID coercion also dropped/misordered some historical rows. Production runtime itself was not affected.",
+  "eligible_axis_races": {"2025":63,"2026":42,"total":105,"axis_finished_top2":38,"axis_finished_top3":50},
   "pooled_partner_capture_conditional_on_axis_survival": {
-    "quinella_axis_top2": {"n":70,"ability_top1":0.7,"ability_top2":0.8428571428571429,"ability_top3":0.8571428571428571,"market_top2":0.4,"ability_plus_m3_p10_top2":0.45714285714285713,"ability_top2_minus_combined_top2":0.38571428571428573,"paired_bootstrap_95ci_difference":[0.2714285714285714,0.5]},
-    "wide_axis_top3": {"n":85,"ability_top1":0.8470588235294118,"ability_top2":0.9764705882352941,"ability_top3":0.9882352941176471,"market_top2":0.6588235294117647,"ability_plus_m3_p10_top2":0.7294117647058823,"ability_top2_minus_combined_top2":0.24705882352941178,"paired_bootstrap_95ci_difference":[0.15294117647058825,0.3411764705882353]},
-    "trio_axis_top3_both_other_top3_horses": {"n":85,"ability_top3":0.7176470588235294,"ability_top4":0.7294117647058823,"ability_top5":0.7411764705882353}
+    "quinella_axis_top2": {"n":38,"ability_top1":0.0526,"ability_top2":0.1842,"ability_top3":0.3421,"market_top2":0.50,"ability_plus_m3_p10_top2":0.2105},
+    "wide_axis_top3": {"n":50,"ability_top1":0.26,"ability_top2":0.34,"ability_top3":0.50,"market_top2":0.76,"ability_plus_m3_p10_top2":0.30},
+    "trio_axis_top3_both_other_top3_horses": {"n":50,"ability_top3":0.10,"ability_top4":0.14,"ability_top5":0.20}
   },
-  "year_stability_ability_only": {
-    "2025": {"n":88,"quinella_top1":0.627906976744186,"quinella_top2":0.813953488372093,"quinella_top3":0.8372093023255814,"wide_top1":0.8113207547169812,"wide_top2":0.9811320754716981,"wide_top3":1.0,"trio_top3_both":0.6981132075471698,"trio_top4_both":0.7169811320754716},
-    "2026": {"n":51,"quinella_top1":0.8148148148148148,"quinella_top2":0.8888888888888888,"quinella_top3":0.8888888888888888,"wide_top1":0.90625,"wide_top2":0.96875,"wide_top3":0.96875,"trio_top3_both":0.75,"trio_top4_both":0.75}
-  },
-  "scenario_rescue_shadow_audit": {
-    "tested_rule_upper_bound": "Add at most one non-axis Ability>=4 horse chosen first by M3 rank among the remaining M3 Top3 horses. This broader rule is an upper-bound screen before the proposed main-scenario filter.",
-    "flat_races": 139,
-    "candidate_top3_rate": {"2025":0.10227272727272728,"2026":0.0196078431372549,"pooled":0.07194244604316546},
-    "incremental_capture_points": {
-      "quinella_ability_top2_plus_one": {"2025":0.06976744186046513,"2026":0.03703703703703709,"pooled":0.05714285714285716},
-      "wide_ability_top2_plus_one": {"2025":0.0,"2026":0.0,"pooled":0.0},
-      "trio_ability_top3_plus_one": {"2025":0.09433962264150952,"2026":0.03125,"pooled":0.07058823529411762}
-    },
-    "interpretation": "No production promotion. Wide adds no capture. Quinella/trio gain shrinks materially in 2026 and price/ROI is unvalidated. Runtime main-scenario rescue may be shown as SHADOW only and logged forward.",
-    "exact_pre_race_main_scenario_oos_validated": false
-  },
+  "decision": "REJECT_ABILITY_PRIMARY_AS_VALIDATED_BETTING_PARTNER_ORDER",
   "ui_policy": {
-    "partner_rank": "Order non-axis horses by Ability rank only.",
-    "core_partners": "Partner ranks 1-2 are CORE for quinella/wide review; rank 3 is BACKUP.",
-    "trio_pool": "Use Ability partner ranks 1-3 as the primary three-horse opponent pool.",
-    "m3_p10_scenario": "Display as traits/risk/context, not ranking weights.",
-    "scenario_rescue": "At most one Ability>=4 x M3 Top3 x current main-scenario Top3 horse may be displayed as SHADOW only. It must not alter partner rank, ticket status, stake, or ROI claims.",
-    "market": "Display popularity and price downstream only; do not use them to reorder partners."
+    "partner_rank": "Do not present Ability-only order as validated CORE/BACKUP betting order.",
+    "ability_m3_p10": "Display as structural traits only while opponent order is revalidated.",
+    "market": "Final-popularity proxy was the strongest simple retrospective comparator, but exact T-15 validation is unavailable and therefore no production ranking is promoted.",
+    "pair_price": "No stable Ability-pair odds threshold was found."
   },
   "caveats": [
-    "This is a retrospective reconstruction using final popularity as a proxy for the axis 1-6 popularity gate because exact T-15 historical snapshots are unavailable.",
-    "Partner ordering itself is market-independent and uses strictly prior histories, but price/ROI of Ability-ranked pair choices is not established by this audit.",
-    "The exact pre-race main-scenario rescue criterion has not been separately frozen and OOS-validated; it remains SHADOW only.",
-    "Forward logging is required before any rescue rule is promoted to a production ticket decision."
+    "This compatibility file exists so older UI code cannot continue showing the superseded 84%/98% Ability capture claims.",
+    "Use opponent_rank_audit_v2.json for full corrected methodology, partner statistics and price-band diagnostics."
   ]
 }
