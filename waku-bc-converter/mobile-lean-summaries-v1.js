@@ -1,6 +1,6 @@
 (()=>{'use strict';
 if(!window.RSAMobileLean||window.__MOBILE_LEAN_SUMMARIES_V1)return;window.__MOBILE_LEAN_SUMMARIES_V1=true;
-const V='mobile-lean-summaries-v1.0',$=id=>document.getElementById(id),E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));let raf=0,last='';
+const V='mobile-lean-summaries-v1.0',$=id=>document.getElementById(id),E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));let raf=0,last='';
 const pct=x=>Number.isFinite(Number(x))?`${Math.round(Number(x)*100)}%`:'—';
 function map(st){return st?.byNo||Object.fromEntries((st?.rows||[]).map(r=>[String(r.no),r]))}
 function schedule(){if(raf)return;raf=requestAnimationFrame(()=>{raf=0;render()})}
