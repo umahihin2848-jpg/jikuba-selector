@@ -1,0 +1,92 @@
+{
+  "version": "opponent_rank_audit_v1",
+  "created": "2026-10-24",
+  "purpose": "Audit partner-ranking rules for manual-bet mode using the deployed Ability v1, M3 core and P10 models reconstructed from strictly prior TARGET histories.",
+  "universe": "JRA flat, field_size>=12, 3-win class or higher; complete 2025-2026 result races available in the uploaded TARGET exports",
+  "base_complete_races": {
+    "2025": 349,
+    "2026": 255,
+    "total": 604
+  },
+  "eligible_axis_definition": "Exactly one M3 Top3 x Ability Top3 structural horse; axis Ability rank 1 or 2; final-popularity proxy 1-6; Ability1 also P10<50%. Final popularity is used only as a historical proxy for the current market-eligibility gate.",
+  "eligible_axis_races": {
+    "2025": 89,
+    "2026": 52,
+    "total": 141,
+    "ability1": 114,
+    "ability2": 27,
+    "axis_finished_top2": 72,
+    "axis_finished_top3": 87
+  },
+  "candidate_rules_compared": [
+    "Ability rank only",
+    "M3 rank only",
+    "final popularity rank proxy",
+    "Ability rank + M3 rank",
+    "Ability rank + M3 rank + P10 risk penalty",
+    "max(Ability,M3) + 0.25*(Ability+M3)"
+  ],
+  "decision": "ADOPT_ABILITY_PRIMARY_FOR_PARTNER_RANKING",
+  "reason": "Ability-only partner ordering was materially stronger and more stable than the combined Borda-style rules. M3, main-scenario rank and P10 should remain explanatory/risk traits instead of moving the core partner order until a separately frozen OOS combiner proves incremental value.",
+  "pooled_partner_capture_conditional_on_axis_survival": {
+    "quinella_axis_top2": {
+      "n": 72,
+      "ability_top1": 0.694444,
+      "ability_top2": 0.833333,
+      "ability_top3": 0.847222,
+      "market_top2": 0.416667,
+      "ability_plus_m3_p10_top2": 0.458333,
+      "ability_top2_minus_combined_top2": 0.375,
+      "paired_bootstrap_95ci_difference": [0.264, 0.486]
+    },
+    "wide_axis_top3": {
+      "n": 87,
+      "ability_top1": 0.839080,
+      "ability_top2": 0.977011,
+      "ability_top3": 0.988506,
+      "market_top2": 0.666667,
+      "ability_plus_m3_p10_top2": 0.724138,
+      "ability_top2_minus_combined_top2": 0.252873,
+      "paired_bootstrap_95ci_difference": [0.161, 0.345]
+    },
+    "trio_axis_top3_both_other_top3_horses": {
+      "n": 87,
+      "ability_top3": 0.712644,
+      "ability_top4": 0.724138,
+      "ability_top5": 0.735632,
+      "market_top3": 0.252874,
+      "ability_plus_m3_p10_top3": 0.229885
+    }
+  },
+  "year_stability_ability_only": {
+    "2025": {
+      "quinella_top2": 0.795455,
+      "quinella_top3": 0.818182,
+      "wide_top2": 0.981481,
+      "wide_top3": 1.0,
+      "trio_top3_both": 0.685185,
+      "trio_top4_both": 0.703704
+    },
+    "2026": {
+      "quinella_top2": 0.892857,
+      "quinella_top3": 0.892857,
+      "wide_top2": 0.969697,
+      "wide_top3": 0.969697,
+      "trio_top3_both": 0.757576,
+      "trio_top4_both": 0.757576
+    }
+  },
+  "ui_policy": {
+    "partner_rank": "Order non-axis horses by Ability rank only.",
+    "core_partners": "Partner ranks 1-2 are CORE for quinella/wide review; rank 3 is BACKUP.",
+    "trio_pool": "Use Ability partner ranks 1-3 as the primary three-horse opponent pool; rank 4 adds only about 1.1 percentage points in this retrospective audit.",
+    "m3_p10_scenario": "Display as traits/risk/context, not as ranking weights.",
+    "market": "Display popularity and price as downstream reference only; do not use them to reorder partners."
+  },
+  "caveats": [
+    "This is a retrospective reconstruction using final popularity as a proxy for the axis 1-6 popularity gate because exact T-15 historical snapshots are unavailable.",
+    "Partner ordering itself is market-independent and uses strictly prior histories, but price/ROI of the new Ability-ranked pair choices is not established by this audit.",
+    "Main-scenario rank was deliberately excluded from the selected ranking because no separately frozen OOS incremental partner-ranking gain has yet been established.",
+    "Forward logging remains required before any pair-price rule is promoted to a green buy rule."
+  ]
+}
