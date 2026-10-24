@@ -1,0 +1,72 @@
+{
+  "version": "opponent_candidate_pool_v1",
+  "created": "2026-10-24",
+  "purpose": "Manual opponent shortlist recall audit. The app surfaces plausible partners; the user makes the final keep/drop and ticket decision.",
+  "universe": "Corrected opponent_rank_audit_v2 eligible-axis sample; JRA flat, field_size>=12, 3-win class or higher.",
+  "protocol": {
+    "development_year": 2025,
+    "untouched_confirmation_year": 2026,
+    "market_proxy_warning": "Historical market order is final popularity because exact T-15 snapshots are unavailable. Live use must rely on the user's entered T-15 market and be forward logged.",
+    "candidate_definition": {
+      "candidate3": "Market top2 excluding axis + at most one best structural rescue outside the market base",
+      "candidate4": "Market top3 excluding axis + at most one best structural rescue outside the market base",
+      "candidate5": "Market top4 excluding axis + at most one best structural rescue outside the market base",
+      "structural_rescue": "Lowest Ability rank + M3 rank + P10 penalty score; P10 penalty 0 (<20%), +1 (20-49.9%), +2 (50-64.9%), +4 (>=65%); tie-break by horse number.",
+      "duplicate_policy": "If the best structural horse is already inside the market base, no extra horse is added. Candidate count is therefore a maximum, not a forced exact count."
+    }
+  },
+  "development_2025": {
+    "candidate3": {"quinella_partner_capture": {"hits": 12, "n": 22, "rate": 0.5455}, "wide_partner_capture": {"hits": 27, "n": 31, "rate": 0.8710}},
+    "candidate4": {"quinella_partner_capture": {"hits": 13, "n": 22, "rate": 0.5909}, "wide_partner_capture": {"hits": 27, "n": 31, "rate": 0.8710}},
+    "candidate5": {"quinella_partner_capture": {"hits": 15, "n": 22, "rate": 0.6818}, "wide_partner_capture": {"hits": 30, "n": 31, "rate": 0.9677}}
+  },
+  "confirmation_2026": {
+    "candidate3": {"quinella_partner_capture": {"hits": 10, "n": 16, "rate": 0.6250}, "wide_partner_capture": {"hits": 14, "n": 19, "rate": 0.7368}},
+    "candidate4": {"quinella_partner_capture": {"hits": 11, "n": 16, "rate": 0.6875}, "wide_partner_capture": {"hits": 15, "n": 19, "rate": 0.7895}},
+    "candidate5": {"quinella_partner_capture": {"hits": 12, "n": 16, "rate": 0.7500}, "wide_partner_capture": {"hits": 15, "n": 19, "rate": 0.7895}}
+  },
+  "pooled_descriptive": {
+    "candidate3": {"quinella_partner_capture": {"hits": 22, "n": 38, "rate": 0.5789}, "wide_partner_capture": {"hits": 41, "n": 50, "rate": 0.8200}},
+    "candidate4": {"quinella_partner_capture": {"hits": 24, "n": 38, "rate": 0.6316}, "wide_partner_capture": {"hits": 42, "n": 50, "rate": 0.8400}},
+    "candidate5": {"quinella_partner_capture": {"hits": 27, "n": 38, "rate": 0.7105}, "wide_partner_capture": {"hits": 45, "n": 50, "rate": 0.9000}}
+  },
+  "candidate6_sanity_check": {
+    "definition": "Market top5 excluding axis + at most one structural rescue",
+    "development_2025": {"quinella_partner_capture": {"hits": 15, "n": 22, "rate": 0.6818}, "wide_partner_capture": {"hits": 30, "n": 31, "rate": 0.9677}},
+    "confirmation_2026": {"quinella_partner_capture": {"hits": 12, "n": 16, "rate": 0.7500}, "wide_partner_capture": {"hits": 16, "n": 19, "rate": 0.8421}},
+    "interpretation": "No quinella gain versus candidate5 and only one additional 2026 wide capture; candidate5 is the practical elbow for manual review width."
+  },
+  "trio": {
+    "hybrid_candidate_pool_exact_capture": "NOT_RECONSTRUCTED_FROM_RANK_ONLY_AUDIT",
+    "reason": "The corrected rank audit does not retain cross-method horse identity needed to know whether both non-axis top3 finishers are inside the hybrid market-plus-structure union.",
+    "market_only_reference": {
+      "2025": {"top3": 0.3226, "top4": 0.4194, "top5": 0.4516},
+      "2026": {"top3": 0.2105, "top4": 0.3684, "top5": 0.4211},
+      "pooled": {"top3": 0.28, "top4": 0.40, "top5": 0.44}
+    }
+  },
+  "decision": "ADOPT_MAX5_MANUAL_SHORTLIST_SHADOW",
+  "production_policy": {
+    "max_candidates": 5,
+    "market_base_count": 4,
+    "structural_rescue_max": 1,
+    "auto_drop_market_horses": false,
+    "auto_bet": false,
+    "auto_stake": false,
+    "user_final_selection": true,
+    "role": "candidate generation / recall support only"
+  },
+  "statistical_interpretation": [
+    "Candidate sets are nested, so recall mechanically rises or stays flat as list width increases; the design decision is an elbow trade-off, not a claim that a larger list has a statistically significant betting edge.",
+    "Candidate5 versus Candidate3 adds 5 quinella-partner captures in 38 qualifying axis-top2 races (+13.2 percentage points) and 4 wide-partner captures in 50 qualifying axis-top3 races (+8.0 percentage points).",
+    "Candidate6 adds no quinella capture and only one 2026 wide capture, so five is a practical manual shortlist stop.",
+    "These results measure shortlist recall, not ROI and not profitability from buying every displayed horse."
+  ],
+  "caveats": [
+    "Historical market order is final popularity proxy, not exact T-15 popularity.",
+    "The eligible-axis sample is small: 38 axis-top2 races for quinella-partner capture and 50 axis-top3 races for wide-partner capture.",
+    "Live T-15 shortlist composition must be forward logged before treating the historical proxy rates as operational rates.",
+    "The shortlist intentionally does not force an exact combination or stake."
+  ],
+  "supersedes_for_ui": ["opponent_rank_audit_v1 Ability-primary CORE/BACKUP display", "scenario-rescue-shadow-v1 automatic rescue framing"]
+}
