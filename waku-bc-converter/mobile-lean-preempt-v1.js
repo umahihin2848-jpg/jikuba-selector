@@ -39,7 +39,5 @@ html.rsaMobileLean .card,html.rsaMobileLean #iosMobileShellV2{box-shadow:none!im
 html.rsaMobileLean body{background:#06111b!important}
 `;
 document.head.appendChild(s);
-function loadController(){if(document.querySelector('script[data-rsa-mobile-controller]'))return;const x=document.createElement('script');x.src='mobile-analysis-controller-v1.js?v=20261024lean5';x.async=false;x.dataset.rsaMobileController='1';document.head.appendChild(x)}
-loadController();
-window.RSAMobileLeanState={ready:true,version:'mobile-lean-preempt-v1.3',legacyAutoBetPreempted:true,researchUiPreempted:true,marketEdgePreempted:true,legacyTransitionPreempted:true,at:Date.now()};
+window.RSAMobileLeanState={ready:true,version:'mobile-lean-preempt-v1.4',legacyAutoBetPreempted:true,researchUiPreempted:true,marketEdgePreempted:true,legacyTransitionPreempted:true,controllerBoot:'loader',at:Date.now()};
 })();
