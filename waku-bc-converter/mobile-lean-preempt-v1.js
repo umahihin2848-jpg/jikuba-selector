@@ -26,7 +26,9 @@ window.__STRUCTURAL_ALERTS_V1=true;
 window.__LONGSHOT_SCOUT_V1=true;
 window.__WIN_CANDIDATE_LAYER_V1=true;
 window.__POSITION_RISK_CONFIDENCE_V1=true;
+window.__POSITION_RISK_CONFIDENCE_SAFE_V2=true;
 window.__RACE_FLOW_LAZY_LOADER_V1=true;
+window.__RSA_ANALYSIS_TRANSITION_V41_LOADED=true;
 const s=document.createElement('style');s.id='rsaMobileLeanStyle';s.textContent=`
 html.rsaMobileLean,html.rsaMobileLean body{scroll-behavior:auto!important;overscroll-behavior-y:auto!important}
 html.rsaMobileLean *{animation:none!important;transition:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;will-change:auto!important}
@@ -37,5 +39,7 @@ html.rsaMobileLean .card,html.rsaMobileLean #iosMobileShellV2{box-shadow:none!im
 html.rsaMobileLean body{background:#06111b!important}
 `;
 document.head.appendChild(s);
-window.RSAMobileLeanState={ready:true,version:'mobile-lean-preempt-v1.2',legacyAutoBetPreempted:true,researchUiPreempted:true,marketEdgePreempted:true,at:Date.now()};
+function loadController(){if(document.querySelector('script[data-rsa-mobile-controller]'))return;const x=document.createElement('script');x.src='mobile-analysis-controller-v1.js?v=20261024lean5';x.async=false;x.dataset.rsaMobileController='1';document.head.appendChild(x)}
+loadController();
+window.RSAMobileLeanState={ready:true,version:'mobile-lean-preempt-v1.3',legacyAutoBetPreempted:true,researchUiPreempted:true,marketEdgePreempted:true,legacyTransitionPreempted:true,at:Date.now()};
 })();
