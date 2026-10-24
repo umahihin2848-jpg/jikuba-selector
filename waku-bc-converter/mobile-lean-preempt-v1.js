@@ -5,6 +5,7 @@ if(!mobile)return;
 window.RSAMobileLean=true;
 document.documentElement.classList.add('rsaMobileLean');
 /* Prevent legacy mobile/auto-bet/research layers from starting. */
+window.__MARKET_EDGE_BOOTSTRAP_V1=true;
 window.__CANDIDATE_ODDS_COMPACT_V1=true;
 window.__WIDE_AUTO_CANDIDATES_V1=true;
 window.__WIDE_QUINELLA_PRICE_GATE_V1=true;
@@ -36,5 +37,5 @@ html.rsaMobileLean .card,html.rsaMobileLean #iosMobileShellV2{box-shadow:none!im
 html.rsaMobileLean body{background:#06111b!important}
 `;
 document.head.appendChild(s);
-window.RSAMobileLeanState={ready:true,version:'mobile-lean-preempt-v1.1',legacyAutoBetPreempted:true,researchUiPreempted:true,at:Date.now()};
+window.RSAMobileLeanState={ready:true,version:'mobile-lean-preempt-v1.2',legacyAutoBetPreempted:true,researchUiPreempted:true,marketEdgePreempted:true,at:Date.now()};
 })();
