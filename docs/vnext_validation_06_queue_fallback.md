@@ -29,7 +29,7 @@ vNext実装前に、Queue不完全時のAxis候補選定が欠損馬の除外で
 
 Queue不完全レースでは、Queue予測がある馬だけでAxis候補を選ばない。
 
-Fallback Axisは、通常AxisBaseから `pred_front` だけを除いた同系統L2 logistic modelとする。
+Fallback Axisは、Validation 04の正本と同じL2 logistic / `C=0.1` を使い、通常AxisBaseから `pred_front` だけを除く。
 
 使用:
 
@@ -52,10 +52,10 @@ Fallback Axisは、通常AxisBaseから `pred_front` だけを除いた同系統
 
 Fallback用Tier境界は2019–23のQueue不完全レース候補score四分位だけから固定。
 
-- A: score >= 0.657492
-- B: 0.577098 <= score < 0.657492
-- C: 0.520052 <= score < 0.577098
-- D: score < 0.520052
+- A: score >= 0.654064
+- B: 0.573666 <= score < 0.654064
+- C: 0.513495 <= score < 0.573666
+- D: score < 0.513495
 
 2024–26を見て境界は動かしていない。
 
@@ -70,10 +70,10 @@ Fallback用Tier境界は2019–23のQueue不完全レース候補score四分位�
 
 2024–26 Queue不完全132レース:
 
-- A: 23頭, 73.9%
-- B: 38頭, 65.8%
-- C: 28頭, 60.7%
-- D: 43頭, 39.5%
+- A: 22頭, 77.3%
+- B: 39頭, 64.1%
+- C: 34頭, 58.8%
+- D: 37頭, 40.5%
 
 確認期間ではA > B > C > Dが再現。
 DevelopmentではB/Cが逆転するため、B/Cを強く分離しすぎない方針は通常Axisと同じ。
@@ -87,14 +87,14 @@ DevelopmentではB/Cが逆転するため、B/Cを強く分離しすぎない方
 - 同じ候補: 76.6%
 - 通常partial Axis候補 Top3: 53.6%
 - Fallback候補 Top3: 55.9%
-- 差 +2.25pt, bootstrap 95%CI -3.15〜+7.21pt
+- 差 +2.25pt, bootstrap 95%CI 約 -3.15〜+7.66pt
 
 2024–26 Queue不完全128レース:
 
-- 同じ候補: 72.7%
+- 同じ候補: 73.4%
 - 通常partial Axis候補 Top3: 51.6%
-- Fallback候補 Top3: 56.3%
-- 差 +4.69pt, bootstrap 95%CI -2.34〜+11.72pt
+- Fallback候補 Top3: 57.0%
+- 差 +5.47pt, bootstrap 95%CI 約 -0.78〜+11.72pt
 
 CIは0を跨ぐのでFallbackが優越すると断定しない。しかし、欠損馬を候補集合から落とす方式より劣化する証拠はなく、全馬を同一条件で評価できるため実装上安全。
 
@@ -110,5 +110,5 @@ CIは0を跨ぐのでFallbackが優越すると断定しない。しかし、欠
 ## 注意
 
 2024–26の完全QueueレースでもFallback候補のTop3率が通常Axis候補より高い差が見えたが、これはQueueが不要という結論にはしない。
-Queue特徴量の本当の増分は次のAblation検証で別途評価する。
+Queue特徴量の本当の増分はAblation検証で別途評価する。
 
