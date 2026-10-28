@@ -4,8 +4,8 @@
   if(root)root.VNextAxisCoreV1=api;
 })(typeof globalThis!=='undefined'?globalThis:this,function(){'use strict';
   const VERSION='vnext-axis-core-v1.0';
-  const finite=v=>Number.isFinite(Number(v));
-  const num=v=>{const x=Number(v);return Number.isFinite(x)?x:NaN};
+  const finite=v=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(Number(v));
+  const num=v=>{if(v===null||v===undefined||v==='')return NaN;const x=Number(v);return Number.isFinite(x)?x:NaN};
   const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
   const sigmoid=z=>z>=0?1/(1+Math.exp(-z)):Math.exp(z)/(1+Math.exp(z));
   const normSurface=s=>String(s||'').includes('ダ')?'ダ':'芝';
