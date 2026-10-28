@@ -1,6 +1,6 @@
 (()=>{'use strict';
 if(!window.RSAMobileLean||window.__MOBILE_OPPONENT_CORE_V1)return;window.__MOBILE_OPPONENT_CORE_V1=true;
-const V='mobile-opponent-core-v1.6',$=id=>document.getElementById(id);let raf=0,lastSig='';
+const V='mobile-opponent-core-v1.7',$=id=>document.getElementById(id);let raf=0,lastSig='';
 const num=v=>{if(v===null||v===undefined||v==='')return NaN;const x=Number(v);return Number.isFinite(x)?x:NaN};
 function schedule(){if(raf)return;raf=requestAnimationFrame(()=>{raf=0;render()})}
 function mapByNo(st){return st?.byNo||Object.fromEntries((st?.rows||[]).map(r=>[String(r.no),r]))}
@@ -11,4 +11,4 @@ function render(){const state=window.DecisionShellV2State;if(!state?.ready)retur
 ['decision-shell-v2-ready','finish600-ready','m3-pure-ability-ready','validated-queue-ready','position-risk-ready','rsa-analysis-complete'].forEach(ev=>addEventListener(ev,()=>setTimeout(schedule,20)));document.addEventListener('input',e=>{if(e.target?.id==='oddsPaste')setTimeout(schedule,50)},true);document.addEventListener('click',e=>{if(['analyzeBtn','applyOddsBtn','parseCsvBtn','clearOddsBtn'].includes(e.target?.id)){lastSig='';setTimeout(schedule,90)}},true);if(document.readyState==='loading')addEventListener('DOMContentLoaded',schedule,{once:true});else schedule();setTimeout(schedule,700);
 window.MobileOpponentCoreV1={ready:true,version:V,render,schedule};
 })();
-(()=>{'use strict';if(window.__RACE_DISSECTION_CARD_LOADER_V1)return;window.__RACE_DISSECTION_CARD_LOADER_V1=true;const css=document.createElement('link');css.rel='stylesheet';css.href='race-dissection-visual-v1.css?v=20261028robust3';document.head.appendChild(css);const add=(src,onload)=>{const s=document.createElement('script');s.src=src;s.async=false;if(onload)s.onload=onload;s.onerror=()=>console.warn('race dissection addon load failed',src);document.body.appendChild(s)};add('race-dissection-card-v1.js?v=20261028robust3',()=>add('structural-watch-summary-v1.js?v=20261028robust3'))})();
+(()=>{'use strict';if(window.__RACE_DISSECTION_CARD_LOADER_V1)return;window.__RACE_DISSECTION_CARD_LOADER_V1=true;const build='20261029overview1',css=document.createElement('link');css.rel='stylesheet';css.href=`race-dissection-visual-v1.css?v=${build}`;document.head.appendChild(css);const add=(src,onload)=>{const s=document.createElement('script');s.src=src;s.async=false;if(onload)s.onload=onload;s.onerror=()=>console.warn('race dissection addon load failed',src);document.body.appendChild(s)};add(`race-dissection-card-v1.js?v=${build}`,()=>add(`structural-watch-summary-v1.js?v=${build}`,()=>add(`race-dissection-overview-v2.js?v=${build}`)))})();
