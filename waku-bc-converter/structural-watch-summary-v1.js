@@ -1,8 +1,8 @@
 (()=>{'use strict';
 if(window.__STRUCTURAL_WATCH_SUMMARY_V1)return;window.__STRUCTURAL_WATCH_SUMMARY_V1=true;
-const V='structural-watch-summary-v1.0',$=id=>document.getElementById(id);let raf=0,last='';
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const num=v=>{const x=Number(v);return Number.isFinite(x)?x:NaN};
+const V='structural-watch-summary-v1.1',$=id=>document.getElementById(id);let raf=0,last='';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]||c));
+const num=v=>{if(v===null||v===undefined||v==='')return NaN;const x=Number(v);return Number.isFinite(x)?x:NaN};
 const pct=(v,d=0)=>Number.isFinite(num(v))?`${(num(v)*100).toFixed(d)}%`:'—';
 const edge=(v,d=2)=>Number.isFinite(num(v))?`×${num(v).toFixed(d)}`:'—';
 function schedule(ms=0){setTimeout(()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;render()})},ms)}
