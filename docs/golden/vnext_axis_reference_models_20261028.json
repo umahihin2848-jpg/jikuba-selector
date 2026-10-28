@@ -1,0 +1,93 @@
+{
+  "version": "vnext_axis_reference_20261028",
+  "training_period": "2019-2023",
+  "note": "2024-2026 is known confirmation, not pristine OOS",
+  "production_policy_candidate": {
+    "queue_complete": "full_reference",
+    "queue_incomplete": "fallback_reference",
+    "simplified": "shadow_only_until_forward"
+  },
+  "full_reference": {
+    "name": "full_reference",
+    "regularization_C": 0.1,
+    "numeric_features": ["abp3_wf","ab_rank_pct","m3_rank_pct","m3score_wf","market_logit","pred_front","hist_n","field","distance"],
+    "categorical_features": ["grade","surface"],
+    "intercept": -1.7975323094855011,
+    "coefficients": {
+      "num__abp3_wf": -0.19765930579493074,
+      "num__ab_rank_pct": 0.13148955450020622,
+      "num__m3_rank_pct": 0.08143294032166015,
+      "num__m3score_wf": -0.003510652155940564,
+      "num__market_logit": 1.2542051497582902,
+      "num__pred_front": 0.0491673179189965,
+      "num__hist_n": 0.043844269479893325,
+      "num__field": -0.09224675132274351,
+      "num__distance": 0.0009420508551511495,
+      "cat__grade_G1": 0.06395188351406204,
+      "cat__grade_G2": 0.009185488763880584,
+      "cat__grade_G3": -0.07715984106427244,
+      "cat__surface_ダ": 0.012197710756009868,
+      "cat__surface_芝": -0.016220179542311922
+    },
+    "tier_thresholds": {"D_C":0.4862505042833954,"C_B":0.5645344615243646,"B_A":0.6447940989032734},
+    "numeric_scaler": {
+      "mean": {"abp3_wf":0.19350026731954065,"ab_rank_pct":0.5089622038446487,"m3_rank_pct":0.5111777703707668,"m3score_wf":0.922932399007961,"market_logit":-3.4066949366675323,"pred_front":0.5442476857144137,"hist_n":4.149947889525794,"field":15.990229286086503,"distance":1822.2120896300157},
+      "scale": {"abp3_wf":0.07752325388641575,"ab_rank_pct":0.316311198536929,"m3_rank_pct":0.31404383041558603,"m3score_wf":0.20944259175720853,"market_logit":1.4069792377634731,"pred_front":0.171759873310845,"hist_n":1.3989504170274134,"field":1.7050742403923864,"distance":469.9964574054734}
+    },
+    "categorical_levels": {"grade":["G1","G2","G3"],"surface":["ダ","芝"]}
+  },
+  "fallback_reference": {
+    "name": "fallback_reference",
+    "regularization_C": 0.1,
+    "numeric_features": ["abp3_wf","ab_rank_pct","m3_rank_pct","m3score_wf","market_logit","hist_n","field","distance"],
+    "categorical_features": ["grade","surface"],
+    "intercept": -1.8099537978986766,
+    "coefficients": {
+      "num__abp3_wf": -0.19936288314010536,
+      "num__ab_rank_pct": 0.152539558075375,
+      "num__m3_rank_pct": 0.06266579144032206,
+      "num__m3score_wf": -0.009784438561535276,
+      "num__market_logit": 1.2231765114034319,
+      "num__hist_n": 0.02333009728833788,
+      "num__field": -0.11763942558210005,
+      "num__distance": -0.004771952058027778,
+      "cat__grade_G1": 0.06446234651589175,
+      "cat__grade_G2": 0.004822366849300672,
+      "cat__grade_G3": -0.07119748719244166,
+      "cat__surface_ダ": 0.007220772853622456,
+      "cat__surface_芝": -0.009133546680871366
+    },
+    "tier_thresholds": {"D_C":0.5134945662877781,"C_B":0.5736659676115357,"B_A":0.6540637697745972},
+    "numeric_scaler": {
+      "mean": {"abp3_wf":0.1926070038910506,"ab_rank_pct":0.5034673202080099,"m3_rank_pct":0.5034673202080099,"m3score_wf":0.9229211451966122,"market_logit":-3.435373437725687,"hist_n":3.645571068894484,"field":15.904211490043489,"distance":1813.2867933165485},
+      "scale": {"abp3_wf":0.07376726453581248,"ab_rank_pct":0.3060861614365088,"m3_rank_pct":0.3060861614365088,"m3score_wf":0.19938060953447334,"market_logit":1.4054015954314036,"hist_n":1.8862518830242847,"field":1.7578527672258502,"distance":455.94260380528794}
+    },
+    "categorical_levels": {"grade":["G1","G2","G3"],"surface":["ダ","芝"]}
+  },
+  "simplified_shadow": {
+    "name": "simplified_market_m3_shadow",
+    "regularization_C": 0.1,
+    "numeric_features": ["market_logit","m3_rank_pct","m3score_wf","hist_n","field","distance"],
+    "categorical_features": ["grade","surface"],
+    "intercept": -1.7916012204032188,
+    "coefficients": {
+      "num__market_logit": 1.2313152548625186,
+      "num__m3_rank_pct": 0.06678599625405056,
+      "num__m3score_wf": 0.015450548120650867,
+      "num__hist_n": 0.05262739371632011,
+      "num__field": -0.03727793268148754,
+      "num__distance": -0.002465623969341561,
+      "cat__grade_G1": 0.07352287665350482,
+      "cat__grade_G2": 0.004426159888705776,
+      "cat__grade_G3": -0.08014289362474017,
+      "cat__surface_ダ": 0.01681920469091942,
+      "cat__surface_芝": -0.01901306177342215
+    },
+    "tier_thresholds": {"D_C":0.4898092315029636,"C_B":0.5645920306331838,"B_A":0.6451432523899564},
+    "numeric_scaler": {
+      "mean": {"market_logit":-3.4066949366675323,"m3_rank_pct":0.5111777703707668,"m3score_wf":0.922932399007961,"hist_n":4.149947889525794,"field":15.990229286086503,"distance":1822.2120896300157},
+      "scale": {"market_logit":1.4069792377634731,"m3_rank_pct":0.31404383041558603,"m3score_wf":0.20944259175720853,"hist_n":1.3989504170274134,"field":1.7050742403923864,"distance":469.9964574054734}
+    },
+    "categorical_levels": {"grade":["G1","G2","G3"],"surface":["ダ","芝"]}
+  }
+}
