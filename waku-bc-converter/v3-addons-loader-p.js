@@ -1,6 +1,6 @@
 (function(){'use strict';
 if(window.__RSA_ADDONS_BOOTING)return;window.__RSA_ADDONS_BOOTING=true;
-const BUILD='20261028robust2';
+const BUILD='20261028robust3';
 function add(src){return new Promise((ok,fail)=>{const s=document.createElement('script');s.src=src;s.async=false;s.onload=()=>ok(src);s.onerror=()=>fail(new Error(src));document.body.appendChild(s)})}
 function preload(files){const seen=new Set([...document.querySelectorAll('link[rel="preload"][as="script"]')].map(x=>x.href));let n=0;for(const src of files){const href=new URL(src,location.href).href;if(seen.has(href))continue;const l=document.createElement('link');l.rel='preload';l.as='script';l.href=src;document.head.appendChild(l);seen.add(href);n++}return n}
 function buildLabel(){const p=location.pathname.toLowerCase();return p.endsWith('/v3q.html')?'M3 Scenario Lab · Q':p.endsWith('/v3p.html')?'M3 Scenario Lab · P':'M3 Scenario Lab'}
