@@ -1,6 +1,6 @@
 (()=>{'use strict';
 if(!window.RSAMobileLean||window.__MOBILE_DECISION_CORE_V1)return;window.__MOBILE_DECISION_CORE_V1=true;
-const V='mobile-decision-core-v1.0',$=id=>document.getElementById(id),num=v=>{const x=Number(v);return Number.isFinite(x)?x:NaN};
+const V='mobile-decision-core-v1.1',$=id=>document.getElementById(id),num=v=>{if(v===null||v===undefined||v==='')return NaN;const x=Number(v);return Number.isFinite(x)?x:NaN};
 let raf=0,lastSig='';
 function schedule(){if(raf)return;raf=requestAnimationFrame(()=>{raf=0;render()})}
 function mapByNo(st){return st?.byNo||Object.fromEntries((st?.rows||[]).map(r=>[String(r.no),r]))}
