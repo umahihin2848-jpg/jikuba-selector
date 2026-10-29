@@ -1,0 +1,86 @@
+{
+  "name": "attrition_v2",
+  "version": "research-1",
+  "status": "REJECT_FOR_PREDICTION_RESEARCH_ONLY",
+  "frozen_at": "2026-10-29",
+  "prediction_impact": false,
+  "probability_impact": false,
+  "ranking_impact": false,
+  "ticket_impact": false,
+  "development_reference": "2016-2023",
+  "development_check_year": 2023,
+  "holdout_period": "2024-2026",
+  "history": {
+    "recent_window": 5,
+    "minimum_valid_runs": 3
+  },
+  "race_demand": {
+    "pressure": "percentile(pre_final3_speed)",
+    "broad_decay": "percentile(mean(last3_laps) - mean(pre_last3_laps))",
+    "terminal_decay": "percentile(last1F - mean(previous_2F))",
+    "decay": "max(broad_decay, terminal_decay)",
+    "attrition_demand": "min(pressure, decay)",
+    "high_requirement_threshold": "top 25% within frozen 2016-2023 graded reference by surface-distance band with fallback"
+  },
+  "horse_run_response": {
+    "relative_last3": "race_last3_seconds - horse_last3_seconds",
+    "gain3": "last3_start_gap_seconds - finish_margin_seconds",
+    "normalization": "2016-2023 surface-distance percentile with fallback",
+    "response": "mean(relative_last3_percentile, gain3_percentile)",
+    "evidence": "attrition_demand * response"
+  },
+  "horse_score": "mean(evidence of up to 5 most recent valid pre-race runs)",
+  "coverage": {
+    "2023": 0.8838,
+    "2024": 0.9464,
+    "2025": 0.9575,
+    "2026": 0.9390
+  },
+  "development_result": {
+    "2023": {
+      "high_requirement_top3_place_rate": 0.3200,
+      "other_top3_place_rate": 0.2428,
+      "difference_points": 7.7,
+      "evaluated_races": 106,
+      "high_requirement_races": 25
+    }
+  },
+  "holdout_results": {
+    "2024": {
+      "high_requirement_top3_place_rate": 0.2857,
+      "other_top3_place_rate": 0.2110,
+      "difference_points": 7.5
+    },
+    "2025": {
+      "high_requirement_top3_place_rate": 0.2000,
+      "other_top3_place_rate": 0.2542,
+      "difference_points": -5.4
+    },
+    "2026": {
+      "high_requirement_top3_place_rate": 0.2121,
+      "other_top3_place_rate": 0.2269,
+      "difference_points": -1.5
+    },
+    "pooled_2024_2026": {
+      "high_requirement_top3_place_rate": 0.2396,
+      "other_top3_place_rate": 0.2309,
+      "difference_points": 0.9,
+      "race_bootstrap_95ci_points": [-5.2, 7.1],
+      "bootstrap_probability_positive": 0.606,
+      "popularity_adjusted_interaction_or": 0.951,
+      "popularity_adjusted_95ci": [0.608, 1.486],
+      "popularity_adjusted_p": 0.825
+    }
+  },
+  "decision": [
+    "REJECT_ATTRITION_V2_AS_PREDICTIVE_FEATURE",
+    "KEEP_CONCEPT_AS_RESEARCH_ONLY",
+    "DO_NOT_ADD_TO_PROBABILITY_RANKING_OR_TICKET_LOGIC",
+    "DO_NOT_RETUNE_USING_2024_2026"
+  ],
+  "next_research_candidates": [
+    "POSITION_CONDITIONAL_DECELERATION_RESILIENCE",
+    "INDIVIDUAL_DECELERATION_RATE_IF_OBSERVABLE",
+    "PREDEFINED_SURFACE_DISTANCE_SPECIFIC_ATTRITION"
+  ]
+}
