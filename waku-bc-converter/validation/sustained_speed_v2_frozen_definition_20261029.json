@@ -1,0 +1,78 @@
+{
+  "name": "sustained_speed_v2",
+  "version": "research-1",
+  "status": "RESEARCH_SHADOW",
+  "frozen_at": "2026-10-29",
+  "prediction_impact": false,
+  "probability_impact": false,
+  "ranking_impact": false,
+  "ticket_impact": false,
+  "development_period": "2016-2023 reference / 2023 development check",
+  "holdout_period": "2024-2026",
+  "forward_confirmation_year": 2027,
+  "history": {
+    "recent_window": 5,
+    "minimum_valid_runs": 3
+  },
+  "race_demand": {
+    "last_furlongs": 5,
+    "speed5": "3600 / sum(F5,F4,F3,F2,F1)",
+    "fast_lap_definition": "lap_time <= 2016-2023 median for the same furlong-to-go position within surface-distance reference",
+    "duration": "longest consecutive fast-lap run in F5..F1",
+    "maintenance": "-std(F5,F4,F3,F2,F1)",
+    "component_weights": {
+      "speed5_percentile": 0.3333333333,
+      "duration_percentile": 0.3333333333,
+      "maintenance_percentile": 0.3333333333
+    },
+    "high_requirement_threshold": "top 25% within frozen 2016-2023 graded-race reference",
+    "fallback": [
+      "surface x exact distance",
+      "surface x distance band",
+      "surface"
+    ]
+  },
+  "horse_run_response": {
+    "gap_score": "1 / (1 + max(last3_start_gap_sec, 0))",
+    "last3_relative": "race_last3_sec - horse_last3_sec",
+    "last3_relative_normalization": "2016-2023 surface-distance percentile with fallback",
+    "gain3": "last3_start_gap_sec - finish_margin_sec",
+    "gain3_normalization": "2016-2023 surface-distance percentile with fallback",
+    "response": "mean(gap_score, last3_relative_percentile, gain3_percentile)",
+    "evidence": "race_sustained_demand_percentile * response"
+  },
+  "horse_score": "mean(evidence of up to 5 most recent valid pre-race runs)",
+  "holdout_results": {
+    "2024": {
+      "high_requirement_top3_place_rate": 0.3675,
+      "other_top3_place_rate": 0.2549,
+      "difference_points": 11.3
+    },
+    "2025": {
+      "high_requirement_top3_place_rate": 0.3125,
+      "other_top3_place_rate": 0.2877,
+      "difference_points": 2.5
+    },
+    "2026": {
+      "high_requirement_top3_place_rate": 0.2333,
+      "other_top3_place_rate": 0.2879,
+      "difference_points": -5.5
+    },
+    "pooled_2024_2026": {
+      "high_requirement_top3_place_rate": 0.3033,
+      "other_top3_place_rate": 0.2757,
+      "difference_points": 2.8,
+      "race_bootstrap_95ci_points": [-2.8, 8.3],
+      "bootstrap_probability_positive": 0.834,
+      "odds_adjusted_interaction_or": 1.249,
+      "odds_adjusted_95ci": [0.843, 1.852],
+      "odds_adjusted_p": 0.268
+    }
+  },
+  "decision": [
+    "KEEP_AS_RESEARCH_SHADOW",
+    "DO_NOT_REPLACE_V1_IN_UI_YET",
+    "DO_NOT_ADD_TO_PROBABILITY_OR_TICKET_LOGIC",
+    "FREEZE_UNTIL_2027_FORWARD_TEST"
+  ]
+}
