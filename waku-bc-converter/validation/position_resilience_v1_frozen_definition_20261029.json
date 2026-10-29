@@ -1,0 +1,71 @@
+{
+  "name": "position_resilience_v1",
+  "version": "research-1",
+  "status": "REJECTED_FOR_PREDICTION",
+  "frozen_at": "2026-10-29",
+  "prediction_impact": false,
+  "probability_impact": false,
+  "ranking_impact": false,
+  "ticket_impact": false,
+  "development_check_year": 2023,
+  "holdout_period": "2024-2026",
+  "forward_research_year": 2027,
+  "history": {
+    "recent_window": 5,
+    "minimum_valid_runs": 3
+  },
+  "race_demand": {
+    "pressure": "percentile of pre-final-3F average speed using frozen 2016-2023 surface-distance reference",
+    "broad_decay": "percentile of mean(last3_laps) - mean(pre_last3_laps)",
+    "terminal_decay": "percentile of last1F - mean(previous2F)",
+    "attrition_demand": "min(pressure_percentile, max(broad_decay_percentile, terminal_decay_percentile))",
+    "high_requirement": "top 25% within frozen 2016-2023 graded-race surface x distance-band reference"
+  },
+  "horse_run_response": {
+    "gap3": "leader gap in seconds at the start of the final 3F",
+    "front_exposure": "1 / (1 + max(gap3, 0))",
+    "lost_ground": "max(finish_margin_sec - gap3, 0)",
+    "retention": "1 / (1 + lost_ground)",
+    "run_evidence": "attrition_demand_percentile * front_exposure * retention"
+  },
+  "horse_score": "mean(run_evidence of up to 5 most recent valid pre-race runs)",
+  "selection": "top 3 horse_score within each target race",
+  "results": {
+    "2023_development_check": {
+      "high_requirement_place_rate": 0.2933,
+      "other_place_rate": 0.2421,
+      "difference_points": 5.1
+    },
+    "2024_holdout": {
+      "high_requirement_place_rate": 0.1795,
+      "other_place_rate": 0.2305,
+      "difference_points": -5.1
+    },
+    "2025_holdout": {
+      "high_requirement_place_rate": 0.2361,
+      "other_place_rate": 0.2675,
+      "difference_points": -3.1
+    },
+    "2026_holdout": {
+      "high_requirement_place_rate": 0.2000,
+      "other_place_rate": 0.2072,
+      "difference_points": -0.7
+    },
+    "pooled_2024_2026": {
+      "high_requirement_place_rate": 0.2056,
+      "other_place_rate": 0.2359,
+      "difference_points": -3.0,
+      "race_bootstrap_95ci_points": [-8.9, 2.8],
+      "bootstrap_probability_positive": 0.157,
+      "odds_adjusted_interaction_or": 0.776,
+      "odds_adjusted_95ci": [0.470, 1.282],
+      "odds_adjusted_p": 0.322
+    }
+  },
+  "decision": [
+    "REJECT_POSITION_RESILIENCE_V1_AS_PREDICTIVE_FEATURE",
+    "DO_NOT_ADD_TO_PROBABILITY_RANKING_OR_TICKET_LOGIC",
+    "DO_NOT_RETUNE_ON_2024_2026",
+    "KEEP_CURRENT_POSITION_CONDITIONAL_HYPOTHESIS_FOR_FORWARD_RESEARCH"
+  ]
+}
