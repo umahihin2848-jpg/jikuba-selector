@@ -43,6 +43,6 @@ html.rsaMobileLean.mpuReady main.view{visibility:visible!important}
 `;
 document.head.appendChild(s);
 /* Fail-open: never leave the app hidden if a later UI module fails. */
-setTimeout(()=>{if(!document.documentElement.classList.contains('mpuReady')){document.documentElement.classList.add('mpuReady');document.documentElement.classList.remove('mpuBoot')}},2600);
-window.RSAMobileLeanState={ready:true,version:'mobile-lean-preempt-v1.5-stable-first-paint',legacyAutoBetPreempted:true,researchUiPreempted:true,marketEdgePreempted:true,legacyTransitionPreempted:true,stableFirstPaint:true,controllerBoot:'loader',at:Date.now()};
+setTimeout(()=>{if(!document.documentElement.classList.contains('mpuReady')){document.documentElement.classList.add('mpuReady');document.documentElement.classList.remove('mpuBoot','rsaMobileBootCritical')}},3200);
+window.RSAMobileLeanState={ready:true,version:'mobile-lean-preempt-v1.6-critical-first-paint',legacyAutoBetPreempted:true,researchUiPreempted:true,marketEdgePreempted:true,legacyTransitionPreempted:true,stableFirstPaint:true,controllerBoot:'loader',at:Date.now()};
 })();
