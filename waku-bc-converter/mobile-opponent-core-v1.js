@@ -1,40 +1,13 @@
 (()=>{'use strict';
 if(!window.RSAMobileLean||window.__MOBILE_OPPONENT_CORE_V1)return;window.__MOBILE_OPPONENT_CORE_V1=true;
-const V='mobile-opponent-core-v1.13-market-top2-warning',$=id=>document.getElementById(id);let raf=0,lastSig='';
+const V='mobile-opponent-core-v1.14-market-gap-warning',$=id=>document.getElementById(id);let raf=0,lastSig='';
 const num=v=>{if(v===null||v===undefined||v==='')return NaN;const x=Number(v);return Number.isFinite(x)?x:NaN};
 function schedule(){if(raf)return;raf=requestAnimationFrame(()=>{raf=0;render()})}
 function mapByNo(st){return st?.byNo||Object.fromEntries((st?.rows||[]).map(r=>[String(r.no),r]))}
-function featureRanks(rows,key){
-  const valid=rows.map(r=>({no:String(r.no),v:num(r.features?.[key])})).filter(x=>Number.isFinite(x.v)).sort((a,b)=>b.v-a.v||Number(a.no)-Number(b.no));
-  const out={};let i=0;while(i<valid.length){let j=i+1;while(j<valid.length&&Math.abs(valid[j].v-valid[i].v)<=1e-12)j++;const rank=(i+1+j)/2;for(let k=i;k<j;k++)out[valid[k].no]=rank;i=j}return out
-}
-function selectMarketTop2(axis,m,A){
-  if(!axis||!m?.complete)return{rows:[],warningCount:0};
-  const abilityRows=A?.rows||[],byA=mapByNo(A),r3=featureRanks(abilityRows,'mean3_finish_pct'),r5=featureRanks(abilityRows,'mean5_finish_pct');
-  const rows=(m.rows||[]).filter(r=>String(r.no)!==String(axis.no)).slice(0,2).map((mk,i)=>{
-    const no=String(mk.no),a=byA[no]||{},histN=num(a.histN),f3=num(r3[no]),f5=num(r5[no]),pop=num(mk.pop),gap3=Number.isFinite(f3)&&Number.isFinite(pop)?f3-pop:NaN,gap5=Number.isFinite(f5)&&Number.isFinite(pop)?f5-pop:NaN;
-    const overpopWarning=histN>=3&&gap3>=9&&gap5>=9;
-    return{no,name:String(a.name||''),role:`相手${i+1}`,selectionRank:i+1,source:'market_top2',pop:mk.pop,odds:mk.od,ar:num(a.abilityRank),m3:num(a.m3Rank),p10:NaN,histN:Number.isFinite(histN)?histN:null,form3Rank:Number.isFinite(f3)?f3:null,form5Rank:Number.isFinite(f5)?f5:null,form3Gap:Number.isFinite(gap3)?gap3:null,form5Gap:Number.isFinite(gap5)?gap5:null,overpopWarning,warningOnly:true,autoDrop:false,selectionReason:'軸を除いた単勝市場上位2頭'}
-  });
-  return{rows,warningCount:rows.filter(r=>r.overpopWarning).length}
-}
-function render(){
-  const state=window.DecisionShellV2State;if(!state?.ready)return;
-  const axis=state.structure?.axis||null,m=state.market||{},A=window.M3PureAbilityState,pick=selectMarketTop2(axis,m,A),rows=pick.rows;
-  const sig=JSON.stringify([axis?.no,state.structure?.abilityRankTie,m.complete,m.rows?.map?.(x=>[x.no,x.od]),rows.map(x=>[x.no,x.pop,x.odds,x.histN,x.form3Rank,x.form5Rank,x.overpopWarning])]);
-  if(sig===lastSig&&window.OpponentCandidatePoolState?.ready)return;lastSig=sig;
-  const noAxisReason=state.structure?.abilityRankTie?state.structure.reason:'軸候補の計算待ち';
-  const reason=!axis?noAxisReason:!m.complete?`全頭単勝オッズ ${m.rows?.length||0}/${m.field||0}。市場入力後に相手2頭を確定`:'軸を除いた市場Top2を本線。長期検証の過剰人気条件は警告表示だけに使い、自動除外・補充はしない';
-  const out={ready:true,version:V,mobileLean:true,mode:'production_market_top2_with_warning',maxCandidates:2,marketBaseCount:2,structuralRescueMax:0,marketReady:Boolean(axis&&m.complete),reason,axis,rows,warningCount:pick.warningCount,
-    selectionMethod:'market_top2_excluding_axis',warningMethod:'hist3_and_hist5_relative_rank_gap_ge9_with_histN_ge3',warningDefinition:'高クラス履歴3走以上かつ、過去3走平均着順率順位・過去5走平均着順率順位がともに現在人気より9順位以上低い',
-    warningEvidence:{period:'2016-2026-10-04',role:'retrospective_long_term_warning',productionDropValidated:false},
-    automaticPartnerOrder:true,manualFinalSelection:true,autoBet:false,autoDrop:false,noReplacement:true,structureReplacementDisabled:true,pairProbabilityUsed:false,conditionEdgeUsed:false,at:Date.now()};
-  window.OpponentCandidatePoolState=out;dispatchEvent(new CustomEvent('opponent-candidate-pool-ready',{detail:out}))
-}
-['decision-shell-v2-ready','m3-pure-ability-ready','rsa-analysis-complete'].forEach(ev=>addEventListener(ev,()=>setTimeout(schedule,20)));
-document.addEventListener('input',e=>{if(e.target?.id==='oddsPaste')setTimeout(schedule,50)},true);
-document.addEventListener('click',e=>{if(['analyzeBtn','applyOddsBtn','parseCsvBtn','clearOddsBtn'].includes(e.target?.id)){lastSig='';setTimeout(schedule,90)}},true);
-if(document.readyState==='loading')addEventListener('DOMContentLoaded',schedule,{once:true});else schedule();setTimeout(schedule,700);
+function featureRanks(rows,key){const valid=rows.map(r=>({no:String(r.no),v:num(r.features?.[key])})).filter(x=>Number.isFinite(x.v)).sort((a,b)=>b.v-a.v||Number(a.no)-Number(b.no));const out={};let i=0;while(i<valid.length){let j=i+1;while(j<valid.length&&Math.abs(valid[j].v-valid[i].v)<=1e-12)j++;const rank=(i+1+j)/2;for(let k=i;k<j;k++)out[valid[k].no]=rank;i=j}return out}
+function selectMarketTop2(axis,m,A){if(!axis||!m?.complete)return{rows:[],warningCount:0};const abilityRows=A?.rows||[],byA=mapByNo(A),r3=featureRanks(abilityRows,'mean3_finish_pct'),r5=featureRanks(abilityRows,'mean5_finish_pct');const rows=(m.rows||[]).filter(r=>String(r.no)!==String(axis.no)).slice(0,2).map((mk,i)=>{const no=String(mk.no),a=byA[no]||{},histN=num(a.histN),f3=num(r3[no]),f5=num(r5[no]),pop=num(mk.pop),gap3=Number.isFinite(f3)&&Number.isFinite(pop)?f3-pop:NaN,gap5=Number.isFinite(f5)&&Number.isFinite(pop)?f5-pop:NaN;const overpopWarning=histN>=3&&gap3>=9&&gap5>=9;return{no,name:String(a.name||''),role:`相手${i+1}`,selectionRank:i+1,source:'market_top2',pop:mk.pop,odds:mk.od,ar:num(a.abilityRank),m3:num(a.m3Rank),p10:NaN,histN:Number.isFinite(histN)?histN:null,form3Rank:Number.isFinite(f3)?f3:null,form5Rank:Number.isFinite(f5)?f5:null,form3Gap:Number.isFinite(gap3)?gap3:null,form5Gap:Number.isFinite(gap5)?gap5:null,overpopWarning,warningOnly:true,autoDrop:false,selectionReason:'軸を除いた単勝市場上位2頭'}});return{rows,warningCount:rows.filter(r=>r.overpopWarning).length}}
+function render(){const state=window.DecisionShellV2State;if(!state?.ready)return;const axis=state.structure?.axis||null,m=state.market||{},A=window.M3PureAbilityState,pick=selectMarketTop2(axis,m,A),rows=pick.rows;const sig=JSON.stringify([axis?.no,state.structure?.abilityRankTie,m.complete,m.rows?.map?.(x=>[x.no,x.od]),rows.map(x=>[x.no,x.pop,x.odds,x.histN,x.form3Rank,x.form5Rank,x.overpopWarning])]);if(sig===lastSig&&window.OpponentCandidatePoolState?.ready)return;lastSig=sig;const noAxisReason=state.structure?.abilityRankTie?state.structure.reason:'軸候補の計算待ち';const reason=!axis?noAxisReason:!m.complete?`全頭単勝オッズ ${m.rows?.length||0}/${m.field||0}。市場入力後に相手2頭を確定`:'軸を除いた市場Top2を本線。市場評価との乖離条件は警告表示だけに使い、自動除外・補充はしない';const out={ready:true,version:V,mobileLean:true,mode:'production_market_top2_with_warning',maxCandidates:2,marketBaseCount:2,structuralRescueMax:0,marketReady:Boolean(axis&&m.complete),reason,axis,rows,warningCount:pick.warningCount,selectionMethod:'market_top2_excluding_axis',warningMethod:'hist3_and_hist5_relative_rank_gap_ge9_with_histN_ge3',warningDefinition:'高クラス履歴3走以上かつ、過去3走平均着順率順位・過去5走平均着順率順位がともに現在人気より9順位以上低い',warningEvidence:{period:'2016-2026-10-04',role:'retrospective_long_term_warning',productionDropTested:true,productionDropImproved:false,productionDropAdopted:false},automaticPartnerOrder:true,manualFinalSelection:true,autoBet:false,autoDrop:false,noReplacement:true,structureReplacementDisabled:true,pairProbabilityUsed:false,conditionEdgeUsed:false,at:Date.now()};window.OpponentCandidatePoolState=out;dispatchEvent(new CustomEvent('opponent-candidate-pool-ready',{detail:out}))}
+['decision-shell-v2-ready','m3-pure-ability-ready','rsa-analysis-complete'].forEach(ev=>addEventListener(ev,()=>setTimeout(schedule,20)));document.addEventListener('input',e=>{if(e.target?.id==='oddsPaste')setTimeout(schedule,50)},true);document.addEventListener('click',e=>{if(['analyzeBtn','applyOddsBtn','parseCsvBtn','clearOddsBtn'].includes(e.target?.id)){lastSig='';setTimeout(schedule,90)}},true);if(document.readyState==='loading')addEventListener('DOMContentLoaded',schedule,{once:true});else schedule();setTimeout(schedule,700);
 window.MobileOpponentCoreV1={ready:true,version:V,render,schedule};
 })();
-(()=>{'use strict';if(window.__RACE_DISSECTION_CARD_LOADER_V1)return;window.__RACE_DISSECTION_CARD_LOADER_V1=true;const build='20261030profile29',css=document.createElement('link');css.rel='stylesheet';css.href=`race-dissection-visual-v1.css?v=${build}`;document.head.appendChild(css);const add=(src,onload)=>{const s=document.createElement('script');s.src=src;s.async=false;if(onload)s.onload=onload;s.onerror=()=>console.warn('race dissection addon load failed',src);document.body.appendChild(s)};add(`race-dissection-card-v1.js?v=${build}`,()=>add(`structural-watch-summary-v1.js?v=${build}`,()=>add(`race-dissection-overview-v2.js?v=${build}`)))})();
+(()=>{'use strict';if(window.__RACE_DISSECTION_CARD_LOADER_V1)return;window.__RACE_DISSECTION_CARD_LOADER_V1=true;const build='20261031cleanup1',css=document.createElement('link');css.rel='stylesheet';css.href=`race-dissection-visual-v1.css?v=${build}`;document.head.appendChild(css);const add=(src,onload)=>{const s=document.createElement('script');s.src=src;s.async=false;if(onload)s.onload=onload;s.onerror=()=>console.warn('race dissection addon load failed',src);document.body.appendChild(s)};add(`race-dissection-card-v1.js?v=${build}`,()=>add(`structural-watch-summary-v1.js?v=${build}`,()=>add(`race-dissection-overview-v2.js?v=${build}`)))})();
