@@ -1,64 +1,37 @@
 (()=>{'use strict';
 if(!window.RSAMobileLean||window.__MOBILE_OPPONENT_CORE_V1)return;window.__MOBILE_OPPONENT_CORE_V1=true;
-const V='mobile-opponent-core-v1.12-top2',$=id=>document.getElementById(id);let raf=0,lastSig='';
+const V='mobile-opponent-core-v1.13-market-top2-warning',$=id=>document.getElementById(id);let raf=0,lastSig='';
 const num=v=>{if(v===null||v===undefined||v==='')return NaN;const x=Number(v);return Number.isFinite(x)?x:NaN};
 function schedule(){if(raf)return;raf=requestAnimationFrame(()=>{raf=0;render()})}
 function mapByNo(st){return st?.byNo||Object.fromEntries((st?.rows||[]).map(r=>[String(r.no),r]))}
-function penalty(p){return p>=.65?4:p>=.50?2:p>=.20?1:0}
-function abilityScoreRank(a,ar){const s=num(a?.abilityTieStart),e=num(a?.abilityTieEnd);return Number.isFinite(s)&&Number.isFinite(e)&&e>=s?(s+e)/2:ar}
-function structure(axisNo,m){
-  const F=window.Finish600State?.rows||[],A=mapByNo(window.M3PureAbilityState),P=mapByNo(window.PositionRiskState),Q=mapByNo(window.ValidatedQueueState);
-  return F.filter(f=>String(f.no)!==String(axisNo)).map(f=>{
-    const no=String(f.no),a=A[no]||{},p=P[no]||{},q=Q[no]||{},mk=m?.byNo?.[no]||{};
-    const ar=Number(a.abilityRank)||99,arScore=abilityScoreRank(a,ar),m3=Number(f.finishRank)||99,p10=num(p.p10),front=num(q.frontness5),abilityTieSize=num(a.abilityTieSize);
-    return{no,name:String(f.name||a.name||''),ar,arScore,m3,p10,front,abilityTieSize,pursuit:String(q.pursuitGrade||'—'),score:arScore+m3+(Number.isFinite(p10)?penalty(p10):2),pop:mk.pop??null,odds:mk.od??null}
-  }).sort((a,b)=>a.score-b.score||a.arScore-b.arScore||a.m3-b.m3||Number(a.no)-Number(b.no))
+function featureRanks(rows,key){
+  const valid=rows.map(r=>({no:String(r.no),v:num(r.features?.[key])})).filter(x=>Number.isFinite(x.v)).sort((a,b)=>b.v-a.v||Number(a.no)-Number(b.no));
+  const out={};let i=0;while(i<valid.length){let j=i+1;while(j<valid.length&&Math.abs(valid[j].v-valid[i].v)<=1e-12)j++;const rank=(i+1+j)/2;for(let k=i;k<j;k++)out[valid[k].no]=rank;i=j}return out
 }
-function enrichMarket(mk,st,i){
-  const s=st.find(x=>x.no===String(mk.no))||{no:String(mk.no),name:'',ar:99,arScore:99,m3:99,p10:NaN,front:NaN,abilityTieSize:1,pursuit:'—',score:198};
-  return{...s,pop:mk.pop,odds:mk.od,marketOrder:i+1,inMarketGate:true,source:'market_gate'}
-}
-function selectTop2(axis,m,st){
-  if(!axis||!m?.complete)return{rows:[],marketGate:[],outsideBest:null,rescueUsed:false};
-  const marketGate=(m.rows||[]).filter(r=>String(r.no)!==String(axis.no)).slice(0,4).map((mk,i)=>enrichMarket(mk,st,i));
-  const marketNos=new Set(marketGate.map(r=>r.no));
-  let selected=[...marketGate].sort((a,b)=>a.score-b.score||a.marketOrder-b.marketOrder||Number(a.no)-Number(b.no)).slice(0,2);
-  const outsideBest=st.find(s=>!marketNos.has(s.no))||null;
-  let rescueUsed=false;
-  if(outsideBest){
-    if(selected.length<2){selected.push({...outsideBest,inMarketGate:false,source:'structure_rescue',marketOrder:null});rescueUsed=true}
-    else{
-      selected.sort((a,b)=>a.score-b.score||a.marketOrder-b.marketOrder||Number(a.no)-Number(b.no));
-      const second=selected[1];
-      if(outsideBest.score<second.score){selected[1]={...outsideBest,inMarketGate:false,source:'structure_rescue',marketOrder:null};rescueUsed=true}
-    }
-  }
-  selected.sort((a,b)=>a.score-b.score||(a.marketOrder??99)-(b.marketOrder??99)||Number(a.no)-Number(b.no));
-  return{
-    rows:selected.slice(0,2).map((r,i)=>({...r,role:`相手${i+1}`,selectionRank:i+1,selectionReason:r.source==='structure_rescue'?'市場Top4外の構造1位が2頭目を逆転':'市場Top4内で構造Score上位'})),
-    marketGate,outsideBest,rescueUsed
-  }
+function selectMarketTop2(axis,m,A){
+  if(!axis||!m?.complete)return{rows:[],warningCount:0};
+  const abilityRows=A?.rows||[],byA=mapByNo(A),r3=featureRanks(abilityRows,'mean3_finish_pct'),r5=featureRanks(abilityRows,'mean5_finish_pct');
+  const rows=(m.rows||[]).filter(r=>String(r.no)!==String(axis.no)).slice(0,2).map((mk,i)=>{
+    const no=String(mk.no),a=byA[no]||{},histN=num(a.histN),f3=num(r3[no]),f5=num(r5[no]),pop=num(mk.pop),gap3=Number.isFinite(f3)&&Number.isFinite(pop)?f3-pop:NaN,gap5=Number.isFinite(f5)&&Number.isFinite(pop)?f5-pop:NaN;
+    const overpopWarning=histN>=3&&gap3>=9&&gap5>=9;
+    return{no,name:String(a.name||''),role:`相手${i+1}`,selectionRank:i+1,source:'market_top2',pop:mk.pop,odds:mk.od,ar:num(a.abilityRank),m3:num(a.m3Rank),p10:NaN,histN:Number.isFinite(histN)?histN:null,form3Rank:Number.isFinite(f3)?f3:null,form5Rank:Number.isFinite(f5)?f5:null,form3Gap:Number.isFinite(gap3)?gap3:null,form5Gap:Number.isFinite(gap5)?gap5:null,overpopWarning,warningOnly:true,autoDrop:false,selectionReason:'軸を除いた単勝市場上位2頭'}
+  });
+  return{rows,warningCount:rows.filter(r=>r.overpopWarning).length}
 }
 function render(){
   const state=window.DecisionShellV2State;if(!state?.ready)return;
-  const axis=state.structure?.axis||null,m=state.market||{},st=axis?structure(axis.no,m):[];
-  const pick=selectTop2(axis,m,st),rows=pick.rows;
-  const sig=JSON.stringify([axis?.no,state.structure?.abilityRankTie,m.complete,m.rows?.map?.(x=>[x.no,x.od]),rows.map(x=>[x.no,x.role,x.pop,x.odds,x.ar,x.arScore,x.m3,x.p10,x.score,x.source])]);
+  const axis=state.structure?.axis||null,m=state.market||{},A=window.M3PureAbilityState,pick=selectMarketTop2(axis,m,A),rows=pick.rows;
+  const sig=JSON.stringify([axis?.no,state.structure?.abilityRankTie,m.complete,m.rows?.map?.(x=>[x.no,x.od]),rows.map(x=>[x.no,x.pop,x.odds,x.histN,x.form3Rank,x.form5Rank,x.overpopWarning])]);
   if(sig===lastSig&&window.OpponentCandidatePoolState?.ready)return;lastSig=sig;
   const noAxisReason=state.structure?.abilityRankTie?state.structure.reason:'軸候補の計算待ち';
-  const reason=!axis?noAxisReason:!m.complete?`全頭単勝オッズ ${m.rows?.length||0}/${m.field||0}。市場入力後に相手2頭を確定`:'市場Top4を構造Scoreで比較して2頭へ。市場外の構造1位が2頭目より低Scoreなら差し替え';
-  const out={
-    ready:true,version:V,mobileLean:true,mode:'production_shortlist_top2',maxCandidates:2,marketBaseCount:4,structuralRescueMax:1,marketReady:Boolean(axis&&m.complete),reason,axis,rows,
-    marketGate:pick.marketGate,outsideStructureBest:pick.outsideBest,rescueUsed:pick.rescueUsed,
-    structureBest:st[0]||null,abilityRankAmbiguous:Boolean(state.structure?.abilityRankTie),tieNeutralScore:true,
-    selectionMethod:'market_top4_then_structure_top2_with_outside_rescue',selectionFormula:'Ability順位 + M3順位 + P10ペナルティ',
-    p10Penalty:{lt20:0,from20to49:1,from50to64:2,gte65:4},
-    marketRankAddedToScore:false,pairProbabilityUsed:false,conditionEdgeUsed:false,
-    automaticPartnerOrder:true,manualFinalSelection:true,autoBet:false,newRuleNeedsForwardValidation:true,at:Date.now()
-  };
+  const reason=!axis?noAxisReason:!m.complete?`全頭単勝オッズ ${m.rows?.length||0}/${m.field||0}。市場入力後に相手2頭を確定`:'軸を除いた市場Top2を本線。長期検証の過剰人気条件は警告表示だけに使い、自動除外・補充はしない';
+  const out={ready:true,version:V,mobileLean:true,mode:'production_market_top2_with_warning',maxCandidates:2,marketBaseCount:2,structuralRescueMax:0,marketReady:Boolean(axis&&m.complete),reason,axis,rows,warningCount:pick.warningCount,
+    selectionMethod:'market_top2_excluding_axis',warningMethod:'hist3_and_hist5_relative_rank_gap_ge9_with_histN_ge3',warningDefinition:'高クラス履歴3走以上かつ、過去3走平均着順率順位・過去5走平均着順率順位がともに現在人気より9順位以上低い',
+    warningEvidence:{period:'2016-2026-10-04',role:'retrospective_long_term_warning',productionDropValidated:false},
+    automaticPartnerOrder:true,manualFinalSelection:true,autoBet:false,autoDrop:false,noReplacement:true,structureReplacementDisabled:true,pairProbabilityUsed:false,conditionEdgeUsed:false,at:Date.now()};
   window.OpponentCandidatePoolState=out;dispatchEvent(new CustomEvent('opponent-candidate-pool-ready',{detail:out}))
 }
-['decision-shell-v2-ready','finish600-ready','m3-pure-ability-ready','validated-queue-ready','position-risk-ready','rsa-analysis-complete'].forEach(ev=>addEventListener(ev,()=>setTimeout(schedule,20)));
+['decision-shell-v2-ready','m3-pure-ability-ready','rsa-analysis-complete'].forEach(ev=>addEventListener(ev,()=>setTimeout(schedule,20)));
 document.addEventListener('input',e=>{if(e.target?.id==='oddsPaste')setTimeout(schedule,50)},true);
 document.addEventListener('click',e=>{if(['analyzeBtn','applyOddsBtn','parseCsvBtn','clearOddsBtn'].includes(e.target?.id)){lastSig='';setTimeout(schedule,90)}},true);
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',schedule,{once:true});else schedule();setTimeout(schedule,700);
