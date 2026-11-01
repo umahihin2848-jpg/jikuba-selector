@@ -1,7 +1,7 @@
 (()=>{'use strict';
 if(window.RSAMobileLean)return;
 if(window.__DESKTOP_LEGACY_RUNTIME_V1)return;window.__DESKTOP_LEGACY_RUNTIME_V1=true;
-const V='desktop-legacy-runtime-v1.0';
+const V='desktop-legacy-runtime-v1.1-retire-bet-plan';
 const files=[
  'market-edge-bootstrap-v1.js?v=20261022mb2',
  'position-risk-confidence-v1.js?v=20261016prc3',
@@ -18,7 +18,6 @@ const files=[
  'structural-ticket-engine-v3.js?v=20261022ste4',
  'logic45-strategies-v1.js?v=20261024ux1',
  'analysis-ready-reconcile-v1.js?v=20261024fix15b',
- 'bet-plan-manual-v1.js?v=20261024ds2',
  'opponent-candidate-pool-v1.js?v=20261024cp1',
  'ticket-scope-wqw-v1.js?v=20261024wqw2',
  'race-flow-lazy-loader-v1.js?v=20261017a11'
