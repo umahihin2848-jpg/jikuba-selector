@@ -1,0 +1,14 @@
+{
+  "version": "course_outer_position_residual_diagnostic_v1",
+  "created": "2026-11-01",
+  "status": "retrospective_diagnostic_only",
+  "purpose": "Small reference set for display-only evidence that outer-gate interpretation depends on realized first-position band. Actual passing position is post-start information; runtime must use predicted queue/P10 instead.",
+  "warning": "These values are market-adjusted retrospective Top3 residuals, not causal distance-loss estimates and not Production corrections.",
+  "entries": [
+    {"course":"東京_芝1600_base","front_pp":0.84,"middle_pp":3.78,"rear_pp":-0.65},
+    {"course":"中山_芝1600_outer","front_pp":1.45,"middle_pp":-4.46,"rear_pp":-3.86},
+    {"course":"阪神_芝1200_inner","front_pp":-1.23,"middle_pp":-4.32,"rear_pp":-12.48},
+    {"course":"中京_芝1200_base","front_pp":-0.98,"middle_pp":-3.56,"rear_pp":-9.83},
+    {"course":"東京_芝2000_base","front_pp":-0.66,"middle_pp":-0.75,"rear_pp":-4.42}
+  ]
+}
