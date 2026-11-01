@@ -1,0 +1,30 @@
+name: Course geometry shadow check
+
+on:
+  push:
+    paths:
+      - 'waku-bc-converter/course-geometry-runtime-v1.js'
+      - 'waku-bc-converter/mobile-opponent-geometry-v1.js'
+      - 'waku-bc-converter/data/course_*geometry*.json'
+      - 'waku-bc-converter/data/course_*residual*.json'
+      - 'waku-bc-converter/data/course_first_turn_distance_v1.json'
+      - 'waku-bc-converter/data/course_route_resolution_v1.json'
+      - 'waku-bc-converter/data/venue_geometry_v1.json'
+      - 'tests/course-geometry-shadow-check.cjs'
+      - '.github/workflows/course-geometry-shadow-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate geometry Shadow layer
+        run: node tests/course-geometry-shadow-check.cjs
