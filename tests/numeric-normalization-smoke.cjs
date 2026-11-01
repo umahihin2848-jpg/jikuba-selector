@@ -36,13 +36,14 @@ async function run(type,name){
   await page.locator('#csvFile').setInputFiles({name:'fullwidth-target.csv',mimeType:'text/csv',buffer:Buffer.from(csv(),'utf8')});
   await page.waitForFunction(()=>/^解析済\s+3頭$/.test(document.querySelector('#csvState')?.textContent||''),null,{timeout:12000});
   const info=await page.locator('#csvInfo').innerText();
-  assert(/過去走\s+7件\s*\/\s*馬\s+3頭/.test(info),`${name}: filtered history count or CSV summary wrong: ${info}`);
   const transformed=await page.evaluate(async()=>{
     const f=document.querySelector('#csvFile').files[0];
     const grid=window.ShapeCore.parseCSV(window.ShapeCore.decode(await f.arrayBuffer()));
     const z=window.ShapeCore.rowsToObjects(grid);
     return {rows:z.rows,stats:window.RSATargetCsvCache?.stats||{},cornerGuard:window.RSACornerPositionGuard||{}};
   });
+  assert.strictEqual(transformed.rows.length,7,`${name}: filtered history row count wrong: ${transformed.rows.length}`);
+  assert.strictEqual(new Set(transformed.rows.map(r=>String(r['馬名']||'').trim()).filter(Boolean)).size,3,`${name}: filtered horse count wrong`);
   assert(!transformed.rows.some(r=>['18','19'].includes(String(r['競走種別コード']||'').normalize('NFKC').trim())),`${name}: obstacle type 18/19 leaked into transformed CSV`);
   assert(!transformed.rows.some(r=>['止','中止','取','取消','消','除','除外','外','失','失格'].includes(String(r['着順']||'').normalize('NFKC').trim())),`${name}: non-finish history leaked into transformed CSV`);
   const local=transformed.rows.find(r=>r['レース名']==='地方テスト');
@@ -76,7 +77,7 @@ async function run(type,name){
   const coverage=await page.evaluate(()=>window.AbilityOpponentState.coverage);
   assert.deepStrictEqual(coverage,{rated:2,total:3},`${name}: Ability coverage wrong ${JSON.stringify(coverage)}`);
   assert.deepStrictEqual(errors,[],`${name}: page errors ${errors.join(' | ')}`);
-  console.log('PASS',name,{nums,info,coverage,cornerZeroNormalized:transformed.stats.cornerZeroNormalized,sharedCornerNormalizations:transformed.cornerGuard.normalizedZeroCorners,obstacleRowsSkipped:transformed.stats.obstacleRowsSkipped,nonFinishRowsSkipped:transformed.stats.nonFinishRowsSkipped});
+  console.log('PASS',name,{nums,info,rows:transformed.rows.length,horses:3,coverage,cornerZeroNormalized:transformed.stats.cornerZeroNormalized,sharedCornerNormalizations:transformed.cornerGuard.normalizedZeroCorners,obstacleRowsSkipped:transformed.stats.obstacleRowsSkipped,nonFinishRowsSkipped:transformed.stats.nonFinishRowsSkipped});
   await browser.close();
 }
 (async()=>{await run(chromium,'Chromium iPhone full-width CSV');await run(webkit,'WebKit iPhone full-width CSV')})().catch(e=>{console.error(e);process.exit(1)});
