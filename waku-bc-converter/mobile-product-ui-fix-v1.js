@@ -1,6 +1,6 @@
 (()=>{'use strict';
 if(!window.RSAMobileLean||window.__MOBILE_PRODUCT_UI_FIX_V1)return;window.__MOBILE_PRODUCT_UI_FIX_V1=true;
-const V='mobile-product-ui-fix-v1.6-opponent-analysis',$=id=>document.getElementById(id);let timer=0,busy=false,revealed=false,revealPending=false,detailLoading=false,barsLoading=false,analysisLoading=false;
+const V='mobile-product-ui-fix-v1.7-opponent-testfix',$=id=>document.getElementById(id);let timer=0,busy=false,revealed=false,revealPending=false,detailLoading=false,barsLoading=false,analysisLoading=false;
 function css(){if($('mpuFix1-css'))return;const s=document.createElement('style');s.id='mpuFix1-css';s.textContent=`
 body.iosMobileShellV2 #mpuResearch #mpuShadowHost>#axisReliabilityShadowV1,
 body.iosMobileShellV2 #mpuResearch #mpuShadowHost>#raceStrengthProfileShadowV1,
@@ -11,7 +11,7 @@ body.iosMobileShellV2 #marketMispricingInputCard,body.iosMobileShellV2 #marketMi
 `;document.head.appendChild(s)}
 function forceTabNames(){const m={ticket:'軸馬',axis:'相手分析',pace:'全馬比較'};for(const [k,t] of Object.entries(m)){const b=document.querySelector(`[data-ims-tab="${k}"]`);if(b&&b.textContent!==t)b.textContent=t;b?.removeAttribute('hidden')}}
 function loadOpponentDetail(){if(window.__MOBILE_OPPONENT_DETAIL_V1||document.querySelector('script[data-mobile-opponent-detail]')||detailLoading)return;detailLoading=true;const s=document.createElement('script');s.dataset.mobileOpponentDetail='1';s.src='mobile-opponent-detail-v1.js?v=20261030profile21';s.async=false;s.onload=()=>{detailLoading=false};s.onerror=()=>{detailLoading=false;console.warn('opponent detail load failed')};document.body.appendChild(s)}
-function loadAbilityBars(){if(window.__MOBILE_HORSE_ABILITY_BARS_V1||document.querySelector('script[data-mobile-ability-bars]')||barsLoading)return;barsLoading=true;const s=document.createElement('script');s.dataset.mobileAbilityBars='1';s.src='mobile-horse-ability-bars-v1.js?v=20261030profile21';s.async=false;s.onload=()=>{barsLoading=false};s.onerror=()=>{barsLoading=false;console.warn('horse ability bars load failed')};document.body.appendChild(s)}
+function loadAbilityBars(){if(window.__MOBILE_HORSE_ABILITY_BARS_V1||document.querySelector('script[data-mobile-ability-bars]')||barsLoading)return;barsLoading=true;const s=document.createElement('script');s.dataset.mobileAbilityBars='1';s.src='mobile-horse-ability-bars-v1.js?v=20261101opptest1';s.async=false;s.onload=()=>{barsLoading=false};s.onerror=()=>{barsLoading=false;console.warn('horse ability bars load failed')};document.body.appendChild(s)}
 function loadOpponentAnalysis(){if(window.__MOBILE_OPPONENT_ANALYSIS_V1||document.querySelector('script[data-mobile-opponent-analysis]')||analysisLoading)return;analysisLoading=true;const s=document.createElement('script');s.dataset.mobileOpponentAnalysis='1';s.src='mobile-opponent-analysis-v1.js?v=20261101oppdeep1';s.async=false;s.onload=()=>{analysisLoading=false;forceTabNames();schedule(20)};s.onerror=()=>{analysisLoading=false;console.warn('opponent analysis load failed')};document.body.appendChild(s)}
 function readyToReveal(){
   const setup=$('mpuSetup'),body=setup?.querySelector('.mpuSetupBody'),csv=$('csvCard'),odds=$('oddsPaste')?.closest('section.card,.card');
