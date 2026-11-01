@@ -1,0 +1,72 @@
+{
+  "version": "course_route_resolution_v1",
+  "created": "2026-11-01",
+  "status": "shadow_display_only",
+  "purpose": "Resolve legacy ambig route entries before joining first-turn distance with venue geometry. Never guess an inner/outer route silently when a supported race can use both.",
+  "rules": [
+    {
+      "venue": "京都", "surface": "芝", "distance": 1400,
+      "routes": [
+        {"route":"inner","first_turn_distance_m":520.0,"distance_quality":"approx","note":"内回り。3角までおよそ520m。"},
+        {"route":"outer","first_turn_distance_m":512.0,"distance_quality":"course_description","note":"外回り。3角まで512m。"}
+      ],
+      "production_default_route": "outer",
+      "requires_explicit_route": false,
+      "note": "上級条件は外回りが通常。ルート選択で上書き可能。"
+    },
+    {
+      "venue": "京都", "surface": "芝", "distance": 1600,
+      "routes": [
+        {"route":"inner","first_turn_distance_m":700.0,"distance_quality":"approx","note":"内回り。3角まで約700m。"},
+        {"route":"outer","first_turn_distance_m":700.0,"distance_quality":"approx","note":"外回り。3角まで約700m。"}
+      ],
+      "production_default_route": "outer",
+      "requires_explicit_route": false,
+      "note": "内外とも発走設定あり。上級条件は外回りが通常だが、ルート選択で上書き可能。"
+    },
+    {
+      "venue": "京都", "surface": "芝", "distance": 2000,
+      "routes": [
+        {"route":"inner","first_turn_distance_m":309.0,"distance_quality":"jra_a_course_exact_rounded","note":"内回り。Aコース1角まで308.7m。"},
+        {"route":"outer","first_turn_distance_m":null,"distance_quality":"unverified","note":"JRA公式の発走距離設定には外回りも存在するが、外回りの最初のコーナーまでの距離は本DBでは未検証。"}
+      ],
+      "production_default_route": null,
+      "requires_explicit_route": true,
+      "note": "距離だけで内外を決めない。実施ルートを明示選択する。"
+    },
+    {
+      "venue": "新潟", "surface": "芝", "distance": 1400,
+      "routes": [
+        {"route":"inner","first_turn_distance_m":648.0,"distance_quality":"a_course","note":"通常使用される内回り。3角まで約648m。"},
+        {"route":"outer","first_turn_distance_m":null,"distance_quality":"unverified","note":"外回りの発走設定は可能だが、近年の通常施行は内回り。外回りの最初のコーナーまでの距離は未検証。"}
+      ],
+      "production_default_route": "inner",
+      "requires_explicit_route": false,
+      "note": "通常は内回り。明示選択で上書き可能。"
+    },
+    {
+      "venue": "新潟", "surface": "芝", "distance": 2000,
+      "routes": [
+        {"route":"inner","first_turn_distance_m":436.0,"distance_quality":"a_course","note":"内回り。1角まで約436m。"},
+        {"route":"outer","first_turn_distance_m":950.0,"distance_quality":"approx","note":"外回り。最初のコーナーまで約950m。"}
+      ],
+      "production_default_route": "outer",
+      "requires_explicit_route": false,
+      "note": "上級条件は外回りが通常。内回りもデータ上は別条件として保持。"
+    },
+    {
+      "venue": "阪神", "surface": "芝", "distance": 1400,
+      "routes": [
+        {"route":"inner","first_turn_distance_m":443.0,"distance_quality":"legacy_course_constant","note":"内回り。既存DBの約443mを継承。"}
+      ],
+      "production_default_route": "inner",
+      "requires_explicit_route": false,
+      "note": "JRA公式の現行発走距離は内回りのみ。旧ambigをinnerへ解消。"
+    }
+  ],
+  "usage_rules": [
+    "A route with unverified first-turn distance may still use verified loop/straight geometry, but inward-settling opportunity must display as unknown.",
+    "Never backfill an unverified first-turn distance from venue size or another distance.",
+    "Route selection is descriptive/Shadow only and must not change Production ticket logic."
+  ]
+}
