@@ -14,6 +14,14 @@ function mockProductionState(){
 
 async function commonAssertions(page,name){
   await page.goto(BASE,{waitUntil:'domcontentloaded',timeout:30000});
+  // Check the shipped v3 semantics before any desktop legacy compatibility runtime can rewrite presentation text.
+  const header=await page.locator('.brand').textContent();
+  assert(header.includes('Ability × M3 × P10/隊列 × 市場'),`${name}: four-layer source header missing`);
+  assert(!header.includes('M3を核に'),`${name}: stale M3-core wording remains in source header`);
+  const flow=await page.locator('.q5flow').textContent();
+  assert(flow.includes('市場照合'),`${name}: market comparison step missing from source flow`);
+  assert(!flow.includes('市場Edge'),`${name}: stale market Edge step remains in source flow`);
+
   await page.waitForFunction(()=>window.RSAAddonHealth?.ready===true,null,{timeout:30000});
   const health=await page.evaluate(()=>window.RSAAddonHealth);
   assert.strictEqual(await page.evaluate(()=>window.RSA_BUILD),EXPECTED_BUILD,`${name}: RSA_BUILD mismatch`);
@@ -21,12 +29,6 @@ async function commonAssertions(page,name){
   assert.strictEqual(health.build,EXPECTED_BUILD,`${name}: loader build mismatch`);
   assert.deepStrictEqual(health.failures,[],`${name}: addon failures ${health.failures.join(',')}`);
   assert.strictEqual(await page.getAttribute('#fieldSize','min'),'12',`${name}: fieldSize minimum must be 12`);
-  const header=await page.locator('.brand').textContent();
-  assert(header.includes('Ability × M3 × P10/隊列 × 市場'),`${name}: four-layer header missing`);
-  assert(!header.includes('M3を核に'),`${name}: stale M3-core wording remains`);
-  const flow=await page.locator('.q5flow').textContent();
-  assert(flow.includes('市場照合'),`${name}: market comparison step missing`);
-  assert(!flow.includes('市場Edge'),`${name}: stale market Edge step remains`);
 }
 
 async function seedState(page){
