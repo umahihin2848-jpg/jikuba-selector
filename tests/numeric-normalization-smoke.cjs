@@ -60,16 +60,29 @@ async function run(type,name){
   assert((transformed.stats.nonFinishRowsSkipped||0)>=3,`${name}: non-finish skip stats missing`);
   assert((transformed.cornerGuard.normalizedZeroCorners||0)>=2,`${name}: shared corner guard did not run`);
 
-  await page.locator('#raceDate').fill('2026-10-15');
-  await page.locator('#venue').selectOption({label:'京都'});
-  await page.locator('#raceName').fill('回帰テスト');
-  await page.locator('#fieldSize').fill('3');
-  await page.locator('#surface').selectOption({label:'芝'});
-  await page.locator('#distance').fill('1600');
-  await page.locator('#grade').selectOption({label:'G3'});
-  await page.locator('#oddsPaste').fill('1 2.0\n2 3.0\n3 5.0');
-  await page.locator('#applyOddsBtn').click();
-  await page.locator('#analyzeBtn').click();
+  await page.evaluate(()=>{
+    const set=(id,value,label)=>{
+      const el=document.getElementById(id);
+      if(!el)throw new Error(`#${id} not found`);
+      if(el.tagName==='SELECT'&&label){
+        const opt=[...el.options].find(o=>o.textContent.trim()===label||o.value===value);
+        if(!opt)throw new Error(`#${id} option ${label} not found`);
+        el.value=opt.value;
+      }else el.value=value;
+      el.dispatchEvent(new Event('input',{bubbles:true}));
+      el.dispatchEvent(new Event('change',{bubbles:true}));
+    };
+    set('raceDate','2026-10-15');
+    set('venue','','京都');
+    set('raceName','回帰テスト');
+    set('fieldSize','3');
+    set('surface','','芝');
+    set('distance','1600');
+    set('grade','','G3');
+    set('oddsPaste','1 2.0\n2 3.0\n3 5.0');
+    document.getElementById('applyOddsBtn')?.click();
+    document.getElementById('analyzeBtn')?.click();
+  });
   await page.waitForFunction(()=>window.AbilityOpponentState?.ready===true&&window.AbilityOpponentState?.coverage?.total===3,null,{timeout:15000});
   const abilityText=await page.locator('#abilityListV27').innerText();
   assert(abilityText.includes('履歴不足テスト'),`${name}: unrated horse disappeared from Ability panel`);
