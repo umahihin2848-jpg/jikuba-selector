@@ -5,6 +5,7 @@ on:
     paths:
       - 'waku-bc-converter/ability-field-structure-v1.js'
       - 'waku-bc-converter/opponent-ranking-display-v1.js'
+      - 'waku-bc-converter/mobile-product-ui-v1.js'
       - 'waku-bc-converter/validation/ability_gap_field_strength_shadow_v1.json'
       - 'waku-bc-converter/v3.html'
       - 'waku-bc-converter/v3-addons-loader-p.js'
