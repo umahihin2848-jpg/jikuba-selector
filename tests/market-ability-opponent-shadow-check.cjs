@@ -4,6 +4,7 @@ const root=path.join(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 const shadow=read('waku-bc-converter/market-ability-opponent-shadow-v1.js');
 const loader=read('waku-bc-converter/v3-addons-loader-p.js');
+const v3=read('waku-bc-converter/v3.html');
 const old=read('waku-bc-converter/opponent-ranking-display-v1.js');
 
 new Function(shadow);
@@ -31,6 +32,7 @@ if(!shadow.includes('下断層 ${r.gapBelow.toFixed(1)}'))throw new Error('Abili
 if(shadow.includes('setInterval(')||shadow.includes('MutationObserver'))throw new Error('heavy polling/observer forbidden');
 
 if(!loader.includes('market-ability-opponent-shadow-v1.js?v=20261102marketability1'))throw new Error('mobile loader not wired');
+if(!v3.includes('v3-addons-loader-p.js?v=20261102marketability1'))throw new Error('v3 mobile loader cache key not updated');
 
 if(!old.includes('Math.min(n(r.abp3),n(r.m3p3))'))throw new Error('legacy wide ranking formula changed');
 if(!old.includes('n(r.abp3)*n(r.m3p3)/win'))throw new Error('legacy quinella ranking formula changed');
