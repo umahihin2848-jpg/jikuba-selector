@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'waku-bc-converter/market-ability-opponent-shadow-v1.js'
+      - 'waku-bc-converter/mobile-opponent-core-v1.js'
       - 'waku-bc-converter/v3-addons-loader-p.js'
       - 'waku-bc-converter/v3.html'
       - 'waku-bc-converter/opponent-ranking-display-v1.js'
