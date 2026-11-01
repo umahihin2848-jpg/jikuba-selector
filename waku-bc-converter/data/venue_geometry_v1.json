@@ -1,0 +1,26 @@
+{
+  "version":"venue_geometry_v1",
+  "created":"2026-11-01",
+  "status":"geometry_reference_only",
+  "purpose":"Base geometry for course-specific wide-trip interpretation. Combine with course_first_turn_distance_v1 and empirical diagnostics; do not use alone as a betting score.",
+  "source":"JRA official racecourse/course and track overview pages; A-course dimensions where multiple rail settings exist.",
+  "venues":[
+    {"venue":"札幌","turf":{"base":{"loop_m":1640.9,"straight_m":266.1,"width_m":[25,27],"curve_note":"large gentle curves; high curve share"}},"dirt":{"loop_m":1487.0,"straight_m":264.3,"width_m":[20,20]},"geometry_note":"round shape; JRA notes that running wide can create substantial distance loss because corners occupy a large share"},
+    {"venue":"函館","turf":{"base":{"loop_m":1626.6,"straight_m":262.1,"width_m":[29,29]}},"dirt":{"loop_m":1475.8,"straight_m":260.3,"width_m":[20,20]},"geometry_note":"very short home straight; compact layout"},
+    {"venue":"福島","turf":{"base":{"loop_m":1600.0,"straight_m":292.0,"width_m":[25,27]}},"dirt":{"loop_m":1444.6,"straight_m":295.7,"width_m":[20,25]},"geometry_note":"compact layout with repeated rises and falls"},
+    {"venue":"新潟","turf":{"inner":{"loop_m":1623.0,"straight_m":358.7,"width_m":[25,25]},"outer":{"loop_m":2223.0,"straight_m":658.7,"width_m":[25,25]},"straight":{"loop_m":null,"straight_m":1000.0,"width_m":null}},"dirt":{"loop_m":1472.5,"straight_m":353.9,"width_m":[20,20]},"geometry_note":"outer course is JRA's largest turf loop with longest conventional home straight; spiral curves"},
+    {"venue":"東京","turf":{"base":{"loop_m":2083.1,"straight_m":525.9,"width_m":[31,41],"curve_note":"large-radius gentle curves"}},"dirt":{"loop_m":1899.0,"straight_m":501.6,"width_m":[25,25]},"geometry_note":"large scale, long straight, broad width; JRA describes curve radius as generous"},
+    {"venue":"中山","turf":{"inner":{"loop_m":1667.1,"straight_m":310.0,"width_m":[20,32],"curve_note":"2nd-3rd corners notably tight"},"outer":{"loop_m":1839.7,"straight_m":310.0,"width_m":[24,32]}},"dirt":{"loop_m":1493.0,"straight_m":308.0,"width_m":[20,25]},"geometry_note":"inner course is compact and tight; short home straight"},
+    {"venue":"中京","turf":{"base":{"loop_m":1705.9,"straight_m":412.5,"width_m":[28,30],"curve_note":"spiral 3rd-4th corners"}},"dirt":{"loop_m":1530.0,"straight_m":410.7,"width_m":[25,25]},"geometry_note":"standard-to-large scale with long straight and steep home-straight rise"},
+    {"venue":"京都","turf":{"inner":{"loop_m":1782.8,"straight_m":328.4,"width_m":[27,38],"curve_note":"3rd-4th corners tighter"},"outer":{"loop_m":1894.3,"straight_m":403.7,"width_m":[24,38]}},"dirt":{"loop_m":1607.6,"straight_m":329.1,"width_m":[25,25]},"geometry_note":"inner is more compact; outer has longer straight; distinctive 3rd-corner hill"},
+    {"venue":"阪神","turf":{"inner":{"loop_m":1689.0,"straight_m":356.5,"width_m":[24,28]},"outer":{"loop_m":2089.0,"straight_m":473.6,"width_m":[24,29],"curve_note":"3rd-4th corners broad and gentle"}},"dirt":{"loop_m":1517.6,"straight_m":352.7,"width_m":[22,25]},"geometry_note":"outer course has long backstretch and gentle 3rd-4th corners; inner is materially more compact"},
+    {"venue":"小倉","turf":{"base":{"loop_m":1615.1,"straight_m":293.0,"width_m":[30,30],"curve_note":"spiral 3rd-4th corners"}},"dirt":{"loop_m":1445.4,"straight_m":291.3,"width_m":[24,24]},"geometry_note":"flat home straight and compact small-turn layout"}
+  ],
+  "usage_rules":[
+    "Do not convert venue size directly into a single wide-trip score.",
+    "Use first-turn distance separately to estimate opportunity to settle inward before the first material turn.",
+    "Use route-specific loop/straight geometry to describe how much of the race is corner-dominant versus straight-dominant.",
+    "Actual lateral path is unavailable in TARGET result CSV, so empirical gate effects are proxies rather than measured meters lost.",
+    "Final horse-level interpretation should combine geometry, gate, predicted queue/position, acceleration and sustained ability without changing Production ticket logic."
+  ]
+}
