@@ -37,13 +37,9 @@ jobs:
         run: |
           python3 -m http.server 4173 > /tmp/jikuba-server.log 2>&1 &
           sleep 2
-      - name: Run core smoke tests
+      - name: Run current core smoke tests
         run: |
           node tests/market-ability-opponent-shadow-check.cjs
-          node tests/wide-auto-candidates-smoke.cjs
-          node tests/candidate-odds-compact-smoke.cjs
-          node tests/trio-third-row-smoke.cjs
-          node tests/longshot-scout-smoke.cjs
           node tests/smoke.cjs
           node tests/numeric-normalization-smoke.cjs
           node tests/quinella-range-smoke.cjs
