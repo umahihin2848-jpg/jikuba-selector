@@ -1,0 +1,26 @@
+name: Market Ability opponent Shadow check
+
+on:
+  push:
+    paths:
+      - 'waku-bc-converter/market-ability-opponent-shadow-v1.js'
+      - 'waku-bc-converter/v3-addons-loader-p.js'
+      - 'waku-bc-converter/opponent-ranking-display-v1.js'
+      - 'tests/market-ability-opponent-shadow-check.cjs'
+      - '.github/workflows/market-ability-opponent-shadow-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate Market × Ability opponent Shadow layer
+        run: node tests/market-ability-opponent-shadow-check.cjs
