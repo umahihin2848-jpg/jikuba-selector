@@ -1,0 +1,74 @@
+{
+  "version": "ability_gap_field_strength_shadow_v1",
+  "created": "2026-11-01",
+  "status": "SHADOW_DISPLAY_ONLY",
+  "production_impact": false,
+  "source": {
+    "ability_model": "data/ability_model_v1.json",
+    "universe": "JRA flat, field size >=12, 3-win class or higher",
+    "years": [2025, 2026],
+    "races": 700,
+    "runners": 10623,
+    "protocol": "Reconstruct Ability v1 from strictly prior high-class starts, rank by raw model logit, project P3 with the frozen race-coherent common-logit shift, and evaluate 3rd-to-4th Ability gaps only on unknown years 2025-2026."
+  },
+  "ability_gap_3_to_4": {
+    "metric": "Ability Index rank3 - rank4; Ability Index = 50 + 10 * within-race z(raw logit)",
+    "quantiles": {
+      "q25": 0.4402,
+      "q50": 1.5217,
+      "q75": 2.9672,
+      "q80": 3.5294,
+      "q90": 5.2850,
+      "q95": 7.1701
+    },
+    "large_gap_definition_for_display_only": "gap >= pooled 80th percentile (3.5294 index points)",
+    "large_gap_races": 140,
+    "ability_rank4_top3": {
+      "hits": 42,
+      "n": 140,
+      "rate": 0.3000
+    },
+    "decision": "DO_NOT_AUTO_VETO_RANK4_FROM_GAP_ALONE",
+    "reason": "Even in the largest 20% of 3-to-4 Ability gaps, Ability rank4 still finished top3 in 42/140 races (30.0%). The gap is useful as a structural display but does not support automatic opponent deletion."
+  },
+  "top3_probability_mass_concentration": {
+    "definition": "sum(Ability P3 for Ability ranks 1-3) / 3.0. Because projected Ability P3 sums to exactly 3.0 per race, this is a share of P3 mass, not the probability that all three horses finish top3.",
+    "quantiles": {
+      "q10": 0.2741,
+      "q25": 0.2992,
+      "q50": 0.3293,
+      "q75": 0.3606,
+      "q90": 0.3977
+    },
+    "display_interpretation": {
+      "below_q25": "spread / relatively flat Ability structure",
+      "q25_to_q75": "middle",
+      "above_q75": "top-concentrated Ability structure"
+    },
+    "betting_signal": false
+  },
+  "same_grade_field_strength": {
+    "metric": "mean raw Ability logit of all runners in the race, compared only with historical races of the same current grade",
+    "meaning": "History-based entrant-strength proxy. It is not the realized race level and must not be used as a Production betting gate without prospective validation.",
+    "baseline_2025_2026": {
+      "3WIN": {"class_level": 0, "n": 313, "q10": -1.8879, "q25": -1.7802, "q50": -1.6523, "q75": -1.5216, "q90": -1.4267},
+      "OP_L": {"class_level": 1, "n": 188, "q10": -1.7924, "q25": -1.7168, "q50": -1.5783, "q75": -1.4394, "q90": -1.3167},
+      "G3": {"class_level": 2, "n": 108, "q10": -1.5397, "q25": -1.4471, "q50": -1.3128, "q75": -1.2298, "q90": -1.1154},
+      "G2": {"class_level": 3, "n": 54, "q10": -1.5378, "q25": -1.4252, "q50": -1.2717, "q75": -1.1591, "q90": -1.0552},
+      "G1": {"class_level": 4, "n": 37, "q10": -1.2176, "q25": -1.1162, "q50": -1.0317, "q75": -0.9007, "q90": -0.6549}
+    },
+    "history_coverage_guard": "Show the strength band as lower-confidence when fewer than 70% of runners have at least 3 prior eligible JRA high-class starts."
+  },
+  "display_rules": {
+    "show_ability_index": true,
+    "show_ability_p3": true,
+    "show_adjacent_gaps": true,
+    "show_3_to_4_gap": true,
+    "show_top3_probability_mass_share": true,
+    "show_same_grade_field_strength": true,
+    "auto_remove_opponents": false,
+    "change_existing_rankings": false,
+    "change_probabilities": false,
+    "change_tickets": false
+  }
+}
