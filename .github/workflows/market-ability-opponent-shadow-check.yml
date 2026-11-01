@@ -5,6 +5,7 @@ on:
     paths:
       - 'waku-bc-converter/market-ability-opponent-shadow-v1.js'
       - 'waku-bc-converter/v3-addons-loader-p.js'
+      - 'waku-bc-converter/v3.html'
       - 'waku-bc-converter/opponent-ranking-display-v1.js'
       - 'tests/market-ability-opponent-shadow-check.cjs'
       - '.github/workflows/market-ability-opponent-shadow-check.yml'
