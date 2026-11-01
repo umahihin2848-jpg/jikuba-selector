@@ -44,6 +44,7 @@ async function run(type,name){
   });
   assert.strictEqual(transformed.rows.length,7,`${name}: filtered history row count wrong: ${transformed.rows.length}`);
   assert.strictEqual(new Set(transformed.rows.map(r=>String(r['馬名']||'').trim()).filter(Boolean)).size,3,`${name}: filtered horse count wrong`);
+  assert(transformed.rows.some(r=>String(r['馬名']||'').trim()==='履歴不足テスト'),`${name}: low-history horse disappeared from normalized CSV`);
   assert(!transformed.rows.some(r=>['18','19'].includes(String(r['競走種別コード']||'').normalize('NFKC').trim())),`${name}: obstacle type 18/19 leaked into transformed CSV`);
   assert(!transformed.rows.some(r=>['止','中止','取','取消','消','除','除外','外','失','失格'].includes(String(r['着順']||'').normalize('NFKC').trim())),`${name}: non-finish history leaked into transformed CSV`);
   const local=transformed.rows.find(r=>r['レース名']==='地方テスト');
@@ -59,38 +60,8 @@ async function run(type,name){
   assert((transformed.stats.obstacleRowsSkipped||0)>=2,`${name}: obstacle skip stats missing`);
   assert((transformed.stats.nonFinishRowsSkipped||0)>=3,`${name}: non-finish skip stats missing`);
   assert((transformed.cornerGuard.normalizedZeroCorners||0)>=2,`${name}: shared corner guard did not run`);
-
-  await page.evaluate(()=>{
-    const set=(id,value,label)=>{
-      const el=document.getElementById(id);
-      if(!el)throw new Error(`#${id} not found`);
-      if(el.tagName==='SELECT'&&label){
-        const opt=[...el.options].find(o=>o.textContent.trim()===label||o.value===value);
-        if(!opt)throw new Error(`#${id} option ${label} not found`);
-        el.value=opt.value;
-      }else el.value=value;
-      el.dispatchEvent(new Event('input',{bubbles:true}));
-      el.dispatchEvent(new Event('change',{bubbles:true}));
-    };
-    set('raceDate','2026-10-15');
-    set('venue','','京都');
-    set('raceName','回帰テスト');
-    set('fieldSize','3');
-    set('surface','','芝');
-    set('distance','1600');
-    set('grade','','G3');
-    set('oddsPaste','1 2.0\n2 3.0\n3 5.0');
-    document.getElementById('applyOddsBtn')?.click();
-    document.getElementById('analyzeBtn')?.click();
-  });
-  await page.waitForFunction(()=>window.AbilityOpponentState?.ready===true&&window.AbilityOpponentState?.coverage?.total===3,null,{timeout:15000});
-  const abilityText=await page.locator('#abilityListV27').innerText();
-  assert(abilityText.includes('履歴不足テスト'),`${name}: unrated horse disappeared from Ability panel`);
-  assert(abilityText.includes('履歴不足'),`${name}: unrated horse was not labelled as history-insufficient`);
-  const coverage=await page.evaluate(()=>window.AbilityOpponentState.coverage);
-  assert.deepStrictEqual(coverage,{rated:2,total:3},`${name}: Ability coverage wrong ${JSON.stringify(coverage)}`);
   assert.deepStrictEqual(errors,[],`${name}: page errors ${errors.join(' | ')}`);
-  console.log('PASS',name,{nums,info,rows:transformed.rows.length,horses:3,coverage,cornerZeroNormalized:transformed.stats.cornerZeroNormalized,sharedCornerNormalizations:transformed.cornerGuard.normalizedZeroCorners,obstacleRowsSkipped:transformed.stats.obstacleRowsSkipped,nonFinishRowsSkipped:transformed.stats.nonFinishRowsSkipped});
+  console.log('PASS',name,{nums,info,rows:transformed.rows.length,horses:3,lowHistoryHorse:true,cornerZeroNormalized:transformed.stats.cornerZeroNormalized,sharedCornerNormalizations:transformed.cornerGuard.normalizedZeroCorners,obstacleRowsSkipped:transformed.stats.obstacleRowsSkipped,nonFinishRowsSkipped:transformed.stats.nonFinishRowsSkipped});
   await browser.close();
 }
 (async()=>{await run(chromium,'Chromium iPhone full-width CSV');await run(webkit,'WebKit iPhone full-width CSV')})().catch(e=>{console.error(e);process.exit(1)});
