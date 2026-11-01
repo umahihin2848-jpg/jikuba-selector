@@ -1,6 +1,6 @@
 (()=>{'use strict';
 if(window.__COURSE_GEOMETRY_RUNTIME_V1)return;window.__COURSE_GEOMETRY_RUNTIME_V1=true;
-const V='course-geometry-runtime-v1.1-light', $=id=>document.getElementById(id);
+const V='course-geometry-runtime-v1.2-lazy', $=id=>document.getElementById(id);
 const Q='?v=20261101geometry2';
 const PATHS={first:'data/course_first_turn_distance_v1.json'+Q,venue:'data/venue_geometry_v1.json'+Q,route:'data/course_route_resolution_v1.json'+Q,gate:'data/course_outer_gate_residual_diagnostic_v1.json'+Q,pos:'data/course_outer_position_residual_diagnostic_v1.json'+Q};
 const state={ready:false,version:V,productionImpact:false,sourceConditions:0,resolvedVariants:0,unresolvedLegacy:[],rows:[],current:null,at:0};
@@ -24,7 +24,11 @@ function ensureRouteField(){if($('courseRoute'))return;const dist=$('distance')?
 function syncRouteField(){ensureRouteField();const v=$('venue')?.value||'',s=surf($('surface')?.value),d=N($('distance')?.value),f=$('courseRouteField'),sel=$('courseRoute'),note=$('courseRouteNote');if(!f||!sel||!note||!v||!Number.isFinite(d)){if(f)f.hidden=true;return''}const xs=variants(v,s,d),rr=routeRule(v,s,d),sig=condKey(v,s,d);if(sig!==lastCondition){lastCondition=sig;sel.innerHTML='<option value="">自動判定</option>'+xs.map(x=>`<option value="${x.route}">${routeLabel(x.route)}</option>`).join('');sel.value=''}if(xs.length<=1){f.hidden=true;return xs[0]?.route||''}f.hidden=false;let manual=sel.value||'';if(!manual&&rr?.production_default_route&&!rr?.requires_explicit_route){sel.value=rr.production_default_route;manual=sel.value;note.textContent=`通常設定：${routeLabel(manual)}（必要なら変更可）`}else if(!manual&&rr?.requires_explicit_route){note.textContent='この距離は内・外を距離だけで決めません。実施ルートを選択してください。'}else if(manual){note.textContent=`選択中：${routeLabel(manual)}`}else note.textContent='ルートを選択するとコース形状を確定します。';return manual}
 function update(fromManual=false){if(!state.ready)return;const v=$('venue')?.value||'',s=surf($('surface')?.value),d=N($('distance')?.value),g=$('grade')?.value||'',manual=syncRouteField(),next=v&&Number.isFinite(d)?resolve(v,s,d,g,manual):null;const sig=next?JSON.stringify([next.ready,next.reason,next.venue,next.surface,next.distance,next.route,next.row?.course_key||null]):'null';state.current=next;if(sig===lastResolvedSig){window.CourseGeometryRuntimeV1State=state;return}lastResolvedSig=sig;state.at=Date.now();window.CourseGeometryRuntimeV1State=state;window.dispatchEvent(new CustomEvent('course-geometry-ready',{detail:{current:state.current,manual:fromManual}}))}
 async function load(){if(loading)return loading;loading=(async()=>{try{const [first,venue,route,gate,pos]=await Promise.all([getJSON(PATHS.first),getJSON(PATHS.venue),getJSON(PATHS.route),getJSON(PATHS.gate),getJSON(PATHS.pos)]);raw={first,venue,route,gate,pos};build();state.ready=true;state.at=Date.now();window.CourseGeometryRuntimeV1State=state;ensureRouteField();update();return state}catch(err){state.ready=false;state.error=String(err?.message||err);state.at=Date.now();window.CourseGeometryRuntimeV1State=state;console.warn('course geometry runtime failed',err);return state}})();return loading}
-window.CourseGeometryRuntimeV1={version:V,state,load,resolve,variants,routeLabel,update};
-['venue','surface','distance'].forEach(id=>document.addEventListener('change',e=>{if(e.target?.id===id)update()}));
-const start=()=>load();if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();
+window.CourseGeometryRuntimeV1={version:V,state,load,resolve,variants,routeLabel,update,refresh};
+function meaningful(){const v=$('venue')?.value||'',d=N($('distance')?.value);return Boolean(v&&Number.isFinite(d))}
+function refresh(){if(state.ready){update();return Promise.resolve(state)}if(!meaningful())return Promise.resolve(state);return load().then(()=>{update();return state})}
+['venue','surface','distance'].forEach(id=>document.addEventListener('change',e=>{if(e.target?.id===id)refresh()}));
+document.addEventListener('click',e=>{if(e.target?.id==='analyzeBtn')refresh()},true);
+addEventListener('rsa-analysis-complete',()=>refresh());
+const start=()=>{ensureRouteField();if(meaningful())refresh()};if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
