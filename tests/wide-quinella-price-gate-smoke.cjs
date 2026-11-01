@@ -1,11 +1,10 @@
 const {chromium,webkit}=require('playwright');
 const assert=require('assert');
 const BASE='http://127.0.0.1:4173/waku-bc-converter/v3.html?test=wide-quinella-price-gate';
-const UA='Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1';
 
 async function run(type,name){
   const browser=await type.launch({headless:true});
-  const context=await browser.newContext({viewport:{width:390,height:844},userAgent:UA,isMobile:true,hasTouch:true});
+  const context=await browser.newContext({viewport:{width:1280,height:900}});
   const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto(BASE,{waitUntil:'networkidle',timeout:30000});
   await page.waitForFunction(()=>window.RSAAddonHealth?.ready===true&&document.querySelector('#wqPriceGate')&&document.querySelector('#qmdQuinellaPaste'),null,{timeout:25000});
@@ -100,4 +99,4 @@ async function run(type,name){
   console.log('PASS',name,'wide price gate + adaptive fallback/manual restore');
   await browser.close();
 }
-(async()=>{await run(chromium,'Chromium iPhone');await run(webkit,'WebKit iPhone')})().catch(e=>{console.error(e);process.exit(1)});
+(async()=>{await run(chromium,'Chromium Desktop');await run(webkit,'WebKit Desktop')})().catch(e=>{console.error(e);process.exit(1)});
