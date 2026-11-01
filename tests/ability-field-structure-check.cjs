@@ -1,3 +1,4 @@
+// Dedicated guard for display-only Ability structure changes.
 const fs=require('fs');
 const path=require('path');
 const root=process.cwd();
