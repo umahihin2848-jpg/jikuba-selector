@@ -1,6 +1,6 @@
 (()=>{'use strict';
 const $=id=>document.getElementById(id),sleep=ms=>new Promise(r=>setTimeout(r,ms));let manifest,running=false;
-const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const eq=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 function waitFor(fn,timeout=15000,label='condition'){const t=Date.now();return new Promise((res,rej)=>{const tick=()=>{let v;try{v=fn()}catch{}if(v)return res(v);if(Date.now()-t>timeout)return rej(new Error(`timeout: ${label}`));setTimeout(tick,60)};tick()})}
 function stage(c,s){console.log(`[regression:${c.id}] ${s}`);$('progress').textContent=`${c.title}｜${s}`}
@@ -24,13 +24,18 @@ ck('手動組合せ',p?.manualCombination,true),
 ck('手動stake',p?.manualStake,true),
 ck('相手選定 method',pm?.opponents?.selectionMethod,'market_top2_excluding_axis'),
 ck('相手 autoDrop',pm?.opponents?.autoDrop,false),
-ck('Pair price Production未接続',pm?.price?.pairPriceConnected,false),
+ck('Pair price Production未接続',pm?.price?.pairPriceConnected,false)
+];
+if(e.eligible){checks.push(
 ck('馬番整合 M3',horseNoIntegrity(w.Finish600State?.rows,c.race.field),true),
 ck('馬番整合 Ability',horseNoIntegrity(w.M3PureAbilityState?.rows,c.race.field),true),
 ck('M3 Top3',top3(w.Finish600State?.rows,'finishRank'),e.m3Top3),
 ck('Ability Top3',top3(w.M3PureAbilityState?.rows,'abilityRank'),e.abilityTop3),
 ck('構造一致',overlap(w),[...(e.structural||[])].sort((a,b)=>a.no-b.no))
-];if(ex.status)checks.push(ck('Production final status',p?.final?.status,ex.status));else checks.push(oneOf('Production final status',p?.final?.status,['ready','conditional']));const shares=(d?.market?.rows||[]).reduce((a,r)=>a+Number(r.share||0),0);checks.push(ck('市場確率正規化',Math.abs(shares-1)<1e-9,true));return checks}
+)}else{
+checks.push(ck('対象条件外',d?.scope?.eligible,false),ck('Production scope対象外',p?.scope?.eligible,false));
+}
+if(ex.status)checks.push(ck('Production final status',p?.final?.status,ex.status));else checks.push(oneOf('Production final status',p?.final?.status,['ready','conditional']));const shares=(d?.market?.rows||[]).reduce((a,r)=>a+Number(r.share||0),0);checks.push(ck('市場確率正規化',Math.abs(shares-1)<1e-9,true));return checks}
 function show(c,checks,error){const ok=!error&&checks.every(x=>x.pass),el=document.createElement('section');el.className=`case ${ok?'pass':'fail'}`;el.innerHTML=`<header><div><small>${E(c.id)}</small><b>${E(c.title)}</b></div><span>${ok?'PASS':'FAIL'}</span></header>${error?`<div class="err">${E(error.message||error)}</div>`:`<div class="checks">${checks.map(x=>`<div class="ck ${x.pass?'ok':'bad'}"><b>${x.pass?'✓':'✕'} ${E(x.label)}</b>${x.pass?'':`<small>expected ${E(JSON.stringify(x.expected))}<br>actual ${E(JSON.stringify(x.actual))}</small>`}</div>`).join('')}</div>`}`;$('results').appendChild(el);return ok}
 async function frame(c){stage(c,'v3読込');$('frameHost').innerHTML='';const f=document.createElement('iframe');f.src=`../v3.html?regression=${encodeURIComponent(c.id)}&t=${Date.now()}`;$('frameHost').appendChild(f);await new Promise((res,rej)=>{const t=setTimeout(()=>rej(new Error('iframe load timeout')),15000);f.onload=()=>{clearTimeout(t);res()}});const w=f.contentWindow,d=f.contentDocument;await waitFor(()=>w.ShapeCore&&d.getElementById('parseCsvBtn'),10000,'v3 controls');stage(c,'Addons準備待ち');await waitFor(()=>w.RSAAddonHealth?.ready,30000,'RSA addons ready');const ah=w.RSAAddonHealth;console.log(`[regression:${c.id}] addons loaded=${ah.loaded?.length||0} failures=${(ah.failures||[]).join(',')||'none'} bootMs=${ah.bootMs}`);if((ah.failures||[]).length)throw new Error(`addon failures: ${ah.failures.join(', ')}`);await waitFor(()=>!d.getElementById('analyzeBtn')?.disabled,5000,'analyze enabled');return{w,d}}
 async function fetchFixture(url,attempts=3){let last;for(let i=1;i<=attempts;i++){try{const u=new URL(url,location.href);u.searchParams.set('_fixtureAttempt',String(i));const r=await fetch(u,{cache:'no-store'});if(!r.ok)throw new Error(`fixture HTTP ${r.status}`);return await r.text()}catch(e){last=e;if(i<attempts)await sleep(250*i)}}throw last||new Error('fixture fetch failed')}
