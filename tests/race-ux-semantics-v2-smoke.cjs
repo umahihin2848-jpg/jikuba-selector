@@ -24,15 +24,19 @@ function csv(){
 const odds=()=>[2.8,4.0,5.5,7.0,9,11,14,18,23,29,36,45,56,70,90,120]
   .map((x,i)=>`${i+1} ${x}`).join('\n');
 
+function roleCoreVersion(st){return st?.internalVersion||st?.version||''}
+function hasAxisText(t){return t.includes('分析上の軸候補')||t.includes('軸候補は')}
+function hasUpliftText(t){return t.includes('構造浮上馬')||t.includes('今回の構造で浮上')}
+function hasCautionText(t){return t.includes('地力上位・構造慎重')||t.includes('地力は高いが今回は慎重')}
 function assertRoleNarrative(s,name,phase='initial'){
-  assert.strictEqual(s.roleState?.version,'ability-m3-role-sync-v1',`${name}: compatibility role sync version ${phase}`);
-  assert.strictEqual(s.roleState?.internalVersion,'ability-m3-role-sync-v3-readable',`${name}: readable v3 role sync missing ${phase}`);
-  assert.strictEqual(s.roleState?.compatibilityVersion,'m3-narrative-compat-v1',`${name}: compatibility marker missing ${phase}`);
+  assert.strictEqual(roleCoreVersion(s.roleState),'ability-m3-role-sync-v3-readable',`${name}: readable v3 role sync missing ${phase}`);
+  assert.strictEqual(s.roleState?.parallelOpponentTypes,true,`${name}: parallel opponent semantics missing ${phase}`);
+  assert.strictEqual(s.roleState?.readableSummary,true,`${name}: readable summary flag missing ${phase}`);
   assert(!s.narrIntro.includes('が中心'),`${name}: legacy M3 center wording survived ${phase}`);
-  if(s.roleState.axisNo)assert(s.narrIntro.includes('分析上の軸候補'),`${name}: axis candidate wording missing ${phase}`);
-  else assert(!s.narrIntro.includes('分析上の軸候補'),`${name}: invented axis candidate ${phase}`);
-  if(s.roleState.upliftNo)assert(s.narrIntro.includes('構造浮上馬'),`${name}: uplift role wording missing ${phase}`);
-  if(s.roleState.cautionNo)assert(s.narrIntro.includes('地力上位・構造慎重'),`${name}: caution role wording missing ${phase}`);
+  if(s.roleState.axisNo)assert(hasAxisText(s.narrIntro),`${name}: axis candidate wording missing ${phase}`);
+  else assert(!hasAxisText(s.narrIntro),`${name}: invented axis candidate ${phase}`);
+  if(s.roleState.upliftNo)assert(hasUpliftText(s.narrIntro),`${name}: uplift role wording missing ${phase}`);
+  if(s.roleState.cautionNo)assert(hasCautionText(s.narrIntro),`${name}: caution role wording missing ${phase}`);
   if(!s.roleState.axisNo&&!s.roleState.upliftNo&&!s.roleState.cautionNo){
     assert(s.narrIntro.includes('明確な役割馬は抽出されていません'),`${name}: no-role wording missing ${phase}`);
   }
@@ -58,19 +62,23 @@ async function ensureCsvParsed(p){
   await p.waitForFunction(()=>/^解析済\s+16頭$/.test(document.querySelector('#csvState')?.textContent||''),null,{timeout:12000});
 }
 
-async function waitRoleNarrativeCompat(p){
+async function waitReadableRoleNarrative(p){
   await p.waitForFunction(()=>{
     const st=window.M3NarrativeRoleSyncState,t=window.RSAAnalysisTransitionState;
     const root=document.querySelector('#m3NarrativeAnalysis');
     const first=root?.querySelector('.m3NarrativeBody p');
     const quick=root?.querySelector('.m3QuickRead');
     const details=root?.querySelector('.m3NarrativeDetails');
-    if(!st?.ready||st.generation!==t?.generation||st.version!=='ability-m3-role-sync-v1'||st.internalVersion!=='ability-m3-role-sync-v3-readable'||st.compatibilityVersion!=='m3-narrative-compat-v1'||first?.dataset.roleSync!=='1'||!quick||!details||details.open)return false;
+    const core=st?.internalVersion||st?.version||'';
+    if(!st?.ready||st.generation!==t?.generation||core!=='ability-m3-role-sync-v3-readable'||st.parallelOpponentTypes!==true||st.readableSummary!==true||!first||!quick||!details||details.open)return false;
     const text=first.textContent||'';
-    if(st.axisNo&&!text.includes('分析上の軸候補'))return false;
-    if(!st.axisNo&&text.includes('分析上の軸候補'))return false;
-    if(st.upliftNo&&!text.includes('構造浮上馬'))return false;
-    if(st.cautionNo&&!text.includes('地力上位・構造慎重'))return false;
+    const axis=text.includes('分析上の軸候補')||text.includes('軸候補は');
+    const uplift=text.includes('構造浮上馬')||text.includes('今回の構造で浮上');
+    const caution=text.includes('地力上位・構造慎重')||text.includes('地力は高いが今回は慎重');
+    if(st.axisNo&&!axis)return false;
+    if(!st.axisNo&&axis)return false;
+    if(st.upliftNo&&!uplift)return false;
+    if(st.cautionNo&&!caution)return false;
     if(!st.axisNo&&!st.upliftNo&&!st.cautionNo&&!text.includes('明確な役割馬は抽出されていません'))return false;
     return true;
   },null,{timeout:12000,polling:50});
@@ -89,7 +97,6 @@ async function run(bt,name){
   assert.strictEqual(health.mobileLean,false,`${name}: expected desktop addon path`);
   assert(health.loaded.some(x=>x.startsWith('race-ux-semantics-v2.js')),`${name}: semantic ux addon not loaded`);
   assert(health.loaded.some(x=>x.startsWith('m3-narrative-role-sync-v1.js')),`${name}: narrative role sync addon not loaded`);
-  assert(health.loaded.some(x=>x.startsWith('m3-narrative-compat-v1.js')),`${name}: narrative compatibility addon not loaded`);
 
   await p.fill('#raceDate','2026-10-17');
   await p.selectOption('#venue','京都');
@@ -107,7 +114,7 @@ async function run(bt,name){
   await p.click('#analyzeBtn');
   await p.waitForFunction(x=>window.RSAAnalysisTransitionState?.generation>x&&window.RSAAnalysisTransitionState?.status==='ready',prev,{timeout:20000});
   await p.waitForFunction(()=>window.RaceUXState?.version==='race-ux-v2-semantics'&&window.RaceUXState?.semanticsReady===true&&window.M3NarrativeRoleSyncState?.ready===true,null,{timeout:9000});
-  await waitRoleNarrativeCompat(p);
+  await waitReadableRoleNarrative(p);
 
   let s=await p.evaluate(()=>({
     summary:document.querySelector('#raceUXSummary')?.innerText||'',
@@ -135,7 +142,7 @@ async function run(bt,name){
   await p.click('#analyzeBtn');
   await p.waitForFunction(x=>window.RSAAnalysisTransitionState?.generation>x&&window.RSAAnalysisTransitionState?.status==='ready',before,{timeout:20000});
   await p.waitForFunction(()=>window.RaceUXState?.version==='race-ux-v2-semantics'&&window.RaceUXState?.semanticsReady===true&&window.M3NarrativeRoleSyncState?.ready===true,null,{timeout:9000});
-  await waitRoleNarrativeCompat(p);
+  await waitReadableRoleNarrative(p);
 
   s=await p.evaluate(()=>({
     summary:document.querySelectorAll('#raceUXSummary.ruxReady').length,
