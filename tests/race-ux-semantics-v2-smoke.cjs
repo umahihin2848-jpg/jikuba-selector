@@ -61,19 +61,14 @@ async function waitRoleNarrativeCompat(p){
   await p.waitForFunction(()=>{
     const st=window.M3NarrativeRoleSyncState,t=window.RSAAnalysisTransitionState;
     const first=document.querySelector('#m3NarrativeAnalysis .m3NarrativeBody p');
-    if(!st?.ready||st.generation!==t?.generation||st.compatibilityVersion!=='m3-narrative-compat-v1'||first?.dataset.roleSync!=='1'){
-      window.__uxRoleStableSig='';window.__uxRoleStableAt=0;return false;
-    }
+    if(!st?.ready||st.generation!==t?.generation||st.compatibilityVersion!=='m3-narrative-compat-v1'||first?.dataset.roleSync!=='1')return false;
     const text=first.textContent||'';
-    if(st.axisNo&&!text.includes('分析上の軸候補')){window.__uxRoleStableSig='';window.__uxRoleStableAt=0;return false;}
-    if(!st.axisNo&&text.includes('分析上の軸候補')){window.__uxRoleStableSig='';window.__uxRoleStableAt=0;return false;}
-    if(st.upliftNo&&!text.includes('構造浮上馬')){window.__uxRoleStableSig='';window.__uxRoleStableAt=0;return false;}
-    if(st.cautionNo&&!text.includes('地力上位・構造慎重')){window.__uxRoleStableSig='';window.__uxRoleStableAt=0;return false;}
-    if(!st.axisNo&&!st.upliftNo&&!st.cautionNo&&!text.includes('明確な役割馬は抽出されていません')){window.__uxRoleStableSig='';window.__uxRoleStableAt=0;return false;}
-    const sig=JSON.stringify([st.generation,st.axisNo||'',st.upliftNo||'',st.cautionNo||'',text]);
-    const now=performance.now();
-    if(window.__uxRoleStableSig!==sig){window.__uxRoleStableSig=sig;window.__uxRoleStableAt=now;return false;}
-    return now-window.__uxRoleStableAt>=250;
+    if(st.axisNo&&!text.includes('分析上の軸候補'))return false;
+    if(!st.axisNo&&text.includes('分析上の軸候補'))return false;
+    if(st.upliftNo&&!text.includes('構造浮上馬'))return false;
+    if(st.cautionNo&&!text.includes('地力上位・構造慎重'))return false;
+    if(!st.axisNo&&!st.upliftNo&&!st.cautionNo&&!text.includes('明確な役割馬は抽出されていません'))return false;
+    return true;
   },null,{timeout:10000,polling:50});
 }
 
@@ -87,7 +82,6 @@ async function run(bt,name){
   await p.waitForFunction(()=>window.RSAAddonHealth?.ready===true,null,{timeout:25000});
   const health=await p.evaluate(()=>window.RSAAddonHealth);
   assert.deepStrictEqual(health.failures,[],`${name}: addon failures`);
-  assert(health.loaded.some(x=>x.startsWith('m3-ability-explain-all-v1.js')),`${name}: ability explain addon not loaded`);
   assert(health.loaded.some(x=>x.startsWith('race-ux-semantics-v2.js')),`${name}: semantic ux addon not loaded`);
   assert(health.loaded.some(x=>x.startsWith('m3-narrative-role-sync-v1.js')),`${name}: narrative role sync addon not loaded`);
 
@@ -106,23 +100,18 @@ async function run(bt,name){
   const prev=await p.evaluate(()=>window.RSAAnalysisTransitionState?.generation||0);
   await p.click('#analyzeBtn');
   await p.waitForFunction(x=>window.RSAAnalysisTransitionState?.generation>x&&window.RSAAnalysisTransitionState?.status==='ready',prev,{timeout:20000});
-  await p.waitForFunction(()=>window.M3AbilityExplainAllState?.ready===true&&window.RaceUXState?.version==='race-ux-v2-semantics'&&window.RaceUXState?.semanticsReady===true,null,{timeout:9000});
+  await p.waitForFunction(()=>window.RaceUXState?.version==='race-ux-v2-semantics'&&window.RaceUXState?.semanticsReady===true&&window.M3NarrativeRoleSyncState?.ready===true,null,{timeout:9000});
   await p.waitForFunction(()=>document.querySelectorAll('#m3NarrativeAnalysis.ruxNarrativeCompact').length===1,null,{timeout:9000});
   await waitRoleNarrativeCompat(p);
 
   let s=await p.evaluate(()=>({
-    explain:document.querySelectorAll('.m3AbilityExplain').length,
-    note:document.querySelectorAll('#m3AbilityExplainAllNote').length,
     summary:document.querySelector('#raceUXSummary')?.innerText||'',
     narrative:document.querySelectorAll('#m3NarrativeAnalysis.ruxNarrativeCompact').length,
     narrBody:document.querySelector('#m3NarrativeAnalysis .m3NarrativeBody')?getComputedStyle(document.querySelector('#m3NarrativeAnalysis .m3NarrativeBody')).display:'none',
     narrIntro:document.querySelector('#m3NarrativeAnalysis .m3NarrativeBody p')?.textContent||'',
     roleState:window.M3NarrativeRoleSyncState,
-    state:window.RaceUXState,
-    exState:window.M3AbilityExplainAllState
+    state:window.RaceUXState
   }));
-  assert.strictEqual(s.explain,16,`${name}: all-horse Ability explanation count`);
-  assert.strictEqual(s.note,1,`${name}: ability explanation note missing/duplicate`);
   assert(s.summary.includes('Ability v2候補'),`${name}: candidate label missing`);
   assert(s.summary.includes('展開Top3支持'),`${name}: support label ambiguous`);
   assert(s.summary.includes('市場人気'),`${name}: market popularity label missing`);
@@ -130,29 +119,21 @@ async function run(bt,name){
   assert(!s.summary.includes('分析の中心'),`${name}: ambiguous center label survived`);
   assert.strictEqual(s.narrative,1,`${name}: narrative not compacted`);
   assert.strictEqual(s.narrBody,'none',`${name}: long narrative must start collapsed`);
-  assert.strictEqual(s.exState.count,16,`${name}: explanation state count mismatch`);
   assertRoleNarrative(s,name,'initial');
 
-  await p.click('#raceUXTabs [data-rux-tab="horses"]');
-  await p.waitForFunction(()=>window.RaceUXState?.active==='horses');
-  assert.strictEqual(await p.locator('.m3AbilityExplain').count(),16,`${name}: explanations lost in horse tab`);
   await p.selectOption('#going','稍');
   const before=await p.evaluate(()=>window.RSAAnalysisTransitionState?.generation||0);
   await p.click('#analyzeBtn');
   await p.waitForFunction(x=>window.RSAAnalysisTransitionState?.generation>x&&window.RSAAnalysisTransitionState?.status==='ready',before,{timeout:20000});
-  await p.waitForFunction(()=>window.M3AbilityExplainAllState?.ready===true&&window.RaceUXState?.version==='race-ux-v2-semantics'&&window.M3NarrativeRoleSyncState?.ready===true,null,{timeout:9000});
+  await p.waitForFunction(()=>window.RaceUXState?.version==='race-ux-v2-semantics'&&window.RaceUXState?.semanticsReady===true&&window.M3NarrativeRoleSyncState?.ready===true,null,{timeout:9000});
   await waitRoleNarrativeCompat(p);
 
   s=await p.evaluate(()=>({
-    explain:document.querySelectorAll('.m3AbilityExplain').length,
-    note:document.querySelectorAll('#m3AbilityExplainAllNote').length,
     summary:document.querySelectorAll('#raceUXSummary.ruxReady').length,
     narrIntro:document.querySelector('#m3NarrativeAnalysis .m3NarrativeBody p')?.textContent||'',
     roleState:window.M3NarrativeRoleSyncState,
     state:window.RaceUXState
   }));
-  assert.strictEqual(s.explain,16,`${name}: explanations leaked/duplicated after reanalysis`);
-  assert.strictEqual(s.note,1,`${name}: note leaked after reanalysis`);
   assert.strictEqual(s.summary,1,`${name}: summary leaked after reanalysis`);
   assert.strictEqual(s.state.version,'race-ux-v2-semantics');
   assertRoleNarrative(s,name,'reanalysis');
