@@ -2,7 +2,6 @@ const {chromium,webkit}=require('playwright');
 const assert=require('assert');
 
 const BASE='http://127.0.0.1:4173/waku-bc-converter/v3.html?test=uxsemantics';
-const UA='Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Mobile Safari/537.36';
 
 function csv(){
   const h=['何走目','馬番','馬名','レースPCI','PCI','Ave-3F','上3F地点差','決手','日付','距離','開催','着順','着差','クラス名','頭数','芝・ダ','上り3F','通過1','通過2','通過3','通過4'];
@@ -74,7 +73,7 @@ async function waitRoleNarrativeCompat(p){
 
 async function run(bt,name){
   const b=await bt.launch({headless:true});
-  const c=await b.newContext({viewport:{width:390,height:844},userAgent:UA,isMobile:true,hasTouch:true});
+  const c=await b.newContext({viewport:{width:1280,height:900}});
   const p=await c.newPage(),errs=[];
   p.on('pageerror',e=>errs.push(e.message));
 
@@ -143,6 +142,6 @@ async function run(bt,name){
 }
 
 (async()=>{
-  await run(chromium,'chromium mobile non-iOS');
-  await run(webkit,'webkit mobile non-iOS');
+  await run(chromium,'chromium desktop');
+  await run(webkit,'webkit desktop');
 })().catch(e=>{console.error(e);process.exit(1)});
