@@ -25,7 +25,9 @@ const odds=()=>[2.8,4.0,5.5,7.0,9,11,14,18,23,29,36,45,56,70,90,120]
   .map((x,i)=>`${i+1} ${x}`).join('\n');
 
 function assertRoleNarrative(s,name,phase='initial'){
-  assert.strictEqual(s.roleState?.version,'ability-m3-role-sync-v1',`${name}: role sync state version ${phase}`);
+  assert.strictEqual(s.roleState?.version,'ability-m3-role-sync-v1',`${name}: compatibility role sync version ${phase}`);
+  assert.strictEqual(s.roleState?.internalVersion,'ability-m3-role-sync-v3-readable',`${name}: readable v3 role sync missing ${phase}`);
+  assert.strictEqual(s.roleState?.compatibilityVersion,'m3-narrative-compat-v1',`${name}: compatibility marker missing ${phase}`);
   assert(!s.narrIntro.includes('が中心'),`${name}: legacy M3 center wording survived ${phase}`);
   if(s.roleState.axisNo)assert(s.narrIntro.includes('分析上の軸候補'),`${name}: axis candidate wording missing ${phase}`);
   else assert(!s.narrIntro.includes('分析上の軸候補'),`${name}: invented axis candidate ${phase}`);
@@ -59,8 +61,11 @@ async function ensureCsvParsed(p){
 async function waitRoleNarrativeCompat(p){
   await p.waitForFunction(()=>{
     const st=window.M3NarrativeRoleSyncState,t=window.RSAAnalysisTransitionState;
-    const first=document.querySelector('#m3NarrativeAnalysis .m3NarrativeBody p');
-    if(!st?.ready||st.generation!==t?.generation||st.compatibilityVersion!=='m3-narrative-compat-v1'||first?.dataset.roleSync!=='1')return false;
+    const root=document.querySelector('#m3NarrativeAnalysis');
+    const first=root?.querySelector('.m3NarrativeBody p');
+    const quick=root?.querySelector('.m3QuickRead');
+    const details=root?.querySelector('.m3NarrativeDetails');
+    if(!st?.ready||st.generation!==t?.generation||st.version!=='ability-m3-role-sync-v1'||st.internalVersion!=='ability-m3-role-sync-v3-readable'||st.compatibilityVersion!=='m3-narrative-compat-v1'||first?.dataset.roleSync!=='1'||!quick||!details||details.open)return false;
     const text=first.textContent||'';
     if(st.axisNo&&!text.includes('分析上の軸候補'))return false;
     if(!st.axisNo&&text.includes('分析上の軸候補'))return false;
@@ -68,7 +73,7 @@ async function waitRoleNarrativeCompat(p){
     if(st.cautionNo&&!text.includes('地力上位・構造慎重'))return false;
     if(!st.axisNo&&!st.upliftNo&&!st.cautionNo&&!text.includes('明確な役割馬は抽出されていません'))return false;
     return true;
-  },null,{timeout:10000,polling:50});
+  },null,{timeout:12000,polling:50});
 }
 
 async function run(bt,name){
@@ -81,8 +86,10 @@ async function run(bt,name){
   await p.waitForFunction(()=>window.RSAAddonHealth?.ready===true,null,{timeout:25000});
   const health=await p.evaluate(()=>window.RSAAddonHealth);
   assert.deepStrictEqual(health.failures,[],`${name}: addon failures`);
+  assert.strictEqual(health.mobileLean,false,`${name}: expected desktop addon path`);
   assert(health.loaded.some(x=>x.startsWith('race-ux-semantics-v2.js')),`${name}: semantic ux addon not loaded`);
   assert(health.loaded.some(x=>x.startsWith('m3-narrative-role-sync-v1.js')),`${name}: narrative role sync addon not loaded`);
+  assert(health.loaded.some(x=>x.startsWith('m3-narrative-compat-v1.js')),`${name}: narrative compatibility addon not loaded`);
 
   await p.fill('#raceDate','2026-10-17');
   await p.selectOption('#venue','京都');
@@ -100,13 +107,14 @@ async function run(bt,name){
   await p.click('#analyzeBtn');
   await p.waitForFunction(x=>window.RSAAnalysisTransitionState?.generation>x&&window.RSAAnalysisTransitionState?.status==='ready',prev,{timeout:20000});
   await p.waitForFunction(()=>window.RaceUXState?.version==='race-ux-v2-semantics'&&window.RaceUXState?.semanticsReady===true&&window.M3NarrativeRoleSyncState?.ready===true,null,{timeout:9000});
-  await p.waitForFunction(()=>document.querySelectorAll('#m3NarrativeAnalysis.ruxNarrativeCompact').length===1,null,{timeout:9000});
   await waitRoleNarrativeCompat(p);
 
   let s=await p.evaluate(()=>({
     summary:document.querySelector('#raceUXSummary')?.innerText||'',
-    narrative:document.querySelectorAll('#m3NarrativeAnalysis.ruxNarrativeCompact').length,
-    narrBody:document.querySelector('#m3NarrativeAnalysis .m3NarrativeBody')?getComputedStyle(document.querySelector('#m3NarrativeAnalysis .m3NarrativeBody')).display:'none',
+    narrativeRoots:document.querySelectorAll('#m3NarrativeAnalysis').length,
+    quickReads:document.querySelectorAll('#m3NarrativeAnalysis .m3QuickRead').length,
+    details:document.querySelectorAll('#m3NarrativeAnalysis .m3NarrativeDetails').length,
+    detailsOpen:document.querySelector('#m3NarrativeAnalysis .m3NarrativeDetails')?.open===true,
     narrIntro:document.querySelector('#m3NarrativeAnalysis .m3NarrativeBody p')?.textContent||'',
     roleState:window.M3NarrativeRoleSyncState,
     state:window.RaceUXState
@@ -116,8 +124,10 @@ async function run(bt,name){
   assert(s.summary.includes('市場人気'),`${name}: market popularity label missing`);
   assert(s.summary.includes('市場ギャップ'),`${name}: market gap label missing`);
   assert(!s.summary.includes('分析の中心'),`${name}: ambiguous center label survived`);
-  assert.strictEqual(s.narrative,1,`${name}: narrative not compacted`);
-  assert.strictEqual(s.narrBody,'none',`${name}: long narrative must start collapsed`);
+  assert.strictEqual(s.narrativeRoots,1,`${name}: narrative root missing/duplicate`);
+  assert.strictEqual(s.quickReads,1,`${name}: readable QUICK READ missing/duplicate`);
+  assert.strictEqual(s.details,1,`${name}: narrative details missing/duplicate`);
+  assert.strictEqual(s.detailsOpen,false,`${name}: detailed narrative must start collapsed`);
   assertRoleNarrative(s,name,'initial');
 
   await p.selectOption('#going','稍');
@@ -129,11 +139,19 @@ async function run(bt,name){
 
   s=await p.evaluate(()=>({
     summary:document.querySelectorAll('#raceUXSummary.ruxReady').length,
+    narrativeRoots:document.querySelectorAll('#m3NarrativeAnalysis').length,
+    quickReads:document.querySelectorAll('#m3NarrativeAnalysis .m3QuickRead').length,
+    details:document.querySelectorAll('#m3NarrativeAnalysis .m3NarrativeDetails').length,
+    detailsOpen:document.querySelector('#m3NarrativeAnalysis .m3NarrativeDetails')?.open===true,
     narrIntro:document.querySelector('#m3NarrativeAnalysis .m3NarrativeBody p')?.textContent||'',
     roleState:window.M3NarrativeRoleSyncState,
     state:window.RaceUXState
   }));
   assert.strictEqual(s.summary,1,`${name}: summary leaked after reanalysis`);
+  assert.strictEqual(s.narrativeRoots,1,`${name}: narrative root leaked after reanalysis`);
+  assert.strictEqual(s.quickReads,1,`${name}: QUICK READ leaked after reanalysis`);
+  assert.strictEqual(s.details,1,`${name}: narrative details leaked after reanalysis`);
+  assert.strictEqual(s.detailsOpen,false,`${name}: detailed narrative reopened after reanalysis`);
   assert.strictEqual(s.state.version,'race-ux-v2-semantics');
   assertRoleNarrative(s,name,'reanalysis');
   assert.deepStrictEqual(errs,[],`${name}: page errors ${errs.join(' | ')}`);
