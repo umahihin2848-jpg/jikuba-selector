@@ -1,0 +1,94 @@
+{
+  "version": "wide_roi_layer_walkforward_v1",
+  "created": "2026-11-03",
+  "status": "RESEARCH_ONLY_NO_PRODUCTION_PROMOTION",
+  "purpose": "Test whether market-independent structural layers create a long-term, fixed-stake Wide betting edge after market calibration, with profitability rather than probability metrics as the final gate.",
+  "data": {
+    "runner_source": "locally supplied umade.csv",
+    "odds_source": ["2016_2025_odds.csv", "2026_odds.csv"],
+    "eligible_runner_rows_2016_2026": 61970,
+    "pair_rows_2019_2026": 324620,
+    "scope": "JRA flat, field_size >= 12, 3-win class or higher, exactly three Top3 labels",
+    "odds_timing": "TARGET odds time flag 4 (confirmed/final)",
+    "wide_return_proxy": "final Wide lower odds; conservative proxy, not exact payout and not T-15 executable odds"
+  },
+  "protocol": {
+    "runner_model_walkforward": "For test year Y, Ability and reconstructed M3 are refit only on years strictly earlier than Y.",
+    "m3_alpha_selection": "Ridge alpha selected before the test window using 2017 train -> 2018 validation only.",
+    "m3_alpha": 10,
+    "m3_validation_2018_mae": 0.5977615865,
+    "pair_probability_walkforward": "2019 supplies the first pair calibration history; pair outcome models are tested on 2020-2026 with only prior-year pair rows.",
+    "bet_rule": "At most one Wide pair per race: select the highest predicted EV pair, fixed 1u stake, and require the stated EV threshold.",
+    "profitability_metrics": ["ROI using Wide lower odds", "largest-payout-trimmed ROI", "top-two-payout-trimmed ROI", "maximum drawdown in units", "maximum losing streak", "year-by-year ROI"]
+  },
+  "models": {
+    "market": "wide lower odds + odds-range ratio + field size",
+    "market_plus_ability": "market + walk-forward Ability pair features",
+    "market_plus_ability_plus_m3": "market + Ability + walk-forward reconstructed M3 pair features",
+    "queue_proxy": "market + Ability + M3 + strictly prior frontness summary pair features. This is NOT the current Production P10/ValidatedQueue model."
+  },
+  "results": {
+    "market_plus_ability_plus_m3": {
+      "ev_threshold_1_00": {
+        "bets": 76,
+        "roi_lower_bound_percent": 75.0,
+        "largest_payout_trimmed_roi_percent": 15.7333,
+        "assessment": "FAIL"
+      },
+      "ev_threshold_1_05": {
+        "bets": 27,
+        "roi_lower_bound_percent": 167.4074,
+        "largest_payout_trimmed_roi_percent": 0.0,
+        "assessment": "FAIL_JACKPOT_DEPENDENT",
+        "note": "The superficially profitable result disappears completely after removing the largest winning payout. Bets are concentrated in the early test period rather than stable across years."
+      }
+    },
+    "queue_proxy": {
+      "ev_threshold_0_95": {
+        "bets": 852,
+        "hits": 21,
+        "roi_lower_bound_percent": 147.2653,
+        "largest_payout_trimmed_roi_percent": 116.6392,
+        "top_two_payout_trimmed_roi_percent": 93.7059,
+        "maximum_drawdown_u": 312.0,
+        "maximum_losing_streak": 312,
+        "yearly": {
+          "2020": {"bets":345,"roi":74.7826},
+          "2021": {"bets":219,"roi":332.1005},
+          "2022": {"bets":191,"roi":66.4921},
+          "2023": {"bets":29,"roi":0.0},
+          "2024": {"bets":27,"roi":305.1852},
+          "2025": {"bets":35,"roi":171.4286},
+          "2026": {"bets":6,"roi":0.0}
+        },
+        "assessment": "FAIL_LONG_TERM_STABILITY"
+      },
+      "ev_threshold_1_00": {
+        "bets": 304,
+        "hits": 7,
+        "roi_lower_bound_percent": 171.3158,
+        "largest_payout_trimmed_roi_percent": 107.1617,
+        "top_two_payout_trimmed_roi_percent": 82.6159,
+        "maximum_drawdown_u": 161.0,
+        "maximum_losing_streak": 161,
+        "yearly": {
+          "2020": {"bets":185,"roi":106.0},
+          "2021": {"bets":65,"roi":313.3846},
+          "2022": {"bets":47,"roi":159.5745},
+          "2023": {"bets":1,"roi":0.0},
+          "2024": {"bets":3,"roi":940.0},
+          "2025": {"bets":3,"roi":593.3333},
+          "2026": {"bets":0,"roi":null}
+        },
+        "assessment": "FAIL_LONG_TERM_STABILITY"
+      }
+    }
+  },
+  "decision": {
+    "promote_m3_to_wide_production": false,
+    "promote_queue_proxy_to_wide_production": false,
+    "reason": "Neither layer meets the long-term profitability standard. M3 profitability is dominated by a single payout. The frontness/Queue proxy has pooled ROI >100 but fails after removing the top two payouts and has extreme drawdown, extreme losing streaks, zero-return years, and vanishing bet counts in recent years.",
+    "anti_champion_policy": "Do not tune EV thresholds, odds caps, or feature cuts on 2020-2026 until a new pre-specified hypothesis is defined. A rule is not promoted merely because pooled ROI exceeds 100%.",
+    "next_test": "Evaluate the already-existing frozen WIDE SIGNAL selection logic as a rule family, rather than searching arbitrary thresholds. Keep current P10/Queue validation separate from the frontness proxy because the proxy is not the Production model."
+  }
+}
