@@ -1,5 +1,5 @@
 {
-  "version": "wide_scenario_m4_user_validation_20261104",
+  "version": "wide_scenario_m4_user_validation_20261104_corrected_date_code",
   "status": "RESEARCH_ONLY_NOT_PRODUCTION",
   "source_data": [
     "umade.csv",
@@ -16,101 +16,108 @@
     "return": "final wide odds lower/upper as payout proxies, not actual settled payout or executable T-15 odds"
   },
   "main": {
-    "bets": 606,
-    "hits": 40,
-    "roi_lower_percent": 89.5,
-    "roi_upper_percent": 97.56,
-    "trim1_lower_percent": 67.54,
-    "trim2_lower_percent": 63.05,
-    "max_dd_u": 219.9,
-    "max_losing_streak": 75,
+    "bets": 635,
+    "hits": 43,
+    "roi_lower_percent": 77.67,
+    "roi_upper_percent": 86.27,
+    "trim1_lower_percent": 69.97,
+    "trim2_lower_percent": 65.69,
+    "max_dd_u": 245.6,
+    "max_losing_streak": 78,
     "bootstrap_roi_lower_ci95_percent": [
-      49.95,
-      147.49
+      51.43,
+      107.89
     ]
   },
   "comparators": {
     "overall_M3_top3": {
-      "bets": 604,
-      "roi_lower_percent": 73.18,
-      "trim2_lower_percent": 61.23
+      "bets": 633,
+      "roi_lower_percent": 81.47,
+      "trim2_lower_percent": 66.39
     },
     "scenario_M4_top5": {
-      "bets": 656,
-      "roi_lower_percent": 95.17,
-      "trim2_lower_percent": 67.78
+      "bets": 686,
+      "roi_lower_percent": 83.83,
+      "trim2_lower_percent": 69.93
     },
     "scenario_M4_ability_upper_half": {
-      "bets": 525,
-      "roi_lower_percent": 100.51,
-      "trim2_lower_percent": 70.31
+      "bets": 550,
+      "roi_lower_percent": 85.6,
+      "trim2_lower_percent": 72.08
     },
     "scenario_M4_no_ability_filter": {
-      "bets": 622,
-      "roi_lower_percent": 138.84,
-      "trim2_lower_percent": 88.45
+      "bets": 651,
+      "roi_lower_percent": 125.1,
+      "trim1_lower_percent": 97.38,
+      "trim2_lower_percent": 85.22
     },
     "oracle_after_race_scenario_not_tradeable": {
-      "bets": 604,
-      "roi_lower_percent": 94.65,
-      "trim2_lower_percent": 64.9
+      "bets": 633,
+      "roi_lower_percent": 80.73,
+      "trim2_lower_percent": 65.64
     }
   },
   "yearly": {
     "2019": {
-      "bets": 68,
-      "roi": 66.18
+      "bets": 72,
+      "roi": 156.81
     },
     "2020": {
-      "bets": 69,
-      "roi": 64.35
+      "bets": 71,
+      "roi": 62.54
     },
     "2021": {
-      "bets": 78,
-      "roi": 86.41
+      "bets": 84,
+      "roi": 89.4
     },
     "2022": {
-      "bets": 72,
-      "roi": 54.86
+      "bets": 78,
+      "roi": 50.64
     },
     "2023": {
-      "bets": 84,
-      "roi": 47.74
+      "bets": 86,
+      "roi": 46.63
     },
     "2024": {
-      "bets": 99,
-      "roi": 73.13
+      "bets": 103,
+      "roi": 70.29
     },
     "2025": {
-      "bets": 91,
-      "roi": 189.89,
-      "roi_after_removing_largest": 43.33
+      "bets": 93,
+      "roi": 51.61,
+      "roi_after_removing_largest": 36.96
     },
     "2026": {
-      "bets": 45,
-      "roi": 135.11,
-      "roi_after_removing_largest": 81.82
+      "bets": 48,
+      "roi": 126.67,
+      "roi_after_removing_largest": 76.6
     }
   },
   "same_races": {
-    "both_select": 582,
-    "scenario_roi": 64.43,
-    "overall_m3_roi": 71.75,
+    "both_select": 611,
+    "scenario_roi": 73.75,
+    "overall_m3_roi": 80.41,
     "scenario_only": 24,
-    "scenario_only_roi": 697.5,
+    "scenario_only_roi": 177.5,
     "scenario_only_trim2_roi": 26.36
   },
   "scenario_prediction": {
-    "accuracy_on_eligible_axis_races": 0.5498,
-    "mean_max_probability": 0.5298
+    "accuracy_on_eligible_axis_races": 0.5505,
+    "mean_max_probability": 0.529
   },
   "caveats": [
     "Not actual manually chosen pre-race scenarios",
     "M3, M4, and Ability were year-refitted proxies and do not exactly reproduce the app",
     "Using final prices and wide ranges, not live bet snapshots or settled payouts",
     "Alternative Ability thresholds inspected on same years; never select a Production rule based on them",
-    "One very large 133.8x wide quote dominates the 2025 success",
+    "Previously reported 133.8x payout was a race-key mismatch; the corrected wide quote was 9.0x. This error is corrected in the current summary.",
     "No Production code was changed"
   ],
-  "decision": "KEEP SHADOW; preregister and store real pre-race scenario choice and ticket odds before forward validation"
+  "decision": "DO NOT PROMOTE, all representative pre-race scenarios fail long-term OOS ROI; manual scenario choice was not observed",
+  "audit": {
+    "fixed": "TARGET race day 10/11/12 must encode as A/B/C (not literal 10/11/12)",
+    "previous_summary": "INVALID, superseded; previously matched wrong races for days 10-12",
+    "popularity_rank_audit": "1256/1270 horse-side pairs (=98.90%) match final odds popularity rank; remaining cases may be rank ties/updates",
+    "corrected": "2026-11-04"
+  }
 }
