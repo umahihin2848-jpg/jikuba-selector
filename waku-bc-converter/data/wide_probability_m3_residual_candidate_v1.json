@@ -1,0 +1,64 @@
+{
+  "version": "wide_probability_m3_residual_candidate_v1",
+  "created": "2026-11-03",
+  "status": "SHADOW_CANDIDATE_NOT_ADOPTED",
+  "purpose": "Test whether current pre-race M3 adds probability information on top of the market-independent Ability-derived coherent wide baseline without adding a high-dimensional combiner.",
+  "formula": {
+    "baseline": "P0(S) proportional to exp(sum(theta_i for i in S)), |S|=3, theta chosen to reproduce Ability Top3 marginals",
+    "m3_strength": "m_i = -(M3_score_i - race_mean_M3_score) / race_sd_M3_score; higher is better because lower runtime M3 score ranks better",
+    "candidate": "P_gamma(S) proportional to exp(sum(theta_i for i in S) + gamma * sum(m_i for i in S))",
+    "wide_probability": "q_ij = sum(P_gamma(S) for S containing i and j)",
+    "gamma_selection": "one scalar gamma selected on 2024 only by minimizing Top3-set negative log likelihood",
+    "gamma": 0.12708213,
+    "market_inputs_used": false,
+    "coherence": "Every candidate distribution still contains exactly three horses, therefore sum of all wide pair probabilities remains exactly 3. M3 is allowed to update the Ability marginals."
+  },
+  "evaluation_universe_note": "Reconstructed from locally supplied TARGET-style data with normalized horse names, actual available starters >=12, and races having exactly three Top3 labels. Ability/M3 features use strictly prior data. Counts are close to but not identical to every frozen source model universe; treat as Research/Shadow evidence only.",
+  "results": {
+    "2024_selection": {
+      "races": 395,
+      "pairs": 42921,
+      "triplet_nll": {"ability_only": 5.60134249, "ability_plus_m3": 5.58454396, "relative_improvement_percent": 0.2999},
+      "pair": {
+        "ability_only": {"logloss": 0.11631188, "brier": 0.02613992, "auc": 0.73512007, "ece10": 0.00139372},
+        "ability_plus_m3": {"logloss": 0.11601669, "brier": 0.02610429, "auc": 0.73553639, "ece10": 0.00126534},
+        "relative_improvement_percent": {"logloss": 0.2538, "brier": 0.1363}
+      }
+    },
+    "2025_confirmation": {
+      "races": 404,
+      "pairs": 43660,
+      "triplet_nll": {"ability_only": 5.66540316, "ability_plus_m3": 5.65837892, "relative_improvement_percent": 0.1240},
+      "pair": {
+        "ability_only": {"logloss": 0.11804395, "brier": 0.02639419, "auc": 0.72008193, "ece10": 0.00090099},
+        "ability_plus_m3": {"logloss": 0.11791615, "brier": 0.02637555, "auc": 0.71983735, "ece10": 0.00035304},
+        "relative_improvement_percent": {"logloss": 0.1083, "brier": 0.0706}
+      },
+      "race_cluster_bootstrap_95pct": {
+        "triplet_nll_delta_m3_minus_base": [-0.02500163, 0.01111000],
+        "pair_logloss_delta_m3_minus_base": [-0.00044152, 0.00018907],
+        "pair_brier_delta_m3_minus_base": [-0.00004760, 0.00001048]
+      }
+    },
+    "2026_final_oos": {
+      "races": 297,
+      "pairs": 32686,
+      "triplet_nll": {"ability_only": 5.68619309, "ability_plus_m3": 5.68035120, "relative_improvement_percent": 0.1027},
+      "pair": {
+        "ability_only": {"logloss": 0.11632843, "brier": 0.02587153, "auc": 0.71533075, "ece10": 0.00134131},
+        "ability_plus_m3": {"logloss": 0.11622866, "brier": 0.02584317, "auc": 0.71493901, "ece10": 0.00124740},
+        "relative_improvement_percent": {"logloss": 0.0858, "brier": 0.1096}
+      },
+      "race_cluster_bootstrap_95pct": {
+        "triplet_nll_delta_m3_minus_base": [-0.02628315, 0.01567570],
+        "pair_logloss_delta_m3_minus_base": [-0.00045607, 0.00027377],
+        "pair_brier_delta_m3_minus_base": [-0.00006045, 0.00000393]
+      }
+    }
+  },
+  "decision": {
+    "adopt_into_wide_probability_v1": false,
+    "reason": "M3 gives small, directionally consistent LogLoss/Brier/calibration improvements in both 2025 and 2026, but the race-cluster bootstrap intervals still include zero and AUC is slightly lower in both untouched years. Evidence is promising but not strong enough to replace the Ability-only baseline.",
+    "next_step": "Keep gamma=0.12708213 frozen as a Shadow challenger and compare it prospectively against the Ability-only baseline. Do not tune gamma again on 2025/2026 results."
+  }
+}
