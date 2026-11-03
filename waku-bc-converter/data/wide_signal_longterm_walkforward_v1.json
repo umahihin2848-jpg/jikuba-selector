@@ -1,0 +1,115 @@
+{
+  "version": "wide_signal_longterm_walkforward_v1",
+  "created": "2026-11-03",
+  "status": "RESEARCH_ONLY_FAIL_LONG_TERM_PROFITABILITY",
+  "purpose": "Test the already-frozen WIDE SIGNAL rule family without post-hoc threshold tuning, using leakage-controlled yearly walk-forward reconstruction.",
+  "frozen_rule_source": "wide-signal-v1.3",
+  "rules": {
+    "A2_CORE": "exactly one structural intersection horse (Ability Top3 x M3 Top3), that horse is Ability rank 2; frame market MID; choose best representative among axis-frame combinations ranked 2-12; Wide lower odds >=5.0",
+    "PAIR2_SECOND": "exactly two structural intersection horses including Ability rank 1; frame market MID/HIGH; choose the second representative among axis-frame combinations ranked 2-12; Wide lower odds >=5.0; MID is BUY candidate, HIGH is forward-research only",
+    "candidate_score": "Ability rank + M3 rank + P10 penalty, where penalty is 0/<20%, 1/20-<50%, 2/50-<65%, 4/>=65%",
+    "frame_market_band": "Neff ratio LOW <0.3582804561, MID <=0.5125919146, HIGH above",
+    "LOGIC_C": "Not evaluated as an active historical strategy because the current code path is effectively unreachable: it requires A1_RED, while current mobile-decision-core returns Ability-rank-1 single structure as green/yellow rather than red."
+  },
+  "protocol": {
+    "test_years": [2019,2020,2021,2022,2023,2024,2025,2026],
+    "universe": "JRA flat, field size >=12, 3-win class or higher",
+    "ability": "Ability-v1 architecture, C=0.03, refit each test year only on earlier years (2017 onward); strictly prior high-class history",
+    "m3": "M3 architecture reconstructed and refit each test year only on earlier years; remaining-600 and closing models use pre-race history; Ridge alpha=10 as pre-specified research reconstruction",
+    "p10": "Position-risk architecture reconstructed with strictly prior history and race LOO pressure; logistic C=0.01 selected using 2017 train -> 2018 validation before the 2019-2026 test window",
+    "odds": "TARGET final odds flag=4. Frame odds and Wide lower/upper ranges parsed from 2016_2025_odds.csv and 2026_odds.csv.",
+    "stake": "fixed 1u per selected Wide pair; WIDE SIGNAL produces at most one selected pair for A2/PAIR2 in this test",
+    "no_posthoc_tuning": true
+  },
+  "results": {
+    "all_signals_including_PAIR2_HIGH_research": {
+      "bets": 361,
+      "hits": 23,
+      "hit_rate_percent": 6.3712,
+      "roi_using_wide_lower_percent": 63.0194,
+      "roi_using_wide_upper_percent": 69.0028,
+      "largest_payout_trimmed_lower_roi_percent": 57.0833,
+      "top_two_payout_trimmed_lower_roi_percent": 51.1421,
+      "maximum_drawdown_u": 158.6,
+      "maximum_losing_streak": 61
+    },
+    "green_BUY_only_A2_MID_plus_PAIR2_MID": {
+      "bets": 294,
+      "hits": 19,
+      "hit_rate_percent": 6.4626,
+      "roi_using_wide_lower_percent": 64.1497,
+      "roi_using_wide_upper_percent": 70.3741,
+      "largest_payout_trimmed_lower_roi_percent": 56.8601,
+      "top_two_payout_trimmed_lower_roi_percent": 49.5548,
+      "maximum_drawdown_u": 121.2,
+      "maximum_losing_streak": 53,
+      "bootstrap_lower_roi_95pct": [34.2517,98.6735],
+      "bootstrap_probability_roi_above_100": 0.0213,
+      "assessment": "FAIL"
+    },
+    "A2_CORE_MID": {
+      "bets": 141,
+      "hits": 8,
+      "hit_rate_percent": 5.6738,
+      "roi_using_wide_lower_percent": 58.6525,
+      "roi_using_wide_upper_percent": 64.8227,
+      "largest_payout_trimmed_lower_roi_percent": 43.3571,
+      "top_two_payout_trimmed_lower_roi_percent": 27.9137,
+      "maximum_drawdown_u": 79.8,
+      "maximum_losing_streak": 49,
+      "assessment": "FAIL"
+    },
+    "PAIR2_SECOND_MID": {
+      "bets": 153,
+      "hits": 11,
+      "hit_rate_percent": 7.1895,
+      "roi_using_wide_lower_percent": 69.2157,
+      "roi_using_wide_upper_percent": 75.4902,
+      "largest_payout_trimmed_lower_roi_percent": 57.1053,
+      "top_two_payout_trimmed_lower_roi_percent": 47.8146,
+      "maximum_drawdown_u": 53.0,
+      "maximum_losing_streak": 38,
+      "assessment": "FAIL"
+    },
+    "PAIR2_SECOND_HIGH_research": {
+      "bets": 67,
+      "hits": 4,
+      "hit_rate_percent": 5.9701,
+      "roi_using_wide_lower_percent": 58.0597,
+      "roi_using_wide_upper_percent": 63.5821,
+      "largest_payout_trimmed_lower_roi_percent": 39.3939,
+      "top_two_payout_trimmed_lower_roi_percent": 25.5385,
+      "maximum_drawdown_u": 37.4,
+      "maximum_losing_streak": 29,
+      "assessment": "FAIL"
+    },
+    "green_BUY_yearly_lower_roi": {
+      "2019": {"bets":17,"hits":0,"roi":0.0},
+      "2020": {"bets":29,"hits":0,"roi":0.0},
+      "2021": {"bets":51,"hits":5,"roi":63.1373},
+      "2022": {"bets":38,"hits":3,"roi":66.3158},
+      "2023": {"bets":43,"hits":1,"roi":50.9302},
+      "2024": {"bets":50,"hits":5,"roi":107.0},
+      "2025": {"bets":40,"hits":3,"roi":87.25},
+      "2026": {"bets":26,"hits":2,"roi":80.3846}
+    }
+  },
+  "interpretation": [
+    "The frozen WIDE SIGNAL rule family does not explain the user's strong live Wide results over the long run.",
+    "The main BUY subset is below break-even even under the optimistic assumption that every hit pays the displayed Wide upper range.",
+    "Only 2024 is above 100% in the yearly lower-bound BUY results; therefore this is not a stable cross-era betting edge.",
+    "A2 CORE and PAIR2 SECOND both fail independently, so their combination should not be promoted or used as the explanation for current live profitability.",
+    "This result should not be repaired by searching new odds caps, P10 cutoffs, or distance/class subsets on the same 2019-2026 sample; that would create champion-data bias."
+  ],
+  "caveats": [
+    "Historical odds are final odds rather than the user's actual T-15 decision-time snapshots.",
+    "Wide return is evaluated as a lower-bound and upper-bound range rather than exact historical payout for the selected pair.",
+    "Ability/M3/P10 are leakage-controlled walk-forward reconstructions of the current architecture, not literal application of 2026-fitted coefficients to old years.",
+    "Because the lower-bound ROI is about 64% and even the upper-bound ROI is about 70%, ordinary payout-range uncertainty is not large enough to reverse the conclusion."
+  ],
+  "decision": {
+    "promote_existing_wide_signal": false,
+    "production_change": false,
+    "next_step": "Investigate what differentiates the user's actually purchased profitable Wide bets from the frozen WIDE SIGNAL. Use the real purchase ledger/tags as a prospective hypothesis source, then pre-register one simple candidate rule and test it on a genuinely untouched historical/forward segment rather than tuning WIDE SIGNAL on 2019-2026."
+  }
+}
