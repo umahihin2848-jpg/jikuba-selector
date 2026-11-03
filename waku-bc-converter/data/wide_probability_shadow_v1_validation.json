@@ -1,0 +1,84 @@
+{
+  "version": "wide_probability_shadow_v1_validation",
+  "created": "2026-11-03",
+  "status": "SHADOW_ONLY",
+  "purpose": "Evaluate a market-independent, race-coherent wide probability baseline derived only from Ability Top3 marginals before any M3/P10/RPCI residual correction or Production use.",
+  "model": {
+    "name": "fixed_size_maximum_entropy_top3",
+    "definition": "For every 3-horse subset S, P(S) = exp(sum(theta_i for i in S)) / Z, with theta solved so each horse's marginal inclusion probability equals Ability Top3.",
+    "wide_probability": "q_ij = sum(P(S) for S containing i and j)",
+    "coherence_constraints": [
+      "sum_i p_i = 3",
+      "sum_{i<j} q_ij = 3",
+      "sum_{j!=i} q_ij = 2*p_i"
+    ],
+    "market_inputs_used": false,
+    "production_connected": false
+  },
+  "comparison_baseline": "naive_independence_qij_equals_pi_times_pj",
+  "offline_reconstruction_note": "Metrics below were reconstructed from the locally supplied TARGET-style historical CSVs using the current Ability formula/history policy. The reconstructed race counts differ slightly from the frozen ability_model_v1 official OOS counts, so these results are a directional Shadow gate, not Production promotion evidence.",
+  "results": {
+    "2025": {
+      "races": 407,
+      "pairs": 44901,
+      "naive_independence": {
+        "logloss": 0.2351686,
+        "brier": 0.0595745,
+        "auc": 0.7083400,
+        "ece10": 0.0274560,
+        "mean_sum_pair_probability_per_race": 4.3076
+      },
+      "race_coherent_maxent": {
+        "logloss": 0.2133288,
+        "brier": 0.0566032,
+        "auc": 0.7083292,
+        "ece10": 0.0032296,
+        "mean_sum_pair_probability_per_race": 3.0
+      },
+      "relative_improvement_percent": {
+        "logloss": 9.2869,
+        "brier": 4.9875,
+        "ece10": 88.2372
+      }
+    },
+    "2026": {
+      "races": 298,
+      "pairs": 32751,
+      "naive_independence": {
+        "logloss": 0.2379298,
+        "brier": 0.0605544,
+        "auc": 0.7049913,
+        "ece10": 0.0277550,
+        "mean_sum_pair_probability_per_race": 4.3071
+      },
+      "race_coherent_maxent": {
+        "logloss": 0.2166787,
+        "brier": 0.0575920,
+        "auc": 0.7049809,
+        "ece10": 0.0034214,
+        "mean_sum_pair_probability_per_race": 3.0
+      },
+      "relative_improvement_percent": {
+        "logloss": 8.9317,
+        "brier": 4.8921,
+        "ece10": 87.6729
+      }
+    }
+  },
+  "interpretation": [
+    "The coherent transform materially improves probability quality and calibration versus multiplying marginal Top3 probabilities.",
+    "AUC/ranking is essentially unchanged; this is expected because v1 is a probability-coherence layer, not a new horse-ranking signal.",
+    "This makes the model suitable as a baseline for later EV research, but not yet a validated BUY rule.",
+    "Any M3/P10/RPCI/Queue correction must be tested as a separate pre-race residual model with race-grouped year splits and must preserve race coherence.",
+    "Market odds must remain outside the structural probability model and be applied only afterward for decision-time EV evaluation."
+  ],
+  "next_gate": {
+    "train": "2019-2023",
+    "selection": "2024",
+    "confirmation": "2025",
+    "final_oos": "2026",
+    "primary_metrics": ["LogLoss", "Brier", "Calibration/ECE"],
+    "uncertainty": "Use race-level clustered/bootstrap comparisons, not pair-level independent standard errors.",
+    "promotion_rule": "Do not connect to Production until structural residual corrections and decision-time wide-odds EV are frozen and pass OOS/forward validation."
+  }
+}
