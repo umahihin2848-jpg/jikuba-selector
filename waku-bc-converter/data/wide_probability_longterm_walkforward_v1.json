@@ -1,0 +1,103 @@
+{
+  "version": "wide_probability_longterm_walkforward_v1",
+  "created": "2026-11-03",
+  "status": "SHADOW_BASELINE_LONGTERM_SUPPORTED",
+  "purpose": "Test whether the market-independent Ability-derived coherent Wide Probability baseline remains stable across multiple racing eras without relying on 2025-2026 alone.",
+  "data": {
+    "source": "locally supplied TARGET-style high-class JRA flat history, 2016-2026",
+    "history_warmup_year": 2016,
+    "training_rows_start_year": 2017,
+    "test_years": [2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
+    "test_races_total": 3069,
+    "universe": "JRA flat, field_size>=12, 3-win class or higher, exactly three Top3 labels",
+    "leakage_rule": "For test year Y, model coefficients are refit using years strictly earlier than Y only. Horse features use strictly prior high-class starts only."
+  },
+  "ability_model_walkforward": {
+    "architecture": "Ability v1 predefined 14-feature L2 logistic regression",
+    "C": 0.03,
+    "feature_set_fixed": true,
+    "refit_policy": "expanding window; 2019 uses 2017-2018, 2020 uses 2017-2019, ..., 2026 uses 2017-2025",
+    "race_probability_projection": "common logit shift so Top3 probabilities sum to exactly 3 per race"
+  },
+  "wide_probability": {
+    "model": "fixed-size maximum-entropy Top3 set distribution",
+    "definition": "For each 3-horse subset S, P(S) proportional to exp(sum(theta_i for i in S)); theta reproduces Ability Top3 marginals. Wide q_ij is the probability mass of all Top3 sets containing both i and j.",
+    "coherence": [
+      "sum_i p_i = 3",
+      "sum_{i<j} q_ij = 3",
+      "sum_{j!=i} q_ij = 2*p_i"
+    ],
+    "comparison": "naive q_ij = p_i*p_j"
+  },
+  "yearly_results": [
+    {"year":2019,"races":342,"ability_logloss":0.472040,"ability_brier":0.151300,"ability_auc":0.679297,"ability_ece10":0.014837,"wide_logloss":0.122130,"naive_logloss":0.123998,"wide_brier":0.027438,"naive_brier":0.027558,"wide_auc":0.718327,"wide_ece10":0.000257,"naive_ece10":0.010914,"wide_logloss_improvement_percent":1.5058,"wide_brier_improvement_percent":0.4368},
+    {"year":2020,"races":393,"ability_logloss":0.465679,"ability_brier":0.148581,"ability_auc":0.672354,"ability_ece10":0.013263,"wide_logloss":0.116739,"naive_logloss":0.118523,"wide_brier":0.025838,"naive_brier":0.025944,"wide_auc":0.709664,"wide_ece10":0.000250,"naive_ece10":0.010421,"wide_logloss_improvement_percent":1.5049,"wide_brier_improvement_percent":0.4075},
+    {"year":2021,"races":405,"ability_logloss":0.469419,"ability_brier":0.149279,"ability_auc":0.659787,"ability_ece10":0.007228,"wide_logloss":0.117625,"naive_logloss":0.119373,"wide_brier":0.025821,"naive_brier":0.025940,"wide_auc":0.692026,"wide_ece10":0.000590,"naive_ece10":0.010365,"wide_logloss_improvement_percent":1.4641,"wide_brier_improvement_percent":0.4593},
+    {"year":2022,"races":396,"ability_logloss":0.463698,"ability_brier":0.147894,"ability_auc":0.688367,"ability_ece10":0.024631,"wide_logloss":0.116956,"naive_logloss":0.118828,"wide_brier":0.026058,"naive_brier":0.026146,"wide_auc":0.725555,"wide_ece10":0.000173,"naive_ece10":0.010499,"wide_logloss_improvement_percent":1.5756,"wide_brier_improvement_percent":0.3335},
+    {"year":2023,"races":421,"ability_logloss":0.466240,"ability_brier":0.148981,"ability_auc":0.687846,"ability_ece10":0.024222,"wide_logloss":0.118444,"naive_logloss":0.120333,"wide_brier":0.026445,"naive_brier":0.026537,"wide_auc":0.724183,"wide_ece10":0.000107,"naive_ece10":0.010645,"wide_logloss_improvement_percent":1.5697,"wide_brier_improvement_percent":0.3450},
+    {"year":2024,"races":405,"ability_logloss":0.461941,"ability_brier":0.147147,"ability_auc":0.696178,"ability_ece10":0.021115,"wide_logloss":0.117642,"naive_logloss":0.119625,"wide_brier":0.026380,"naive_brier":0.026454,"wide_auc":0.730562,"wide_ece10":0.001085,"naive_ece10":0.011447,"wide_logloss_improvement_percent":1.6572,"wide_brier_improvement_percent":0.2792},
+    {"year":2025,"races":409,"ability_logloss":0.463806,"ability_brier":0.147934,"ability_auc":0.690697,"ability_ece10":0.017895,"wide_logloss":0.118040,"naive_logloss":0.119979,"wide_brier":0.026440,"naive_brier":0.026524,"wide_auc":0.725886,"wide_ece10":0.001078,"naive_ece10":0.011598,"wide_logloss_improvement_percent":1.6167,"wide_brier_improvement_percent":0.3141},
+    {"year":2026,"races":298,"ability_logloss":0.462348,"ability_brier":0.146873,"ability_auc":0.684395,"ability_ece10":0.016829,"wide_logloss":0.116620,"naive_logloss":0.118527,"wide_brier":0.025930,"naive_brier":0.026013,"wide_auc":0.715992,"wide_ece10":0.001054,"naive_ece10":0.012038,"wide_logloss_improvement_percent":1.6090,"wide_brier_improvement_percent":0.3192}
+  ],
+  "stability_checks": {
+    "all_8_test_years_wide_logloss_better_than_naive": true,
+    "all_8_test_years_wide_brier_better_than_naive": true,
+    "race_cluster_bootstrap": {
+      "pooled_wide_minus_naive_logloss_delta_mean": -0.00195433,
+      "pooled_logloss_delta_95pct": [-0.00199154, -0.00191887],
+      "pooled_wide_minus_naive_brier_delta_mean": -0.00010689,
+      "pooled_brier_delta_95pct": [-0.00011597, -0.00009783],
+      "note": "Negative favors coherent Wide Probability. Every individual yearly 95% interval was also below zero."
+    },
+    "training_window_sensitivity": {
+      "schemes": ["expanding", "rolling_3_year", "rolling_5_year"],
+      "maximum_same_year_wide_logloss_range": 0.000144,
+      "interpretation": "Performance is nearly unchanged when old years are retained or discarded, reducing concern that one historical era dominates the result."
+    },
+    "coefficient_stability": {
+      "consecutive_fold_cosine_similarity_mean": 0.9861,
+      "consecutive_fold_cosine_similarity_min": 0.9671,
+      "features_with_same_coefficient_sign_in_all_8_folds": 13,
+      "total_features": 14,
+      "unstable_feature": "mean_class5",
+      "unstable_feature_dominant_sign_fraction": 0.75
+    },
+    "subgroups": {
+      "surface": {
+        "turf": {"races":1876,"wide_logloss":0.12432,"naive_logloss":0.12626,"logloss_improvement_percent":1.5326},
+        "dirt": {"races":1193,"wide_logloss":0.12129,"naive_logloss":0.12327,"logloss_improvement_percent":1.6101}
+      },
+      "distance": {
+        "<=1400": {"races":1121,"logloss_improvement_percent":1.5203},
+        "1500-1800": {"races":1120,"logloss_improvement_percent":1.5746},
+        "1900-2200": {"races":537,"logloss_improvement_percent":1.6136},
+        "2300+": {"races":291,"logloss_improvement_percent":1.5700}
+      },
+      "grade": {
+        "3win": {"races":1333,"logloss_improvement_percent":1.5590},
+        "OP_L": {"races":868,"logloss_improvement_percent":1.5634},
+        "G3": {"races":459,"logloss_improvement_percent":1.4857},
+        "G2": {"races":229,"logloss_improvement_percent":1.6259},
+        "G1": {"races":180,"logloss_improvement_percent":1.7098}
+      }
+    }
+  },
+  "interpretation": [
+    "The coherent Wide Probability transform is not a 2025-2026-only artifact: it improves pair LogLoss and Brier in every unseen test year from 2019 through 2026.",
+    "The gain is mainly probability coherence/calibration, not a dramatic new ranking edge; this is expected and desirable for an EV probability layer.",
+    "Results are stable across turf/dirt, distance bands, and class levels, including G1, but subgroup sizes differ and should not be used to create extra tuning rules yet.",
+    "The Ability architecture itself is temporally stable under expanding and rolling-window refits, though mean_class5 deserves monitoring because its coefficient sign is less stable than the other 13 features.",
+    "This validates Wide Probability as a long-term Shadow baseline, not as an automatic BUY rule. Profitability still requires separate decision-time wide-odds validation."
+  ],
+  "m3_policy": {
+    "current_status": "NOT_LONGTERM_VALIDATED",
+    "reason": "The prior M3 residual candidate used 2024 for gamma selection and 2025-2026 for confirmation. That is useful but too short for the user's long-term stability standard.",
+    "required_test": "Rebuild M3 walk-forward so each historical test year uses an M3 model fitted only on earlier years, then test one frozen residual-combiner rule across multiple untouched years.",
+    "production_change": false
+  },
+  "production_policy": {
+    "wide_probability_baseline": "SHADOW_ONLY",
+    "pair_ev_buy_rule": "NOT_APPROVED",
+    "reason": "Long-term probability stability is supported, but historical decision-time wide odds and prospective EV/ROI validation remain necessary before Production use."
+  }
+}
