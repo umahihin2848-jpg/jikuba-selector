@@ -246,9 +246,15 @@ function init(){
  });
  root.addEventListener('change',e=>{
   if(e.target?.id==='mplImportFile'){const f=e.target.files?.[0];importLog(f);e.target.value='';return;}
+  if(e.target?.id==='mplDecision'){
+   const box=$('mplHypoBox');if(box)box.style.display=e.target.value==='skip'?'grid':'none';
+   return;
+  }
+  if(e.target?.id==='mplPace'){scenarioOrigin='manual-form';const label=$('mplScenarioSource');if(label)label.textContent='選択方法：記録画面で手動指定';return}
   if(e.target?.id==='mplResultSelect'){
    const r=records().find(x=>x.id===e.target.value)?.outcome;
    $('mplStake').value=r?.stakeYen??'';$('mplReturn').value=r?.returnedYen??'';
+   $('mplHypoReturn').value=r?.hypotheticalReturnedYen??'';
   }
  });
  ready=true;context();history();
@@ -257,6 +263,7 @@ function init(){
 function refresh(){init();if(ready)context()}
 function schedule(){clearTimeout(timer);timer=setTimeout(refresh,130)}
 ['production-decision-pipeline-ready','finish600-ready','rsa-analysis-complete','rsa-addons-ready'].forEach(ev=>addEventListener(ev,schedule));
+addEventListener('race-progress-scenario-selected',e=>{const z=e.detail||{},m=window.MobileAnalysisCoreState?.meta||{};if(z.source!=='manual'||window.RSAAnalysisTransitionState?.status!=='ready'||String(z.date)!==String(m.date)||String(z.venue)!==String(m.venue)||String(z.raceName)!==String(m.raceName)||Number(z.distance)!==Number(m.distance)||Number(z.fieldSize)!==Number(m.fieldSize)||!Number.isInteger(z.band)||z.band<0||z.band>3)return;const sel=$('mplPace');if(sel){sel.value=String(z.band);scenarioOrigin='manual-timeline';const label=$('mplScenarioSource');if(label)label.textContent='選択方法：レース推移タブで手動指定（アプリ本線とは独立）'}});
 document.addEventListener('change',e=>{if(['raceDate','venue','raceName','distance','surface','fieldSize'].includes(e.target?.id))schedule()},true);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
