@@ -2,7 +2,7 @@
 'use strict';
 if(!window.RSAMobileLean||window.__MOBILE_PREDICTION_LEDGER_V1)return;
 window.__MOBILE_PREDICTION_LEDGER_V1=true;
-const V='mobile-prediction-ledger-v1.2',KEY='rsa-mobile-prediction-ledger-v1',MAX=500;
+const V='mobile-prediction-ledger-v1.3',KEY='rsa-mobile-prediction-ledger-v1',MAX=500;
 const $=id=>document.getElementById(id);
 const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const num=v=>v===null||v===undefined||v===''?null:Number.isFinite(Number(v))?Number(v):null;
@@ -22,7 +22,7 @@ function css(){
  '#mobilePredictionLedger .mplField{display:grid;gap:5px;min-width:0}',
  '#mobilePredictionLedger .mplField.full{grid-column:1/-1}',
  '#mobilePredictionLedger label{font-size:11px;font-weight:750;color:#c5dbe5}',
- '#mobilePredictionLedger select,#mobilePredictionLedger input:not([type="checkbox"]),#mobilePredictionLedger textarea{width:100%;min-width:0;min-height:43px;padding:8px;border:1px solid #416578;border-radius:9px;font:inherit;font-size:14px;color:#eef8fb;background:#0b2635;box-sizing:border-box}',
+ '#mobilePredictionLedger select,#mobilePredictionLedger input:not([type="checkbox"]):not([type="file"]),#mobilePredictionLedger textarea{width:100%;min-width:0;min-height:43px;padding:8px;border:1px solid #416578;border-radius:9px;font:inherit;font-size:14px;color:#eef8fb;background:#0b2635;box-sizing:border-box}',
  '#mobilePredictionLedger textarea{min-height:66px;resize:vertical}',
  '#mobilePredictionLedger option{background:#102635;color:#eef8fb}',
  '#mobilePredictionLedger .mplCheck{display:flex;align-items:flex-start;gap:8px;font-size:11px;line-height:1.5;margin:12px 0;color:#e1ebf1}',
@@ -55,7 +55,7 @@ function html(){
  '<div class="mplField"><label for="mplPrices">想定ワイドオッズ</label><input id="mplPrices" placeholder="例：6-11 8.5倍" maxlength="100"></div>',
  '<div class="mplField full"><label for="mplMemo">判断理由・映像メモ</label><textarea id="mplMemo" maxlength="500" placeholder="例：前残り予想、内が伸びないので外の先行馬を優遇"></textarea></div>',
  '</div><label class="mplCheck"><input id="mplBeforeStart" type="checkbox"><span>この予想は発走前に入力しました（予想とアプリの分析値を固定保存します）</span></label>',
- '<div class="mplBtns"><button type="button" class="mplPrimary" id="mplSave">発走前の予想を保存</button><button type="button" id="mplCsv">CSV書き出し</button><button type="button" id="mplJson">JSONバックアップ</button></div>',
+ '<div class="mplBtns"><button type="button" class="mplPrimary" id="mplSave">発走前の予想を保存</button><button type="button" id="mplCsv">CSV書き出し</button><button type="button" id="mplJson">JSONバックアップ</button><button type="button" id="mplImportBtn">JSONから復元</button><input type="file" id="mplImportFile" accept="application/json,.json" style="display:none"></div>',
  '<div id="mplStatus" class="mplStatus" role="status" aria-live="polite"></div><hr class="mplDivider">',
  '<div class="mplField full"><label for="mplResultSelect">レース後の結果を追記（発走前の選択は書き換えません）</label><select id="mplResultSelect"><option value="">保存済み予想を選択</option></select></div>',
  '<div class="mplResultRow" style="margin-top:8px"><div class="mplField"><label for="mplStake">投資額（円）</label><input id="mplStake" type="number" min="0" step="100" inputmode="numeric"></div>',
@@ -169,6 +169,23 @@ function exportLog(kind){
   status((json?'JSON':'CSV')+'を書き出しました。ファイルアプリに保存してください。');
  }catch(e){status('ファイル書き出しに失敗しました。',true)}
 }
+async function importLog(file){
+ if(!file)return;
+ if(file.size>4*1024*1024){status('JSONが4MBを超えています。確認してください。',true);return}
+ try{
+  const obj=JSON.parse(await file.text());
+  if(!String(obj?.schema||'').startsWith('mobile-prediction-ledger-v1.')||!Array.isArray(obj.records))throw new Error('JSONの形式が異なります');
+  const all=records(),known=new Set(all.map(x=>x.id));let added=0;
+  for(const x of obj.records){
+   if(!x||x.kind!=='pre_race'||typeof x.id!=='string'||x.id.length>400||!x.meta?.date||!x.meta?.venue||!x.meta?.name||!x.choice||typeof x.capturedAt!=='string')continue;
+   if(known.has(x.id))continue;
+   if(all.length>=MAX)break;
+   all.push({kind:'pre_race',version:String(x.version||obj.schema),id:x.id,capturedAt:x.capturedAt,meta:x.meta,choice:x.choice,snapshot:x.snapshot||null,outcome:x.outcome||null});known.add(x.id);added++;
+  }
+  all.sort((a,b)=>String(a.capturedAt).localeCompare(String(b.capturedAt)));
+  write(all);history();status('JSONから'+added+'件を復元しました（既存記録は上書きしません）。');
+ }catch(e){status('JSONの復元に失敗しました：'+String(e?.message||e),true)}
+}
 function context(){
  const m=meta(),p=window.ProductionDecisionPipelineV1State?.stages?.axis;
  const summary=[m.date||'日付なし',m.venue,m.name||'レース名なし',m.surface,m.distance?m.distance+'m':'','アプリ軸 '+(p?.no?p.no+'番 '+(p.name||''):'未計算')].filter(Boolean).join('｜');
@@ -203,8 +220,10 @@ function init(){
   else if(id==='mplSaveResult')saveOutcome();
   else if(id==='mplCsv')exportLog('csv');
   else if(id==='mplJson')exportLog('json');
+  else if(id==='mplImportBtn')$('mplImportFile')?.click();
  });
  root.addEventListener('change',e=>{
+  if(e.target?.id==='mplImportFile'){const f=e.target.files?.[0];importLog(f);e.target.value='';return;}
   if(e.target?.id==='mplResultSelect'){
    const r=records().find(x=>x.id===e.target.value)?.outcome;
    $('mplStake').value=r?.stakeYen??'';$('mplReturn').value=r?.returnedYen??'';
