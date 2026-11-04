@@ -234,6 +234,36 @@ function context(){
  }
  if(!val('mplAxis')&&p?.no&&analysisMatches()&&window.RSAAnalysisTransitionState?.status==='ready')$('mplAxis').value=p.no;
 }
+function comparisonSummary(all){
+ const latest=new Map();
+ for(const rec of all){
+  if(rec.timeValidation?.status!=='before_user_confirmed_time'||!Array.isArray(rec.outcome?.top3Nos)||rec.outcome.top3Nos.length!==3)continue;
+  const key=[rec.meta?.date,rec.meta?.venue,rec.meta?.name,rec.meta?.surface,rec.meta?.distance].join('|');
+  if(!latest.has(key)||String(latest.get(key).capturedAt)<String(rec.capturedAt))latest.set(key,rec);
+ }
+ const races=[...latest.values()];
+ let axisN=0,axisHit=0,opN=0,axisPlaced=0,manualHits=0,m3Hits=0,m4Hits=0;
+ for(const rec of races){
+  const winners=new Set(rec.outcome.top3Nos.map(Number)),appAxis=Number(rec.snapshot?.appAxis?.no);
+  if(Number.isInteger(appAxis)&&appAxis>0){axisN++;if(winners.has(appAxis))axisHit++}
+  const c=rec.choice||{},ax=Number(c.axisNo),k=c.partners?.length||0,scenario=Number(c.scenario),hs=rec.snapshot?.horses||[],field=Number(rec.meta?.fieldSize);
+  if(c.decision!=='buy'||!Number.isInteger(ax)||ax<1||k<1||k>3||!Number.isInteger(scenario)||scenario<0||scenario>3||hs.length!==field)continue;
+  const peers=hs.filter(x=>Number(x.no)!==ax);
+  if(peers.length!==field-1||peers.some(x=>!Number.isInteger(Number(x.m3Rank))||Number(x.m3Rank)<1||!Number.isInteger(Number(x.scenarioM4Ranks?.[scenario]))||Number(x.scenarioM4Ranks[scenario])<1))continue;
+  const byRank=(key)=>peers.slice().sort((a,b)=>Number(key(a))-Number(key(b))||Number(a.no)-Number(b.no)).slice(0,k).map(x=>Number(x.no));
+  const pM3=byRank(x=>x.m3Rank),pM4=byRank(x=>x.scenarioM4Ranks[scenario]);
+  opN++;
+  if(winners.has(ax)){
+   axisPlaced++;
+   if(c.partners.some(x=>winners.has(Number(x))))manualHits++;
+   if(pM3.some(x=>winners.has(x)))m3Hits++;
+   if(pM4.some(x=>winners.has(x)))m4Hits++;
+  }
+ }
+ const axisRate=axisN?(100*axisHit/axisN).toFixed(1)+'%':'未集計';
+ const rate=(hits)=>axisPlaced?(100*hits/axisPlaced).toFixed(1)+'%':'—';
+ return '<div class="mplRecent"><b>発走前・結果検証（同レースは最新の1記録）</b><div>アプリ軸3着内：'+axisHit+'/'+axisN+'（'+axisRate+'）</div><div>同じ軸・同じ相手点数で比較／購入'+opN+'レース、軸好走'+axisPlaced+'レース</div><div>手動相手 '+manualHits+'/'+axisPlaced+'（'+rate(manualHits)+'）｜通常M3順位 '+m3Hits+'/'+axisPlaced+'（'+rate(m3Hits)+'）｜選択M4順位 '+m4Hits+'/'+axisPlaced+'（'+rate(m4Hits)+'）</div><small class="mplFine">M3/M4は順位だけの対照候補。馬券オッズ・買い目条件は反映していません。実ROIと混同せず、少数標本の優劣を断定しないでください。</small></div>';
+}
 function history(){
  const all=records(),count=$('mplCount'),sel=$('mplResultSelect'),box=$('mplRecords');
  if(count)count.textContent=all.length+'件保存';
