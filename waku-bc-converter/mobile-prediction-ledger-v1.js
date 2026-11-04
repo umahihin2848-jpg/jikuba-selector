@@ -165,13 +165,19 @@ function saveOutcome(){
  const top3=finishTop3(val('mplTop3Finish'),Number(item.meta?.fieldSize));
  if(top3===null){status('確定1〜3着の馬番を、重複なしで3頭入力してください（または空欄）。',true);return}
  let stake=num(val('mplStake')),returned=num(val('mplReturn'));
- if(skip&&stake===null&&returned===null){stake=0;returned=0}
- if(stake===null||returned===null||!Number.isInteger(stake)||!Number.isInteger(returned)||stake<0||returned<0){status('投資額・払戻額は0円以上の整数で入力してください。',true);return}
+ const prev=item.outcome||{},priorTop3=Array.isArray(prev.top3Nos)&&prev.top3Nos.length===3?prev.top3Nos:null;
+ if(stake===null&&returned===null){
+  if(skip){stake=0;returned=0}
+  else if(num(prev.stakeYen)!==null&&num(prev.returnedYen)!==null){stake=num(prev.stakeYen);returned=num(prev.returnedYen)}
+  else if(top3.length===3||priorTop3){stake=null;returned=null}
+  else{status('結果の着順、または投資額と払戻額を入力してください。',true);return}
+ }
+ if((stake===null)!==(returned===null)||stake!==null&&(!Number.isInteger(stake)||!Number.isInteger(returned)||stake<0||returned<0)){status('投資額・払戻額は両方とも0円以上の整数で入力してください。',true);return}
  if(skip&&(stake>0||returned>0)){status('見送りの投資額・払戻額は0円にしてください。',true);return}
  if(stake===0&&returned>0){status('投資額0円に実払戻を入力できません。',true);return}
  const hs=num(item.choice?.hypothetical?.stakeYen);
  if(hypoReturned!==null&&(!skip||!hs||hs<=0||!Number.isInteger(hypoReturned)||hypoReturned<0)){status('仮想払戻は発走前に仮想投資額を保存した見送り記録にのみ入力できます。',true);return}
- item.outcome={recordedAt:new Date().toISOString(),stakeYen:stake,returnedYen:returned,hypotheticalReturnedYen:skip?hypoReturned:null,top3Nos:top3.length===3?top3:null};
+ item.outcome={recordedAt:new Date().toISOString(),stakeYen:stake,returnedYen:returned,hypotheticalReturnedYen:skip?hypoReturned:null,top3Nos:top3.length===3?top3:priorTop3};
  try{write(all);status('結果を追記しました。実購入と仮想損益は別集計です。');history()}
  catch(e){status('結果の保存に失敗しました。',true)}
 }
