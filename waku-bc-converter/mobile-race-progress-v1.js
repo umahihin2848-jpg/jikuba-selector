@@ -118,7 +118,7 @@ function focus(h,field){
  '<div class="rpvMetric"><small>1コーナー</small><b>'+fmt(h.one)+'</b></div>'+
  '<div class="rpvMetric"><small>残600m</small><b>'+fmt(h.r600)+'</b></div>'+
  '<div class="rpvMetric"><small>M4参考順位</small><b>'+fmt(h.goal)+'</b></div></div>'+
- '<div class="rpvAlert">'+esc(alert)+'<br>残600mの先頭差目安：'+(finite(h.gap)?h.gap.toFixed(2)+'秒':'—')+' ／ 残600m→ゴール見込み：'+(h.r600>h.goal?'↑ '+(h.r600-h.goal)+'頭前へ':h.r600<h.goal?'↓ '+(h.goal-h.r600)+'頭後退':'位置を維持')+'</div></div>';
+ '<div class="rpvAlert">'+esc(alert)+'<br>残600mの先頭差目安：'+(finite(h.gap)?h.gap.toFixed(2)+'秒':'—')+' ／ M4参考順位は走破評価で、実際に何頭抜くかは算出しません。+'</div></div>';
 }
 function render(force){
  // Lazy render: do not build a 12–18 horse SVG while this tab is not visible.
