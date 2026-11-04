@@ -83,24 +83,24 @@ function rows(){
 }
 function svgChart(a,axis){
  const field=Math.max(a.length,Number($('fieldSize')?.value)||a.length);
- const ht=clamp(field*25+68,280,570),top=46,bot=ht-23,xs=[105,345,590],step=(bot-top)/Math.max(1,field-1);
+ const ht=clamp(field*25+68,280,570),top=46,bot=ht-23,xs=[77,250,424],step=(bot-top)/Math.max(1,field-1);
  const y=r=>top+(clamp(r,1,field)-1)*step;
- let out='<svg viewBox="0 0 680 '+ht+'" role="img" aria-label="1コーナー、残り600m、選択シナリオでのゴール想定順位を線で比較"><rect width="680" height="'+ht+'" rx="10" fill="#061621"/>';
+ let out='<svg viewBox="0 0 500 '+ht+'" role="img" aria-label="1コーナー、残り600m、選択シナリオでのゴール想定順位を線で比較"><rect width="500" height="'+ht+'" rx="10" fill="#061621"/>';
  for(let i=0;i<3;i++){
   out+='<line x1="'+xs[i]+'" y1="'+top+'" x2="'+xs[i]+'" y2="'+bot+'" stroke="#315164" stroke-dasharray="4 5" stroke-width="1"/>';
   out+='<text x="'+xs[i]+'" y="20" text-anchor="middle" fill="#d5e5ef" font-size="15" font-weight="700">'+['1コーナー','残600m','ゴール想定'][i]+'</text>';
  }
- out+='<line x1="45" y1="'+y(3.5)+'" x2="644" y2="'+y(3.5)+'" stroke="#486249" stroke-dasharray="5 5"/>';
- out+='<text x="35" y="'+(y(1)+4)+'" text-anchor="middle" fill="#88abbc" font-size="12">1位</text>';
- out+='<text x="35" y="'+(y(field)+4)+'" text-anchor="middle" fill="#88abbc" font-size="12">'+field+'位</text>';
- const order=a.slice().sort((p,q)=>(p.no===selected?1:0)-(q.no===selected?1:0));
+ out+='<line x1="36" y1="'+y(3.5)+'" x2="473" y2="'+y(3.5)+'" stroke="#486249" stroke-dasharray="5 5"/>';
+ out+='<text x="23" y="'+(y(1)+4)+'" text-anchor="middle" fill="#88abbc" font-size="12">1位</text>';
+ out+='<text x="23" y="'+(y(field)+4)+'" text-anchor="middle" fill="#88abbc" font-size="12">'+field+'位</text>';
+ const order=a.slice().sort((p,q)=>(p.no===selected?2:p.no===axis?1:0)-(q.no===selected?2:q.no===axis?1:0));
  for(const h of order){
   const active=h.no===selected,ax=h.no===axis,color=active?'#ffd17f':ax?'#68dfc7':'#66879d';
   const points=[[xs[0],h.one],[xs[1],h.r600],[xs[2],h.goal]].filter(v=>Number.isFinite(v[1]));
   const pts=points.map(p=>p[0]+','+y(p[1])).join(' ');
-  if(points.length>=2)out+='<polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="'+(active?4:ax?3:1.3)+'" opacity="'+(active?1:ax?.85:.23)+'" stroke-linejoin="round" stroke-linecap="round"/>';
+  if(points.length>=2)out+='<polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="'+(active?4:ax?3:1.3)+'" opacity="'+(active?1:ax?0.85:0.23)+'" stroke-linejoin="round" stroke-linecap="round"/>';
   for(const p of points){
-   out+='<circle cx="'+p[0]+'" cy="'+y(p[1])+'" r="'+(active?10:ax?7:3.7)+'" fill="'+color+'" opacity="'+(active?1:ax?.95:.5)+'" data-rpv-no="'+esc(h.no)+'"/>';
+   out+='<circle cx="'+p[0]+'" cy="'+y(p[1])+'" r="'+(active?10:ax?7:3.7)+'" fill="'+color+'" opacity="'+(active?1:ax?0.95:0.5)+'" data-rpv-no="'+esc(h.no)+'"/>';
    if(active)out+='<text x="'+p[0]+'" y="'+(y(p[1])+3.7)+'" fill="#18222e" text-anchor="middle" font-size="10" font-weight="900" pointer-events="none">'+esc(h.no)+'</text>';
   }
  }
@@ -130,7 +130,7 @@ function render(force){
  if(rid!==lastRace){lastRace=rid;selected='';touchedBand=false;last='';}
  const p=probabilities();
  if(!touchedBand&&p){band=p.indexOf(Math.max(...p));}
- const a=rows();
+ const a=window.RSAAnalysisTransitionState?.status==='running'?[]:rows();
  const axis=String(window.ProductionDecisionPipelineV1State?.stages?.axis?.no||window.DecisionShellV2State?.structure?.axis?.no||'');
  if(a.length&&(!selected||!a.some(x=>x.no===selected)))selected=a.some(x=>x.no===axis)?axis:a[0].no;
  const sig=JSON.stringify([rid,band,selected,axis,p,a.map(x=>[x.no,x.name,x.one,x.r600,x.gap,x.goal,x.scScore,x.historyN])]);
