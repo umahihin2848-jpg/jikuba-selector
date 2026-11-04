@@ -2,7 +2,7 @@
 'use strict';
 if(!window.RSAMobileLean||window.__MOBILE_PREDICTION_LEDGER_V1)return;
 window.__MOBILE_PREDICTION_LEDGER_V1=true;
-const V='mobile-prediction-ledger-v1.1',KEY='rsa-mobile-prediction-ledger-v1',MAX=500;
+const V='mobile-prediction-ledger-v1.2',KEY='rsa-mobile-prediction-ledger-v1',MAX=500;
 const $=id=>document.getElementById(id);
 const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const num=v=>v===null||v===undefined||v===''?null:Number.isFinite(Number(v))?Number(v):null;
@@ -140,7 +140,8 @@ function saveOutcome(){
  const id=val('mplResultSelect'),all=records(),item=all.find(x=>x.id===id),stake=num(val('mplStake')),returned=num(val('mplReturn'));
  if(!item){status('結果を追記する予想を選んでください。',true);return}
  if(stake===null||returned===null||!Number.isInteger(stake)||!Number.isInteger(returned)||stake<0||returned<0){status('投資額・払戻額は0円以上の整数で入力してください。',true);return}
- if(item.choice?.decision==='skip'&&stake>0){status('見送り記録に投資額は設定できません。',true);return}
+ if(item.choice?.decision==='skip'&&(stake>0||returned>0)){status('見送り記録に投資額・払戻額は設定できません。',true);return}
+ if(stake===0&&returned>0){status('投資額0円に払戻額を設定できません。',true);return}
  item.outcome={recordedAt:new Date().toISOString(),stakeYen:stake,returnedYen:returned};
  try{write(all);status('結果を追記しました。発走前の予想は変更していません。');history()}
  catch(e){status('結果の保存に失敗しました。',true)}
@@ -181,7 +182,7 @@ function history(){
  if(count)count.textContent=all.length+'件保存';
  if(!sel||!box)return;
  const old=sel.value;
- const options=['<option value="">保存済み予想を選択</option>'].concat(all.slice().reverse().slice(0,40).map(x=>'<option value="'+E(x.id)+'">'+E([x.meta?.date,x.meta?.venue,x.meta?.name,x.choice?.axisNo?'軸'+x.choice.axisNo:'',x.choice?.decision].filter(Boolean).join(' '))+'</option>')).join('');
+ const options=['<option value="">保存済み予想を選択</option>'].concat(all.slice().reverse().slice(0,MAX).map(x=>'<option value="'+E(x.id)+'">'+E([x.meta?.date,x.meta?.venue,x.meta?.name,x.choice?.axisNo?'軸'+x.choice.axisNo:'',x.choice?.decision].filter(Boolean).join(' '))+'</option>')).join('');
  if(sel.innerHTML!==options){sel.innerHTML=options;if(all.some(x=>x.id===old))sel.value=old}
  const priced=all.filter(x=>x.choice?.decision==='buy'&&num(x.outcome?.stakeYen)>0);
  const st=priced.reduce((s,x)=>s+x.outcome.stakeYen,0),ret=priced.reduce((s,x)=>s+x.outcome.returnedYen,0),roi=st?Math.round(ret/st*1000)/10:null;
