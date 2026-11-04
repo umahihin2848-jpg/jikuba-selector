@@ -169,7 +169,7 @@ function csvCell(x){
  return '"'+s.replace(/"/g,'""')+'"';
 }
 function csvData(all){
- const keys=['capturedAt','date','venue','race','surface','distance','field','axis','partners','scenario','front','track','decision','wideOdds','memo','appAxis','appAbilityRank','appM3Rank','paceProbabilities','stakeYen','returnedYen','ROI','resultRecordedAt'];
+ const keys=['capturedAt','date','venue','race','surface','distance','field','axis','partners','scenario','front','track','decision','wideOdds','memo','appAxis','appAbilityRank','appM3Rank','paceProbabilities','stakeYen','returnedYen','ROI','resultRecordedAt','startTimeJST','timeStatus','userCheckedStart','scenarioOrigin','hypotheticalStake','hypotheticalPayout','hypotheticalROI'];
  const lines=[keys.join(',')];
  for(const x of all){
   const c=x.choice||{},o=x.outcome||{},a=x.snapshot?.appAxis||{},st=num(o.stakeYen),ret=num(o.returnedYen);
