@@ -45,6 +45,7 @@ function style(){
  '#raceProgressV1 .rpvHorse .rpvName{font-weight:850;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
  '#raceProgressV1 .rpvHorse .rpvDetail{display:block;font-size:11px;color:#99b5c4;margin-top:3px;white-space:normal;font-weight:500}',
  '#raceProgressV1 .rpvHorse .rpvEnd{font-size:12px;font-weight:900;color:#a7e9d1;white-space:nowrap}',
+ '#raceProgressV1 .rpvCoverage{margin:8px 0;padding:8px;border:1px solid #36576a;border-radius:8px;color:#d6e9f0;font-size:11px}',
  '#raceProgressV1 .rpvNote{margin-top:11px;border-top:1px solid #254355;padding-top:9px;color:#90abb9;font-size:11px;line-height:1.7}',
  '#raceProgressV1 .rpvWaiting{padding:16px 8px;font-size:12px;color:#9fb7c4;line-height:1.7}',
  '@media(max-width:375px){#raceProgressV1{padding:9px}#raceProgressV1 .rpvBand{font-size:9px!important}#raceProgressV1 .rpvMetric b{font-size:14px}}'
@@ -134,21 +135,23 @@ function render(force){
  last=sig;
  const hero='<div class="rpvHero"><div><small>RACE PROGRESSION · VISUAL</small><strong>🏁 レース推移シミュレーター</strong></div><span class="rpvTag">分析補助</span></div>';
  if(!a.length){
-  root.innerHTML=hero+'<div class="rpvWaiting">隊列・残600m・シナリオ別M3の計算結果を読み込み中です。<br>過去走CSVを設定してレースを分析してください。</div>';
+  root.innerHTML=hero+'<div class="rpvWaiting">隊列・残600m・シナリオ別M4の計算結果を読み込み中です。<br>過去走CSVを設定してレースを分析してください。</div>';
   window.RaceProgressVisualV1State={ready:false,version:V,displayOnly:true};
   return;
  }
  const field=Math.max(a.length,Number($('fieldSize')?.value)||a.length);
+ const covered=a.filter(x=>!x.missing.length).length;
+ const coverage='<div class="rpvCoverage" role="status">3指標すべて取得：'+covered+'/'+field+'頭'+(covered<field?'｜不足のある馬も一覧に表示':'')+'</div>';
  const bands='<div class="rpvBands" role="group" aria-label="展開シナリオ選択">'+LABELS.map((nm,i)=>'<button type="button" class="rpvBand" data-rpv-band="'+i+'" aria-pressed="'+String(band===i)+'">'+nm+'<small>'+(p?Math.round(p[i]*100)+'%':'確率未取得')+'</small></button>').join('')+'</div>';
  const h=a.find(x=>x.no===selected);
- const list='<div class="rpvSectionTitle">馬ごとの推移（タップで強調）</div><div class="rpvList">'+a.map(x=>'<button type="button" class="rpvHorse" data-rpv-no="'+esc(x.no)+'" data-selected="'+String(x.no===selected)+'"><span class="rpvNo">'+esc(x.no)+'</span><span><span class="rpvName">'+esc(x.name)+(x.no===axis?'　◎軸':'')+'</span><small class="rpvDetail">初角 '+(finite(x.one)?x.one.toFixed(1)+'番手':'不明')+' → 残600 '+x.r600+'番手 → M4 '+x.goal+'位</small></span><span class="rpvEnd">'+(x.r600>x.goal?'↗':x.r600<x.goal?'↘':'→')+' '+x.goal+'位</span></button>').join('')+'</div>';
+ const list='<div class="rpvSectionTitle">馬ごとの比較（タップで強調）</div><div class="rpvList">'+a.map(x=>'<button type="button" class="rpvHorse" data-rpv-no="'+esc(x.no)+'" data-selected="'+String(x.no===selected)+'"><span class="rpvNo">'+esc(x.no)+'</span><span><span class="rpvName">'+esc(x.name)+(x.no===axis?'　◎軸':'')+'</span><small class="rpvDetail">初角 '+(finite(x.one)?x.one.toFixed(1)+'番手':'—')+' ／ 残600 '+(finite(x.r600)?x.r600+'番手':'—')+' ／ M4 '+(finite(x.goal)?x.goal+'位':'—')+(x.missing.length?'｜不足 '+esc(x.missing.join('・')):'')+'</small></span><span class="rpvEnd">'+(finite(x.goal)?'M4 '+x.goal+'位':'未算出')+'</span></button>').join('')+'</div>';
  root.innerHTML=hero+
- '<p class="rpvLead">選んだ展開なら、各馬がどのあたりにいそうかを比較。軸馬や全頭の順位・確率は変更しません。</p>'+
- bands+'<div class="rpvSub"><b>シナリオ｜'+LABELS[band]+'</b><span>各馬の線は予測位置の移り変わり</span></div>'+
+ '<p class="rpvLead">初角・残600mの予測位置と、選択シナリオのM4参考順位を比較します。M4は追い抜き数・着順の予測ではありません。</p>'+
+ bands+coverage+'<div class="rpvSub"><b>シナリオ｜'+LABELS[band]+'</b><span>'+(touchedBand?'手動選択':'アプリの仮表示')+'</span></div>'+
  '<div class="rpvCanvas">'+svgChart(a,axis)+'</div>'+
  '<div class="rpvLegend"><span><i class="rpvSwatch" style="background:#ffd17f"></i>選択中の馬</span><span><i class="rpvSwatch" style="background:#68dfc7"></i>アプリ軸</span><span><i class="rpvSwatch" style="background:#66879d"></i>その他</span></div>'+
  focus(h,field)+list+
- '<div class="rpvNote">【読み方】1コーナー＝予測隊列の番手／残600m＝予測タイム差から並べた相対位置／M4参考順位＝選択したRPCI帯のM4スコアの相対順位（着順予測ではありません）。3つの異なる指標を線で比較する図です。実際の通過順・確定着順、途中での追い上げ量、連続した物理的位置を予測したものではありません。<br>スタート反応・出遅れ・進路取り・内外馬場バイアスはこの推移図で直接推定していません。馬場は実際の映像と照合してください。シナリオの切り替えは表示だけで、本番の軸・相手・買い目判定には影響しません。</div>';
+ '<div class="rpvNote">【読み方】1コーナー＝予測隊列の番手／残600m＝予測タイム差から並べた相対位置／M4参考順位＝選択したRPCI帯のM4スコアの相対順位（着順予測ではありません）。初角・残600mだけ線で結び、M4は別の評価指標です。実際の通過順・確定着順、途中での追い上げ量、連続した物理的位置を予測したものではありません。<br>スタート反応・出遅れ・進路取り・内外馬場バイアスはこの推移図で直接推定していません。馬場は実際の映像と照合してください。シナリオの切り替えは表示だけで、本番の軸・相手・買い目判定には影響しません。</div>';
  window.RaceProgressVisualV1State={ready:true,version:V,displayOnly:true,productionChanged:false,scenarioBand:band,selectedHorseNo:selected,axisNo:axis,fieldSize:field,rows:a.map(x=>({no:x.no,firstCornerExpectedRank:x.one,remaining600ExpectedRank:x.r600,remaining600Gap:x.gap,scenarioGoalRank:x.goal})),at:Date.now()};
 }
 function schedule(ms){
