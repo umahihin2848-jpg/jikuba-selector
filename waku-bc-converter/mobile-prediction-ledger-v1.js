@@ -2,7 +2,7 @@
 'use strict';
 if(!window.RSAMobileLean||window.__MOBILE_PREDICTION_LEDGER_V1)return;
 window.__MOBILE_PREDICTION_LEDGER_V1=true;
-const V='mobile-prediction-ledger-v1.0',KEY='rsa-mobile-prediction-ledger-v1',MAX=160;
+const V='mobile-prediction-ledger-v1.1',KEY='rsa-mobile-prediction-ledger-v1',MAX=500;
 const $=id=>document.getElementById(id);
 const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const num=v=>v===null||v===undefined||v===''?null:Number.isFinite(Number(v))?Number(v):null;
@@ -69,10 +69,10 @@ function status(s,bad){
  const x=$('mplStatus');if(x){x.textContent=s;x.style.color=bad?'#ffb7aa':'#a8dfbf'}
 }
 function records(){
- try{const x=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(x)?x.filter(v=>v?.kind==='pre_race'&&typeof v.id==='string').slice(-MAX):[]}
+ try{const x=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(x)?x.filter(v=>v?.kind==='pre_race'&&typeof v.id==='string'):[]}
  catch(e){status('保存領域の読み込みに失敗。既存データは消していません。',true);return[]}
 }
-function write(arr){localStorage.setItem(KEY,JSON.stringify(arr.slice(-MAX)))}
+function write(arr){localStorage.setItem(KEY,JSON.stringify(arr))}
 function raceDateISO(s){
  const z=String(s||'').normalize('NFKC').trim(),m=z.match(/^(\d{4})[-/.年]?(\d{1,2})[-/.月]?(\d{1,2})日?$/);
  if(!m)return'';
@@ -107,10 +107,15 @@ function partners(text,field,axis){
  const a=[...new Set(t.map(Number))];
  return a.some(x=>x<1||x>field||x===axis)?null:a;
 }
+function analysisMatches(){
+ const a=window.MobileAnalysisCoreState?.meta;
+ if(!a)return false;
+ return String(a.date||'')===val('raceDate')&&String(a.venue||'')===val('venue')&&String(a.raceName||'')===val('raceName')&&String(a.surface||'')===val('surface')&&Number(a.distance)===Number(val('distance'))&&Number(a.fieldSize)===Number(val('fieldSize'));
+}
 function savePrediction(){
  const m=meta(),field=Number(m.fieldSize),d=val('mplDecision'),pace=val('mplPace'),front=val('mplFront'),track=val('mplTrack'),axis=Number(val('mplAxis'));
  const shell=window.IOSMobileShellV3State||window.IOSMobileShellV2State;
- if(!shell?.analysisReady||!window.Finish600State?.ready||window.RSAAnalysisTransitionState?.status==='running'){status('先に対象レースを分析してください。',true);return}
+ if(!shell?.analysisReady||!window.Finish600State?.ready||window.RSAAnalysisTransitionState?.status!=='ready'||!analysisMatches()){status('レース条件の分析が未完了、または入力が変更されています。現在のレースで再分析してください。',true);return}
  if(!m.date||!m.venue||!m.name){status('レース日・競馬場・レース名（または識別名）が必要です。',true);return}
  if(m.date<nowJST()){status('過去日付は「発走前の予想」として保存できません。',true);return}
  if(!$('mplBeforeStart')?.checked){status('発走前のチェックを入れてください。',true);return}
@@ -125,6 +130,7 @@ function savePrediction(){
   snapshot:snapshot(),outcome:null
  };
  const all=records();
+ if(all.length>=MAX){status('保存件数の上限に達しました。バックアップを保存してから別の記録方法に移してください。',true);return}
  if(all.some(x=>x.meta?.date===m.date&&x.meta?.venue===m.venue&&x.meta?.name===m.name&&JSON.stringify(x.choice)===JSON.stringify(rec.choice))){status('同じレース・同じ選択内容が保存済みです。',true);return}
  all.push(rec);
  try{write(all);$('mplBeforeStart').checked=false;status('発走前の予想を固定保存しました。保存時刻：'+new Date(at).toLocaleString('ja-JP'));history()}
