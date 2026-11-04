@@ -6,9 +6,9 @@ if(!(isiOS||isMobile))return;
 window.__IOS_MOBILE_SHELL_V3=true;
 window.__IOS_MOBILE_SHELL_V2=true;
 const V='ios-mobile-shell-v3.1-ready-sync', $=id=>document.getElementById(id), E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let active='ticket',analysisReady=false,pending=false,timer=0,lastTicketSig='',lastAnswerSig='';
+let active='ticket',analysisReady=false,pending=false,timer=0,frame=0,lastTicketSig='',lastAnswerSig='';
 const pct=x=>Number.isFinite(Number(x))?`${Math.round(Number(x)*100)}%`:'—';
-function schedule(ms=0){clearTimeout(timer);timer=setTimeout(()=>requestAnimationFrame(renderAll),ms)}
+function schedule(ms=0){clearTimeout(timer);timer=setTimeout(()=>{if(frame)return;frame=requestAnimationFrame(()=>{frame=0;renderAll()})},ms)}
 function closestCard(el){return el?.closest('section.card,.card')||null}
 function coreReady(){const t=window.RSAAnalysisTransitionState;const base=Boolean(window.Finish600State?.ready&&window.M3PureAbilityState?.ready&&window.ValidatedQueueState?.ready&&window.PositionRiskState?.ready&&window.DecisionShellV2State?.ready);return base&&(!t||t.status==='ready')}
 function css(){if($('ios-mobile-shell-v3-css'))return;const s=document.createElement('style');s.id='ios-mobile-shell-v3-css';s.textContent=`
