@@ -104,18 +104,14 @@ function svgChart(a,axis){
  return out+'</svg>';
 }
 function focus(h,field){
- if(!h)return '';
- const fmt=r=>Number.isFinite(r)?r.toFixed(Math.abs(r-Math.round(r))<.11?0:1)+'番手':'—';
- const posterior=Number.isFinite(h.one)&&h.one>=Math.ceil(field*.70);
- let alert='';
- if(!Number.isFinite(h.one))alert='初コーナー予測は過去走数が足りないため未算出です。';
- else if(posterior)alert='序盤後方見込み。スタートで置かれるか、意図して控えるかは区別できません。';
- else alert='初コーナーの位置予測であり、ゲートの反応や出遅れは予測していません。';
+ if(!h)return'';
+ const fmt=(r,unit)=>Number.isFinite(r)?r.toFixed(Math.abs(r-Math.round(r))<.11?0:1)+unit:'—';
+ const note=!Number.isFinite(h.one)?'初コーナー予測なし':h.one>=Math.ceil(field*.70)?'序盤後方見込み。ただし出遅れか意図した控えかは判別できません。':'出遅れやゲート反応を直接予測していません。';
  return '<div class="rpvFocus"><h4>注目｜'+esc(h.no)+'番 '+esc(h.name)+'</h4><div class="rpvFocusGrid">'+
- '<div class="rpvMetric"><small>1コーナー</small><b>'+fmt(h.one)+'</b></div>'+
- '<div class="rpvMetric"><small>残600m</small><b>'+fmt(h.r600)+'</b></div>'+
- '<div class="rpvMetric"><small>M4参考順位</small><b>'+fmt(h.goal)+'</b></div></div>'+
- '<div class="rpvAlert">'+esc(alert)+'<br>残600mの先頭差目安：'+(finite(h.gap)?h.gap.toFixed(2)+'秒':'—')+' ／ M4参考順位は走破評価で、実際に何頭抜くかは算出しません。</div></div>';
+ '<div class="rpvMetric"><small>1コーナー</small><b>'+fmt(h.one,'番手')+'</b></div>'+
+ '<div class="rpvMetric"><small>残600m</small><b>'+fmt(h.r600,'番手')+'</b></div>'+
+ '<div class="rpvMetric"><small>M4参考順位</small><b>'+fmt(h.goal,'位')+'</b></div></div>'+
+ '<div class="rpvAlert">'+esc(note)+'<br>残600m先頭差の目安：'+(finite(h.gap)?h.gap.toFixed(2)+'秒':'—')+' ／ M4から追い抜き数・着順は推定できません。'+(h.missing?.length?'<br>データ不足：'+esc(h.missing.join('・')):'')+'</div></div>';
 }
 function render(force){
  // Lazy render: do not build a 12–18 horse SVG while this tab is not visible.
