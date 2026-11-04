@@ -88,13 +88,15 @@ function meta(){
  return{date:raceDateISO(val('raceDate')),venue:val('venue'),name:val('raceName')||val('mplRaceRef'),surface:val('surface'),distance:val('distance'),fieldSize:val('fieldSize'),grade:val('grade'),going:val('going')};
 }
 function snapshot(){
- const p=window.ProductionDecisionPipelineV1State,f=window.Finish600State,q=window.ValidatedQueueState,r=window.Remaining600ValidatedState;
+ const p=window.ProductionDecisionPipelineV1State,f=window.Finish600State,q=window.ValidatedQueueState,r=window.Remaining600ValidatedState,market=window.DecisionShellV2State?.market;
  const odds=window.ShapeCore?.parseOdds?.(val('oddsPaste'))?.odds||{};
  const p4=window.MobileAnalysisCoreState?.analysis?.pred?.p||window.FourAxisIntegrationState?.p||null;
  const gap=new Map((r?.rows||[]).map(x=>[String(x.no),num(x.pred)]));
  return{
   versions:{pipeline:p?.version||null,finish:f?.version||null,queue:q?.version||null,remaining600:r?.version||null},
-  appAxis:p?.stages?.axis?{no:String(p.stages.axis.no||''),name:String(p.stages.axis.name||''),abilityRank:num(p.stages.axis.abilityRank),m3Rank:num(p.stages.axis.m3Rank),popularity:num(p.stages.price?.axisPopularity)}:null,
+  appAxis:p?.stages?.axis?{no:String(p.stages.axis.no||''),name:String(p.stages.axis.name||''),status:String(p.stages.axis.status||''),abilityRank:num(p.stages.axis.abilityRank),m3Rank:num(p.stages.axis.m3Rank),popularity:num(p.stages.price?.axisPopularity)}:null,
+  marketRows:market?.complete&&Array.isArray(market.rows)&&market.rows.length===Number(val('fieldSize'))?market.rows.map(x=>({no:String(x.no),pop:num(x.pop),winOdds:num(x.od)})):[],
+  marketCapturedAs:'win_odds_popularity_before_race',
   appOpponents:(p?.stages?.opponents?.rows||[]).slice(0,18).map(x=>({no:String(x.no),pop:num(x.pop),abilityRank:num(x.abilityRank),m3Rank:num(x.m3Rank)})),
   paceProbabilities:Array.isArray(p4)&&p4.length===4?p4.map(num):null,
   pressure:window.MobileAnalysisCoreState?.analysis?.pressure||null,
