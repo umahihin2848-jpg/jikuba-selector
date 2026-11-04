@@ -7,7 +7,7 @@ const $=id=>document.getElementById(id);
 const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const num=v=>v===null||v===undefined||v===''?null:Number.isFinite(Number(v))?Number(v):null;
 const val=id=>String($(id)?.value??'').trim();
-let timer=0,retries=0,ready=false,lastRace='',lastHistory='';
+let timer=0,retries=0,ready=false,lastRace='',lastHistory='',scenarioOrigin='manual-form';
 function css(){
  if($('mplCss'))return;
  const s=document.createElement('style');s.id='mplCss';
@@ -112,28 +112,41 @@ function analysisMatches(){
  if(!a)return false;
  return String(a.date||'')===val('raceDate')&&String(a.venue||'')===val('venue')&&String(a.raceName||'')===val('raceName')&&String(a.surface||'')===val('surface')&&Number(a.distance)===Number(val('distance'))&&Number(a.fieldSize)===Number(val('fieldSize'));
 }
+function scheduleCheck(day){
+ const time=val('mplStartTime'),checked=Boolean($('mplTimeChecked')?.checked);
+ if(!time)return checked?{error:'発走予定時刻を入力してから確認してください。'}:{status:'unverified_no_time',timeJst:null,userChecked:false};
+ if(!/^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(time))return{error:'発走予定時刻は時:分で入力してください。'};
+ const iso=day+'T'+time+':00+09:00',start=Date.parse(iso);
+ if(!Number.isFinite(start))return{error:'発走予定時刻の形式が正しくありません。'};
+ if(Date.now()>=start)return{error:'入力した発走予定時刻を過ぎています。発走前予想として保存できません。'};
+ return{status:checked?'before_user_confirmed_time':'unverified_time_source',timeJst:iso,userChecked:checked};
+}
 function savePrediction(){
  const m=meta(),field=Number(m.fieldSize),d=val('mplDecision'),pace=val('mplPace'),front=val('mplFront'),track=val('mplTrack'),axis=Number(val('mplAxis'));
  const shell=window.IOSMobileShellV3State||window.IOSMobileShellV2State;
  if(!shell?.analysisReady||!window.Finish600State?.ready||window.RSAAnalysisTransitionState?.status!=='ready'||!analysisMatches()){status('レース条件の分析が未完了、または入力が変更されています。現在のレースで再分析してください。',true);return}
  if(!m.date||!m.venue||!m.name){status('レース日・競馬場・レース名（または識別名）が必要です。',true);return}
  if(m.date<nowJST()){status('過去日付は「発走前の予想」として保存できません。',true);return}
+ const check=scheduleCheck(m.date);if(check.error){status(check.error,true);return}
  if(!$('mplBeforeStart')?.checked){status('発走前のチェックを入れてください。',true);return}
  if(!Number.isInteger(field)||field<2||field>20){status('出走頭数を確認してください。',true);return}
- const pair=partners(val('mplPartners'),field,axis);
+ const pair=partners(val('mplPartners'),field,axis),hypoStake=num(val('mplHypoStake'));
+ if(d==='skip'&&hypoStake!==null&&(!Number.isInteger(hypoStake)||hypoStake<0)){status('仮想投資額は0円以上の整数にしてください。',true);return}
+ if(d==='skip'&&hypoStake>0&&(!Number.isInteger(axis)||axis<1||axis>field||!pair?.length)){status('見送りの仮想投資には軸馬番と相手馬番が必要です。',true);return}
  if(!['buy','skip','hold'].includes(d)||!pace||!front||!track){status('シナリオ・展開・馬場・購入判断を選択してください。',true);return}
  if(d==='buy'&&(!Number.isInteger(axis)||axis<1||axis>field||!pair?.length)){status('購入する場合は軸と相手の馬番を入力してください。',true);return}
  if(pair===null){status('相手馬番の形式・範囲を確認してください。',true);return}
  const at=new Date().toISOString();
  const rec={kind:'pre_race',version:V,id:[m.date,m.venue,m.name,m.surface,m.distance,at,Math.random().toString(36).slice(2,8)].join('|'),capturedAt:at,meta:m,
-  choice:{axisNo:Number.isInteger(axis)&&axis>0&&axis<=field?axis:null,partners:pair,scenario:pace,front,track,decision:d,wideOddsText:val('mplPrices'),memo:val('mplMemo')},
+  choice:{axisNo:Number.isInteger(axis)&&axis>0&&axis<=field?axis:null,partners:pair,scenario:pace,scenarioOrigin,front,track,decision:d,wideOddsText:val('mplPrices'),memo:val('mplMemo'),hypothetical:d==='skip'&&pair?.length?{stakeYen:hypoStake||null,partners:pair,axisNo:Number.isInteger(axis)?axis:null,wideOddsText:val('mplPrices')}:null},
+  timeValidation:{...check,checkedAt:at,method:'local_clock_and_user_supplied_schedule'},
   snapshot:snapshot(),outcome:null
  };
  const all=records();
  if(all.length>=MAX){status('保存件数の上限に達しました。バックアップを保存してから別の記録方法に移してください。',true);return}
  if(all.some(x=>x.meta?.date===m.date&&x.meta?.venue===m.venue&&x.meta?.name===m.name&&JSON.stringify(x.choice)===JSON.stringify(rec.choice))){status('同じレース・同じ選択内容が保存済みです。',true);return}
  all.push(rec);
- try{write(all);$('mplBeforeStart').checked=false;status('発走前の予想を固定保存しました。保存時刻：'+new Date(at).toLocaleString('ja-JP'));history()}
+ try{write(all);$('mplBeforeStart').checked=false;status((check.status==='before_user_confirmed_time'?'時刻照合済（利用者確認）':'発走前未確認')+'｜予想を固定保存しました：'+new Date(at).toLocaleString('ja-JP'));history()}
  catch(e){status('ブラウザの保存領域へ書き込めません。容量やプライベートモードを確認してください。',true)}
 }
 function saveOutcome(){
