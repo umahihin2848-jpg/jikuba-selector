@@ -61,25 +61,22 @@ function raceId(){
  return ['raceDate','venue','raceName','surface','distance','fieldSize'].map(id=>$(id)?.value||'').join('|')+'|'+(Number(window.RSAAnalysisTransitionState?.generation)||0);
 }
 function rows(){
- const f=window.Finish600State,r=window.Remaining600ValidatedState,q=window.ValidatedQueueState;
- const g=Number(window.RSAAnalysisTransitionState?.generation)||0;
- if(!f?.ready||!Array.isArray(f.rows)||f.rows.length<2)return [];
- if(g&&f.generation&&Number(f.generation)!==g)return [];
- if(!r?.ready||!Array.isArray(r.rows)||r.rows.length<2)return [];
- if(g&&r.generation&&Number(r.generation)!==g)return [];
- const seen=new Set();
- const sorted=r.rows.filter(x=>finite(x.pred)).slice().sort((a,b)=>N(a.pred)-N(b.pred));
- const rm=new Map(sorted.map((x,i)=>[String(x.no),{rank:i+1,gap:N(x.pred)}]));
- const qm=new Map((q?.rows||[]).map(x=>[String(x.no),x]));
- const a=[];
+ const f=window.Finish600State,r=window.Remaining600ValidatedState,q=window.ValidatedQueueState,g=Number(window.RSAAnalysisTransitionState?.generation)||0;
+ if(!f?.ready||!Array.isArray(f.rows)||f.rows.length<2||g&&f.generation&&Number(f.generation)!==g)return [];
+ const rValid=!!(r?.ready&&Array.isArray(r.rows)&&(!g||!r.generation||Number(r.generation)===g));
+ const rs=(rValid?r.rows:[]).filter(x=>finite(x.pred)).sort((x,y)=>N(x.pred)-N(y.pred));
+ const rm=new Map(rs.map((x,i)=>[String(x.no),{rank:i+1,gap:N(x.pred)}]));
+ const qm=new Map((q?.ready?q.rows||[]:[]).map(x=>[String(x.no),x])),byNo=q?.ready?q.byNo||{}:{};
+ const a=[],seen=new Set();
  for(const x of f.rows){
-  const no=String(x.no),r6=rm.get(no),q1=qm.get(no),goal=N(x.sc?.[band]?.rank);
-  if(seen.has(no)||!r6||!Number.isFinite(goal))continue;
-  seen.add(no);
-  const one=finite(q1?.expectedRank)?N(q1.expectedRank):NaN;
-  a.push({no,name:String(x.name||q1?.name||''),one,r600:r6.rank,gap:r6.gap,goal,scScore:N(x.sc?.[band]?.score),historyN:N(q1?.hist_n),frontness:N(q1?.frontness5),lane:String(q1?.lane||''),position:String(q1?.position||'')});
+  const no=String(x.no);if(seen.has(no)||!/^[1-9][0-9]*$/.test(no))continue;seen.add(no);
+  const early=qm.get(no)||byNo[no]||{},r6=rm.get(no),one=finite(early.expectedRank)?N(early.expectedRank):NaN,goal=N(x.sc?.[band]?.rank);
+  const missing=[!Number.isFinite(one)?'初角':null,!r6?'残600m':null,!Number.isFinite(goal)?'M4':null].filter(Boolean);
+  a.push({no,name:String(x.name||early.name||''),one,r600:r6?r6.rank:NaN,gap:r6?r6.gap:NaN,goal,historyN:N(early.hist_n),missing});
  }
- return a.sort((x,y)=>x.goal-y.goal||N(x.no)-N(y.no));
+ const field=Number($('fieldSize')?.value)||a.length;
+ for(let no=1;no<=field&&no<=20;no++)if(!seen.has(String(no)))a.push({no:String(no),name:'データ未取得',one:NaN,r600:NaN,gap:NaN,goal:NaN,missing:['全指標']});
+ return a.sort((x,y)=>(Number.isFinite(x.goal)?x.goal:999)-(Number.isFinite(y.goal)?y.goal:999)||Number(x.no)-Number(y.no));
 }
 function svgChart(a,axis){
  const field=Math.max(a.length,Number($('fieldSize')?.value)||a.length);
