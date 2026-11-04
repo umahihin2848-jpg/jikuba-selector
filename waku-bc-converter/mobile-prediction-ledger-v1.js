@@ -2,7 +2,7 @@
 'use strict';
 if(!window.RSAMobileLean||window.__MOBILE_PREDICTION_LEDGER_V1)return;
 window.__MOBILE_PREDICTION_LEDGER_V1=true;
-const V='mobile-prediction-ledger-v1.3',KEY='rsa-mobile-prediction-ledger-v1',MAX=500;
+const V='mobile-prediction-ledger-v1.4',KEY='rsa-mobile-prediction-ledger-v1',MAX=500;
 const $=id=>document.getElementById(id);
 const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const num=v=>v===null||v===undefined||v===''?null:Number.isFinite(Number(v))?Number(v):null;
@@ -46,23 +46,23 @@ function html(){
  '<div id="mplContext" class="mplContext">レース分析待ち</div>',
  '<div class="mplGrid">',
  '<div class="mplField"><label for="mplRaceRef">レース識別名（未入力時のみ）</label><input id="mplRaceRef" placeholder="例：東京11R" maxlength="48"></div>',
- '<div class="mplField"><label for="mplAxis">採用する軸馬番</label><input id="mplAxis" inputmode="numeric" type="number" min="1" max="18" placeholder="例：6"></div>',
+ '<div class="mplField"><label for="mplStartTime">発走予定時刻（JST）</label><input id="mplStartTime" type="time" step="60"></div><div class="mplField"><label for="mplAxis">採用する軸馬番</label><input id="mplAxis" inputmode="numeric" type="number" min="1" max="18" placeholder="例：6"></div>',
  '<div class="mplField"><label for="mplPace">決め打ちシナリオ</label><select id="mplPace"><option value="">選択してください</option><option value="0">強前傾</option><option value="1">前傾</option><option value="2">標準</option><option value="3">スロー</option><option value="unknown">判断保留</option></select></div>',
- '<div class="mplField"><label for="mplFront">展開判断</label><select id="mplFront"><option value="">選択してください</option><option value="hold">前残り</option><option value="collapse">前崩れ</option><option value="neutral">中立・読めない</option></select></div>',
+ '<div class="mplField full"><small id="mplScenarioSource" style="font-size:11px;color:#a7c7d5">アプリ本線は参考表示。シナリオは手動で決定してください。</small></div><div class="mplField"><label for="mplFront">展開判断</label><select id="mplFront"><option value="">選択してください</option><option value="hold">前残り</option><option value="collapse">前崩れ</option><option value="neutral">中立・読めない</option></select></div>',
  '<div class="mplField"><label for="mplTrack">映像で判断した馬場</label><select id="mplTrack"><option value="">選択してください</option><option value="flat">フラット</option><option value="inside_bad">内が伸びない</option><option value="outside_bad">外を回すと厳しい</option><option value="unknown">未判定</option></select></div>',
  '<div class="mplField"><label for="mplDecision">購入判断</label><select id="mplDecision"><option value="buy">購入する</option><option value="skip">見送る</option><option value="hold">購入保留</option></select></div>',
- '<div class="mplField"><label for="mplPartners">ワイド相手馬番</label><input id="mplPartners" placeholder="例：3, 11" maxlength="80"></div>',
+ '<div class="mplField"><label for="mplPartners">ワイド相手馬番（見送り時は仮想候補）</label><input id="mplPartners" placeholder="例：3, 11" maxlength="80"></div>',
  '<div class="mplField"><label for="mplPrices">想定ワイドオッズ</label><input id="mplPrices" placeholder="例：6-11 8.5倍" maxlength="100"></div>',
- '<div class="mplField full"><label for="mplMemo">判断理由・映像メモ</label><textarea id="mplMemo" maxlength="500" placeholder="例：前残り予想、内が伸びないので外の先行馬を優遇"></textarea></div>',
+ '<div class="mplField full" id="mplHypoBox" style="display:none"><label for="mplHypoStake">見送り時：仮に購入した場合の投資額（円・任意）</label><input id="mplHypoStake" type="number" min="0" step="100" inputmode="numeric" placeholder="例：500"><small style="font-size:11px;color:#a7c7d5">仮想買い目は実購入の収支と区別して保存</small></div><div class="mplField full"><label for="mplMemo">判断理由・映像メモ</label><textarea id="mplMemo" maxlength="500" placeholder="例：前残り予想、内が伸びないので外の先行馬を優遇"></textarea></div>',
  '</div><label class="mplCheck"><input id="mplBeforeStart" type="checkbox"><span>この予想は発走前に入力しました（予想とアプリの分析値を固定保存します）</span></label>',
- '<div class="mplBtns"><button type="button" class="mplPrimary" id="mplSave">発走前の予想を保存</button><button type="button" id="mplCsv">CSV書き出し</button><button type="button" id="mplJson">JSONバックアップ</button><button type="button" id="mplImportBtn">JSONから復元</button><input type="file" id="mplImportFile" accept="application/json,.json" style="display:none"></div>',
+ '<label class="mplCheck"><input id="mplTimeChecked" type="checkbox"><span>入力した発走予定時刻を公式発表と照合した（未確認ならオフ）</span></label><div class="mplBtns"><button type="button" class="mplPrimary" id="mplSave">発走前の予想を保存</button><button type="button" id="mplCsv">CSV書き出し</button><button type="button" id="mplJson">JSONバックアップ</button><button type="button" id="mplImportBtn">JSONから復元</button><input type="file" id="mplImportFile" accept="application/json,.json" style="display:none"></div>',
  '<div id="mplStatus" class="mplStatus" role="status" aria-live="polite"></div><hr class="mplDivider">',
  '<div class="mplField full"><label for="mplResultSelect">レース後の結果を追記（発走前の選択は書き換えません）</label><select id="mplResultSelect"><option value="">保存済み予想を選択</option></select></div>',
  '<div class="mplResultRow" style="margin-top:8px"><div class="mplField"><label for="mplStake">投資額（円）</label><input id="mplStake" type="number" min="0" step="100" inputmode="numeric"></div>',
  '<div class="mplField"><label for="mplReturn">払戻額（円）</label><input id="mplReturn" type="number" min="0" step="10" inputmode="numeric"></div></div>',
- '<div class="mplBtns"><button type="button" id="mplSaveResult">レース結果を追記</button></div>',
+ '<div class="mplField full" style="margin-top:8px"><label for="mplHypoReturn">見送り時のみ：仮想買い目の払戻額（円）</label><input id="mplHypoReturn" type="number" min="0" step="10" inputmode="numeric" placeholder="任意・実払戻には加算しません"></div><div class="mplBtns"><button type="button" id="mplSaveResult">レース結果を追記</button></div>',
  '<div id="mplRecords" class="mplRecords"></div>',
- '<p class="mplFine">このiPhone/Safariの保存領域に保存します。履歴削除・機種変更で消える可能性があるので、定期的にJSONまたはCSVを保存してください。過去レースを後から「発走前予想」として登録することはできません。</p></div>'
+ '<p class="mplFine">保存時刻は端末の時計、発走予定時刻は入力値に基づきます。第三者による時刻証明ではありません。発走時刻未確認の記録は正式な事前検証から除外。見送り時の仮想損益は実購入ROIに含めません。このiPhone/Safariの保存領域に保存します。履歴削除・機種変更で消える可能性があるので、定期的にJSONまたはCSVを保存してください。過去レースを後から「発走前予想」として登録することはできません。</p></div>'
  ].join('');
 }
 function status(s,bad){
