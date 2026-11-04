@@ -1,0 +1,24 @@
+/* 2026-11-04: mobile legibility layer; presentation only. No model/decision changes. */
+@media (max-width:760px) {
+  body.iosMobileShellV2 .imsTabs { gap:4px!important; }
+  body.iosMobileShellV2 .imsTab { font-size:11px!important; line-height:1.28!important; padding:7px 2px!important; min-height:48px!important; }
+  body.iosMobileShellV2 .mpuRaceHead small,
+  body.iosMobileShellV2 .mpuRaceHead p,
+  body.iosMobileShellV2 .mpuVerdict p,
+  body.iosMobileShellV2 .mpuOppMain small,
+  body.iosMobileShellV2 .mpuOppProb small,
+  body.iosMobileShellV2 .mpuResearchIntro p,
+  body.iosMobileShellV2 .mpuFoot,
+  body.iosMobileShellV2 .mpuSetupBody .muted,
+  body.iosMobileShellV2 .mpuSetupBody .tiny,
+  body.iosMobileShellV2 .mfsNote,
+  body.iosMobileShellV2 .mfsMain small,
+  body.iosMobileShellV2 .mrmpNote {font-size:11px!important;line-height:1.55!important;}
+  body.iosMobileShellV2 .mpuOppMain b,
+  body.iosMobileShellV2 .mfsMain b {font-size:12px!important;line-height:1.4!important;}
+  body.iosMobileShellV2 .mpuOppProb b,
+  body.iosMobileShellV2 .mfsTag {font-size:11px!important;}
+  body.iosMobileShellV2 .mpuOpp,
+  body.iosMobileShellV2 .mfsRow {align-items:center;}
+  body.iosMobileShellV2 #raceProgressV1 .rpvHorse .rpvDetail {font-size:11px!important;}
+}
