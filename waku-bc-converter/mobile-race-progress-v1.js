@@ -83,7 +83,7 @@ function svgChart(a,axis){
  const field=Math.max(a.length,Number($('fieldSize')?.value)||a.length);
  const ht=clamp(field*25+68,280,570),top=46,bot=ht-23,xs=[77,250,424],step=(bot-top)/Math.max(1,field-1);
  const y=r=>top+(clamp(r,1,field)-1)*step;
- let out='<svg viewBox="0 0 500 '+ht+'" role="img" aria-label="1コーナー、残り600m、選択シナリオでのゴールでのM4参考順位を線で比較"><rect width="500" height="'+ht+'" rx="10" fill="#061621"/>';
+ let out='<svg viewBox="0 0 500 '+ht+'" role="img" aria-label="1コーナー、残り600m、選択シナリオでのM4参考順位を別指標として比較"><rect width="500" height="'+ht+'" rx="10" fill="#061621"/>';
  for(let i=0;i<3;i++){
   out+='<line x1="'+xs[i]+'" y1="'+top+'" x2="'+xs[i]+'" y2="'+bot+'" stroke="#315164" stroke-dasharray="4 5" stroke-width="1"/>';
   out+='<text x="'+xs[i]+'" y="20" text-anchor="middle" fill="#d5e5ef" font-size="15" font-weight="700">'+['1コーナー','残600m','M4順位'][i]+'</text>';
@@ -94,11 +94,13 @@ function svgChart(a,axis){
  const order=a.slice().sort((p,q)=>(p.no===selected?2:p.no===axis?1:0)-(q.no===selected?2:q.no===axis?1:0));
  for(const h of order){
   const active=h.no===selected,ax=h.no===axis,color=active?'#ffd17f':ax?'#68dfc7':'#66879d';
-  const points=[[xs[0],h.one],[xs[1],h.r600],[xs[2],h.goal]].filter(v=>Number.isFinite(v[1]));
-  const pts=points.map(p=>p[0]+','+y(p[1])).join(' ');
-  if(points.length>=2)out+='<polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="'+(active?4:ax?3:1.3)+'" opacity="'+(active?1:ax?0.85:0.23)+'" stroke-linejoin="round" stroke-linecap="round"/>';
+  const points=[[xs[0],h.one],[xs[1],h.r600],[xs[2],h.goal]].filter(p=>Number.isFinite(p[1]));
+  // M4 is an independent performance rank: never connect it to positional estimates.
+  if(Number.isFinite(h.one)&&Number.isFinite(h.r600))out+='<line x1="'+xs[0]+'" y1="'+y(h.one)+'" x2="'+xs[1]+'" y2="'+y(h.r600)+'" stroke="'+color+'" stroke-width="'+(active?4:ax?3:1.3)+'" opacity="'+(active?1:ax?0.85:0.23)+'"/>';
   for(const p of points){
-   out+='<circle cx="'+p[0]+'" cy="'+y(p[1])+'" r="'+(active?10:ax?7:3.7)+'" fill="'+color+'" opacity="'+(active?1:ax?0.95:0.5)+'" data-rpv-no="'+esc(h.no)+'"/>';
+   const isM4=p[0]===xs[2],sz=active?9:ax?6:4;
+   if(isM4)out+='<rect x="'+(p[0]-sz)+'" y="'+(y(p[1])-sz)+'" width="'+2*sz+'" height="'+2*sz+'" rx="2" fill="'+color+'" opacity="'+(active?1:ax?0.95:0.6)+'" data-rpv-no="'+esc(h.no)+'"/>';
+   else out+='<circle cx="'+p[0]+'" cy="'+y(p[1])+'" r="'+(active?10:ax?7:3.7)+'" fill="'+color+'" opacity="'+(active?1:ax?0.95:0.5)+'" data-rpv-no="'+esc(h.no)+'"/>';
    if(active)out+='<text x="'+p[0]+'" y="'+(y(p[1])+3.7)+'" fill="#18222e" text-anchor="middle" font-size="10" font-weight="900" pointer-events="none">'+esc(h.no)+'</text>';
   }
  }
