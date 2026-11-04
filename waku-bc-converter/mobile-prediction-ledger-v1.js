@@ -150,13 +150,18 @@ function savePrediction(){
  catch(e){status('ブラウザの保存領域へ書き込めません。容量やプライベートモードを確認してください。',true)}
 }
 function saveOutcome(){
- const id=val('mplResultSelect'),all=records(),item=all.find(x=>x.id===id),stake=num(val('mplStake')),returned=num(val('mplReturn'));
+ const id=val('mplResultSelect'),all=records(),item=all.find(x=>x.id===id);
  if(!item){status('結果を追記する予想を選んでください。',true);return}
+ const skip=item.choice?.decision==='skip',hypoReturned=num(val('mplHypoReturn'));
+ let stake=num(val('mplStake')),returned=num(val('mplReturn'));
+ if(skip&&stake===null&&returned===null){stake=0;returned=0}
  if(stake===null||returned===null||!Number.isInteger(stake)||!Number.isInteger(returned)||stake<0||returned<0){status('投資額・払戻額は0円以上の整数で入力してください。',true);return}
- if(item.choice?.decision==='skip'&&(stake>0||returned>0)){status('見送り記録に投資額・払戻額は設定できません。',true);return}
- if(stake===0&&returned>0){status('投資額0円に払戻額を設定できません。',true);return}
- item.outcome={recordedAt:new Date().toISOString(),stakeYen:stake,returnedYen:returned};
- try{write(all);status('結果を追記しました。発走前の予想は変更していません。');history()}
+ if(skip&&(stake>0||returned>0)){status('見送りの投資額・払戻額は0円にしてください。',true);return}
+ if(stake===0&&returned>0){status('投資額0円に実払戻を入力できません。',true);return}
+ const hs=num(item.choice?.hypothetical?.stakeYen);
+ if(hypoReturned!==null&&(!skip||!hs||hs<=0||!Number.isInteger(hypoReturned)||hypoReturned<0)){status('仮想払戻は発走前に仮想投資額を保存した見送り記録にのみ入力できます。',true);return}
+ item.outcome={recordedAt:new Date().toISOString(),stakeYen:stake,returnedYen:returned,hypotheticalReturnedYen:skip?hypoReturned:null};
+ try{write(all);status('結果を追記しました。実購入と仮想損益は別集計です。');history()}
  catch(e){status('結果の保存に失敗しました。',true)}
 }
 function csvCell(x){
