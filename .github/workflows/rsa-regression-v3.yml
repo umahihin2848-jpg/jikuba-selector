@@ -24,6 +24,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+      - name: Guard mobile UI against render loops and tab conflicts
+        run: node waku-bc-converter/regression/mobile-ui-performance-guard-v1.cjs
       - name: Install browser driver library
         run: npm install --no-save --package-lock=false playwright-core@1.55.0
       - name: Start local app server
