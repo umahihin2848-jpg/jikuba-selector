@@ -1,7 +1,7 @@
 (()=>{'use strict';
 if(!window.RSAMobileLean||window.__WIDE_PROBABILITY_SHADOW_V1)return;window.__WIDE_PROBABILITY_SHADOW_V1=true;
 const V='wide-probability-shadow-v1.0-ability-maxent',$=id=>document.getElementById(id);let raf=0,timer=0,last='',rootRetries=0;
-const n=v=>{const x=Number(v);return Number.isFinite(x)?x:NaN};
+const n=v=>{if(v===null||v===undefined||(typeof v==='string'&&!v.trim()))return NaN;const x=Number(v);return Number.isFinite(x)?x:NaN};
 const E=s=>String(s??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
 const pct=p=>Number.isFinite(n(p))?`${(100*n(p)).toFixed(1)}%`:'—';
 function key(a,b){return [Number(a),Number(b)].sort((x,y)=>x-y).join('-')}
