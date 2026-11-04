@@ -135,7 +135,7 @@ function render(force){
  const sig=JSON.stringify([rid,band,touchedBand,selected,axis,p,a.map(x=>[x.no,x.name,x.one,x.r600,x.gap,x.goal,x.historyN])]);
  if(!force&&sig===last)return;
  last=sig;
- const hero='<div class="rpvHero"><div><small>RACE PROGRESSION · VISUAL</small><strong>🏁 レース推移シミュレーター</strong></div><span class="rpvTag">分析補助</span></div>';
+ const hero='<div class="rpvHero"><div><small>RACE PROGRESSION · VISUAL</small><strong>🏁 位置予測・M4比較</strong></div><span class="rpvTag">分析補助</span></div>';
  if(!a.length){
   root.innerHTML=hero+'<div class="rpvWaiting">隊列・残600m・シナリオ別M4の計算結果を読み込み中です。<br>過去走CSVを設定してレースを分析してください。</div>';
   window.RaceProgressVisualV1State={ready:false,version:V,displayOnly:true};
