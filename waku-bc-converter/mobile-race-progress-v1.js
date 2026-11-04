@@ -2,7 +2,7 @@
 'use strict';
 if(!window.RSAMobileLean||window.__MOBILE_RACE_PROGRESS_V1)return;
 window.__MOBILE_RACE_PROGRESS_V1=true;
-const V='mobile-race-progress-v1.1-readable-goal';
+const V='mobile-race-progress-v1.3-manual-scenario';
 const LABELS=['強前傾','前傾','標準','スロー'];
 const $=id=>document.getElementById(id);
 const N=v=>v===null||v===undefined||v===''?NaN:Number(v);
@@ -132,7 +132,7 @@ function render(force){
  const a=window.RSAAnalysisTransitionState?.status==='running'?[]:rows();
  const axis=String(window.ProductionDecisionPipelineV1State?.stages?.axis?.no||window.DecisionShellV2State?.structure?.axis?.no||'');
  if(a.length&&(!selected||!a.some(x=>x.no===selected)))selected=a.some(x=>x.no===axis)?axis:a[0].no;
- const sig=JSON.stringify([rid,band,selected,axis,p,a.map(x=>[x.no,x.name,x.one,x.r600,x.gap,x.goal,x.scScore,x.historyN])]);
+ const sig=JSON.stringify([rid,band,touchedBand,selected,axis,p,a.map(x=>[x.no,x.name,x.one,x.r600,x.gap,x.goal,x.historyN])]);
  if(!force&&sig===last)return;
  last=sig;
  const hero='<div class="rpvHero"><div><small>RACE PROGRESSION · VISUAL</small><strong>🏁 レース推移シミュレーター</strong></div><span class="rpvTag">分析補助</span></div>';
@@ -154,7 +154,7 @@ function render(force){
  '<div class="rpvLegend"><span><i class="rpvSwatch" style="background:#ffd17f"></i>選択中の馬</span><span><i class="rpvSwatch" style="background:#68dfc7"></i>アプリ軸</span><span><i class="rpvSwatch" style="background:#66879d"></i>その他</span></div>'+
  focus(h,field)+list+
  '<div class="rpvNote">【読み方】1コーナー＝予測隊列の番手／残600m＝予測タイム差から並べた相対位置／M4参考順位＝選択したRPCI帯のM4スコアの相対順位（着順予測ではありません）。初角・残600mだけ線で結び、M4は別の評価指標です。実際の通過順・確定着順、途中での追い上げ量、連続した物理的位置を予測したものではありません。<br>スタート反応・出遅れ・進路取り・内外馬場バイアスはこの推移図で直接推定していません。馬場は実際の映像と照合してください。シナリオの切り替えは表示だけで、本番の軸・相手・買い目判定には影響しません。</div>';
- window.RaceProgressVisualV1State={ready:true,version:V,displayOnly:true,productionChanged:false,scenarioBand:band,selectedHorseNo:selected,axisNo:axis,fieldSize:field,rows:a.map(x=>({no:x.no,firstCornerExpectedRank:x.one,remaining600ExpectedRank:x.r600,remaining600Gap:x.gap,scenarioGoalRank:x.goal})),at:Date.now()};
+ window.RaceProgressVisualV1State={ready:true,version:V,displayOnly:true,productionChanged:false,scenarioBand:band,scenarioSource:touchedBand?'manual':'app-default',generation:Number(window.RSAAnalysisTransitionState?.generation)||0,selectedHorseNo:selected,axisNo:axis,fieldSize:field,completeRows:covered,rows:a.map(x=>({no:x.no,firstCornerExpectedRank:finite(x.one)?x.one:null,remaining600ExpectedRank:finite(x.r600)?x.r600:null,remaining600Gap:finite(x.gap)?x.gap:null,scenarioGoalRank:finite(x.goal)?x.goal:null,missing:x.missing})),at:Date.now()};
 }
 function schedule(ms){
  clearTimeout(timer);
@@ -164,7 +164,7 @@ document.addEventListener('click',e=>{
  // The shell changes hidden panels synchronously; draw after its tab click handler.
  if(e.target.closest?.('[data-ims-tab="flow"]')){schedule(20);return;}
  const b=e.target.closest?.('[data-rpv-band]');
- if(b&&$('raceProgressV1')?.contains(b)){band=Number(b.dataset.rpvBand);touchedBand=true;last='';render(true);return;}
+ if(b&&$('raceProgressV1')?.contains(b)){const next=Number(b.dataset.rpvBand);if(!Number.isInteger(next)||next<0||next>3)return;band=next;touchedBand=true;last='';render(true);if(window.RaceProgressVisualV1State?.ready){const m=window.MobileAnalysisCoreState?.meta||{};window.dispatchEvent(new CustomEvent('race-progress-scenario-selected',{detail:{band,source:'manual',date:String(m.date||''),venue:String(m.venue||''),raceName:String(m.raceName||''),surface:String(m.surface||''),distance:Number(m.distance),fieldSize:Number(m.fieldSize),generation:Number(window.RSAAnalysisTransitionState?.generation)||0}}))}return;}
  const h=e.target.closest?.('[data-rpv-no]');
  if(h&&$('raceProgressV1')?.contains(h)){selected=String(h.dataset.rpvNo);last='';render(true);}
 });
