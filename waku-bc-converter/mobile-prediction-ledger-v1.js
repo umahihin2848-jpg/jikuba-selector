@@ -180,12 +180,12 @@ function csvCell(x){
  return '"'+s.replace(/"/g,'""')+'"';
 }
 function csvData(all){
- const keys=['capturedAt','date','venue','race','surface','distance','field','axis','partners','scenario','front','track','decision','wideOdds','memo','appAxis','appAbilityRank','appM3Rank','paceProbabilities','stakeYen','returnedYen','ROI','resultRecordedAt','startTimeJST','timeStatus','userCheckedStart','scenarioOrigin','hypotheticalStake','hypotheticalPayout','hypotheticalROI'];
+ const keys=['capturedAt','date','venue','race','surface','distance','field','axis','partners','scenario','front','track','decision','wideOdds','memo','appAxis','appAbilityRank','appM3Rank','paceProbabilities','stakeYen','returnedYen','ROI','resultRecordedAt','startTimeJST','timeStatus','userCheckedStart','scenarioOrigin','hypotheticalStake','hypotheticalPayout','hypotheticalROI','finishTop3Nos'];
  const lines=[keys.join(',')];
  for(const x of all){
   const c=x.choice||{},o=x.outcome||{},a=x.snapshot?.appAxis||{},st=num(o.stakeYen),ret=num(o.returnedYen);
   const roi=st>0&&ret!==null?(ret/st*100).toFixed(1):null;
-  lines.push([x.capturedAt,x.meta?.date,x.meta?.venue,x.meta?.name,x.meta?.surface,x.meta?.distance,x.meta?.fieldSize,c.axisNo,(c.partners||[]).join(' '),c.scenario,c.front,c.track,c.decision,c.wideOddsText,c.memo,a.no,a.abilityRank,a.m3Rank,JSON.stringify(x.snapshot?.paceProbabilities||[]),o.stakeYen,o.returnedYen,roi,o.recordedAt,x.timeValidation?.timeJst||'',x.timeValidation?.status||'legacy_unverified',x.timeValidation?.userChecked??false,c.scenarioOrigin||'legacy_unverified',c.hypothetical?.stakeYen??'',o.hypotheticalReturnedYen??'',num(c.hypothetical?.stakeYen)>0&&num(o.hypotheticalReturnedYen)!==null?(num(o.hypotheticalReturnedYen)/num(c.hypothetical.stakeYen)*100).toFixed(1):''].map(csvCell).join(','));
+  lines.push([x.capturedAt,x.meta?.date,x.meta?.venue,x.meta?.name,x.meta?.surface,x.meta?.distance,x.meta?.fieldSize,c.axisNo,(c.partners||[]).join(' '),c.scenario,c.front,c.track,c.decision,c.wideOddsText,c.memo,a.no,a.abilityRank,a.m3Rank,JSON.stringify(x.snapshot?.paceProbabilities||[]),o.stakeYen,o.returnedYen,roi,o.recordedAt,x.timeValidation?.timeJst||'',x.timeValidation?.status||'legacy_unverified',x.timeValidation?.userChecked??false,c.scenarioOrigin||'legacy_unverified',c.hypothetical?.stakeYen??'',o.hypotheticalReturnedYen??'',num(c.hypothetical?.stakeYen)>0&&num(o.hypotheticalReturnedYen)!==null?(num(o.hypotheticalReturnedYen)/num(c.hypothetical.stakeYen)*100).toFixed(1):'',Array.isArray(o.top3Nos)?o.top3Nos.join(' '):''].map(csvCell).join(','));
  }
  return '\ufeff'+lines.join('\r\n');
 }
@@ -246,7 +246,7 @@ function comparisonSummary(all){
  for(const rec of races){
   const winners=new Set(rec.outcome.top3Nos.map(Number)),appAxis=Number(rec.snapshot?.appAxis?.no);
   if(Number.isInteger(appAxis)&&appAxis>0){axisN++;if(winners.has(appAxis))axisHit++}
-  const c=rec.choice||{},ax=Number(c.axisNo),k=c.partners?.length||0,scenario=Number(c.scenario),hs=rec.snapshot?.horses||[],field=Number(rec.meta?.fieldSize);
+  const c=rec.choice||{},ax=Number(c.axisNo),k=Array.isArray(c.partners)?c.partners.length:0,scenario=Number(c.scenario),hs=rec.snapshot?.horses||[],field=Number(rec.meta?.fieldSize);
   if(c.decision!=='buy'||!Number.isInteger(ax)||ax<1||k<1||k>3||!Number.isInteger(scenario)||scenario<0||scenario>3||hs.length!==field)continue;
   const peers=hs.filter(x=>Number(x.no)!==ax);
   if(peers.length!==field-1||peers.some(x=>!Number.isInteger(Number(x.m3Rank))||Number(x.m3Rank)<1||!Number.isInteger(Number(x.scenarioM4Ranks?.[scenario]))||Number(x.scenarioM4Ranks[scenario])<1))continue;
@@ -278,7 +278,7 @@ function history(){
  const hypothetical=all.filter(x=>x.choice?.decision==='skip'&&num(x.choice?.hypothetical?.stakeYen)>0&&num(x.outcome?.hypotheticalReturnedYen)!==null);
  const hStake=hypothetical.reduce((sum,x)=>sum+num(x.choice.hypothetical.stakeYen),0),hPayout=hypothetical.reduce((sum,x)=>sum+num(x.outcome.hypotheticalReturnedYen),0),hRoi=hStake?Math.round(hPayout/hStake*1000)/10:null;
  const recent=all.slice().reverse().slice(0,4).map(x=>'<div class="mplRecent">'+E(x.meta?.date)+' '+E(x.meta?.venue)+' '+E(x.meta?.name)+'｜'+E(x.choice?.decision==='buy'?'購入':x.choice?.decision==='skip'?'見送り':'保留')+(x.timeValidation?.status==='before_user_confirmed_time'?'｜時刻照合済（利用者確認）':'｜発走前未確認')+(x.outcome?'｜結果記録済み':'｜結果待ち')+'</div>').join('');
- const h='<b>保存 '+all.length+'件</b>｜実購入参考 '+priced.length+'件'+(roi!==null?' ROI '+roi.toFixed(1)+'%':' ROI未集計')+'<div>入力発走時刻と照合済（利用者確認）'+checked.length+'件'+(checkedRoi!==null?' ROI '+checkedRoi.toFixed(1)+'%':' ROI未集計')+'｜仮想見送り '+hypothetical.length+'件'+(hRoi!==null?' 仮想ROI '+hRoi.toFixed(1)+'%':' 仮想ROI未集計')+'</div><div class="mplFine">未確認・旧記録は照合済集計に含めません。異なる予想を同一レースに複数保存した場合、最終的な戦略検証では重複整理が必要です。</div>'+(recent||'<div class="mplRecent">まだ保存記録はありません。</div>');
+ const h='<b>保存 '+all.length+'件</b>｜実購入参考 '+priced.length+'件'+(roi!==null?' ROI '+roi.toFixed(1)+'%':' ROI未集計')+'<div>入力発走時刻と照合済（利用者確認）'+checked.length+'件'+(checkedRoi!==null?' ROI '+checkedRoi.toFixed(1)+'%':' ROI未集計')+'｜仮想見送り '+hypothetical.length+'件'+(hRoi!==null?' 仮想ROI '+hRoi.toFixed(1)+'%':' 仮想ROI未集計')+'</div><div class="mplFine">未確認・旧記録は照合済集計に含めません。異なる予想を同一レースに複数保存した場合、最終的な戦略検証では重複整理が必要です。</div>'+comparisonSummary(all)+(recent||'<div class="mplRecent">まだ保存記録はありません。</div>');
  if(lastHistory!==h){box.innerHTML=h;lastHistory=h}
 }
 function init(){
