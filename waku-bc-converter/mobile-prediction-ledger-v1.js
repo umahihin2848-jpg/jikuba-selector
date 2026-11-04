@@ -2,7 +2,7 @@
 'use strict';
 if(!window.RSAMobileLean||window.__MOBILE_PREDICTION_LEDGER_V1)return;
 window.__MOBILE_PREDICTION_LEDGER_V1=true;
-const V='mobile-prediction-ledger-v1.4',KEY='rsa-mobile-prediction-ledger-v1',MAX=500;
+const V='mobile-prediction-ledger-v1.5-results',KEY='rsa-mobile-prediction-ledger-v1',MAX=500;
 const $=id=>document.getElementById(id);
 const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const num=v=>v===null||v===undefined||v===''?null:Number.isFinite(Number(v))?Number(v):null;
@@ -58,6 +58,7 @@ function html(){
  '<label class="mplCheck"><input id="mplTimeChecked" type="checkbox"><span>入力した発走予定時刻を公式発表と照合した（未確認ならオフ）</span></label><div class="mplBtns"><button type="button" class="mplPrimary" id="mplSave">発走前の予想を保存</button><button type="button" id="mplCsv">CSV書き出し</button><button type="button" id="mplJson">JSONバックアップ</button><button type="button" id="mplImportBtn">JSONから復元</button><input type="file" id="mplImportFile" accept="application/json,.json" style="display:none"></div>',
  '<div id="mplStatus" class="mplStatus" role="status" aria-live="polite"></div><hr class="mplDivider">',
  '<div class="mplField full"><label for="mplResultSelect">レース後の結果を追記（発走前の選択は書き換えません）</label><select id="mplResultSelect"><option value="">保存済み予想を選択</option></select></div>',
+ '<div class="mplField full" style="margin-top:8px"><label for="mplTop3Finish">確定1〜3着馬番（軸・相手の精度検証用）</label><input id="mplTop3Finish" placeholder="例：1, 4, 7" inputmode="text" maxlength="30"><small class="mplFine">成績検証に使います。任意入力／同じレースの3頭を入力</small></div>',
  '<div class="mplResultRow" style="margin-top:8px"><div class="mplField"><label for="mplStake">投資額（円）</label><input id="mplStake" type="number" min="0" step="100" inputmode="numeric"></div>',
  '<div class="mplField"><label for="mplReturn">払戻額（円）</label><input id="mplReturn" type="number" min="0" step="10" inputmode="numeric"></div></div>',
  '<div class="mplField full" style="margin-top:8px"><label for="mplHypoReturn">見送り時のみ：仮想買い目の払戻額（円）</label><input id="mplHypoReturn" type="number" min="0" step="10" inputmode="numeric" placeholder="任意・実払戻には加算しません"></div><div class="mplBtns"><button type="button" id="mplSaveResult">レース結果を追記</button></div>',
@@ -93,7 +94,7 @@ function snapshot(){
  const gap=new Map((r?.rows||[]).map(x=>[String(x.no),num(x.pred)]));
  return{
   versions:{pipeline:p?.version||null,finish:f?.version||null,queue:q?.version||null,remaining600:r?.version||null},
-  appAxis:p?.stages?.axis?{no:String(p.stages.axis.no||''),name:String(p.stages.axis.name||''),abilityRank:num(p.stages.axis.abilityRank),m3Rank:num(p.stages.axis.m3Rank)}:null,
+  appAxis:p?.stages?.axis?{no:String(p.stages.axis.no||''),name:String(p.stages.axis.name||''),abilityRank:num(p.stages.axis.abilityRank),m3Rank:num(p.stages.axis.m3Rank),popularity:num(p.stages.price?.axisPopularity)}:null,
   appOpponents:(p?.stages?.opponents?.rows||[]).slice(0,18).map(x=>({no:String(x.no),pop:num(x.pop),abilityRank:num(x.abilityRank),m3Rank:num(x.m3Rank)})),
   paceProbabilities:Array.isArray(p4)&&p4.length===4?p4.map(num):null,
   pressure:window.MobileAnalysisCoreState?.analysis?.pressure||null,
