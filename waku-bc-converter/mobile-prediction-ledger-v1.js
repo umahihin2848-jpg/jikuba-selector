@@ -244,23 +244,23 @@ function context(){
 }
 function comparisonSummary(all){
  // Research only: a pre-race record with confirmed user-entered start time and an entered official top3 is required.
- const latest=new Map(),conflicts=new Set();
+ const latest=new Map(),results=new Map(),conflicts=new Set();
  for(const rec of all){
-  if(rec.timeValidation?.status!=='before_user_confirmed_time'||!Array.isArray(rec.outcome?.top3Nos)||rec.outcome.top3Nos.length!==3)continue;
+  if(rec.timeValidation?.status!=='before_user_confirmed_time')continue;
   const id=[rec.meta?.date,rec.meta?.venue,rec.meta?.name,rec.meta?.surface,rec.meta?.distance,rec.meta?.fieldSize].join('|');
-  const placed=rec.outcome.top3Nos.map(Number).sort((x,y)=>x-y);
-  if(placed.some(x=>!Number.isInteger(x)||x<1||x>Number(rec.meta?.fieldSize))||new Set(placed).size!==3)continue;
-  if(latest.has(id)){
-   const old=latest.get(id).outcome.top3Nos.map(Number).sort((x,y)=>x-y);
-   if(JSON.stringify(placed)!==JSON.stringify(old))conflicts.add(id);
-  }
   if(!latest.has(id)||String(rec.capturedAt)>String(latest.get(id).capturedAt))latest.set(id,rec);
+  if(Array.isArray(rec.outcome?.top3Nos)&&rec.outcome.top3Nos.length===3){
+   const placed=rec.outcome.top3Nos.map(Number).sort((x,y)=>x-y);
+   if(placed.some(x=>!Number.isInteger(x)||x<1||x>Number(rec.meta?.fieldSize))||new Set(placed).size!==3)continue;
+   if(results.has(id)&&JSON.stringify(results.get(id))!==JSON.stringify(placed))conflicts.add(id);
+   else results.set(id,placed);
+  }
  }
  let axisN=0,axisHit=0,bandN=0,bandAxisHit=0,peerExpected=0,partnerN=0,axisPlaced=0,manHit=0,m3Hit=0,m4Hit=0,tieSkip=0,missingPeer=0,alternateAxis=0;
  const band=p=>p>=1&&p<=4?'1-4':p>=5&&p<=8?'5-8':p>=9?'9+':null;
  for(const [id,rec] of latest){
-  if(conflicts.has(id))continue;
-  const winners=new Set(rec.outcome.top3Nos.map(Number)),field=Number(rec.meta?.fieldSize),snap=rec.snapshot||{},appNo=Number(snap.appAxis?.no);
+  if(conflicts.has(id)||!results.has(id))continue;
+  const winners=new Set(results.get(id)),field=Number(rec.meta?.fieldSize),snap=rec.snapshot||{},appNo=Number(snap.appAxis?.no);
   const validAxis=Number.isInteger(appNo)&&appNo>=1&&appNo<=field&&(!snap.appAxis?.status||['ready','conditional'].includes(snap.appAxis.status));
   if(validAxis){axisN++;if(winners.has(appNo))axisHit++;}
   const market=snap.marketRows;
@@ -292,7 +292,7 @@ function comparisonSummary(all){
   }
  }
  const pct=(n,d)=>d?(100*n/d).toFixed(1)+'%':'未集計';
- const n=latest.size-conflicts.size;
+ const n=[...latest.keys()].filter(id=>!conflicts.has(id)&&results.has(id)).length;
  const axisComparison=bandN?'同人気帯・同レースの他馬平均 '+pct(peerExpected,bandN)+'／アプリ軸 '+pct(bandAxisHit,bandN)+'（比較 '+bandN+'R）':'同人気帯比較は未集計（事前市場人気の保存が必要）';
  return '<div class="mplRecent"><b>① アプリ軸の3着内精度</b>'+
  '<div>アプリ軸 '+axisHit+'/'+axisN+'（'+pct(axisHit,axisN)+'）｜結果入力 '+n+'R</div>'+
@@ -303,7 +303,7 @@ function comparisonSummary(all){
  '<div>採用軸を固定・相手は同点数で比較：手動 '+manHit+'/'+partnerN+'（'+pct(manHit,partnerN)+'）｜通常M3 '+m3Hit+'/'+partnerN+'（'+pct(m3Hit,partnerN)+'）｜選択M4 '+m4Hit+'/'+partnerN+'（'+pct(m4Hit,partnerN)+'）</div>'+
  '<div>軸が3着内に入った場合：手動 '+pct(manHit,axisPlaced)+'／M3 '+pct(m3Hit,axisPlaced)+'／M4 '+pct(m4Hit,axisPlaced)+'</div>'+
  '<small class="mplFine">手動は購入予定の相手。M3/M4は事前に保存された全頭順位から、同じ軸を除いて上位K頭を比較する参考対照。結果の上位3頭に相手が1頭以上含まれる率であり、実際のワイド払戻・期待値ではありません。</small></div>'+
- '<small class="mplFine">同レースの複数記録は時刻上の最新1件のみ採用（最終確定の代理）。確定1〜3着が相違するレース '+conflicts.size+'件は除外。順位の境界同着 '+tieSkip+'件を除外。標本数が少ない間は順位差を結論としません。</small>';
+ '<small class="mplFine">同レースの複数記録は発走前の最新案のみを採用し、確定着順はそのレースの結果入力から照合（最終確定の代理）。確定1〜3着が相違するレース '+conflicts.size+'件は除外。順位の境界同着 '+tieSkip+'件を除外。標本数が少ない間は順位差を結論としません。</small>';
 }
 function history(){
  const all=records(),count=$('mplCount'),sel=$('mplResultSelect'),box=$('mplRecords');
