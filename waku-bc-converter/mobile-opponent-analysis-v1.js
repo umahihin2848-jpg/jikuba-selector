@@ -85,7 +85,7 @@ function m4Panel(rows,choice){
   '<span class="moaM4Main"><b>M3 '+fmt(s.m3)+' → M4 '+fmt(s.selected)+'</b><small>'+delta(s.change)+' ／ 上位5 '+(s.top5===null?'—':s.top5+'/4')+'</small></span></summary>'+
   '<div class="moaM4Detail">'+SCL.map((lab,i)=>'<div><small>'+lab+'</small><b>'+fmt(s.all[i])+'</b></div>').join('')+'</div></details>';
  }).join('');
- const note='<div class="moaRule">評価はあくまで参考。M3/M4の順位から3着内率・ワイド期待値・払戻は算出できません。ワイドオッズと実購入・見送りの理由は発走前に「予想記録」に保存し、結果入力後に検証してください。</div>';
+ const note='<div class="moaRule">評価はあくまで参考。M3/M4の順位は3着内確率・着順やワイド期待値を意味しません。ワイドオッズと実購入・見送りの理由は発走前に「予想記録」に保存し、結果入力後に検証してください。</div>';
  const empty=shown.length?'':'<div class="moaEmpty">'+(all.length?'該当する相手馬はありません。フィルターを変更してください。':'相手馬の予測データがありません。')+'</div>';
  return header+'<div class="moaM4List">'+content+empty+'</div>'+note+'</section>';
 }
