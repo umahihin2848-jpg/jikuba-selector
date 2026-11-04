@@ -66,6 +66,7 @@ assert(shown.includes('data-oa-m4-filter="stable"'),'filters must be interactive
 assert(shown.includes('ワイドオッズと実購入・見送りの理由'),'odds must be recorded, not inferred from M4');
 assert(shown.includes('data-oa-open-ledger'),'prospective odds record must be one tap away');
 assert(src.includes('ledger.open=true'),'price-record shortcut should open the existing ledger');
+assert(src.includes("document.querySelector('[data-ims-tab=\"ticket\"]')?.click()"),'navigate to the ledger tab before opening the hidden panel');
 const deep=fs.readFileSync(path.join(__dirname,'../mobile-opponent-deep-dive-v1.js'),'utf8');
 assert(!deep.includes('シナリオ別M3'),'scenario ranks must consistently be called M4');
 const scStart=deep.indexOf('function scenario(no){'),scEnd=deep.indexOf('function analyze(no){',scStart);
