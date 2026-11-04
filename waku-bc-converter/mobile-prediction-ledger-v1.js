@@ -209,8 +209,19 @@ function context(){
  const summary=[m.date||'日付なし',m.venue,m.name||'レース名なし',m.surface,m.distance?m.distance+'m':'','アプリ軸 '+(p?.no?p.no+'番 '+(p.name||''):'未計算')].filter(Boolean).join('｜');
  const el=$('mplContext');if(el&&el.textContent!==summary)el.textContent=summary;
  const key=[m.date,m.venue,m.name,m.surface,m.distance].join('|');
- if(key!==lastRace){lastRace=key;if(!val('mplAxis')&&p?.no)$('mplAxis').value=p.no}
- if(!val('mplAxis')&&p?.no)$('mplAxis').value=p.no;
+ if(key!==lastRace){
+  if(lastRace){
+   for(const id of ['mplAxis','mplPartners','mplPrices','mplMemo','mplPace','mplFront','mplTrack','mplHypoStake','mplStartTime'])if($(id))$(id).value='';
+   if($('mplTimeChecked'))$('mplTimeChecked').checked=false;
+   if($('mplBeforeStart'))$('mplBeforeStart').checked=false;
+   if($('mplDecision'))$('mplDecision').value='buy';
+   if($('mplHypoBox'))$('mplHypoBox').style.display='none';
+   scenarioOrigin='manual-form';
+   if($('mplScenarioSource'))$('mplScenarioSource').textContent='アプリ本線は参考。シナリオは手動で決定してください。';
+  }
+  lastRace=key;
+ }
+ if(!val('mplAxis')&&p?.no&&analysisMatches()&&window.RSAAnalysisTransitionState?.status==='ready')$('mplAxis').value=p.no;
 }
 function history(){
  const all=records(),count=$('mplCount'),sel=$('mplResultSelect'),box=$('mplRecords');
