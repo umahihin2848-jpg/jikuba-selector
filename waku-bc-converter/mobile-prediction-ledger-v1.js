@@ -243,34 +243,67 @@ function context(){
  if(!val('mplAxis')&&p?.no&&analysisMatches()&&window.RSAAnalysisTransitionState?.status==='ready')$('mplAxis').value=p.no;
 }
 function comparisonSummary(all){
- const latest=new Map();
+ // Research only: a pre-race record with confirmed user-entered start time and an entered official top3 is required.
+ const latest=new Map(),conflicts=new Set();
  for(const rec of all){
   if(rec.timeValidation?.status!=='before_user_confirmed_time'||!Array.isArray(rec.outcome?.top3Nos)||rec.outcome.top3Nos.length!==3)continue;
-  const key=[rec.meta?.date,rec.meta?.venue,rec.meta?.name,rec.meta?.surface,rec.meta?.distance].join('|');
-  if(!latest.has(key)||String(latest.get(key).capturedAt)<String(rec.capturedAt))latest.set(key,rec);
+  const id=[rec.meta?.date,rec.meta?.venue,rec.meta?.name,rec.meta?.surface,rec.meta?.distance,rec.meta?.fieldSize].join('|');
+  const placed=rec.outcome.top3Nos.map(Number).sort((x,y)=>x-y);
+  if(placed.some(x=>!Number.isInteger(x)||x<1||x>Number(rec.meta?.fieldSize))||new Set(placed).size!==3)continue;
+  if(latest.has(id)){
+   const old=latest.get(id).outcome.top3Nos.map(Number).sort((x,y)=>x-y);
+   if(JSON.stringify(placed)!==JSON.stringify(old))conflicts.add(id);
+  }
+  if(!latest.has(id)||String(rec.capturedAt)>String(latest.get(id).capturedAt))latest.set(id,rec);
  }
- const races=[...latest.values()];
- let axisN=0,axisHit=0,opN=0,axisPlaced=0,manualHits=0,m3Hits=0,m4Hits=0;
- for(const rec of races){
-  const winners=new Set(rec.outcome.top3Nos.map(Number)),appAxis=Number(rec.snapshot?.appAxis?.no);
-  if(Number.isInteger(appAxis)&&appAxis>0){axisN++;if(winners.has(appAxis))axisHit++}
-  const c=rec.choice||{},ax=Number(c.axisNo),k=Array.isArray(c.partners)?c.partners.length:0,scenario=Number(c.scenario),hs=rec.snapshot?.horses||[],field=Number(rec.meta?.fieldSize);
-  if(c.decision!=='buy'||!Number.isInteger(ax)||ax<1||k<1||k>3||!Number.isInteger(scenario)||scenario<0||scenario>3||hs.length!==field)continue;
+ let axisN=0,axisHit=0,bandN=0,bandAxisHit=0,peerExpected=0,partnerN=0,axisPlaced=0,manHit=0,m3Hit=0,m4Hit=0,tieSkip=0,missingPeer=0,alternateAxis=0;
+ const band=p=>p>=1&&p<=4?'1-4':p>=5&&p<=8?'5-8':p>=9?'9+':null;
+ for(const [id,rec] of latest){
+  if(conflicts.has(id))continue;
+  const winners=new Set(rec.outcome.top3Nos.map(Number)),field=Number(rec.meta?.fieldSize),snap=rec.snapshot||{},appNo=Number(snap.appAxis?.no);
+  const validAxis=Number.isInteger(appNo)&&appNo>=1&&appNo<=field&&(!snap.appAxis?.status||['ready','conditional'].includes(snap.appAxis.status));
+  if(validAxis){axisN++;if(winners.has(appNo))axisHit++;}
+  const market=snap.marketRows;
+  if(validAxis&&Array.isArray(market)&&market.length===field&&new Set(market.map(x=>String(x.no))).size===field){
+   const pop=Number(market.find(x=>Number(x.no)===appNo)?.pop),b=band(pop);
+   const peers=market.filter(x=>Number(x.no)!==appNo&&band(Number(x.pop))===b);
+   if(b&&peers.length){
+    bandN++;if(winners.has(appNo))bandAxisHit++;
+    peerExpected+=peers.filter(x=>winners.has(Number(x.no))).length/peers.length;
+   }else missingPeer++;
+  }else if(validAxis)missingPeer++;
+  // Same chosen axis + same number of opponent selections; only the ranking method changes.
+  const c=rec.choice||{},ax=Number(c.axisNo),ks=Array.isArray(c.partners)?c.partners.map(Number):[],k=ks.length,scenario=Number(c.scenario),hs=snap.horses||[];
+  if(c.decision!=='buy'||!Number.isInteger(ax)||ax<1||ax>field||!k||k>5||!Number.isInteger(scenario)||scenario<0||scenario>3)continue;
+  if(hs.length!==field||new Set(hs.map(x=>Number(x.no))).size!==field||new Set(ks).size!==k||ks.some(x=>x===ax||!Number.isInteger(x)||x<1||x>field))continue;
   const peers=hs.filter(x=>Number(x.no)!==ax);
-  if(peers.length!==field-1||peers.some(x=>!Number.isInteger(Number(x.m3Rank))||Number(x.m3Rank)<1||!Number.isInteger(Number(x.scenarioM4Ranks?.[scenario]))||Number(x.scenarioM4Ranks[scenario])<1))continue;
-  const byRank=(key)=>peers.slice().sort((a,b)=>Number(key(a))-Number(key(b))||Number(a.no)-Number(b.no)).slice(0,k).map(x=>Number(x.no));
-  const pM3=byRank(x=>x.m3Rank),pM4=byRank(x=>x.scenarioM4Ranks[scenario]);
-  opN++;
+  if(peers.length!==field-1||ks.some(no=>!peers.some(x=>Number(x.no)===no)))continue;
+  if(peers.some(x=>!Number.isInteger(Number(x.m3Rank))||Number(x.m3Rank)<1||!Number.isInteger(Number(x.scenarioM4Ranks?.[scenario]))||Number(x.scenarioM4Ranks?.[scenario])<1))continue;
+  const order=fn=>peers.slice().sort((x,y)=>Number(fn(x))-Number(fn(y))||Number(x.no)-Number(y.no));
+  const om=order(x=>x.m3Rank),os=order(x=>x.scenarioM4Ranks[scenario]);
+  // Do not pick the better horse by arbitrary horse-number order at a tied cutoff.
+  if(k<peers.length&&(Number(om[k-1].m3Rank)===Number(om[k].m3Rank)||Number(os[k-1].scenarioM4Ranks[scenario])===Number(os[k].scenarioM4Ranks[scenario]))){tieSkip++;continue;}
+  partnerN++;if(validAxis&&ax!==appNo)alternateAxis++;
   if(winners.has(ax)){
    axisPlaced++;
-   if(c.partners.some(x=>winners.has(Number(x))))manualHits++;
-   if(pM3.some(x=>winners.has(x)))m3Hits++;
-   if(pM4.some(x=>winners.has(x)))m4Hits++;
+   if(ks.some(no=>winners.has(no)))manHit++;
+   if(om.slice(0,k).some(x=>winners.has(Number(x.no))))m3Hit++;
+   if(os.slice(0,k).some(x=>winners.has(Number(x.no))))m4Hit++;
   }
  }
- const axisRate=axisN?(100*axisHit/axisN).toFixed(1)+'%':'未集計';
- const rate=(hits)=>axisPlaced?(100*hits/axisPlaced).toFixed(1)+'%':'—';
- return '<div class="mplRecent"><b>発走前・結果検証（同レースは最新の1記録）</b><div>アプリ軸3着内：'+axisHit+'/'+axisN+'（'+axisRate+'）</div><div>同じ軸・同じ相手点数で比較／購入'+opN+'レース、軸好走'+axisPlaced+'レース</div><div>手動相手 '+manualHits+'/'+axisPlaced+'（'+rate(manualHits)+'）｜通常M3順位 '+m3Hits+'/'+axisPlaced+'（'+rate(m3Hits)+'）｜選択M4順位 '+m4Hits+'/'+axisPlaced+'（'+rate(m4Hits)+'）</div><small class="mplFine">M3/M4は順位だけの対照候補。馬券オッズ・買い目条件は反映していません。実ROIと混同せず、少数標本の優劣を断定しないでください。</small></div>';
+ const pct=(n,d)=>d?(100*n/d).toFixed(1)+'%':'未集計';
+ const n=latest.size-conflicts.size;
+ const axisComparison=bandN?'同人気帯・同レースの他馬平均 '+pct(peerExpected,bandN)+'／アプリ軸 '+pct(bandAxisHit,bandN)+'（比較 '+bandN+'R）':'同人気帯比較は未集計（事前市場人気の保存が必要）';
+ return '<div class="mplRecent"><b>① アプリ軸の3着内精度</b>'+
+ '<div>アプリ軸 '+axisHit+'/'+axisN+'（'+pct(axisHit,axisN)+'）｜結果入力 '+n+'R</div>'+
+ '<div>'+axisComparison+'</div>'+
+ '<small class="mplFine">人気帯：1〜4／5〜8／9番人気以下。比較は各レースでアプリ軸以外の同人気帯馬の平均3着内率（レースごと等重み）。未保存の市場データは後付けしません。新旧記録を混在させないでください。</small></div>'+
+ '<div class="mplRecent"><b>② ワイド相手の選び方を比較</b>'+
+ '<div>比較可能 '+partnerN+'R／採用軸が3着内 '+axisPlaced+'R'+(alternateAxis?'（アプリ軸と採用軸が異なる '+alternateAxis+'R）':'')+'</div>'+
+ '<div>採用軸を固定・相手は同点数で比較：手動 '+manHit+'/'+partnerN+'（'+pct(manHit,partnerN)+'）｜通常M3 '+m3Hit+'/'+partnerN+'（'+pct(m3Hit,partnerN)+'）｜選択M4 '+m4Hit+'/'+partnerN+'（'+pct(m4Hit,partnerN)+'）</div>'+
+ '<div>軸が3着内に入った場合：手動 '+pct(manHit,axisPlaced)+'／M3 '+pct(m3Hit,axisPlaced)+'／M4 '+pct(m4Hit,axisPlaced)+'</div>'+
+ '<small class="mplFine">手動は購入予定の相手。M3/M4は事前に保存された全頭順位から、同じ軸を除いて上位K頭を比較する参考対照。結果の上位3頭に相手が1頭以上含まれる率であり、実際のワイド払戻・期待値ではありません。</small></div>'+
+ '<small class="mplFine">同レースの複数記録は時刻上の最新1件のみ採用（最終確定の代理）。確定1〜3着が相違するレース '+conflicts.size+'件は除外。順位の境界同着 '+tieSkip+'件を除外。標本数が少ない間は順位差を結論としません。</small>';
 }
 function history(){
  const all=records(),count=$('mplCount'),sel=$('mplResultSelect'),box=$('mplRecords');
