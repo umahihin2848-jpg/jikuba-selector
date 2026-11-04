@@ -150,10 +150,20 @@ function savePrediction(){
  try{write(all);$('mplBeforeStart').checked=false;status((check.status==='before_user_confirmed_time'?'時刻照合済（利用者確認）':'発走前未確認')+'｜予想を固定保存しました：'+new Date(at).toLocaleString('ja-JP'));history()}
  catch(e){status('ブラウザの保存領域へ書き込めません。容量やプライベートモードを確認してください。',true)}
 }
+function finishTop3(text,field){
+ const a=String(text??'').normalize('NFKC').trim();
+ if(!a)return[];
+ const tokens=a.split(/[\s,、，]+/).filter(Boolean);
+ if(tokens.length!==3||tokens.some(x=>!/^[0-9]+$/.test(x)))return null;
+ const nos=tokens.map(Number);
+ return new Set(nos).size===3&&nos.every(x=>Number.isInteger(x)&&x>=1&&x<=field)?nos:null;
+}
 function saveOutcome(){
  const id=val('mplResultSelect'),all=records(),item=all.find(x=>x.id===id);
  if(!item){status('結果を追記する予想を選んでください。',true);return}
  const skip=item.choice?.decision==='skip',hypoReturned=num(val('mplHypoReturn'));
+ const top3=finishTop3(val('mplTop3Finish'),Number(item.meta?.fieldSize));
+ if(top3===null){status('確定1〜3着の馬番を、重複なしで3頭入力してください（または空欄）。',true);return}
  let stake=num(val('mplStake')),returned=num(val('mplReturn'));
  if(skip&&stake===null&&returned===null){stake=0;returned=0}
  if(stake===null||returned===null||!Number.isInteger(stake)||!Number.isInteger(returned)||stake<0||returned<0){status('投資額・払戻額は0円以上の整数で入力してください。',true);return}
@@ -161,7 +171,7 @@ function saveOutcome(){
  if(stake===0&&returned>0){status('投資額0円に実払戻を入力できません。',true);return}
  const hs=num(item.choice?.hypothetical?.stakeYen);
  if(hypoReturned!==null&&(!skip||!hs||hs<=0||!Number.isInteger(hypoReturned)||hypoReturned<0)){status('仮想払戻は発走前に仮想投資額を保存した見送り記録にのみ入力できます。',true);return}
- item.outcome={recordedAt:new Date().toISOString(),stakeYen:stake,returnedYen:returned,hypotheticalReturnedYen:skip?hypoReturned:null};
+ item.outcome={recordedAt:new Date().toISOString(),stakeYen:stake,returnedYen:returned,hypotheticalReturnedYen:skip?hypoReturned:null,top3Nos:top3.length===3?top3:null};
  try{write(all);status('結果を追記しました。実購入と仮想損益は別集計です。');history()}
  catch(e){status('結果の保存に失敗しました。',true)}
 }
@@ -267,6 +277,7 @@ function init(){
    const r=records().find(x=>x.id===e.target.value)?.outcome;
    $('mplStake').value=r?.stakeYen??'';$('mplReturn').value=r?.returnedYen??'';
    $('mplHypoReturn').value=r?.hypotheticalReturnedYen??'';
+   $('mplTop3Finish').value=Array.isArray(r?.top3Nos)?r.top3Nos.join(', '):'';
   }
  });
  ready=true;context();history();
