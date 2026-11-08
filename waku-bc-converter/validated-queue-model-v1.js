@@ -7,7 +7,7 @@ const n=v=>{if(v===null||v===undefined||v==='')return NaN;const z=Number(String(
 const sd=a=>{a=a.filter(Number.isFinite);if(a.length<2)return NaN;const m=a.reduce((s,x)=>s+x,0)/a.length;return Math.sqrt(a.reduce((s,x)=>s+(x-m)*(x-m),0)/(a.length-1))};
 const mean=a=>{a=a.filter(Number.isFinite);return a.length?a.reduce((s,x)=>s+x,0)/a.length:NaN};
 function col(headers,names){const nn=names.map(C.normHead);return headers.find(h=>nn.includes(C.normHead(h)))||headers.find(h=>nn.some(x=>C.normHead(h).includes(x)))||''}
-function dateVal(v){return C.dateVal(String(v||'').normalize('NFKC'))}
+function dateVal(v){const x=String(v||'').normalize('NFKC').trim(),m=x.match(/^(\d{4})\D+(\d{1,2})\D+(\d{1,2})(?:\D|$)/);if(m){const y=Number(m[1]),mo=Number(m[2]),d=Number(m[3]);if(y>=1990&&y<=2100&&mo>=1&&mo<=12&&d>=1&&d<=31)return y*10000+mo*100+d}const plain=x.match(/^\d{8}$/);if(plain)return Number(x);return 0}
 function surf(v){const s=String(v||'').normalize('NFKC').trim();return s.startsWith('ダ')?'ダ':s.startsWith('芝')?'芝':''}
 async function parseFile(file){
   parsed=false;rawByHorse=new Map();if(!file)return;
