@@ -172,7 +172,7 @@ function render(){
  <button type="button" data-c34-action="save" ${hasLog?'disabled':''}>${hasLog?'記録済み':'予測を記録'}</button>
  <button type="button" data-c34-action="export">JSON出力</button>
  ${note?`<p>${E(note)}</p>`:''}
- <p>2025〜26年の検証で4角誤差は約${(data.modelValidation?.mae4||0)*100|0}%（頭数正規化）。1頭の参考幅は広く、映像なしに壁や正確な馬群距離を確定できません。軸・相手・買い目は変更しません。</p>`;
+ <p>2025〜26年の検証で4角の平均絶対誤差は正規化順位で約${(data.modelValidation?.mae4||0).toFixed(3)}（16頭立て換算で約${((data.modelValidation?.mae4||0)*15).toFixed(1)}順位分）。参考幅は過去誤差の80%点に基づくもので、馬ごとの保証区間ではありません。実際の壁や馬群の距離は未観測。軸・相手・買い目は変更しません。</p>`;
  window.RaceCorner34V1State={...data,displayOnly:true,updatedAt:Date.now()};
  window.dispatchEvent(new CustomEvent('race-corner34-ready'));
 }
