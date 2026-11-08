@@ -15,7 +15,7 @@ async function parseFile(file){
     const grid=C.parseCSV(C.decode(await file.arrayBuffer()));if(grid.length<2)return;
     const z=C.rowsToObjects(grid),h=z.headers,m={
       name:col(h,['馬名']),date:col(h,['日付','年月日','レース日']),field:col(h,['頭数','出走頭数']),
-      c1:col(h,['1角','１角']),c2:col(h,['2角','２角']),c3:col(h,['3角','３角']),c4:col(h,['4角','４角']),
+      c1:col(h,['1角','１角','通過1','通過順1']),c2:col(h,['2角','２角','通過2','通過順2']),c3:col(h,['3角','３角','通過3','通過順3']),c4:col(h,['4角','４角','通過4','通過順4']),
       surface:col(h,['芝・ダート','芝・ダ','芝ダ']),distance:col(h,['距離','距離.1']),front3f:col(h,['レース前3Fタイム','前半3F','前3F'])
     };
     if(!m.name||!m.date||!m.field||(!m.c1&&!m.c2&&!m.c3&&!m.c4))return;
@@ -23,15 +23,15 @@ async function parseFile(file){
       const name=String(r[m.name]||'').trim();if(!name)continue;
       const field=n(r[m.field]),corners=[m.c1,m.c2,m.c3,m.c4].filter(Boolean).map(k=>n(r[k])),pos=corners.find(x=>Number.isFinite(x)&&x>=1),dv=dateVal(r[m.date]);
       if(!Number.isFinite(field)||field<=1||!Number.isFinite(pos)||!dv)continue;
-      const front=clamp((field-pos)/(field-1),0,1),lead=pos===1?1:0,surface=m.surface?surf(r[m.surface]):'',distance=m.distance?n(r[m.distance]):NaN,front3f=m.front3f?n(r[m.front3f]):NaN;
+      const front=clamp((field-pos)/(field-1),0,1),lead=pos===1?1:0,surface=m.surface?surf(r[m.surface]):'',distance=m.distance?n(r[m.distance]):NaN,front3f=m.front3f?n(r[m.front3f]):NaN,raw3=m.c3?n(r[m.c3]):NaN,raw4=m.c4?n(r[m.c4]):NaN,three=raw3>=1&&raw3<=field?(raw3-1)/(field-1):NaN,four=raw4>=1&&raw4<=field?(raw4-1)/(field-1):NaN;
       if(!rawByHorse.has(name))rawByHorse.set(name,[]);
-      rawByHorse.get(name).push({date:dv,front,lead,surface,distance,front3f});
+      rawByHorse.get(name).push({date:dv,front,lead,surface,distance,front3f,three,four,delta34:Number.isFinite(three)&&Number.isFinite(four)?four-three:NaN});
     }
     for(const a of rawByHorse.values())a.sort((x,y)=>y.date-x.date);
     parsed=true;setTimeout(recalc,30);
   }catch(e){console.warn('validated queue csv',e)}
 }
-function hist(name,raceDate){const med=MODEL?.history_medians||{},a=(rawByHorse.get(name)||[]).filter(x=>x.date<raceDate).slice(0,5),f=a.map(x=>x.front),l=a.map(x=>x.lead),hn=f.length,frontRate=hn?mean(f.map(x=>x>=PURSUIT.frontCut?1:0)):NaN;return{hist_n5:hn,frontness5:hn?mean(f):Number(med.frontness5),lead_rate5:hn?mean(l):Number(med.lead_rate5),front_rate5:Number.isFinite(frontRate)?frontRate:NaN,frontness_std5:hn>=2?sd(f):Number(med.frontness_std5)}}
+function hist(name,raceDate){const med=MODEL?.history_medians||{},a=(rawByHorse.get(name)||[]).filter(x=>x.date<raceDate).slice(0,5),f=a.map(x=>x.front),l=a.map(x=>x.lead),hn=f.length,frontRate=hn?mean(f.map(x=>x>=PURSUIT.frontCut?1:0)):NaN;return{hist_n5:hn,frontness5:hn?mean(f):Number(med.frontness5),lead_rate5:hn?mean(l):Number(med.lead_rate5),front_rate5:Number.isFinite(frontRate)?frontRate:NaN,frontness_std5:hn>=2?sd(f):Number(med.frontness_std5),corner3Mean5:mean(a.map(x=>x.three)),corner4Mean5:mean(a.map(x=>x.four)),corner3Last5:a.length?a[0].three:NaN,corner4Last5:a.length?a[0].four:NaN,corner34DeltaMean5:mean(a.map(x=>x.delta34)),corner3N5:a.filter(x=>Number.isFinite(x.three)).length,corner4N5:a.filter(x=>Number.isFinite(x.four)).length,corner4Std5:a.filter(x=>Number.isFinite(x.four)).length>=2?sd(a.map(x=>x.four)):0.18}}
 function pursuit(name,raceDate,targetSurface,targetDistance){
   const key=`${targetSurface}:${Math.round(Number(targetDistance)||0)}`,cfg=PURSUIT.conditions[key];
   if(!cfg)return{pursuitGrade:'—',pursuitApplicable:false,pursuitEvidence:'none',pursuitFastN:0,pursuitFastFront:NaN,pursuitThreshold:NaN};
@@ -52,7 +52,7 @@ function recalc(){
     const others=base.filter((_,j)=>j!==i),fp=mean(others.map(x=>x.frontness5)),lp=mean(others.map(x=>x.lead_rate5)),fs=mean(others.map(x=>x.frontness5>=.70?1:0)),no=String(r.h.no||''),gate=field>1?clamp((Number(no)-1)/(field-1),0,1):.5,x={frontness5:r.frontness5,lead_rate5:r.lead_rate5,frontness_std5:r.frontness_std5,hist_n5:r.hist_n5,gate_frac:gate,turn_urgency:urgency,front_pressure_loo:Number.isFinite(fp)?fp:Number(MODEL.history_medians.frontness5),lead_pressure_loo:Number.isFinite(lp)?lp:0,front_share_loo:Number.isFinite(fs)?fs:0,field_size:field,no_turn:noTurn};
     x.outer_tuck_risk=x.gate_frac*(1-x.frontness5)*urgency;x.outer_burn_risk=x.gate_frac*x.frontness5*x.front_pressure_loo*urgency;x.inner_front_edge=(1-x.gate_frac)*x.frontness5*urgency;x.crowding_urgency=x.front_pressure_loo*urgency;
     const validated=r.hist_n5>=2,posFrac=validated?predictRow(x):NaN,expectedRank=validated?1+posFrac*(field-1):NaN,lane=laneEstimate({no},field,ft,noTurn,r.h.pEscape,r.h.pFront);
-    return{no,name:r.h.name,hist_n:r.hist_n5,validated,posFrac,expectedRank,position:positionLabel(expectedRank,field),frontness5:r.frontness5,frontRate5:r.front_rate5,leadRate5:r.lead_rate5,frontPressure:x.front_pressure_loo,firstTurnDistance:ft,noTurn,turnUrgency:urgency,pursuitGrade:r.pursuitGrade,pursuitApplicable:r.pursuitApplicable,pursuitEvidence:r.pursuitEvidence,pursuitFastN:r.pursuitFastN,pursuitFastFront:r.pursuitFastFront,pursuitThreshold:r.pursuitThreshold,...lane};
+    return{no,name:r.h.name,hist_n:r.hist_n5,validated,posFrac,expectedRank,position:positionLabel(expectedRank,field),frontness5:r.frontness5,frontRate5:r.front_rate5,leadRate5:r.lead_rate5,frontPressure:x.front_pressure_loo,firstTurnDistance:ft,noTurn,turnUrgency:urgency,pursuitGrade:r.pursuitGrade,pursuitApplicable:r.pursuitApplicable,pursuitEvidence:r.pursuitEvidence,pursuitFastN:r.pursuitFastN,pursuitFastFront:r.pursuitFastFront,pursuitThreshold:r.pursuitThreshold,corner3Mean5:r.corner3Mean5,corner4Mean5:r.corner4Mean5,corner3Last5:r.corner3Last5,corner4Last5:r.corner4Last5,corner34DeltaMean5:r.corner34DeltaMean5,corner3N5:r.corner3N5,corner4N5:r.corner4N5,corner4Std5:r.corner4Std5,earlyPosStd5:r.frontness_std5,...lane};
   });
   const key=`${targetSurface}:${Math.round(targetDistance||0)}`,cfg=PURSUIT.conditions[key];
   window.ValidatedQueueState={ready:true,version:MODEL.version,parsed,fieldSize:field,rows,byNo:Object.fromEntries(rows.map(x=>[String(x.no),x])),validation:MODEL.oos_validation,pursuitPolicy:{version:PURSUIT.version,key,evidence:cfg?.evidence||'none',fast3f:cfg?.fast3f??null,frontCut:PURSUIT.frontCut,maxHistory:PURSUIT.maxHistory,noPenaltyForBOrC:true}};
