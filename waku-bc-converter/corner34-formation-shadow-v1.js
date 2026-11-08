@@ -64,7 +64,7 @@ function predict(q,meta,mod,conditions={}){
   if(longitudinal==='natural_close'&&rear)flags.push('直線で後方との差が縮む仮説');
   if(r.lane===null)flags.push('左右の推定レーンなし');
   r.risk=(flags.length?flags.join('／'):'特定の複合注意なし');
-  r.riskReason=`4角推定 ${four.toFixed(1)}位・初角推定レーン ${r.lane===null?'不明':['内ラチ','内','中','外'][r.lane]}。${r.externalPeers===null?'横方向未判定':`外側で同順位帯の候補${near.length}頭`}（実測の進路ではない）`;
+  r.riskReason=`4角推定 ${r.four.toFixed(1)}位・初角推定レーン ${r.lane===null?'不明':['内ラチ','内','中','外'][r.lane]}。${r.externalPeers===null?'横方向未判定':`外側で同順位帯の候補${near.length}頭`}（実測の進路ではない）`;
  }
  const focus=eligible.map(r=>r.four).sort((a,b)=>a-b);
  const highPressure=frontshare>=.38,lowPressure=frontshare<=.24;
