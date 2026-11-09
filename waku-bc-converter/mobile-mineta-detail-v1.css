@@ -1,0 +1,30 @@
+/* Research-only Mineta insights, integrated inside selected horse detail.
+   Leave all betting gates, probabilities and Ability/M3/P10 calculations untouched. */
+body.iosMobileShellV2 #mpsRoot{display:none!important}
+#moaRoot .moaMineta{box-sizing:border-box;margin-top:13px;border:1px solid #4e7284;border-radius:13px;background:#0c2936;overflow:hidden;color:#e5f3f7}
+#moaRoot .moaMineta *{box-sizing:border-box}
+#moaRoot .moaMineta>header{padding:12px 13px 11px;background:#123645;border-bottom:1px solid #426878}
+#moaRoot .moaMineta>header>span{display:block;font-size:10px;letter-spacing:.1em;font-weight:850;color:#aac8d7}
+#moaRoot .moaMineta>header h4{font-size:16px!important;line-height:1.45!important;margin:4px 0!important;font-weight:900;color:#f0fafc}
+#moaRoot .moaMineta>header small{display:block;font-size:11px!important;line-height:1.5!important;color:#a6c1cd}
+#moaRoot .moaMinetaWaiting{padding:13px;color:#b6cbd4;font-size:12px!important;line-height:1.7!important;margin:0}
+#moaRoot .moaMinetaPosition{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:12px 12px 2px}
+#moaRoot .moaMinetaPosition>div{background:#0e3341;border:1px solid #3d6372;padding:10px 8px;border-radius:10px;min-width:0}
+#moaRoot .moaMinetaPosition small{display:block;font-size:11px!important;line-height:1.4!important;color:#a8c6d4}
+#moaRoot .moaMinetaPosition b{display:block;font-size:14px!important;line-height:1.5!important;margin-top:5px;color:#ecf8fd;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+#moaRoot .moaMinetaSignals,#moaRoot .moaMinetaRefs{padding:10px 12px 4px}
+#moaRoot .moaMinetaSignals h5,#moaRoot .moaMinetaRefs h5{font-size:13px!important;line-height:1.5!important;margin:0 0 9px;font-weight:850;color:#d8edf4}
+#moaRoot .moaMinetaChip{margin-bottom:7px;border:1px solid #4f7467;border-radius:10px;background:#14362f;padding:9px 10px}
+#moaRoot .moaMinetaChip strong{font-size:12px!important;line-height:1.5!important;color:#c7eadc}
+#moaRoot .moaMinetaChip p{font-size:12px!important;line-height:1.65!important;color:#b3d4c7;margin:4px 0 0!important;overflow-wrap:anywhere}
+#moaRoot .moaMinetaNone{font-size:12px!important;line-height:1.65!important;color:#a7c2d0;margin:0 0 12px!important}
+#moaRoot .moaMinetaRelation{padding:10px 11px;margin-bottom:7px;border:1px solid #40667c;background:#102c3d;border-radius:10px}
+#moaRoot .moaMinetaRelation small{display:block;font-size:10px!important;line-height:1.5!important;color:#9abfce}
+#moaRoot .moaMinetaRelation b{display:block;font-size:13px!important;margin-top:4px;color:#edfaff}
+#moaRoot .moaMinetaRelation p{font-size:12px!important;line-height:1.65!important;color:#bbd3dc;margin:5px 0 0!important}
+#moaRoot .moaMinetaUnproven{font-size:12px!important;line-height:1.7!important;color:#c3d7df;margin:8px 0 13px!important}
+#moaRoot .moaMineta>footer{padding:11px 12px;border-top:1px solid #395c6b;background:#0c202c;font-size:11px!important;line-height:1.7!important;color:#a5bac4}
+@media(max-width:370px){
+ #moaRoot .moaMinetaPosition{grid-template-columns:1fr}
+ #moaRoot .moaMineta>header h4{font-size:15px!important}
+}
