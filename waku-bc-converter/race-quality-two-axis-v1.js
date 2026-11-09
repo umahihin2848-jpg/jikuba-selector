@@ -14,7 +14,7 @@
   function evaluate(ctx,options){
     const {queue,market,axisNo,frontState}=ctx||{},field=Number(ctx?.field)||0;
     if(!queue?.ready||!Array.isArray(queue.rows)||queue.rows.length!==field||Number(queue.fieldSize)!==field||field<12)return{ready:false,reason:'隊列データ待ち／頭数未一致'};
-    if(!axisNo)return{ready:false,reason:'軸馬の判定待ち（全馬データは別画面で確認できます）'};
+    // 軸なしでも全馬の位置・レース質は表示する。軸診断欄は待機とする。
     const q=queue.rows,byNo=Object.fromEntries(q.map(r=>[String(Number(r.no)),r])),fields=q.filter(r=>Boolean(r.validated)&&N(r.hist_n)>=2&&Number.isFinite(N(r.expectedRank)));
     const byMarket=Object.fromEntries((market?.rows||[]).map(m=>[String(Number(m.no)),m]));
     const sorted=q.map(r=>({no:r.no,name:r.name||'',pop:byMarket[String(Number(r.no))]?.pop,od:byMarket[String(Number(r.no))]?.od})).sort((a,b)=>Number(a.no)-Number(b.no));
