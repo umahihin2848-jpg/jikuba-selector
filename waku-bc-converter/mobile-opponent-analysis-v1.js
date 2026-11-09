@@ -145,7 +145,7 @@ function minetaDetail(h){
 function horseDetail(r,pressure,bias){
  const good=strengths(r,bias),bad=risks(r,pressure,bias),sc=scenarioInfo(r),w=pref(r.no,'wide'),mn=pref(r.no,'min');
  const odds=Number.isFinite(r.winOdds)?r.winOdds.toFixed(1)+'倍':'—';
- return '<section id="moaHorseDetail" class="moaSelectedDetail" aria-label="'+E(r.name)+'の詳細分析">'+
+ return '<section id="moaHorseDetail" data-moa-no="'+E(r.no)+'" class="moaSelectedDetail" aria-label="'+E(r.name)+'の詳細分析">'+
   '<header class="moaDetailHead"><div><small>'+E(r.no)+'番・選択した馬の詳細</small><h3>'+E(r.name)+'</h3></div>'+
   '<button type="button" data-oa-close-horse aria-label="詳細を閉じる">閉じる ×</button></header>'+
   '<div class="moaBody">'+
@@ -213,6 +213,7 @@ function render(){
  const conclusion=$('mpuConclusion');
  if(conclusion&&!$('moaAxisExtra'))conclusion.insertAdjacentHTML('beforeend',`<div id="moaAxisExtra">${axisExtra(rows)}</div>`);
  else if($('moaAxisExtra'))$('moaAxisExtra').innerHTML=axisExtra(rows);
+ window.dispatchEvent?.(new CustomEvent('mobile-opponent-analysis-rendered',{detail:{selectedNo:selIdx<0?'':selectedNo,pairMode}}));
  window.MobileOpponentAnalysisV1State={ready:true,version:V,build:BUILD,displayOnly:true,productionChanged:false,sixLenses:['市場','能力','今回構造','位置・展開','リスク','価格'],marketNos:[],watchNos:[],analysisNos:all.map(r=>r.no),selectedNo,horseCount:all.length,equalCards:true,frontBiasManual:bias,m4ComparisonDisplayOnly:true,paceSource:'MobileAnalysisCoreState',paceProbabilities:canonicalPace(),m4Filter,selectedM4Band:choice.band,selectedM4Source:choice.source,at:Date.now()};
 }
 addEventListener('race-progress-scenario-selected',()=>{last='';schedule(70)});
