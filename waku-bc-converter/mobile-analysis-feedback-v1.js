@@ -23,7 +23,11 @@ function css(){
  '#rsaAnalysisFeedback .rafStats>div{border:1px solid #2e4e60;border-radius:9px;padding:8px;background:#0c2838}'+
  '#rsaAnalysisFeedback .rafStats b{display:block;color:#f1f8fa;font-size:14px}'+
  '#rsaAnalysisFeedback details{margin-top:7px;font-size:11px;border-top:1px solid #355368;padding-top:7px}'+
- '#rsaAnalysisFeedback details>summary{cursor:pointer;color:#b7d5e6;font-weight:700}';
+ '#rsaAnalysisFeedback details>summary{cursor:pointer;color:#b7d5e6;font-weight:700}'+
+ '#rsaAnalysisFeedback .rafHorseList{margin-top:8px;max-height:340px;overflow-y:auto;border:1px solid #2e5266;border-radius:9px}'+
+ '#rsaAnalysisFeedback .rafHorse{display:flex;gap:6px;flex-wrap:wrap;align-items:baseline;justify-content:space-between;padding:7px 9px;border-bottom:1px solid #274558}'+
+ '#rsaAnalysisFeedback .rafHorse b{font-size:12px;color:#e8f6fb}#rsaAnalysisFeedback .rafHorse span{font-size:10px;color:#b4c8d0}'+
+ '#rsaAnalysisFeedback .rafCaution{font-size:10px;color:#c7bb98;line-height:1.6;margin-top:6px}';
  document.head.appendChild(s);
 }
 function statusMap(x){return[
@@ -42,6 +46,19 @@ function baseContent(x){
  '<div><small>RPCI本線</small><b>'+esc(rpci)+'</b></div>'+
  '<div><small>先行圧</small><b>'+esc(pressure)+'</b></div>'+
  '<div><small>RPCI履歴カバー率</small><b>'+esc(cover)+'</b></div></div>';
+}
+function partialHorses(x){
+ const hs=Array.isArray(x.base?.analysis?.hs)?x.base.analysis.hs:[];
+ if(!hs.length)return '';
+ const a=x.ability?.byNo||Object.fromEntries((x.ability?.rows||[]).map(r=>[String(r.no),r]));
+ const f=x.finish?.byNo||Object.fromEntries((x.finish?.rows||[]).map(r=>[String(r.no),r]));
+ const header='<details><summary>全'+hs.length+'頭の分析状況を見る（仮馬番）</summary><div class="rafHorseList">';
+ const rows=hs.map(h=>{
+  const no=String(h.no||'?'),xA=a[no]||{},xF=f[no]||{},rankA=xA.abilityRank??'—',rankF=xF.finishRank??'—';
+  const p=Number(h.pFront),pace=Number.isFinite(p)?Math.round(p*100)+'%':'—';
+  return '<div class="rafHorse"><b>'+esc(no)+'番 '+esc(h.name||'')+'</b><span>Ability '+esc(rankA)+' ｜ M3 '+esc(rankF)+' ｜ 先行参考 '+esc(pace)+'</span></div>';
+ }).join('');
+ return header+rows+'</div><div class="rafCaution">出走馬番はTARGET CSVの馬名登場順からの仮付番です。実際の確定馬番と照合してください。順位が「—」の項目はまだ計算できていません。</div></details>';
 }
 function render(){
  css();const box=ensure();if(!box)return;
@@ -67,6 +84,7 @@ function render(){
  box.innerHTML='<h3 class="'+((t.status==='error'||errorMessage)?'rafError':full?'rafOk':'rafWait')+'">'+esc(head)+'</h3>'+
  '<p>'+esc(lead)+'</p>'+baseContent(x)+
  (baseReady?'<p>本番軸：'+axis+'。'+(gate.status==='skip'?'軸は見送り。'+esc(reason):gate.status==='open'?'軸の条件を通過。':'判定待ち（購入は未判定）。')+'</p>':'')+
+ partialHorses(x)+
  '<details><summary>計算状況・不具合の確認</summary>'+
  '<div>'+diag+'</div><div>経過時間 '+esc(timing)+' / 処理 '+esc(t.status||'未起動')+' / 見送り判定 '+esc(gate.status||'未起動')+'</div>'+
  (srcError?'<p class="rafError">'+esc(srcError)+'</p>':'')+
