@@ -21,6 +21,20 @@ const raceGateDecision=function raceGateDecision(x) {
   return core.some(h=>m3.has(String(Number(h.no))))?"open":"skip";
 };
 let requested=false,requestedAt=0,status="";
+function diagnose(r,next){
+  if(next!=="skip")return{kind:"",reason:next==="checking"?"AbilityとM3を照合中です":""};
+  const name=String(r.name||"").normalize("NFKC"),grade=String(r.grade||"").normalize("NFKC").toUpperCase().trim(),field=Number(r.field);
+  if(/障害|ジャンプ|J[- ]?G[123]/i.test(name))return{kind:"scope",reason:"障害レースは対象外です"};
+  if(!/^(3勝|OP|L|G1|G2|G3)$/.test(grade)||field<12||field>18)return{kind:"scope",reason:"平地・3勝以上・12〜18頭という対象条件外です"};
+  const a=r.ability||{},f=r.finish||{};
+  if(a.leaderAmbiguous)return{kind:"axis",reason:"Ability首位が同点のため軸の信頼性を確定できません"};
+  const core=(a.rows||[]).filter(h=>Number(h.abilityRank)===1||Number(h.abilityRank)===2);
+  if(core.length!==2||core.some(h=>Number(h.abilityTieStart)<=2&&Number(h.abilityTieEnd)>2))
+    return{kind:"axis",reason:"Ability上位2頭の境界が同点などで不明確なため軸なし"};
+  const top3=new Set((f.rows||[]).filter(h=>Number(h.finishRank)>=1&&Number(h.finishRank)<=3).map(h=>String(Number(h.no))));
+  const hit=core.filter(h=>top3.has(String(Number(h.no))));
+  return{kind:"axis",reason:hit.length?"軸の安全条件を確認できませんでした":"Ability上位2頭とM3上位3頭が一致しないため、購入軸は見送り"};
+}
 function ensureCard(){
  let el=$("raceSkipCard");if(el)return el;
  const b=$("analyzeBtn");if(!b)return null;
@@ -32,15 +46,16 @@ function read(){
  requested,requestedAt,ability:window.M3PureAbilityState,finish:window.Finish600State};
 }
 function render(){
- const next=raceGateDecision(read()),card=ensureCard();
+ const r=read(),next=raceGateDecision(r),diagnostic=diagnose(r,next),card=ensureCard();
  d.dataset.raceGate=next;
+ d.dataset.raceSkipKind=diagnostic.kind;
  if(card){
   card.hidden=next!=="skip"&&next!=="checking";
-  const t=next==="skip"?"見送り":next==="checking"?"判定中…":"";
+  const t=next==="skip"?"見送り｜"+diagnostic.reason+"。分析結果は確認できますが、自動軸は採用しません。":next==="checking"?"判定中…":"";
   if(card.textContent!==t)card.textContent=t;
  }
  status=next;
- window.RaceSkipLockV1State={status:next,blocked:next!=="open",updatedAt:Date.now()};
+ window.RaceSkipLockV1State={status:next,blocked:next!=="open",kind:diagnostic.kind,reason:diagnostic.reason,updatedAt:Date.now()};
 }
 function invalidate(){requested=false;requestedAt=0;render()}
 document.addEventListener("input",e=>{
@@ -54,7 +69,7 @@ document.addEventListener("click",e=>{
  requested=true;requestedAt=Date.now();render();
 },true);
 ["rsa-analysis-complete","m3-pure-ability-ready","finish600-ready","decision-shell-v2-ready","rsa-addons-ready"].forEach(ev=>addEventListener(ev,render));
-window.RaceSkipLockV1={version:"1.1.0-flat-3win-plus",evaluate:raceGateDecision,refresh:render};
+window.RaceSkipLockV1={version:"1.2.0-skip-diagnostics",evaluate:raceGateDecision,refresh:render};
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",render,{once:true});
 else render();
 })();
