@@ -1,0 +1,42 @@
+/* Strict single-axis review: only a completed valid axis can unlock any race analysis.
+ * Hide UI only. Statistical models and predictions are not modified.
+ */
+html:not([data-axis-access="pass"]) body main.view > :not(#mpuSetup):not(#raceCondCard):not(#csvCard):not(#oddsCard):not(#analyzeBtn):not(#axisAccessScreen),
+html:not([data-axis-access="pass"]) body #iosMobileShellV2,
+html:not([data-axis-access="pass"]) body #result,
+html:not([data-axis-access="pass"]) body #m3RaceLab,
+html:not([data-axis-access="pass"]) body #raceDissectionCardV1,
+html:not([data-axis-access="pass"]) body #mobileLeanAxisSummary,
+html:not([data-axis-access="pass"]) body #rsaAnalysisFeedback,
+html:not([data-axis-access="pass"]) body #raceSkipCard,
+html:not([data-axis-access="pass"]) body #marketMispricingInputCard,
+html:not([data-axis-access="pass"]) body #marketMispricingResultCard,
+html:not([data-axis-access="pass"]) body #rq2-root,
+html:not([data-axis-access="pass"]) body #minetaPositionStudyRoot,
+html:not([data-axis-access="pass"]) body #mobilePairProbabilityReferenceV1,
+html:not([data-axis-access="pass"]) body #mobilePredictionLedgerV1,
+html:not([data-axis-access="pass"]) body #mobileFinalSummaryV1,
+html:not([data-axis-access="pass"]) body #mpuConclusion,
+html:not([data-axis-access="pass"]) body #mpuAllHorses,
+html:not([data-axis-access="pass"]) body #mpuResearch {
+ display:none!important;
+}
+html[data-axis-access="skip"] body #analyzeBtn {display:none!important}
+html[data-axis-access="skip"] body #mpuSetup {opacity:.77}
+html:not([data-axis-access="skip"]):not([data-axis-access="market"]):not([data-axis-access="checking"]):not([data-axis-access="error"]) body #axisAccessScreen,
+body #axisAccessScreen[hidden]{display:none!important}
+body #axisAccessScreen{
+ display:block!important;box-sizing:border-box;margin:14px 0 20px;padding:27px 18px 24px;
+ text-align:center;color:#eaf1f5;background:#111c27;border:1px solid #485b6a;
+ border-radius:19px;box-shadow:none;
+}
+body #axisAccessScreen .aasIcon{
+ width:56px;height:56px;line-height:50px;border-radius:50%;border:2px solid #6c7884;
+ margin:0 auto 15px;color:#d4dbe0;font-size:31px;font-weight:800
+}
+body #axisAccessScreen h2{font-size:clamp(27px,7vw,36px);font-weight:900;margin:0 0 12px;letter-spacing:.05em}
+body #axisAccessScreen p{color:#aebdc9;font-size:13px;line-height:1.75;margin:5px 0 12px}
+body #axisAccessScreen .aasEmphasis{border-top:1px solid #344859;padding-top:12px;margin-top:14px;font-size:15px;font-weight:800;color:#d0d9de}
+body #axisAccessScreen [data-axis-retry]{background:transparent!important;border:1px solid #536777!important;
+ color:#b7cad3!important;font-size:12px;font-weight:700;border-radius:10px;
+ padding:10px 16px;margin-top:22px}
