@@ -30,7 +30,7 @@ function ensure(){
  btn.insertAdjacentElement('afterend',el);
  el.addEventListener('click',ev=>{
   if(!ev.target?.closest?.('[data-axis-retry]'))return;
-  phase='editing';startAt=0;D.dataset.axisAccess='editing';
+  if(D.dataset.axisAccess!=='market'){phase='editing';startAt=0;D.dataset.axisAccess='editing'}
   const setup=$('mpuSetup');if(setup){setup.open=true;setup.scrollIntoView?.({block:'start'})}
   else($('raceCondCard')||$('csvCard'))?.scrollIntoView?.({block:'start'});
  });
@@ -53,7 +53,7 @@ function render(){
  last=sig;el.innerHTML='<div class="aasIcon">'+(status==='skip'?'×':status==='error'?'!':'…')+'</div>'+
  '<h2>'+E(r.title)+'</h2><p>'+E(r.reason)+'</p>'+
  (status==='skip'?'<div class="aasEmphasis">このレースは購入しません</div>':'')+
- '<button type="button" data-axis-retry>別のレースを入力する</button>';
+ '<button type="button" data-axis-retry>'+(status==='market'?'単勝オッズを入力する':status==='error'?'入力とCSVを確認する':status==='checking'?'レース入力を確認する':'別のレースを入力する')+'</button>';
  }
  if(['skip','market'].includes(status)){const setup=$('mpuSetup');if(setup)setup.open=false}
  window.AxisAccessGateV1State={ready:true,status,reason:r.reason,axisNo:r.axisNo||'',version:V,at:Date.now()};
