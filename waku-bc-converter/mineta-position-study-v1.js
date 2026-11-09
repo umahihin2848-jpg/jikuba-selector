@@ -142,7 +142,7 @@ function inspectHorse(no){
  if(window.RaceSkipLockV1State?.status!=="open"||window.RSAAnalysisTransitionState?.status!=="ready")
    return{ready:false,reason:"軸判定・解析完了を確認中です"};
  const file=$("csvFile")?.files?.[0];
- if(!parsed||!file||!currentFile||file!==currentFile)return{ready:false,reason:lastError?"CSVの確認に失敗しました":"TARGET CSVの研究用読み込み待ちです"};
+ if(!parsed||!file||!currentFile||![["name",""],["size",0],["lastModified",0]].every(([k,d])=>String(file[k]??d)===String(currentFile[k]??d)))return{ready:false,reason:lastError?"CSVの確認に失敗しました":"TARGET CSVの研究用読み込み待ちです"};
  const horses=window.Finish600State?.rows||[],field=Number($("fieldSize")?.value)||horses.length;
  const core=window.DecisionShellV2State,structure=core?.structure||{};
  if(!core?.ready||!["green","yellow"].includes(structure.level)||field<12||field>18||horses.length!==field)
