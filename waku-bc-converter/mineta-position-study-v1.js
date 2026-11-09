@@ -285,7 +285,7 @@ function render(){
 function schedule(ms=80){clearTimeout(timer);timer=setTimeout(render,ms)}
 function init(){
   const file=$("csvFile");
-  $("imsAxis")?.addEventListener("click",e=>{if(e.target?.closest?.("[data-mps-export]"))exportSnapshot()});
+  document.addEventListener("click",e=>{if(e.target?.closest?.("[data-mps-export]"))exportSnapshot()});
   file?.addEventListener("change",e=>parseFile(e.target.files?.[0]));
   if(file?.files?.[0])parseFile(file.files[0]);
   document.addEventListener("change",e=>{if(["raceDate","raceName","fieldSize","grade","surface","distance","venue"].includes(e.target?.id))schedule(80)},true);
