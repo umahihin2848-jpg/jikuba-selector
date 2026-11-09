@@ -46,8 +46,16 @@ html[data-axis-access="pair"] body #imsTicket > :not(#mpuConclusion),
 html[data-axis-access="pair"] body #mpsRoot,
 html[data-axis-access="pair"] body #axisReliabilityShadowV1,
 html[data-axis-access="pair"] body #mobilePredictionLedger,
+html[data-axis-access="pair"] body #moaRoot .moaM4ToLedger,
+html[data-axis-access="pair"] body #moaRoot [data-oa-open-ledger],
+html[data-axis-access="pair"] body #raceDissectionCardV1,
+html[data-axis-access="pair"] body #rq2-root,
+html[data-axis-access="pair"] body #mobileLeanAxisSummary,
 html[data-axis-access="pair"] body #mfs1,
 html[data-axis-access="pair"] body #moaAxisExtra,
 html[data-axis-access="pair"] body #mpuShadowHost {display:none!important}
 html[data-axis-access="pair"] body #mpuConclusion .mpuVerdict {border-color:#657a86;background:#142832}
 html[data-axis-access="pair"] body #mpuConclusion .mpuAxisCard {border-color:#44677a}
+
+html[data-axis-access="pair"] body .mpuHorse.pair{border-color:#557a86;background:#102c38}
+html[data-axis-access="pair"] body .mpuHorse.pair .mpuHorseNo{border-color:#649ba2}
