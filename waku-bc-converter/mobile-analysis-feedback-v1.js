@@ -6,8 +6,8 @@ const get=()=>({base:window.MobileAnalysisCoreState,transition:window.RSAAnalysi
 let clicked=false,clickAt=0,errorMessage='',timer=0;
 function ensure(){
  let box=$('rsaAnalysisFeedback');
- if(box)return box;
  const btn=$('analyzeBtn');if(!btn)return null;
+ if(box){if(box.previousElementSibling!==btn||box.parentElement!==btn.parentElement)btn.insertAdjacentElement('afterend',box);return box}
  box=document.createElement('section');box.id='rsaAnalysisFeedback';
  box.setAttribute('role','status');box.setAttribute('aria-live','polite');box.hidden=true;
  btn.insertAdjacentElement('afterend',box);
@@ -46,7 +46,7 @@ function baseContent(x){
 function render(){
  css();const box=ensure();if(!box)return;
  const x=get(),t=x.transition||{},baseReady=Boolean(x.base?.ready),full=Boolean(t.status==='ready');
- if(!clicked&&!baseReady&&t.status!=='error'){box.hidden=true;return}
+ if(!clicked&&t.status!=='error'){box.hidden=true;return}
  box.hidden=false;
  if(baseReady)html.dataset.rsaCoreAnalyzed='1';
  let head,lead;
@@ -86,8 +86,9 @@ function init(){
  ensure();css();
  document.addEventListener('click',e=>{if(e.target?.id==='analyzeBtn')click()},true);
  document.addEventListener('change',e=>{if(['csvFile','raceDate','venue','raceName','fieldSize','surface','distance','grade','going'].includes(e.target?.id)){clicked=false;errorMessage='';delete html.dataset.rsaCoreAnalyzed;const b=$('rsaAnalysisFeedback');if(b)b.hidden=true}},true);
- for(const name of ['mobile-analysis-core-ready','finish600-ready','m3-pure-ability-ready','validated-queue-ready','position-risk-ready','decision-shell-v2-ready','rsa-analysis-complete','rsa-analysis-start','rsa-addons-ready'])
-  window.addEventListener(name,()=>schedule(60));
+ window.addEventListener('rsa-analysis-start',()=>{if(!clicked){clicked=true;clickAt=Date.now()}errorMessage='';schedule(20)});
+ for(const name of ['mobile-analysis-core-ready','finish600-ready','m3-pure-ability-ready','validated-queue-ready','position-risk-ready','decision-shell-v2-ready','rsa-analysis-complete','rsa-addons-ready'])
+  window.addEventListener(name,()=>{if((name==='mobile-analysis-core-ready'||name==='rsa-analysis-complete')&&window.RSAAnalysisTransitionState?.status!=='error')errorMessage='';schedule(60)});
  window.addEventListener('rsa-analysis-error',e=>{errorMessage=String(e?.detail?.message||window.RSAAnalysisTransitionState?.message||'解析エラー');schedule(0)});
  schedule(400);
 }
