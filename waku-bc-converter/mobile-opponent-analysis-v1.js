@@ -1,6 +1,6 @@
 (()=>{'use strict';
 if(!window.RSAMobileLean||window.__MOBILE_OPPONENT_ANALYSIS_V1)return;window.__MOBILE_OPPONENT_ANALYSIS_V1=true;
-const V='mobile-opponent-analysis-v1.5-balanced-grid',BUILD='20261110balanced1',$=id=>document.getElementById(id);
+const V='mobile-opponent-analysis-v1.6-mineta-insights',BUILD='20261110mineta1',$=id=>document.getElementById(id);
 let raf=0,timer=0,last='',currentRaceKey='',selectedNo='',paceOpen=false,m4Open=false;
 const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const N=v=>{if(v===null||v===undefined||v==='')return NaN;const x=Number(v);return Number.isFinite(x)?x:NaN};
@@ -108,6 +108,40 @@ function miniCard(r){
   '<span class="moaGridMarket">'+(Number.isFinite(r.pop)?r.pop+'人気':'人気未入力')+'<i>・</i>単勝 '+(Number.isFinite(r.winOdds)?r.winOdds.toFixed(1)+'倍':'—')+'</span>'+
   '<span class="moaGridMore">'+(active?'分析を表示中':'タップで詳しく見る')+'</span></button>';
 }
+const MINETA_LABELS={
+ sandwich:"逃げハサミ",outside:"逃げ馬のすぐ外",
+ advance:"位置取り前進候補",recover:"道中後退から巻き返し"
+};
+function minetaDetail(h){
+ const I=window.MinetaPositionStudyV1;
+ const info=I?.inspectHorse?.(h.no);
+ if(!info?.ready){
+  const message=info?.reason||"研究用の前走通過順位を読み込み中です";
+  return '<section class="moaMineta" aria-label="みねた式・研究分析">'+
+   '<header><span>POSITION STUDY</span><h4>みねた式｜位置取りと決着形</h4><small>参考研究・自動推奨には未使用</small></header>'+
+   '<p class="moaMinetaWaiting">'+E(message)+'</p></section>';
+ }
+ const row=info.row,notes=info.notes||[],signals=info.signals||[];
+ const chips=signals.length?signals.map((key,i)=>'<div class="moaMinetaChip"><strong>'+E(MINETA_LABELS[key]||key)+'</strong>'+
+  '<p>'+E(notes[i]||"前走通過・隊列から抽出した研究条件")+'</p></div>').join(''):
+  '<p class="moaMinetaNone">'+(row.known?'4つの位置取り条件には該当しません。能力が低いという意味ではありません。':'前走の有効通過順位がなく、判定できません。')+'</p>';
+ const prior=row.known&&row.corners.length?row.corners.join(' → '):'履歴不足';
+ const expected=row.expected===null?'予測待ち':row.expected.toFixed(1)+'番手';
+ const refs=(info.refs||[]).map(ref=>
+  '<div class="moaMinetaRelation"><small>'+E(ref.label)+'</small>'+
+  '<b>'+E(ref.no)+'番 '+E(ref.name)+'</b>'+
+  '<p>'+E(ref.relation)+'</p></div>').join('');
+ return '<section class="moaMineta" aria-label="みねた式・研究分析">'+
+  '<header><span>POSITION STUDY / RESEARCH</span><h4>みねた式｜位置取りと決着形</h4><small>仮説の表示・買い目に非連動</small></header>'+
+  '<div class="moaMinetaPosition"><div><small>前走の通過</small><b>'+E(prior)+'</b></div>'+
+  '<div><small>今回の予測位置</small><b>'+E(expected)+'</b></div></div>'+
+  '<div class="moaMinetaSignals"><h5>前走と枠の並びから見た特徴</h5>'+chips+'</div>'+
+  '<div class="moaMinetaRefs"><h5>'+(info.isPair?'Pairの軸を仮定した位置関係':'軸との位置関係')+'</h5>'+
+  (refs||'<p class="moaMinetaNone">比較対象を特定できません。</p>')+
+  '<p class="moaMinetaUnproven">これは「同時に好走できる確率」ではありません。軸が好走する展開で選択馬の位置取りが成立するかを確認します。</p></div>'+
+  '<footer>前走通過確認 '+info.known+'/'+info.field+'頭。抽出条件の一部はアプリ独自の研究用仮閾値。未検証のためAbility・M3・P10・見送り・期待値を変更しません。確定馬番との照合が必要です。</footer>'+
+  '</section>';
+}
 function horseDetail(r,pressure,bias){
  const good=strengths(r,bias),bad=risks(r,pressure,bias),sc=scenarioInfo(r),w=pref(r.no,'wide'),mn=pref(r.no,'min');
  const odds=Number.isFinite(r.winOdds)?r.winOdds.toFixed(1)+'倍':'—';
@@ -120,7 +154,7 @@ function horseDetail(r,pressure,bias){
   '<div class="moaLens"><span>Ability・3着内参考</span><b>'+rank(r.abilityRank)+' ／ '+pct(r.abilityP3)+'</b></div>'+
   '<div class="moaLens"><span>M3・今回の構造</span><b>'+rank(r.m3Rank)+' ／ '+E(sc.label)+'</b></div>'+
   '<div class="moaLens '+(r.p10>=.5?'risk':'')+'"><span>想定位置・P10</span><b>'+E(r.position||'—')+' ／ '+pct(r.p10)+'</b></div>'+
-  '</div><div class="moaDetailM4">'+m4Quick(r.no)+'</div>'+
+  '</div><div class="moaDetailM4">'+m4Quick(r.no)+'</div>'+minetaDetail(r)+
   '<div class="moaReason">'+
   '<div class="moaBox moaGood"><b>好走材料</b><p>'+(good.length?good.map(x=>'・'+E(x)).join('<br>'):'強い単独材料は少なめ。複数の指標を確認。')+'</p></div>'+
   '<div class="moaBox moaBad"><b>凡走リスク</b><p>'+(bad.length?bad.map(x=>'・'+E(x)).join('<br>'):'現時点で目立つ単独リスクは少なめ。')+'</p></div>'+
@@ -204,6 +238,6 @@ document.addEventListener('click',function(e){
  if(['analyzeBtn','applyOddsBtn','parseCsvBtn','clearOddsBtn'].includes(e.target?.id))schedule(180);
 },true);
 document.addEventListener('input',e=>{const no=e.target?.dataset?.oaWide||e.target?.dataset?.oaMin;if(no){const k=e.target.dataset.oaWide?'wide':'min';setPref(no,k,e.target.value);const j=document.querySelector(`[data-oa-judge="${CSS.escape(String(no))}"]`);if(j)j.textContent=priceJudge(no);return}if(['raceName','raceDate','venue','surface','distance','grade','going','oddsPaste'].includes(e.target?.id))schedule(120)},true);
-['production-decision-pipeline-ready','opponent-candidate-pool-ready','m3-pure-ability-ready','finish600-ready','validated-queue-ready','position-risk-ready','mobile-race-map-pace-ready','axis-reliability-shadow-ready','four-ability-profile-ready','five-ability-profile-v2-ready','rsa-analysis-complete','mobile-analysis-consistency-ready'].forEach(ev=>addEventListener(ev,()=>schedule(70)));
+['production-decision-pipeline-ready','opponent-candidate-pool-ready','m3-pure-ability-ready','finish600-ready','validated-queue-ready','position-risk-ready','mobile-race-map-pace-ready','axis-reliability-shadow-ready','four-ability-profile-ready','five-ability-profile-v2-ready','rsa-analysis-complete','mobile-analysis-consistency-ready','mineta-position-study-data-ready'].forEach(ev=>addEventListener(ev,()=>schedule(70)));
 function start(){schedule(220);setTimeout(()=>schedule(),850)}if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
