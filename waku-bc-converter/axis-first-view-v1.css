@@ -19,3 +19,9 @@ html body.iosMobileShellV2 #mpuResearch #mpuShadowHost > #postVetoTop2ShadowV1 {
   #rq2-root { padding: 12px; }
   #rq2-root .rq2-rows { max-height: 68vh; overflow-y: auto; }
 }
+
+/* Keep the course/pace map, but remove preselected longshot and structural-pick chips. */
+#raceDissectionCardV1 .rdcSection[data-structural-watch="1"],
+#raceDissectionCardV1 .rdcSection:has(.rdcLong),
+#raceDissectionCardV1 .rdcoWatch,
+#raceDissectionCardV1 .rdcLongRow {display:none!important}
