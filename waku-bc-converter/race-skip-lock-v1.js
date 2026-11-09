@@ -51,7 +51,7 @@ function render(){
  d.dataset.raceSkipKind=diagnostic.kind;
  if(card){
   card.hidden=next!=="skip"&&next!=="checking";
-  const t=next==="skip"?"見送り｜"+diagnostic.reason+"。分析結果は確認できますが、自動軸は採用しません。":next==="checking"?"判定中…":"";
+  const t=next==="skip"?((diagnostic.kind==="scope"?"対象外｜":"軸は見送り｜")+diagnostic.reason+(diagnostic.kind==="axis"?"。診断結果は閲覧できますが、自動軸は採用しません。":"")):next==="checking"?"判定中…":"";
   if(card.textContent!==t)card.textContent=t;
  }
  status=next;
