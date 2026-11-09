@@ -183,12 +183,12 @@ function render(){
 }
 addEventListener('race-progress-scenario-selected',()=>{last='';schedule(70)});
 addEventListener('rsa-analysis-start',()=>{m4Filter='all';last='';});
-document.addEventListener('toggle',function(ee){
+document.addEventListener('toggle',function(e){
  const t=e.target;
  if(t?.matches?.('details[data-oa-section="pace"]'))paceOpen=t.open;
  if(t?.matches?.('details[data-oa-section="m4"]'))m4Open=t.open;
 },true);
-document.addEventListener('click',function(ee){
+document.addEventListener('click',function(e){
  const open=e.target.closest?.('[data-oa-open-horse]');
  if(open){
   const no=String(open.dataset.oaOpenHorse||'');selectedNo=selectedNo===no?'':no;last='';schedule();
