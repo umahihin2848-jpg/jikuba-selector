@@ -1,7 +1,7 @@
 (function raceQualityTwoAxis(){
   'use strict';
   if(window.RaceQualityTwoAxisV1) return;
-  const V='race-quality-two-axis-v1.0.0', STORE='race_quality_two_axis_predictions_v1',$=id=>document.getElementById(id);
+  const V='race-quality-two-axis-v1.1.0', STORE='race_quality_two_axis_predictions_v1',$=id=>document.getElementById(id);
   const E=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
   const N=v=>v===null||v===undefined||v===''?NaN:Number(v);
   const LATERAL=[['unknown','まだ判断しない'],['outer_loss','外回しの距離ロス大'],['flat','内外の差は小さい'],['inner_slow','内を通ると伸びない']];
@@ -92,8 +92,10 @@
         else reason='安全に比較できる補充候補が足りないため保留';
       }else{candidate=preselected.slice();reason='強い複合注意の馬が市場Top2にいないため変更なし'}
     }else reason='2軸の判断が揃わないか確信度が低いため、比較案は保留';
+    const study=window.RaceQualityTop2LogicV1?.rank(rows,{lateral,longitudinal,confidence})||{ready:false,top2:null,ranked:[],reason:'研究用Top2のロジック未読込'};
     return{ready:true,version:V,axisNo:String(axisNo),inputs:{lateral,longitudinal,confidence},marketTop2:preselected,
-      shadowTop2:candidate,changed,reason,rows,calibrated:false,productionImpact:false,changesProductionTickets:false,at:Date.now()};
+      shadowTop2:candidate,changed,reason,rows,raceQualityTop2:study.top2,raceQualityRanked:study.ranked,raceQualityReason:study.reason,
+      calibrated:false,productionImpact:false,changesProductionTickets:false,at:Date.now()};
   }
   function css(){
     if($('rq2-css'))return;
@@ -159,25 +161,28 @@
     const formatNo=no=>{const r=result.rows?.find(z=>z.no===String(no));return r?`${E(r.no)}番 ${E(r.name)}`:`${E(no)}番`};
     let body=`<p class="rq2-note">${E(result.reason||'')}</p>`;
     if(result.ready){
-      const baseline=result.marketTop2.map(formatNo).join('・'),comparison=result.shadowTop2?.map(formatNo).join('・')||'判断保留';
-      body=`<div class="rq2-pair"><small>現行本番相手（市場Top2）</small><strong>${baseline}</strong><small>研究用の比較候補（馬券ロジックには接続しない）</small><strong>${comparison}</strong><small>${E(result.reason)}</small></div>
+      const baseline=result.marketTop2.map(formatNo).join('・'),comparison=result.raceQualityTop2?.map(formatNo).join('・')||'判定保留';
+      const studyDetail=(result.raceQualityRanked||[]).slice(0,2).map(t=>`${E(t.rank)}位 ${formatNo(t.no)}：適合段階${t.score>0?'+':''}${E(t.score)}｜${E(t.reasons.join('、'))}`).join(' ／ ');
+      body=`<div class="rq2-pair"><small>現行本番相手（市場Top2）</small><strong>${baseline}</strong><small>レース質Top2｜研究用（本番の馬券ロジックには接続しない）</small><strong>${comparison}</strong><small>${E(result.raceQualityReason)}${studyDetail?' ／ '+studyDetail:''}</small></div>
       <div class="rq2-rows">${result.rows.map(r=>{
       const caution=r.level==='strong'?'強い複合注意':r.level==='watch'?'要確認':r.level==='unknown'?'データ不足':'通常';
-      const mark=result.marketTop2.includes(r.no)?'現行相手':result.shadowTop2?.includes(r.no)?'比較相手':'';
+      const mark=[result.marketTop2.includes(r.no)?'市場Top2':'',result.raceQualityTop2?.includes(r.no)?'レース質Top2':''].filter(Boolean).join('・');
+      const fit=(result.raceQualityRanked||[]).find(t=>t.no===r.no);
       return `<div class="rq2-row ${r.level==='strong'?'warn':''}">
         <strong>${E(r.no)}番 ${E(r.name)} ${r.pop!==null?E(r.pop)+'人気':''}</strong><span class="rq2-tag">${E(caution)}</span>${mark?`<span class="rq2-tag">${E(mark)}</span>`:''}
         <small>想定初角${r.expectedRank!==null?Math.round(r.expectedRank)+'位':'未判定'}｜予測レーン${r.lane!==null?['内ラチ','内','中','外'][r.lane]:'未取得'}。${E(r.accessDetail)}</small>
         <small>横：${E(r.track)} ／ 移動：${E(r.move)}</small>
         <small>縦：${E(r.position)}</small>
+        ${fit?`<small>研究用適合段階：${fit.score>0?'+':''}${E(fit.score)}｜${E(fit.reasons.join('、'))}</small>`:''}
       </div>`}).join('')}</div>`;
     }
-    el.innerHTML=`<h3>レース質2軸 × 進路｜相手比較</h3>
+    el.innerHTML=`<h3>レース質Top2 × 進路｜相手比較</h3>
       <p class="rq2-note">観察した馬場を2項目で入力。AIが予測した位置・レーンと合わせ、相手馬の不利を確認する試験版。</p>
       ${inputs}${body}
       <div><button type="button" data-rq2-action="save" ${!result.ready||hasLog?'disabled':''}>${hasLog?'このレースは保存済み':'発走前の予測を保存'}</button>
       <button type="button" data-rq2-action="export">保存記録を出力</button></div>
       ${note?`<p class="rq2-note">${E(note)}</p>`:''}
-      <p class="rq2-note">注意判定は未較正。初角の予測レーンは実走経路ではありません。距離ロスの秒数や好走確率を捏造せず、CORE・M3・購入判定は変更しません。</p>`;
+      <p class="rq2-note">適合段階は未較正の研究用指標で、好走確率ではありません。レーンは推定であり実走経路ではありません。CORE・M3・本番の相手Top2・購入判定は変更しません。</p>`;
     window.RaceQualityTwoAxisV1State={...result,displayOnly:true,updatedAt:Date.now()};
   }
   function save(){
