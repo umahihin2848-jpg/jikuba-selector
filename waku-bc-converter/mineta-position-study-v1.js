@@ -176,6 +176,7 @@ let parsed=null,currentFile=null,fileToken=0,timer=0,lastSig="",lastError="";
 async function parseFile(file){
   const token=++fileToken;
   parsed=null;currentFile=file||null;lastError="";lastSig="";
+  window.dispatchEvent(new CustomEvent("mineta-position-study-data-ready",{detail:{ready:false,reason:"csv_changed",at:Date.now()}}));
   if(!file){schedule(80);return}
   try{
     const buf=window.RSATargetCsvCache?.arrayBuffer?await window.RSATargetCsvCache.arrayBuffer(file):await file.arrayBuffer();
@@ -188,6 +189,7 @@ async function parseFile(file){
     if(token!==fileToken)return;
     lastError=String(e?.message||e);
     console.warn("mineta-position-study CSV",e);
+    window.dispatchEvent(new CustomEvent("mineta-position-study-data-ready",{detail:{ready:false,reason:"csv_error",at:Date.now()}}));
   }
   schedule(40);
 }
