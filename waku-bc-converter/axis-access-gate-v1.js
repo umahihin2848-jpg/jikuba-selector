@@ -1,6 +1,6 @@
 (()=>{'use strict';
 if(window.AxisAccessGateV1)return;
-const V='axis-access-gate-v1.0',D=document.documentElement,$=id=>document.getElementById(id);
+const V='axis-access-gate-v1.1-pair-analysis',D=document.documentElement,$=id=>document.getElementById(id);
 const E=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let phase='idle',startAt=0,last='',timer=0;
 function classify(transition,decision,gate){
@@ -14,7 +14,20 @@ function classify(transition,decision,gate){
  if(s.code==='ability_rank_tie'||s.code==='wait')return{status:'skip',title:'見送り',reason:'軸馬の順位を一意に判定できませんでした。'};
  const candidates=Array.isArray(s.candidates)?s.candidates:[];
  if(s.code==='no_auto_axis'||s.code==='validated_stop'||s.kind==='A3'||!s.axis)return{status:'skip',title:'見送り',reason:'信頼条件を満たす軸馬がいません。'};
- if(s.kind==='double'||candidates.length!==1)return{status:'skip',title:'見送り',reason:'単独で採用できる軸馬が決まりませんでした。'};
+ if(s.kind==='double'||s.code==='double'){
+   // Pair requires two validated overlaps including Ability #1.
+   // The pre-existing model retains an Ability #1 anchor internally for compatibility,
+   // but a Pair is never treated as a confirmed *single* axis by this UI.
+   if(candidates.length!==2||!candidates.some(x=>Number(x.ar)===1)||gate?.status==='skip')
+     return{status:'skip',title:'見送り',reason:'Pair構造の信頼条件を満たしていません。'};
+   if(f.level==='red'||f.level==='neutral')return{status:'skip',title:'見送り',reason:'本番の安全条件を満たしていません。'};
+   if(!d.market?.complete||f.level==='wait')
+     return{status:'market',title:'市場判定待ち',reason:'Pair構造を確認しました。全頭単勝オッズ入力後に2頭の比較を表示します。'};
+   if(f.code!=='double'||f.level!=='yellow')
+     return{status:'checking',title:'Pair判定中',reason:'2頭一致の本番構造を照合しています。'};
+   return{status:'pair',title:'',reason:'',candidates:candidates.map(x=>({no:String(x.no),name:String(x.name||''),abilityRank:Number(x.ar),m3Rank:Number(x.m3)}))};
+ }
+ if(candidates.length!==1)return{status:'skip',title:'見送り',reason:'単独で採用できる軸馬が決まりませんでした。'};
  if(!['A1','A2'].includes(s.kind))return{status:'skip',title:'見送り',reason:'軸馬の採用条件を満たしていません。'};
  if(gate?.status==='skip')return{status:'skip',title:'見送り',reason:'軸馬の安全条件を満たしていません。'};
  if(f.code==='market_range'||f.level==='neutral'||f.level==='red')return{status:'skip',title:'見送り',reason:'本番の市場条件を満たしていません。'};
