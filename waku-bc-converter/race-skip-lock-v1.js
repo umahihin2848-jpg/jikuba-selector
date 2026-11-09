@@ -1,11 +1,14 @@
-/* Race skip gate v1.0 - purchase-scope + strict CORE 1/2 x M3 top3. */
+/* Race skip gate v1.1 - JRA flat 3-win+ (including OP/L/G1-G3), 12+ runners, strict CORE 1/2 x M3 top3. */
 (()=>{"use strict";
 if(window.RaceSkipLockV1)return;
 const $=id=>document.getElementById(id),d=document.documentElement;
 const raceGateDecision=function raceGateDecision(x) {
   const r=x||{}, name=String(r.name||"").normalize("NFKC").trim(), grade=String(r.grade||"").normalize("NFKC").toUpperCase().trim(), field=Number(r.field);
-  const excluded=/スプリンターズ|中山記念|スワン(?:ステークス|S)|京都新聞|京成杯(?:オータム|AH|A\.H\.)|函館記念|中山牝馬|フェアリー/.test(name);
-  if ((name&&(/障害|ジャンプ|J-G[123]|JG[123]/i.test(name)||excluded))|| (grade&& !/^(G1|G2|G3)$/.test(grade)) || (Number.isInteger(field)&&field>=1&&field<12)) return "skip";
+  // Model scope and visible scope are intentionally identical.
+  // Do not hard-exclude named graded races: let the verified axis gate decide.
+  const isObstacle=/障害|ジャンプ|J[- ]?G[123]/i.test(name);
+  const eligibleGrade=/^(3勝|OP|L|G1|G2|G3)$/.test(grade);
+  if (isObstacle || (grade && !eligibleGrade) || (Number.isInteger(field)&&field>=1&&field<12)) return "skip";
   if (!name||!r.venue||!Number.isInteger(field)||field<1||field>18) return "idle";
   if (!r.requested) return "idle";
   const a=r.ability,f=r.finish,at=Number(r.requestedAt)||0;
@@ -51,7 +54,7 @@ document.addEventListener("click",e=>{
  requested=true;requestedAt=Date.now();render();
 },true);
 ["rsa-analysis-complete","m3-pure-ability-ready","finish600-ready","decision-shell-v2-ready","rsa-addons-ready"].forEach(ev=>addEventListener(ev,render));
-window.RaceSkipLockV1={version:"1.0.0",evaluate:raceGateDecision,refresh:render};
+window.RaceSkipLockV1={version:"1.1.0-flat-3win-plus",evaluate:raceGateDecision,refresh:render};
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",render,{once:true});
 else render();
 })();
