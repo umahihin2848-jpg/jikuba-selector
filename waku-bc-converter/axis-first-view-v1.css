@@ -25,3 +25,10 @@ html body.iosMobileShellV2 #mpuResearch #mpuShadowHost > #postVetoTop2ShadowV1 {
 #raceDissectionCardV1 .rdcSection:has(.rdcLong),
 #raceDissectionCardV1 .rdcoWatch,
 #raceDissectionCardV1 .rdcLongRow {display:none!important}
+
+/* The legacy dissection card's market/structure "best horse" rows are shortlist UI.
+   Keep only field-level market context, axis diagnostics and race-shape map. */
+#raceDissectionCardV1 > .rdcSection:has(.rdcRows),
+#raceDissectionCardV1 > .rdcSection:has(.rdcNarr):not(:has(.rdcMarket)) {
+  display: none !important;
+}
