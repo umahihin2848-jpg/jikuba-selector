@@ -1,24 +1,24 @@
 /* Strict single-axis review: only a completed valid axis can unlock any race analysis.
  * Hide UI only. Statistical models and predictions are not modified.
  */
-html:not([data-axis-access="pass"]) body main.view > :not(#mpuSetup):not(#raceCondCard):not(#csvCard):not(#oddsCard):not(#analyzeBtn):not(#axisAccessScreen),
-html:not([data-axis-access="pass"]) body #iosMobileShellV2,
-html:not([data-axis-access="pass"]) body #result,
-html:not([data-axis-access="pass"]) body #m3RaceLab,
-html:not([data-axis-access="pass"]) body #raceDissectionCardV1,
-html:not([data-axis-access="pass"]) body #mobileLeanAxisSummary,
-html:not([data-axis-access="pass"]) body #rsaAnalysisFeedback,
-html:not([data-axis-access="pass"]) body #raceSkipCard,
-html:not([data-axis-access="pass"]) body #marketMispricingInputCard,
-html:not([data-axis-access="pass"]) body #marketMispricingResultCard,
-html:not([data-axis-access="pass"]) body #rq2-root,
-html:not([data-axis-access="pass"]) body #minetaPositionStudyRoot,
-html:not([data-axis-access="pass"]) body #mobilePairProbabilityReferenceV1,
-html:not([data-axis-access="pass"]) body #mobilePredictionLedgerV1,
-html:not([data-axis-access="pass"]) body #mobileFinalSummaryV1,
-html:not([data-axis-access="pass"]) body #mpuConclusion,
-html:not([data-axis-access="pass"]) body #mpuAllHorses,
-html:not([data-axis-access="pass"]) body #mpuResearch {
+html:not([data-axis-access="pass"]):not([data-axis-access="pair"]) body main.view > :not(#mpuSetup):not(#raceCondCard):not(#csvCard):not(#oddsCard):not(#analyzeBtn):not(#axisAccessScreen),
+html:not([data-axis-access="pass"]):not([data-axis-access="pair"]) body #iosMobileShellV2,
+html:not([data-axis-access="pass"]):not([data-axis-access="pair"]) body #result,
+html:not([data-axis-access="pass"]):not([data-axis-access="pair"]) body #m3RaceLab,
+html:not([data-axis-access="pass"]):not([data-axis-access="pair"]) body #raceDissectionCardV1,
+html:not([data-axis-access="pass"]):not([data-axis-access="pair"]) body #mobileLeanAxisSummary,
+html:not([data-axis-access="pass"]):not([data-axis-access="pair"]) body #rsaAnalysisFeedback,
+html:not([data-axis-access="pass"]):not([data-axis-access="pair"]) body #raceSkipCard,
+html:not([data-axis-access="pass"]):not([data-axis-access="pair"]) body #marketMispricingInputCard,
+html:not([data-axis-access="pass"]):not([data-axis-access="pair"]) body #marketMispricingResultCard,
+html:not([data-axis-access="pass"]):not([data-axis-access="pair"]) body #rq2-root,
+html:not([data-axis-access="pass"]):not([data-axis-access="pair"]) body #minetaPositionStudyRoot,
+html:not([data-axis-access="pass"]):not([data-axis-access="pair"]) body #mobilePairProbabilityReferenceV1,
+html:not([data-axis-access="pass"]):not([data-axis-access="pair"]) body #mobilePredictionLedgerV1,
+html:not([data-axis-access="pass"]):not([data-axis-access="pair"]) body #mobileFinalSummaryV1,
+html:not([data-axis-access="pass"]):not([data-axis-access="pair"]) body #mpuConclusion,
+html:not([data-axis-access="pass"]):not([data-axis-access="pair"]) body #mpuAllHorses,
+html:not([data-axis-access="pass"]):not([data-axis-access="pair"]) body #mpuResearch {
  display:none!important;
 }
 html[data-axis-access="skip"] body #analyzeBtn {display:none!important}
@@ -40,3 +40,14 @@ body #axisAccessScreen .aasEmphasis{border-top:1px solid #344859;padding-top:12p
 body #axisAccessScreen [data-axis-retry]{background:transparent!important;border:1px solid #536777!important;
  color:#b7cad3!important;font-size:12px;font-weight:700;border-radius:10px;
  padding:10px 16px;margin-top:22px}
+
+/* Pair is a comparative research state, not a confirmed single-axis buy state. */
+html[data-axis-access="pair"] body #imsTicket > :not(#mpuConclusion),
+html[data-axis-access="pair"] body #mpsRoot,
+html[data-axis-access="pair"] body #axisReliabilityShadowV1,
+html[data-axis-access="pair"] body #mobilePredictionLedger,
+html[data-axis-access="pair"] body #mfs1,
+html[data-axis-access="pair"] body #moaAxisExtra,
+html[data-axis-access="pair"] body #mpuShadowHost {display:none!important}
+html[data-axis-access="pair"] body #mpuConclusion .mpuVerdict {border-color:#657a86;background:#142832}
+html[data-axis-access="pair"] body #mpuConclusion .mpuAxisCard {border-color:#44677a}
