@@ -1,0 +1,21 @@
+/* Axis-first layout. Hide legacy automatic partner rankings without disabling analytical models. */
+#opponentTop2LogicV1,
+#opponentRankingDisplayV1,
+#opponentVetoShadowV1,
+#postVetoTop2ShadowV1,
+#marketAbilityOpponentShadowV1,
+#rqfr-root,
+html body.iosMobileShellV2 #mpuResearch #mpuShadowHost > #opponentTop2LogicV1,
+html body.iosMobileShellV2 #mpuResearch #mpuShadowHost > #opponentRankingDisplayV1,
+html body.iosMobileShellV2 #mpuResearch #mpuShadowHost > #opponentVetoShadowV1,
+html body.iosMobileShellV2 #mpuResearch #mpuShadowHost > #postVetoTop2ShadowV1 {
+  display: none !important;
+}
+#rq2-root .rq2-all > summary { font-size: 13px; }
+#rq2-root .rq2-row small { font-size: 12px; line-height: 1.55; }
+#rq2-root .rq2-row strong { font-size: 14px; }
+#mpuConclusion .mpuAxisCard { border-width: 2px; }
+@media (max-width: 600px) {
+  #rq2-root { padding: 12px; }
+  #rq2-root .rq2-rows { max-height: 68vh; overflow-y: auto; }
+}
