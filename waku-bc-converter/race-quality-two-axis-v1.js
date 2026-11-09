@@ -1,7 +1,7 @@
 (function raceQualityTwoAxis(){
   'use strict';
   if(window.RaceQualityTwoAxisV1) return;
-  const V='race-quality-two-axis-v1.1.0', STORE='race_quality_two_axis_predictions_v1',$=id=>document.getElementById(id);
+  const V='race-quality-two-axis-v1.2.0-axis-first', STORE='race_quality_two_axis_predictions_v1',$=id=>document.getElementById(id);
   const E=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
   const N=v=>v===null||v===undefined||v===''?NaN:Number(v);
   const LATERAL=[['unknown','まだ判断しない'],['outer_loss','外回しの距離ロス大'],['flat','内外の差は小さい'],['inner_slow','内を通ると伸びない']];
@@ -14,12 +14,12 @@
   function evaluate(ctx,options){
     const {queue,market,axisNo,frontState}=ctx||{},field=Number(ctx?.field)||0;
     if(!queue?.ready||!Array.isArray(queue.rows)||queue.rows.length!==field||Number(queue.fieldSize)!==field||field<12)return{ready:false,reason:'隊列データ待ち／頭数未一致'};
-    if(!axisNo||!market?.complete||!Array.isArray(market.rows)||market.rows.length!==field)return{ready:false,reason:'軸判定または全頭単勝オッズ待ち'};
+    if(!axisNo)return{ready:false,reason:'軸馬の判定待ち（全馬データは別画面で確認できます）'};
     const q=queue.rows,byNo=Object.fromEntries(q.map(r=>[String(Number(r.no)),r])),fields=q.filter(r=>Boolean(r.validated)&&N(r.hist_n)>=2&&Number.isFinite(N(r.expectedRank)));
-    const sorted=[...market.rows].filter(m=>String(Number(m.no))!==String(Number(axisNo))).sort((a,b)=>N(a.pop)-N(b.pop)||N(a.od)-N(b.od)||Number(a.no)-Number(b.no));
-    const preselected=sorted.slice(0,2).map(m=>String(Number(m.no)));
+    const byMarket=Object.fromEntries((market?.rows||[]).map(m=>[String(Number(m.no)),m]));
+    const sorted=q.map(r=>({no:r.no,name:r.name||'',pop:byMarket[String(Number(r.no))]?.pop,od:byMarket[String(Number(r.no))]?.od})).sort((a,b)=>Number(a.no)-Number(b.no));
     const lateral=options?.lateral||'unknown',longitudinal=options?.longitudinal||'unknown',confidence=options?.confidence||'medium';
-    const baselineApplicable=lateral!=='unknown'&&longitudinal!=='unknown'&&confidence!=='low';
+    const qualityReady=lateral!=='unknown'&&longitudinal!=='unknown'&&confidence!=='low';
     const stateByNo=Object.fromEntries((frontState?.rows||[]).map(r=>[String(Number(r.no)),r]));
     const rows=sorted.map(m=>{
       const no=String(Number(m.no)),r=byNo[no],rank=N(r?.expectedRank),frontness=N(r?.frontness5),lane=N(r?.laneIdx),odds=N(m.od),pop=N(m.pop);
@@ -78,24 +78,15 @@
         expectedRank:valid?rank:null, lane:laneKnown?lane:null, front, rear, blockers,
         access,accessDetail,track,move,position,level,flags,frontWarning:frontCheck?.level||null};
     });
-    // Preserve the exact same two market picks unless a high-confidence *joint* warning
-    // is present. Replacement is a research-only counterfactual, not a production ticket.
-    let candidate=null,changed=[],reason='';
-    if(baselineApplicable){
-      const highWarn=new Set(rows.filter(r=>r.level==='strong').map(r=>r.no));
-      if(preselected.some(no=>highWarn.has(no))){
-        const keep=preselected.filter(no=>!highWarn.has(no));
-        const incoming=rows.filter(r=>!preselected.includes(r.no)&&r.pop!==null&&r.pop<=9&&r.odds!==null&&r.odds<40&&r.level!=='strong'&&r.level!=='unknown');
-        const selected=[...keep];
-        while(selected.length<2&&incoming.length){const next=incoming.shift();selected.push(next.no);changed.push(next.no)}
-        if(selected.length===2){candidate=selected;reason='複数の不利条件が重なった市場上位馬を比較用に差し替え'}
-        else reason='安全に比較できる補充候補が足りないため保留';
-      }else{candidate=preselected.slice();reason='強い複合注意の馬が市場Top2にいないため変更なし'}
-    }else reason='2軸の判断が揃わないか確信度が低いため、比較案は保留';
-    const study=window.RaceQualityTop2LogicV1?.rank(rows,{lateral,longitudinal,confidence})||{ready:false,top2:null,ranked:[],reason:'研究用Top2のロジック未読込'};
-    return{ready:true,version:V,axisNo:String(axisNo),inputs:{lateral,longitudinal,confidence},marketTop2:preselected,
-      shadowTop2:candidate,changed,reason,rows,raceQualityTop2:study.top2,raceQualityRanked:study.ranked,raceQualityReason:study.reason,
-      calibrated:false,productionImpact:false,changesProductionTickets:false,at:Date.now()};
+    // Explanation only: neither market Top2 nor research Top2 is selected here.
+    // Earlier rank-based fields are intentionally null for consumer compatibility.
+    const qualityNote=qualityReady?'入力した内外・前後の馬場仮説から各馬への影響を表示。実走経路と好走確率は未確定。':'内外と前後の両方を入力し、確信度を中以上にすると条件付き診断が表示されます。';
+    const assessed=rows.map(r=>{
+      const fit=qualityReady?window.RaceQualityTop2LogicV1?.fit?.(r,{lateral,longitudinal,confidence}):null;
+      return{...r,isAxis:r.no===String(Number(axisNo)),fitReasons:fit?.notes||[],fitScore:fit?.score??null};
+    });
+    return{ready:true,version:V,axisNo:String(axisNo),inputs:{lateral,longitudinal,confidence},rows:assessed,reason:qualityNote,
+      marketTop2:null,shadowTop2:null,raceQualityTop2:null,raceQualityRanked:[],analysisOnly:true,calibrated:false,productionImpact:false,changesProductionTickets:false,at:Date.now()};
   }
   function css(){
     if($('rq2-css'))return;
@@ -115,7 +106,7 @@
     #rq2-root .rq2-row small{display:block;font-size:11px;color:#adc4ce;margin-top:4px}
     #rq2-root .rq2-tag{font-size:10px;white-space:nowrap;border:1px solid #6a8792;border-radius:7px;padding:2px 5px;margin-left:6px}
     #rq2-root button{min-height:39px;border-radius:8px;background:#1d5163;border:1px solid #59889a;color:#effaff;font-size:12px;padding:8px 12px}
-    #rq2-root .rq2-rows{max-height:470px;overflow-y:auto}
+    #rq2-root .rq2-rows{max-height:560px;overflow-y:auto}#rq2-root .rq2-all{margin-top:9px}#rq2-root .rq2-all>summary{padding:10px 8px;color:#cce9f0;cursor:pointer;font-size:12px;font-weight:700}#rq2-root .rq2-pair .rq2-row{margin-top:8px;border-color:#4b8777}
     #rq2-legacy{margin:8px 0}#rq2-legacy>summary{cursor:pointer;color:#b1c9d1;font-size:12px;padding:8px;border:1px solid #3d5e6d;border-radius:9px}
     html[data-race-gate]:not([data-race-gate="open"]) #rq2-root,
     html[data-race-gate]:not([data-race-gate="open"]) #rq2-legacy{display:none!important}
@@ -135,7 +126,7 @@
   function pane(){
     let root=$('rq2-root');const parent=$('rqfr-root')?.parentElement||$('imsTicket')||$('result');
     if(!parent)return null;
-    if(!root){root=document.createElement('section');root.id='rq2-root';root.setAttribute('aria-label','レース質2軸の相手馬検証');const old=$('rqfr-root');if(old?.parentElement===parent&&parent.insertBefore)parent.insertBefore(root,old);else parent.appendChild(root)}
+    if(!root){root=document.createElement('section');root.id='rq2-root';root.setAttribute('aria-label','軸馬と全馬のレース質診断');const old=$('rqfr-root');if(old?.parentElement===parent&&parent.insertBefore)parent.insertBefore(root,old);else parent.appendChild(root)}
     else if(root.parentElement!==parent)parent.appendChild(root);
     relocateLegacy();return root;
   }
@@ -158,31 +149,36 @@
       <label>縦方向｜前後の差<select data-rq2="longitudinal">${enumHtml(LONGITUDINAL,draft.longitudinal)}</select></label>
       <label>判断の確信度<select data-rq2="confidence">${enumHtml(CONF,draft.confidence)}</select></label>
       </div>`;
-    const formatNo=no=>{const r=result.rows?.find(z=>z.no===String(no));return r?`${E(r.no)}番 ${E(r.name)}`:`${E(no)}番`};
     let body=`<p class="rq2-note">${E(result.reason||'')}</p>`;
     if(result.ready){
-      const baseline=result.marketTop2.map(formatNo).join('・'),comparison=result.raceQualityTop2?.map(formatNo).join('・')||'判定保留';
-      const studyDetail=(result.raceQualityRanked||[]).slice(0,2).map(t=>`${E(t.rank)}位 ${formatNo(t.no)}：適合段階${t.score>0?'+':''}${E(t.score)}｜${E(t.reasons.join('、'))}`).join(' ／ ');
-      body=`<div class="rq2-pair"><small>現行本番相手（市場Top2）</small><strong>${baseline}</strong><small>レース質Top2｜研究用（本番の馬券ロジックには接続しない）</small><strong>${comparison}</strong><small>${E(result.raceQualityReason)}${studyDetail?' ／ '+studyDetail:''}</small></div>
-      <div class="rq2-rows">${result.rows.map(r=>{
-      const caution=r.level==='strong'?'強い複合注意':r.level==='watch'?'要確認':r.level==='unknown'?'データ不足':'通常';
-      const mark=[result.marketTop2.includes(r.no)?'市場Top2':'',result.raceQualityTop2?.includes(r.no)?'レース質Top2':''].filter(Boolean).join('・');
-      const fit=(result.raceQualityRanked||[]).find(t=>t.no===r.no);
-      return `<div class="rq2-row ${r.level==='strong'?'warn':''}">
-        <strong>${E(r.no)}番 ${E(r.name)} ${r.pop!==null?E(r.pop)+'人気':''}</strong><span class="rq2-tag">${E(caution)}</span>${mark?`<span class="rq2-tag">${E(mark)}</span>`:''}
-        <small>想定初角${r.expectedRank!==null?Math.round(r.expectedRank)+'位':'未判定'}｜予測レーン${r.lane!==null?['内ラチ','内','中','外'][r.lane]:'未取得'}。${E(r.accessDetail)}</small>
-        <small>横：${E(r.track)} ／ 移動：${E(r.move)}</small>
-        <small>縦：${E(r.position)}</small>
-        ${fit?`<small>研究用適合段階：${fit.score>0?'+':''}${E(fit.score)}｜${E(fit.reasons.join('、'))}</small>`:''}
-      </div>`}).join('')}</div>`;
+      const describe=r=>{
+        const caution=r.level==='strong'?'複合懸念':r.level==='watch'?'注意材料あり':r.level==='unknown'?'データ不足':'構造確認';
+        const why=r.fitReasons?.length&&Number.isFinite(r.fitScore)?r.fitReasons.join(' ／ '):'馬場・展開との適合は未判定';
+        return `<div class="rq2-row ${r.level==='strong'?'warn':''}">
+          <strong>${E(r.no)}番 ${E(r.name)} ${r.isAxis?'<span class="rq2-tag">今回の軸馬</span>':''}</strong>
+          <span class="rq2-tag">${E(caution)}</span>
+          <small>${r.pop!==null?E(r.pop)+'人気｜':''}単勝 ${r.odds!==null?E(r.odds)+'倍':'未入力'}｜想定初角 ${r.expectedRank!==null?Math.round(r.expectedRank)+'位':'未判定'}｜推定位置 ${r.lane!==null?['内ラチ','内','中','外'][r.lane]:'未取得'}</small>
+          <small>位置・進路：${E(r.accessDetail)}</small>
+          <small>内外：${E(r.track)}｜移動：${E(r.move)}</small>
+          <small>前後：${E(r.position)}</small>
+          <small>適合の根拠：${E(why)}</small>
+        </div>`;
+      };
+      const axis=result.rows.find(r=>r.isAxis);
+      body=`<div class="rq2-pair"><small>軸馬のレース質診断｜Ability × M3による軸を変更しません</small>
+          ${axis?describe(axis):'<strong>軸馬の判定待ち</strong>'}</div>
+        <details class="rq2-all" open><summary>全馬の内外・前後・進路を比較（${result.rows.length}頭）</summary>
+          <div class="rq2-rows">${result.rows.map(describe).join('')}</div>
+        </details>`;
     }
-    el.innerHTML=`<h3>レース質Top2 × 進路｜相手比較</h3>
-      <p class="rq2-note">観察した馬場を2項目で入力。AIが予測した位置・レーンと合わせ、相手馬の不利を確認する試験版。</p>
+    el.innerHTML=`<h3>軸馬 × レース質｜全馬の進路分析</h3>
+      <p class="rq2-note">相手候補の順位やTop2は出しません。観察した馬場の内外・前後を入力して、軸馬と全馬の想定位置・リスクを自分で比較できます。</p>
       ${inputs}${body}
       <div><button type="button" data-rq2-action="save" ${!result.ready||hasLog?'disabled':''}>${hasLog?'このレースは保存済み':'発走前の予測を保存'}</button>
       <button type="button" data-rq2-action="export">保存記録を出力</button></div>
       ${note?`<p class="rq2-note">${E(note)}</p>`:''}
-      <p class="rq2-note">適合段階は未較正の研究用指標で、好走確率ではありません。レーンは推定であり実走経路ではありません。CORE・M3・本番の相手Top2・購入判定は変更しません。</p>`;
+      <p class="rq2-note">研究用の条件診断です。適合点は好走確率ではありません。内外位置はモデル推定で、実走経路・壁の有無を確認したものではありません。Ability・M3・本番軸判定は変更しません。</p>`;
+
     window.RaceQualityTwoAxisV1State={...result,displayOnly:true,updatedAt:Date.now()};
   }
   function save(){
