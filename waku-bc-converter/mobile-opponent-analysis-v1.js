@@ -1,8 +1,7 @@
 (()=>{'use strict';
 if(!window.RSAMobileLean||window.__MOBILE_OPPONENT_ANALYSIS_V1)return;window.__MOBILE_OPPONENT_ANALYSIS_V1=true;
-const V='mobile-opponent-analysis-v1.4-readable-first',BUILD='20261110compareUI1',$=id=>document.getElementById(id);
-let raf=0,timer=0,last='',compare=[],compareRaceKey='',compareManual=false,listFilter='all',sortKey='no',paceOpen=false,m4Open=false;
-const openedCards=new Set();
+const V='mobile-opponent-analysis-v1.5-balanced-grid',BUILD='20261110balanced1',$=id=>document.getElementById(id);
+let raf=0,timer=0,last='',currentRaceKey='',selectedNo='',paceOpen=false,m4Open=false;
 const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const N=v=>{if(v===null||v===undefined||v==='')return NaN;const x=Number(v);return Number.isFinite(x)?x:NaN};
 const pct=(v,d=0)=>Number.isFinite(N(v))?`${(N(v)*100).toFixed(d)}%`:'—';
@@ -65,7 +64,7 @@ function m4Quick(no){
  return'<span class="moaM4Quick">選択M4 '+rank(s.selected)+d+' ｜ 上位5 '+(s.top5===null?'—':s.top5+'/4')+'</span>';
 }
 function m4Panel(rows,choice){
- const all=rows.filter(x=>!x.axis).map(x=>({...x,m4:m4Stats(x.no,choice)})).sort((a,b)=>Number(a.no)-Number(b.no));
+ const all=rows.map(x=>({...x,m4:m4Stats(x.no,choice)})).sort((a,b)=>Number(a.no)-Number(b.no));
  const shown=all.filter(x=>m4Filter==='all'||m4Kind(x.m4)===m4Filter);
  const fmt=x=>Number.isFinite(x)?'#'+x:'—';
  const delta=x=>!Number.isFinite(x)?'—':x>0?'↑'+x:x<0?'↓'+(-x):'±0';
@@ -98,125 +97,112 @@ function goodScenario(r,bias){if(bias&&(r.expectedRank<=5||r.front>=.55))return'
 function badScenario(r,pressure,bias){if(r.p10>=.5)return'後方化して位置取り差を埋める負荷が大きくなる形。';if(pressure==='高'&&r.front>=.55)return'先行争いに巻き込まれ、前半で脚を使う形。';if(bias&&r.expectedRank>8)return'前有利の馬場で後ろからになり、位置取り差が残る形。';if(r.histN<3)return'昇級・履歴不足で、過去材料からの評価が安定しない形。';return'M3が下がる展開や想定より悪い位置取りになった形。'}
 function maxRisk(r,pressure,bias){return risks(r,pressure,bias)[0]||'大きな単独リスクなし'}
 function priceJudge(no){const w=N(pref(no,'wide')),min=N(pref(no,'min'));if(!Number.isFinite(w)&&!Number.isFinite(min))return'ワイド価格を入れると、リスクと価格を同じ場所で比較できます。';if(Number.isFinite(w)&&Number.isFinite(min))return w>=min?`現在 ${w.toFixed(1)}倍 ≥ 自分の最低ライン ${min.toFixed(1)}倍。価格条件は満たしています。`:`現在 ${w.toFixed(1)}倍 ＜ 自分の最低ライン ${min.toFixed(1)}倍。価格面では待ち。`;if(Number.isFinite(w))return`現在ワイド ${w.toFixed(1)}倍。上のリスクをこの価格で許容するか判断。`;return`自分の最低ライン ${min.toFixed(1)}倍。現在ワイドを入力して比較。`}
-function card(r,kind,pressure,bias,open=false){
+function miniCard(r){
+ const active=selectedNo===String(r.no);
+ const p=Number(r.p10),risk=Number.isFinite(p)?p>=.5?'caution':p>=.2?'attention':'low':'unknown';
+ return '<button type="button" class="moaGridCard'+(active?' active':'')+'" data-oa-open-horse="'+E(r.no)+'" aria-expanded="'+(active?'true':'false')+'" aria-controls="moaHorseDetail">'+
+  '<span class="moaGridHead"><span class="moaGridNo">'+E(r.no)+'</span><span class="moaGridRole">'+(r.pair?'Pair候補':r.axis?'軸馬':'')+'</span></span>'+
+  '<strong class="moaGridName">'+E(r.name)+'</strong>'+
+  '<span class="moaGridMetrics"><span><small>Ability</small><b>'+rank(r.abilityRank)+'</b></span><span><small>M3</small><b>'+rank(r.m3Rank)+'</b></span>'+
+  '<span class="moaGridP10 '+risk+'"><small>P10</small><b>'+pct(r.p10)+'</b></span><span><small>想定位置</small><b>'+E(r.position||'—')+'</b></span></span>'+
+  '<span class="moaGridMarket">'+(Number.isFinite(r.pop)?r.pop+'人気':'人気未入力')+'<i>・</i>単勝 '+(Number.isFinite(r.winOdds)?r.winOdds.toFixed(1)+'倍':'—')+'</span>'+
+  '<span class="moaGridMore">'+(active?'分析を表示中':'タップで詳しく見る')+'</span></button>';
+}
+function horseDetail(r,pressure,bias){
  const good=strengths(r,bias),bad=risks(r,pressure,bias),sc=scenarioInfo(r),w=pref(r.no,'wide'),mn=pref(r.no,'min');
- const riskClass=Number.isFinite(r.p10)?r.p10>=.5?'high':r.p10>=.2?'mid':'low':'unknown';
- const pop=Number.isFinite(r.pop)?r.pop+'人気':'人気未入力';
  const odds=Number.isFinite(r.winOdds)?r.winOdds.toFixed(1)+'倍':'—';
- return `<div class="moaItemWrap${r.pair?' isPair':''}" data-moa-item="${E(r.no)}">
- <details class="moaCard ${kind}${r.pair?' moaPair':''}" data-moa-no="${E(r.no)}"${open?' open':''}>
-  <summary>
-   <span class="moaNo">${E(r.no)}</span>
-   <span class="moaSummaryCore">
-    <span class="moaHorseTitle">${E(r.name)}</span>
-    <span class="moaSummaryRanks"><span>Ability <b>${rank(r.abilityRank)}</b></span><span>M3 <b>${rank(r.m3Rank)}</b></span><span class="moaP10Mini ${riskClass}">P10 <b>${pct(r.p10)}</b></span></span>
-    <span class="moaSummarySub">想定 ${E(r.position||'—')} <i>／</i> ${E(pop)} <i>／</i> 単勝 ${E(odds)}</span>
-   </span>
-   <span class="moaSummaryEnd"><span class="moaOpenCue">詳細を見る</span>${r.pair?'<span class="moaPairTag">Pair</span>':riskClass==='high'?'<span class="moaCautionTag">後方注意</span>':''}</span>
-  </summary>
-  <div class="moaBody">
-   <p class="moaDetailLead">モデルの順位と位置取りを比較する参考情報です。自動的な相手馬推奨ではありません。</p>
-   <div class="moaSix">
-    <div class="moaLens"><span>市場評価</span><b>${E(pop)} ／ ${E(odds)}</b></div>
-    <div class="moaLens"><span>Ability・3着内参考</span><b>${rank(r.abilityRank)} ／ ${pct(r.abilityP3)}</b></div>
-    <div class="moaLens"><span>M3・今回の構造</span><b>${rank(r.m3Rank)} ／ ${E(sc.label)}</b></div>
-    <div class="moaLens ${riskClass==='high'?'risk':''}"><span>想定位置・P10</span><b>${E(r.position||'—')} ／ ${pct(r.p10)}</b></div>
-   </div>
-   <div class="moaDetailM4">${m4Quick(r.no)}</div>
-   <div class="moaReason">
-    <div class="moaBox moaGood"><b>好走につながる材料</b><p>${good.length?good.map(x=>`・${E(x)}`).join('<br>'):'強い単独材料は少なめ。複数の指標を確認。'}</p></div>
-    <div class="moaBox moaBad"><b>凡走につながるリスク</b><p>${bad.length?bad.map(x=>`・${E(x)}`).join('<br>'):'現時点で目立つ単独リスクは少なめ。'}</p></div>
-    <div class="moaBox moaScenario"><b>好走できる展開</b><p>${E(goodScenario(r,bias))}</p><b>崩れる展開</b><p>${E(badScenario(r,pressure,bias))}</p></div>
-    <div class="moaBox moaThink"><b>市場と展開の見方</b><p>${E(marketView(r))}。${E(scenarioText(r))}</p></div>
-   </div>
-   <div class="moaPriceBox">
-    <div class="moaPriceHead">ワイド価格を自分で確認 <small>価格条件は買い推奨ではありません</small></div>
-    <div class="moaPriceGrid"><label>現在のワイドオッズ<input data-oa-wide="${E(r.no)}" inputmode="decimal" placeholder="例 6.5" value="${E(w)}"></label><label>自分の最低ライン<input data-oa-min="${E(r.no)}" inputmode="decimal" placeholder="例 5.0" value="${E(mn)}"></label></div>
-    <div class="moaPriceJudge" data-oa-judge="${E(r.no)}">${E(priceJudge(r.no))}</div>
-   </div>
-  </div>
- </details>
- <button type="button" class="moaQuickCompare${compare.includes(r.no)?' on':''}" data-oa-compare="${E(r.no)}" aria-pressed="${compare.includes(r.no)?'true':'false'}">${compare.includes(r.no)?'✓ 比較に選択中':'＋ 2頭比較に追加'}</button>
- </div>`;
+ return '<section id="moaHorseDetail" class="moaSelectedDetail" aria-label="'+E(r.name)+'の詳細分析">'+
+  '<header class="moaDetailHead"><div><small>'+E(r.no)+'番・選択した馬の詳細</small><h3>'+E(r.name)+'</h3></div>'+
+  '<button type="button" data-oa-close-horse aria-label="詳細を閉じる">閉じる ×</button></header>'+
+  '<div class="moaBody">'+
+  '<div class="moaSix">'+
+  '<div class="moaLens"><span>市場評価</span><b>'+(Number.isFinite(r.pop)?r.pop+'人気':'—')+' ／ '+E(odds)+'</b></div>'+
+  '<div class="moaLens"><span>Ability・3着内参考</span><b>'+rank(r.abilityRank)+' ／ '+pct(r.abilityP3)+'</b></div>'+
+  '<div class="moaLens"><span>M3・今回の構造</span><b>'+rank(r.m3Rank)+' ／ '+E(sc.label)+'</b></div>'+
+  '<div class="moaLens '+(r.p10>=.5?'risk':'')+'"><span>想定位置・P10</span><b>'+E(r.position||'—')+' ／ '+pct(r.p10)+'</b></div>'+
+  '</div><div class="moaDetailM4">'+m4Quick(r.no)+'</div>'+
+  '<div class="moaReason">'+
+  '<div class="moaBox moaGood"><b>好走材料</b><p>'+(good.length?good.map(x=>'・'+E(x)).join('<br>'):'強い単独材料は少なめ。複数の指標を確認。')+'</p></div>'+
+  '<div class="moaBox moaBad"><b>凡走リスク</b><p>'+(bad.length?bad.map(x=>'・'+E(x)).join('<br>'):'現時点で目立つ単独リスクは少なめ。')+'</p></div>'+
+  '<div class="moaBox moaScenario"><b>好走できる展開</b><p>'+E(goodScenario(r,bias))+'</p><b>崩れる展開</b><p>'+E(badScenario(r,pressure,bias))+'</p></div>'+
+  '<div class="moaBox moaThink"><b>市場・展開の評価</b><p>'+E(marketView(r))+'。'+E(scenarioText(r))+'</p></div></div>'+
+  '<div class="moaPriceBox"><div class="moaPriceHead">ワイド価格の確認<small>価格を満たしても自動購入判断はしません</small></div>'+
+  '<div class="moaPriceGrid"><label>現在のワイド<input data-oa-wide="'+E(r.no)+'" inputmode="decimal" placeholder="例 6.5" value="'+E(w)+'"></label>'+
+  '<label>自分の最低ライン<input data-oa-min="'+E(r.no)+'" inputmode="decimal" placeholder="例 5.0" value="'+E(mn)+'"></label></div>'+
+  '<div class="moaPriceJudge" data-oa-judge="'+E(r.no)+'">'+E(priceJudge(r.no))+'</div></div>'+
+  '</div></section>';
 }
 function canonicalPace(){const t=window.RSAAnalysisTransitionState,c=window.MobileAnalysisCoreState;if(t?.status!=='ready'||!c?.ready||Number(c.generation)!==Number(t.generation))return null;const v=c.analysis?.pred?.p;if(!Array.isArray(v)||v.length!==4)return null;const a=v.map(x=>x===null||x===undefined||x===''?NaN:Number(x));if(!a.every(x=>Number.isFinite(x)&&x>=0))return null;const s=a.reduce((u,v)=>u+v,0);return s>0?a.map(x=>x/s):null}
 function paceHtml(){const p=canonicalPace();return`<div class="moaPace">${SCL.map((k,i)=>`<div><span>${k}</span><b>${p?pct(p[i]):'—'}</b></div>`).join('')}</div>`}
-function scenarioTop(rows){const labs=['強前傾','前傾','標準','スロー'];const others=rows.filter(r=>!r.axis);return labs.map((lab,i)=>{const usable=others.filter(r=>Number.isFinite(r.sc[i]));const top5=usable.filter(r=>r.sc[i]<=5).length;return `<div class="moaScenarioRow"><span>${lab}</span><b>上位5以内：${top5} / ${usable.length}頭</b></div>`}).join('')}
+function scenarioTop(rows){const labs=['強前傾','前傾','標準','スロー'];const others=rows;return labs.map((lab,i)=>{const usable=others.filter(r=>Number.isFinite(r.sc[i]));const top5=usable.filter(r=>r.sc[i]<=5).length;return `<div class="moaScenarioRow"><span>${lab}</span><b>上位5以内：${top5} / ${usable.length}頭</b></div>`}).join('')}
 
-function compareHtml(byNo){if(compare.length!==2)return'<div class="moaEmpty">比較したい馬を2頭選ぶと、同じ項目で直接比較できます。</div>';const a=byNo[compare[0]],b=byNo[compare[1]];if(!a||!b)return'';const row=(l,x,y)=>`<span>${E(l)}</span><b>${E(x)}</b><b>${E(y)}</b>`;return`<div class="moaCompare"><h4>VS比較｜${E(a.no)} ${E(a.name)} vs ${E(b.no)} ${E(b.name)}</h4><div class="moaVs">${row('',`${a.no} ${a.name}`,`${b.no} ${b.name}`)}${row('市場',Number.isFinite(a.pop)?`${a.pop}人気`:'—',Number.isFinite(b.pop)?`${b.pop}人気`:'—')}${row('Ability',rank(a.abilityRank),rank(b.abilityRank))}${row('M3',rank(a.m3Rank),rank(b.m3Rank))}${row('P10',pct(a.p10),pct(b.p10))}${row('想定位置',a.position||'—',b.position||'—')}${row('ワイド',Number.isFinite(N(pref(a.no,'wide')))?`${N(pref(a.no,'wide')).toFixed(1)}倍`:'—',Number.isFinite(N(pref(b.no,'wide')))?`${N(pref(b.no,'wide')).toFixed(1)}倍`:'—')}</div><div class="moaRule">「どちらが上か」の総合点は作りません。信頼性を取るか、今回条件と価格を取るかを同じ材料で比較します。</div></div>`}
+
 function axisExtra(rows){if(window.DecisionShellV2State?.structure?.kind==='double')return'';const prod=window.ProductionDecisionPipelineV1State,a=prod?.stages?.axis;if(!a?.no)return'';const r=rows.find(x=>x.no===String(a.no));if(!r)return'';const high=window.AxisReliabilityShadowV1State?.high&&String(window.AxisReliabilityShadowV1State?.axis?.no)===r.no,pressure=window.MobileRaceMapPaceV1State?.pressure||'',bad=risks(r,pressure,false);return`<div class="moaAxisExtra"><h3>${high?'🟢 HIGH｜':''}軸馬の確認ポイント</h3><p>Ability ${rank(r.abilityRank)}・M3 ${rank(r.m3Rank)}・P10 ${pct(r.p10)}。軸の良さだけでなく、崩れる条件を先に確認します。</p><div class="moaAxisBadges">${bad.length?bad.map(x=>`<span class="moaAxisBadge warn">⚠ ${E(x)}</span>`).join(''):'<span class="moaAxisBadge">大きな単独リスクなし</span>'}</div></div>`}
 function render(){
  css();
  const sh=shell();if(!sh){schedule(220);return}
- const rows=dataRows(),choice=chosenM4(),byNo=Object.fromEntries(rows.map(r=>[r.no,r]));
- const prod=window.ProductionDecisionPipelineV1State,pairMode=window.DecisionShellV2State?.structure?.kind==='double';
- const axis=pairMode?'':String(prod?.stages?.axis?.no||'');
- const pace=window.MobileRaceMapPaceV1State;
+ const rows=dataRows(),choice=chosenM4(),prod=window.ProductionDecisionPipelineV1State;
+ const pairMode=window.DecisionShellV2State?.structure?.kind==='double';
  const pressure=String(canonicalPace()?window.MobileAnalysisCoreState?.analysis?.pressure||'':'');
- const prefs=loadPrefs(),bias=Boolean(prefs.__frontBias);
- const key=raceKey()+'|'+String($('csvFile')?.files?.[0]?.name||'');
- if(key!==compareRaceKey){compareRaceKey=key;compare=[];compareManual=false;openedCards.clear();listFilter='all';sortKey='no';paceOpen=false;m4Open=false;last=''}
- if(pairMode&&!compareManual&&compare.length===0){
-  const pair=window.DecisionShellV2State?.structure?.candidates||[];
-  if(pair.length===2)compare=pair.map(r=>String(r.no));
- }
- const allOthers=rows.filter(r=>!r.axis);
- const matches=r=>listFilter==='all'||listFilter==='pair'&&r.pair||listFilter==='top'&&(r.abilityRank<=3||r.m3Rank<=3)||listFilter==='p10'&&r.p10>=.5;
- const filtered=allOthers.filter(matches);
- const sorted=[...filtered].sort((a,b)=>sortKey==='ability'?(a.abilityRank||99)-(b.abilityRank||99)||Number(a.no)-Number(b.no):sortKey==='m3'?(a.m3Rank||99)-(b.m3Rank||99)||Number(a.no)-Number(b.no):sortKey==='p10'?(Number.isFinite(a.p10)?a.p10:99)-(Number.isFinite(b.p10)?b.p10:99)||Number(a.no)-Number(b.no):Number(a.no)-Number(b.no));
- const filters=[['all','全頭',allOthers.length],...(pairMode?[['pair','Pair',allOthers.filter(r=>r.pair).length]]:[]),['top','Ability/M3上位',allOthers.filter(r=>r.abilityRank<=3||r.m3Rank<=3).length],['p10','P10 50%以上',allOthers.filter(r=>r.p10>=.5).length]];
- const btns=filters.map(([k,l,n])=>`<button type="button" class="moaControl${listFilter===k?' on':''}" data-oa-list-filter="${E(k)}" aria-pressed="${listFilter===k?'true':'false'}">${E(l)} <span>${n}</span></button>`).join('');
- const sorts=[['no','馬番'],['ability','Ability順'],['m3','M3順'],['p10','P10低い順']];
- const sortBtns=sorts.map(([k,l])=>`<button type="button" class="moaSort${sortKey===k?' on':''}" data-oa-sort="${k}" aria-pressed="${sortKey===k?'true':'false'}">${l}</button>`).join('');
- const sig=JSON.stringify([prod?.at,window.M3PureAbilityState?.at,window.Finish600State?.at,window.ValidatedQueueState?.at,window.PositionRiskState?.at,window.FourAbilityProfileV1State?.at,pace?.at,window.MobileAnalysisCoreState?.at,window.RSAAnalysisTransitionState?.generation,canonicalPace(),axis,pairMode,bias,choice.band,choice.source,m4Filter,listFilter,sortKey,paceOpen,m4Open,[...openedCards].sort(),allOthers.map(r=>[r.no,r.pop,r.abilityRank,r.m3Rank,r.p10,r.winOdds]),compare]);
+ const prefs=loadPrefs(),bias=Boolean(prefs.__frontBias),key=raceKey()+'|'+String($('csvFile')?.files?.[0]?.name||'');
+ if(key!==currentRaceKey){currentRaceKey=key;selectedNo='';paceOpen=false;m4Open=false;last=''}
+ if(selectedNo&&!rows.some(r=>String(r.no)===selectedNo))selectedNo='';
+ const all=[...rows].sort((a,b)=>Number(a.no)-Number(b.no));
+ const selIdx=all.findIndex(r=>String(r.no)===selectedNo),selRow=selIdx<0?-1:Math.floor(selIdx/2);
+ const sig=JSON.stringify([prod?.at,window.M3PureAbilityState?.at,window.Finish600State?.at,window.ValidatedQueueState?.at,window.PositionRiskState?.at,window.FourAbilityProfileV1State?.at,window.MobileAnalysisCoreState?.at,window.RSAAnalysisTransitionState?.generation,canonicalPace(),pairMode,bias,choice.band,choice.source,m4Filter,selectedNo,paceOpen,m4Open,all.map(r=>[r.no,r.name,r.axis,r.pair,r.pop,r.abilityRank,r.m3Rank,r.p10,r.position,r.winOdds])]);
  if(sig===last&&sh.root.dataset.ready==='1')return;last=sig;
- const biasRows=rows.filter(r=>!r.axis&&(r.expectedRank<=5||r.front>=.55));
+ const biasRows=all.filter(r=>r.expectedRank<=5||r.front>=.55);
+ const cards=all.map((r,i)=>{
+  const tile=miniCard(r),endOfRow=i%2===1||i===all.length-1;
+  return tile+(endOfRow&&selRow===Math.floor(i/2)?horseDetail(all[selIdx],pressure,bias):'');
+ }).join('');
  sh.root.innerHTML=`
  <div class="moaHead">
-  <small>HORSE COMPARISON</small><h2>${pairMode?'Pairと全馬を比較':'相手馬の比較分析'}</h2>
-  <p>${pairMode?'Pairの2頭は自動で比較欄に表示。どちらも単独軸に確定していません。':'軸馬以外の馬を同じ指標で比較します。'}順位・リスクと、好走できる展開を分けて確認。</p>
-  <div class="moaGuide"><span>1. 指標で絞る</span><span>2. 詳細を確認</span><span>3. 2頭を比較</span></div>
+  <small>ALL HORSES / ANALYSIS</small><h2>全頭のバランス比較</h2>
+  <p>全${all.length}頭を馬番順に同じ大きさで表示します。${pairMode?'Pairの2頭も他馬と同じサイズです。':'軸馬も含めて全頭を確認できます。'} 気になる馬をタップすると詳細を開けます。</p>
  </div>
- <section class="moaSec moaCompareSection" id="moaCompareTop">
-  <div class="moaSecHead"><h3>2頭の直接比較</h3><span>選択 ${compare.length}/2</span></div>
-  <div class="moaRule">Ability・M3・P10・位置取りを横並びで確認。2頭を選ぶこと自体は買い目の推奨ではありません。</div>
-  ${compareHtml(byNo)}
-  ${compare.length?`<button type="button" class="moaCompareClear" data-oa-clear-compare>選択を解除</button>`:''}
- </section>
- <section class="moaSec moaHorseSection">
-  <div class="moaSecHead"><h3>全馬の一覧</h3><span>${sorted.length} / ${allOthers.length}頭</span></div>
-  <div class="moaControls" role="group" aria-label="表示する馬を絞り込む">${btns}</div>
-  <div class="moaSortRow"><span>並び順</span><div role="group" aria-label="馬の並び順">${sortBtns}</div></div>
-  <p class="moaRule">Ability・M3は順位。P10は後方10番手以下になる予測確率。フィルターは予想を変更しません。</p>
-  <div class="moaList">${sorted.length?sorted.map(r=>card(r,'all',pressure,bias,openedCards.has(r.no))).join(''):'<div class="moaEmpty">この条件に該当する馬はいません。別の絞り込みを選んでください。</div>'}</div>
+ <section class="moaSec moaBalancedSection">
+  <div class="moaSecHead"><h3>全馬一覧</h3><span>${all.length}頭 / 馬番順</span></div>
+  <p class="moaRule">Ability・M3は順位、P10は後方になる予測確率。カードの位置や色は購入推奨順位ではありません。</p>
+  <div class="moaBalancedGrid">${cards||'<div class="moaEmpty">解析データを読み込んでいます。</div>'}</div>
+  <p class="moaRule">※TARGET CSV由来の馬番は出走馬の出力順からの仮付番です。確定馬番と照合してください。</p>
  </section>
  <details class="moaOptional" data-oa-section="pace"${paceOpen?' open':''}>
-  <summary>展開・先行圧を確認 <span>${E(pressure||'—')} ／ タップで開く</span></summary>
-  <div class="moaOptionalBody"><p class="moaRule">レース全体の展開参考情報。自動的に馬を推奨する表示ではありません。</p>${paceHtml()}<div class="moaScenarioRows">${scenarioTop(rows)}</div><div class="moaBiasCtl"><b>前有利バイアスを仮定する</b><button type="button" data-oa-bias>${bias?'ON ✓':'OFF'}</button></div>${bias?`<p class="moaRule">前目想定 ${biasRows.length}頭。各馬の好走/凡走リスクを確認。</p>`:'<p class="moaRule">任意の研究用スイッチ。モデル順位を変更しません。</p>'}</div>
+  <summary>展開・先行圧を確認 <span>${E(pressure||'—')} ／ 必要時に開く</span></summary>
+  <div class="moaOptionalBody"><p class="moaRule">レース全体の展開参考情報。自動的な相手馬推奨ではありません。</p>${paceHtml()}<div class="moaScenarioRows">${scenarioTop(rows)}</div><div class="moaBiasCtl"><b>前有利バイアスを仮定</b><button type="button" data-oa-bias>${bias?'ON ✓':'OFF'}</button></div>${bias?'<p class="moaRule">前目想定 '+biasRows.length+'頭。各馬の好走・凡走リスクを確認。</p>':'<p class="moaRule">研究用スイッチ。モデルの順位は変更しません。</p>'}</div>
  </details>
  <details class="moaOptional" data-oa-section="m4"${m4Open?' open':''}>
-  <summary>展開別M4の詳しい分析 <span>4シナリオ ／ タップで開く</span></summary>
+  <summary>展開別M4の詳細を見る <span>4シナリオ ／ 必要時に開く</span></summary>
   <div class="moaOptionalBody">${m4Panel(rows,choice)}</div>
  </details>`;
  sh.root.dataset.ready='1';
- const c=$('mpuConclusion');
- if(c&&!$('moaAxisExtra'))c.insertAdjacentHTML('beforeend',`<div id="moaAxisExtra">${axisExtra(rows)}</div>`);
+ const conclusion=$('mpuConclusion');
+ if(conclusion&&!$('moaAxisExtra'))conclusion.insertAdjacentHTML('beforeend',`<div id="moaAxisExtra">${axisExtra(rows)}</div>`);
  else if($('moaAxisExtra'))$('moaAxisExtra').innerHTML=axisExtra(rows);
- window.MobileOpponentAnalysisV1State={ready:true,version:V,build:BUILD,displayOnly:true,productionChanged:false,sixLenses:['市場','能力','今回構造','位置・展開','リスク','価格'],marketNos:[],watchNos:[],analysisNos:allOthers.map(r=>r.no),frontBiasManual:bias,compare:[...compare],listFilter,sortKey,shownHorseCount:sorted.length,m4ComparisonDisplayOnly:true,paceSource:'MobileAnalysisCoreState',paceProbabilities:canonicalPace(),m4Filter,selectedM4Band:choice.band,selectedM4Source:choice.source,at:Date.now()}
+ window.MobileOpponentAnalysisV1State={ready:true,version:V,build:BUILD,displayOnly:true,productionChanged:false,sixLenses:['市場','能力','今回構造','位置・展開','リスク','価格'],marketNos:[],watchNos:[],analysisNos:all.map(r=>r.no),selectedNo,horseCount:all.length,equalCards:true,frontBiasManual:bias,m4ComparisonDisplayOnly:true,paceSource:'MobileAnalysisCoreState',paceProbabilities:canonicalPace(),m4Filter,selectedM4Band:choice.band,selectedM4Source:choice.source,at:Date.now()};
 }
 addEventListener('race-progress-scenario-selected',()=>{last='';schedule(70)});
 addEventListener('rsa-analysis-start',()=>{m4Filter='all';last='';});
-document.addEventListener('toggle',e=>{
+document.addEventListener('toggle',function(ee){
  const t=e.target;
- if(t?.matches?.('details[data-moa-no]')){const no=String(t.dataset.moaNo);if(t.open)openedCards.add(no);else openedCards.delete(no)}
  if(t?.matches?.('details[data-oa-section="pace"]'))paceOpen=t.open;
  if(t?.matches?.('details[data-oa-section="m4"]'))m4Open=t.open;
 },true);
-document.addEventListener('click',e=>{
- const fil=e.target.closest?.('[data-oa-list-filter]');if(fil){listFilter=fil.dataset.oaListFilter;last='';schedule();return}
- const sort=e.target.closest?.('[data-oa-sort]');if(sort){sortKey=sort.dataset.oaSort;last='';schedule();return}
- if(e.target.closest?.('[data-oa-clear-compare]')){compare=[];compareManual=true;last='';schedule();return}
- const go=e.target.closest?.('[data-oa-open-ledger]');if(go){const ledger=$('mobilePredictionLedger');if(ledger){document.querySelector('[data-ims-tab="ticket"]')?.click();ledger.open=true;ledger.scrollIntoView?.({behavior:'smooth',block:'start'});}return}const f=e.target.closest?.('[data-oa-m4-filter]');if(f){setM4Filter(f.dataset.oaM4Filter);last='';schedule();return}const c=e.target.closest?.('[data-oa-compare]');if(c){const no=String(c.dataset.oaCompare);compare=compare.includes(no)?compare.filter(x=>x!==no):[...compare,no].slice(-2);compareManual=true;last='';schedule();if(compare.length===2)setTimeout(()=>$('moaCompareTop')?.scrollIntoView?.({behavior:'smooth',block:'start'}),150);return}if(e.target.closest?.('[data-oa-bias]')){const p=loadPrefs();p.__frontBias=!p.__frontBias;savePrefs(p);last='';schedule();return}if(['analyzeBtn','applyOddsBtn','parseCsvBtn','clearOddsBtn'].includes(e.target?.id))schedule(180)},true);
+document.addEventListener('click',function(ee){
+ const open=e.target.closest?.('[data-oa-open-horse]');
+ if(open){
+  const no=String(open.dataset.oaOpenHorse||'');selectedNo=selectedNo===no?'':no;last='';schedule();
+  if(selectedNo)setTimeout(()=>$('moaHorseDetail')?.scrollIntoView?.({behavior:'smooth',block:'nearest'}),150);
+  return;
+ }
+ if(e.target.closest?.('[data-oa-close-horse]')){selectedNo='';last='';schedule();return}
+ const go=e.target.closest?.('[data-oa-open-ledger]');
+ if(go){const ledger=$('mobilePredictionLedger');if(ledger){document.querySelector('[data-ims-tab="ticket"]')?.click();ledger.open=true;ledger.scrollIntoView?.({behavior:'smooth',block:'start'})}return}
+ const filter=e.target.closest?.('[data-oa-m4-filter]');
+ if(filter){setM4Filter(filter.dataset.oaM4Filter);last='';schedule();return}
+ if(e.target.closest?.('[data-oa-bias]')){const p=loadPrefs();p.__frontBias=!p.__frontBias;savePrefs(p);last='';schedule();return}
+ if(['analyzeBtn','applyOddsBtn','parseCsvBtn','clearOddsBtn'].includes(e.target?.id))schedule(180);
+},true);
 document.addEventListener('input',e=>{const no=e.target?.dataset?.oaWide||e.target?.dataset?.oaMin;if(no){const k=e.target.dataset.oaWide?'wide':'min';setPref(no,k,e.target.value);const j=document.querySelector(`[data-oa-judge="${CSS.escape(String(no))}"]`);if(j)j.textContent=priceJudge(no);return}if(['raceName','raceDate','venue','surface','distance','grade','going','oddsPaste'].includes(e.target?.id))schedule(120)},true);
 ['production-decision-pipeline-ready','opponent-candidate-pool-ready','m3-pure-ability-ready','finish600-ready','validated-queue-ready','position-risk-ready','mobile-race-map-pace-ready','axis-reliability-shadow-ready','four-ability-profile-ready','five-ability-profile-v2-ready','rsa-analysis-complete','mobile-analysis-consistency-ready'].forEach(ev=>addEventListener(ev,()=>schedule(70)));
 function start(){schedule(220);setTimeout(()=>schedule(),850)}if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();
