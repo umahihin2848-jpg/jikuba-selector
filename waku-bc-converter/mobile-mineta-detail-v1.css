@@ -28,3 +28,19 @@ body.iosMobileShellV2 #mpsRoot{display:none!important}
  #moaRoot .moaMinetaPosition{grid-template-columns:1fr}
  #moaRoot .moaMineta>header h4{font-size:15px!important}
 }
+
+/* Restore readable companion analysis that is injected below the selected horse only. */
+#moaRoot #moaHorseDetail .mofFit,
+#moaRoot #moaHorseDetail .modd {padding:12px!important;margin-top:12px!important;border-radius:12px!important}
+#moaRoot #moaHorseDetail .mofFitHead b,
+#moaRoot #moaHorseDetail .moddHead b {font-size:13px!important;line-height:1.5!important}
+#moaRoot #moaHorseDetail .mofFitHead span,
+#moaRoot #moaHorseDetail .moddHead span {font-size:11px!important;color:#adcad7!important}
+#moaRoot #moaHorseDetail .mofFitKey {font-size:13px!important;line-height:1.55!important}
+#moaRoot #moaHorseDetail .mofFitRow {font-size:12px!important;line-height:1.65!important;padding:9px!important}
+#moaRoot #moaHorseDetail .mofFitFoot,
+#moaRoot #moaHorseDetail .moddFoot {font-size:11px!important;line-height:1.7!important}
+#moaRoot #moaHorseDetail .moddItem {padding:10px!important}
+#moaRoot #moaHorseDetail .moddLabel {font-size:11px!important;line-height:1.5!important}
+#moaRoot #moaHorseDetail .moddTitle {font-size:13px!important;line-height:1.5!important;margin-top:5px!important}
+#moaRoot #moaHorseDetail .moddText {font-size:12px!important;line-height:1.7!important;margin-top:6px!important}
