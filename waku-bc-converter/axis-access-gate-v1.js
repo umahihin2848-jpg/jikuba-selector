@@ -20,6 +20,7 @@ function classify(transition,decision,gate){
    // but a Pair is never treated as a confirmed *single* axis by this UI.
    if(candidates.length!==2||!candidates.some(x=>Number(x.ar)===1)||gate?.status==='skip')
      return{status:'skip',title:'見送り',reason:'Pair構造の信頼条件を満たしていません。'};
+   if(gate?.status!=='open')return{status:'checking',title:'Pair判定中',reason:'対象レースとAbility・M3の安全条件を確認しています。'};
    if(f.level==='red'||f.level==='neutral')return{status:'skip',title:'見送り',reason:'本番の安全条件を満たしていません。'};
    if(!d.market?.complete||f.level==='wait')
      return{status:'market',title:'市場判定待ち',reason:'Pair構造を確認しました。全頭単勝オッズ入力後に2頭の比較を表示します。'};
