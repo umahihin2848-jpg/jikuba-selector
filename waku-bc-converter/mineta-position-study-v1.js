@@ -3,7 +3,7 @@
 if(window.MinetaPositionStudyV1)return;
 const C=window.ShapeCore;
 if(!C)return;
-const V="mineta-position-study-v1.0-research";
+const V="mineta-position-study-v1.1-research-snapshot";
 const $=id=>document.getElementById(id);
 const esc=v=>String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const num=v=>v==null||String(v).trim()===""?NaN:Number(String(v).normalize("NFKC").trim());
@@ -162,7 +162,7 @@ function css(){
   "#mpsRoot .mpsBody{border-top:1px solid #315163;padding:9px;color:#bcd2de;font-size:11px}#mpsRoot .mpsNotice{margin-top:10px;font-size:10px;color:#b0b9bd}"+
   "#mpsRoot .mpsEmpty{font-size:11px;color:#8ea8b8;margin-top:5px}#mpsRoot .mpsBar{height:6px;background:#1c3c4d;border-radius:99px;overflow:hidden;margin-top:7px}"+
   "#mpsRoot .mpsBar>span{height:100%;display:block;background:#4b9b91;max-width:100%}"+
-  "#mpsRoot .mpsLink{display:inline-block;color:#95ddc7;text-decoration:underline;margin-top:8px}"+
+  "#mpsRoot .mpsLink{display:inline-block;color:#95ddc7;text-decoration:underline;margin-top:8px}#mpsRoot .mpsExport{margin:4px 0 7px;padding:9px 11px;border:1px solid #5c8374;border-radius:10px;color:#d8f4e9;background:#11392f;font-weight:800;font-size:12px}"+
   "@media(max-width:390px){#mpsRoot{padding:9px}#mpsRoot .mpsMeta{font-size:9px}}";
   document.head.appendChild(style);
 }
@@ -202,7 +202,51 @@ function buildHtml(state,phase){
     '<a href="https://www.keiba-salon.com/mineta-quotations-20250129_63441/" target="_blank" rel="noopener noreferrer">逃げハサミ</a>・'+
     '<a href="https://www.keiba-salon.com/mineta-quotations-20230606_6493/" target="_blank" rel="noopener noreferrer">逃げ馬の外</a>。判定閾値の一部はアプリ独自の研究用仮定。</div>'+
     '<a href="#moaRoot" class="mpsLink">全馬分析で能力・馬場・M4を確認</a>';
+  html+='<div class="mpsNotice"><button type="button" data-mps-export="1" class="mpsExport">発走前の研究データをCSV保存</button>'+
+    '<div>今回の全出走馬（抽出されなかった馬も含む）と、抽出条件・モデル版・記録時刻を保存します。必ず発走前に保存してください。これは実馬番との対応や発走前保存を自動保証する機能ではありません。</div></div>';
   return html;
+}
+function snapshotRows(state,meta,at){
+  if(!state?.ready||!Array.isArray(state.rows))return [];
+  const t=String(at||new Date().toISOString()),m=meta||{},axis=String(state.axis?.no||'');
+  return state.rows.map(r=>({
+    snapshot_utc:t,model_build:String(m.build||''),signal_version:V,
+    race_date:String(m.raceDate||''),race_name:String(m.raceName||''),venue:String(m.venue||''),
+    grade:String(m.grade||''),surface:String(m.surface||''),distance:String(m.distance||''),
+    field_size:state.field,source_csv:String(m.csv||''),
+    horse_no:r.no,horse_name:r.name,axis_no:axis,axis_candidate:r.no===axis?1:0,
+    prior_date:r.prior?.date||'',prior_known:r.known?1:0,
+    prior_front_any_corner:r.known&&r.priorFront?1:0,
+    prior_initial_lead:r.known&&r.priorLead?1:0,
+    prior_first_corner:r.first??'',prior_last_corner:r.last??'',
+    previous_finish:r.finish??'',prior_corners:(r.corners||[]).join('-'),
+    expected_first_turn_rank:r.expected??'',front_share:state.share,
+    prior_coverage:state.coverage,ability_rank:r.abilityRank??'',m3_rank:r.m3Rank??'',
+    popularity_at_snapshot:r.pop??'',win_odds_at_snapshot:r.odds??'',
+    signal_sandwich:r.signals.includes('sandwich')?1:0,
+    signal_outside:r.signals.includes('outside')?1:0,
+    signal_advance:r.signals.includes('advance')?1:0,
+    signal_recover:r.signals.includes('recover')?1:0
+  }));
+}
+function snapshotCsv(rows){
+  if(!rows?.length)return '';
+  const keys=Object.keys(rows[0]),q=x=>'"'+String(x??'').replace(/"/g,'""')+'"';
+  return '\uFEFF'+[keys.map(q).join(','),...rows.map(r=>keys.map(k=>q(r[k])).join(','))].join('\r\n');
+}
+function exportSnapshot(){
+  const state=window.MinetaPositionStudyV1State;
+  if(!state?.ready)return;
+  const meta={build:String(window.RSA_BUILD||''),raceDate:$('raceDate')?.value||'',raceName:$('raceName')?.value||'',
+    venue:$('venue')?.value||'',grade:$('grade')?.value||'',surface:$('surface')?.value||'',
+    distance:$('distance')?.value||'',csv:currentFile?.name||''};
+  const rows=snapshotRows(state,meta);
+  if(!rows.length)return;
+  const csv=snapshotCsv(rows),blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  const safe=String(meta.raceName||'race').replace(/[^a-zA-Z0-9\u3040-\u30ff\u3400-\u9fff_-]/g,'_').slice(0,35);
+  a.href=url;a.download='mineta-research-'+String(meta.raceDate||'undated')+'-'+safe+'.csv';
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000);
 }
 function render(){
   css();const root=mount();if(!root)return;
@@ -241,6 +285,7 @@ function render(){
 function schedule(ms=80){clearTimeout(timer);timer=setTimeout(render,ms)}
 function init(){
   const file=$("csvFile");
+  $("imsAxis")?.addEventListener("click",e=>{if(e.target?.closest?.("[data-mps-export]"))exportSnapshot()});
   file?.addEventListener("change",e=>parseFile(e.target.files?.[0]));
   if(file?.files?.[0])parseFile(file.files[0]);
   document.addEventListener("change",e=>{if(["raceDate","raceName","fieldSize","grade","surface","distance","venue"].includes(e.target?.id))schedule(80)},true);
@@ -249,6 +294,6 @@ function init(){
     window.addEventListener(event,()=>schedule(120));
   schedule(250);setTimeout(()=>schedule(),900);
 }
-window.MinetaPositionStudyV1={version:V,parseGrid,evaluate,render,schedule};
+window.MinetaPositionStudyV1={version:V,parseGrid,evaluate,render,schedule,snapshotRows,snapshotCsv};
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
 })();
