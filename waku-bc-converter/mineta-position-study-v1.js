@@ -197,7 +197,10 @@ function buildHtml(state,phase){
       '<div class="mpsTiny">'+esc(g.hint)+'</div>'+
       (rows.length?rows.map(viewItem).join(""):'<div class="mpsEmpty">該当なし（または過去走・予測位置不足）</div>')+'</div>';
   }
-  html+='<div class="mpsNotice">4つの視点は重複あり。抽出＝推奨ではなく、同時好走や利益率は未検証。前走の通過順位と今回予測隊列から機械的に判定。CSVの出走順と今回の馬番が一致していることを確認してください。</div>'+
+  html+='<div class="mpsNotice">4つの視点は重複あり。抽出＝推奨ではなく、同時好走や利益率は未検証。前走の通過順位と今回予測隊列から機械的に判定。CSVの出走順と今回の馬番が一致していることを確認してください。'+
+    '出典：<a href="https://note.com/frontrunner/n/nee6e82d0bd14" target="_blank" rel="noopener noreferrer">先行馬占有率</a>・'+
+    '<a href="https://www.keiba-salon.com/mineta-quotations-20250129_63441/" target="_blank" rel="noopener noreferrer">逃げハサミ</a>・'+
+    '<a href="https://www.keiba-salon.com/mineta-quotations-20230606_6493/" target="_blank" rel="noopener noreferrer">逃げ馬の外</a>。判定閾値の一部はアプリ独自の研究用仮定。</div>'+
     '<a href="#moaRoot" class="mpsLink">全馬分析で能力・馬場・M4を確認</a>';
   return html;
 }
@@ -224,9 +227,15 @@ function render(){
     window.ValidatedQueueState?.at,window.M3PureAbilityState?.at,
     window.DecisionShellV2State?.at,
     state?.byGroup&&groups.map(g=>state.byGroup[g.id].map(r=>r.no+":"+r.notes.join("|"))),
-    state?.share,state?.known]);
+    state?.share,state?.known,window.PositionRiskState?.byNo?.[axis]?.p10]);
   if(sig===lastSig&&root.innerHTML)return;
   lastSig=sig;root.innerHTML=buildHtml(state,phase);
+  if(state?.ready){
+    const p10=num(window.PositionRiskState?.byNo?.[axis]?.p10);
+    const warning=Number.isFinite(p10)&&p10>=.65
+      ?'<div class="mpsStatus">軸馬のP10が'+Math.round(p10*100)+'%：過去の近似検証では高リスク帯。相手馬の抽出は参考として表示し、軸の自動判定は変更しません。</div>':'';
+    if(warning)root.innerHTML+=warning;
+  }
   window.MinetaPositionStudyV1State=state?.ready?{...state,uiReady:true,productionLogicChanged:false}:{ready:false,reason:phase};
 }
 function schedule(ms=80){clearTimeout(timer);timer=setTimeout(render,ms)}
