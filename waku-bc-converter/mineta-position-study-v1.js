@@ -21,7 +21,7 @@ const col=(headers,...names)=>headers.find(h=>names.some(n=>cleanHead(h)===clean
 const groups=[
   {id:"sandwich",title:"逃げハサミ",hint:"前走4番手以下の馬の両隣に、前走どこかで3番手以内の馬がいる"},
   {id:"outside",title:"逃げ馬のすぐ外",hint:"内隣の馬に前走1番手の通過実績があり、外の進路選択肢が増える可能性"},
-  {id:"advance",title:"今回前進する可能性",hint:"前走の最初の有効コーナー6番手以下 → 今回の予測初角が3番手以上前"},
+  {id:"advance",title:"今回前進する可能性",hint:"前走の最初の有効コーナー6番手以下 → 今回は前方約25%かつ3番手以上前進の予測"},
   {id:"recover",title:"道中後退から巻き返し",hint:"前走途中で位置を下げた後、着順で盛り返した（不利の有無は未確認）"}
 ];
 function parseGrid(grid){
@@ -95,7 +95,7 @@ function evaluate(ctx){
       r.signals.push("outside");
       r.notes.push("すぐ内の"+inner.no+"番が前走どこかのコーナーで先頭");
     }
-    if(r.first!==null&&r.first>=6&&r.expected!==null&&r.expected<=Math.max(5,field*.4)&&r.first-r.expected>=3){
+    if(r.first!==null&&r.first>=6&&r.expected!==null&&r.expected<=Math.max(4,Math.ceil(field*.25))&&r.first-r.expected>=3){
       r.signals.push("advance");
       r.notes.push("前走初位置"+r.first+"番手 → 今回予測"+r.expected.toFixed(1)+"番手");
     }
@@ -106,7 +106,6 @@ function evaluate(ctx){
   }
   const byGroup=Object.fromEntries(groups.map(g=>[g.id,rows.filter(r=>r.signals.includes(g.id))]));
   const countCandidates=rows.filter(r=>r.signals.length).length;
-  const axisExp=axis.expected===null?"取得待ち":axis.expected.toFixed(1)+"番手";
   const relative=rows.filter(r=>r.signals.length).map(r=>{
     let pair="軸との位置関係は未判定";
     if(axis.expected!==null&&r.expected!==null){
@@ -123,7 +122,7 @@ function evaluate(ctx){
   const paired=Object.fromEntries(relative.map(r=>[r.no,r]));
   for(const g of groups)byGroup[g.id]=byGroup[g.id].map(r=>paired[r.no]);
   return{
-    ready:true,version:V,field,raceDate,axis:{no:axis.no,name:axis.name,expected:axisExp,abilityRank:axis.abilityRank,m3Rank:axis.m3Rank},
+    ready:true,version:V,field,raceDate,axis:{no:axis.no,name:axis.name,expected:axis.expected===null?"取得待ち":axis.expected.toFixed(1)+"番手",abilityRank:axis.abilityRank,m3Rank:axis.m3Rank},
     known,front,share:front/field,coverage:known/field,byGroup,candidates:countCandidates,
     rows,warning:"候補は位置取り仮説の一致であり、勝率・回収率・期待値を示しません"
   };
@@ -204,23 +203,24 @@ function buildHtml(state,phase){
 }
 function render(){
   css();const root=mount();if(!root)return;
-  const prod=window.ProductionDecisionPipelineV1State;
+  const core=window.DecisionShellV2State;
+  const structure=core?.structure;
   const gate=window.RaceSkipLockV1State;
   let phase="";
   if(gate?.status!=="open")phase="軸の信頼条件を通過したレースだけで表示します。現在は見送り・判定待ちです。";
-  else if(!prod?.ready||!["ready","conditional"].includes(prod.final?.status)||!prod.stages?.axis?.no)
-    phase="軸馬の本番判定待ちです。全頭オッズとAbility・M3を確認してください。";
+  else if(!core?.ready||!["green","yellow"].includes(structure?.level)||!structure?.axis?.no)
+    phase="Ability×M3の軸判定待ちです。オッズ入力なしでも位置取り分析はできます。";
   else if(lastError)phase="CSV読取エラー："+lastError;
   else if(!parsed)phase="TARGET CSVを読み込んで過去走を確認してください。";
   const F=window.Finish600State?.rows||[],field=Number($("fieldSize")?.value)||F.length;
-  const date=$("raceDate")?.value||"",axis=String(prod?.stages?.axis?.no||"");
+  const date=$("raceDate")?.value||"",axis=String(structure?.axis?.no||"");
   let state=null;
   if(!phase){
     state=evaluate({field,raceDate:date,axisNo:axis,horses:F,past:parsed.past,
       queue:window.ValidatedQueueState?.byNo||{},ability:window.M3PureAbilityState?.byNo||{},market:window.DecisionShellV2State?.market?.byNo||{}});
     if(!state.ready)phase=state.reason;
   }
-  const sig=JSON.stringify([phase,field,date,axis,parsed?.count,
+  const sig=JSON.stringify([phase,field,date,axis,structure?.level,structure?.code,parsed?.count,
     window.ValidatedQueueState?.at,window.M3PureAbilityState?.at,
     window.DecisionShellV2State?.at,
     state?.byGroup&&groups.map(g=>state.byGroup[g.id].map(r=>r.no+":"+r.notes.join("|"))),
