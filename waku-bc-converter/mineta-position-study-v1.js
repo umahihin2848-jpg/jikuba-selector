@@ -20,7 +20,7 @@ const cleanHead=v=>String(v||"").normalize("NFKC").trim();
 const col=(headers,...names)=>headers.find(h=>names.some(n=>cleanHead(h)===cleanHead(n)))||"";
 const groups=[
   {id:"sandwich",title:"逃げハサミ",hint:"前走4番手以下の馬の両隣に、前走どこかで3番手以内の馬がいる"},
-  {id:"outside",title:"逃げ馬のすぐ外",hint:"内隣の馬に前走1番手の通過実績があり、外の進路選択肢が増える可能性"},
+  {id:"outside",title:"逃げ馬のすぐ外",hint:"内隣の馬が前走最初の通過地点で先頭だった場合、外の進路選択肢が増える可能性"},
   {id:"advance",title:"今回前進する可能性",hint:"前走の最初の有効コーナー6番手以下 → 今回は前方約25%かつ3番手以上前進の予測"},
   {id:"recover",title:"道中後退から巻き返し",hint:"前走途中で位置を下げた後、着順で盛り返した（不利の有無は未確認）"}
 ];
@@ -68,7 +68,7 @@ function evaluate(ctx){
     const expected=num(qh.expectedRank);
     return{
       no,name,prior,known,priorFront:known&&p.corners.some(x=>x<=3),
-      priorLead:known&&p.corners.includes(1),
+      priorLead:known&&p.corners[0]===1,
       first:known?p.corners[0]:null,last:known?p.corners[p.corners.length-1]:null,
       corners:known?p.corners:[],finish:known?p.finish:null,
       expected:Number.isFinite(expected)&&qh.validated?expected:null,
@@ -91,9 +91,9 @@ function evaluate(ctx){
       r.signals.push("sandwich");
       r.notes.push("両隣 "+inner.no+"番・"+outer.no+"番に前走3番手以内の通過実績");
     }
-    if(inner?.known&&inner.priorLead&&!r.priorFront){
+    if(inner?.known&&inner.priorLead){
       r.signals.push("outside");
-      r.notes.push("すぐ内の"+inner.no+"番が前走どこかのコーナーで先頭");
+      r.notes.push("すぐ内の"+inner.no+"番が前走最初の通過地点で先頭"+(r.priorFront?"。自身にも先行実績があり競り合いに注意":"。前を取るかは未確定"));
     }
     if(r.first!==null&&r.first>=6&&r.expected!==null&&r.expected<=Math.max(4,Math.ceil(field*.25))&&r.first-r.expected>=3){
       r.signals.push("advance");
