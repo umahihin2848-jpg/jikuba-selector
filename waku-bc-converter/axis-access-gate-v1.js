@@ -23,7 +23,7 @@ function classify(transition,decision,gate){
    if(gate?.status!=='open')return{status:'checking',title:'Pair判定中',reason:'対象レースとAbility・M3の安全条件を確認しています。'};
    if(f.level==='red'||f.level==='neutral')return{status:'skip',title:'見送り',reason:'本番の安全条件を満たしていません。'};
    if(!d.market?.complete||f.level==='wait')
-     return{status:'market',title:'市場判定待ち',reason:'Pair構造を確認しました。全頭単勝オッズ入力後に2頭の比較を表示します。'};
+     return{status:'market',title:'市場判定待ち',reason:'Pair構造を確認しました。全頭単勝オッズ入力後に、Pair候補を含む全頭分析を表示します。'};
    if(f.code!=='double'||f.level!=='yellow')
      return{status:'checking',title:'Pair判定中',reason:'2頭一致の本番構造を照合しています。'};
    return{status:'pair',title:'',reason:'',candidates:candidates.map(x=>({no:String(x.no),name:String(x.name||''),abilityRank:Number(x.ar),m3Rank:Number(x.m3)}))};
