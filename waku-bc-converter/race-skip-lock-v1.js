@@ -3,13 +3,15 @@
 if(window.RaceSkipLockV1)return;
 const $=id=>document.getElementById(id),d=document.documentElement;
 const raceGateDecision=function raceGateDecision(x) {
-  const r=x||{}, name=String(r.name||"").normalize("NFKC").trim(), grade=String(r.grade||"").normalize("NFKC").toUpperCase().trim(), field=Number(r.field);
+  const r=x||{}, name=String(r.name||"").normalize("NFKC").trim(), grade=String(r.grade||"").normalize("NFKC").toUpperCase().trim(), surface=String(r.surface||"").normalize("NFKC").trim(), field=Number(r.field);
   // Model scope and visible scope are intentionally identical.
   // Do not hard-exclude named graded races: let the verified axis gate decide.
   const isObstacle=/障害|ジャンプ|J[- ]?G[123]/i.test(name);
   const eligibleGrade=/^(3勝|OP|L|G1|G2|G3)$/.test(grade);
   if (isObstacle || (grade && !eligibleGrade) || (Number.isInteger(field)&&field>=1&&field<12)) return "skip";
-  if (!name||!r.venue||!Number.isInteger(field)||field<1||field>18) return "idle";
+  // Race name is optional in the UI. An explicit flat surface, eligible grade
+  // and venue suffice; an explicitly named obstacle race is still rejected above.
+  if ((!name&&!/^(芝|ダ|ダート)$/.test(surface))||!r.venue||!Number.isInteger(field)||field<1||field>18) return "idle";
   if (!r.requested) return "idle";
   const a=r.ability,f=r.finish,at=Number(r.requestedAt)||0;
   if (!a?.ready||!f?.ready||!a.at||!f.at||Number(a.at)<at||Number(f.at)<at) return "checking";
@@ -42,7 +44,7 @@ function ensureCard(){
  el.hidden=true;b.insertAdjacentElement("afterend",el);return el;
 }
 function read(){
- return {name:$("raceName")?.value,venue:$("venue")?.value,grade:$("grade")?.value,field:$("fieldSize")?.value,
+ return {name:$("raceName")?.value,venue:$("venue")?.value,grade:$("grade")?.value,surface:$("surface")?.value,field:$("fieldSize")?.value,
  requested:requested||(!dirty&&window.RSAAnalysisTransitionState?.status==="ready"),
  requestedAt:requestedAt||(!dirty?Number(window.RSAAnalysisTransitionState?.startedWall)||0:0),
  ability:window.M3PureAbilityState,finish:window.Finish600State};
