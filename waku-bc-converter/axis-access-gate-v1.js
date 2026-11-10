@@ -97,7 +97,7 @@ document.addEventListener('click',e=>{
 },true);
 document.addEventListener('input',e=>{
  if(['raceName','raceDate','venue','fieldSize','surface','distance','grade','going'].includes(e.target?.id))invalidate();
- if(e.target?.id==='oddsPaste')schedule(150);
+ if(e.target?.id==='oddsPaste'){D.dataset.axisBet='locked';D.dataset.axisMarket='pending';schedule(150)}
 },true);
 document.addEventListener('change',e=>{
  if(['raceName','raceDate','venue','fieldSize','surface','distance','grade','going','csvFile'].includes(e.target?.id))invalidate();
