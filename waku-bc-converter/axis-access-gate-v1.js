@@ -1,6 +1,6 @@
 (()=>{'use strict';
 if(window.AxisAccessGateV1)return;
-const V='axis-access-gate-v1.1-pair-analysis',D=document.documentElement,$=id=>document.getElementById(id);
+const V='axis-access-gate-v1.2-pair-preview-no-odds-lock',D=document.documentElement,$=id=>document.getElementById(id);
 const E=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let phase='idle',startAt=0,last='',timer=0;
 function classify(transition,decision,gate){
@@ -10,6 +10,7 @@ function classify(transition,decision,gate){
  if(t.status!=='ready')return{status:'idle',title:'',reason:''};
  if(!d.ready||!s.code)return{status:'checking',title:'軸馬を判定中',reason:'軸判定の結果を確認しています。'};
  if(gate?.status==='checking')return{status:'checking',title:'軸馬を判定中',reason:'Ability・M3の一致を確認しています。'};
+ if(gate?.status==='idle'||!gate?.status)return{status:'checking',title:'レース条件の確認待ち',reason:gate?.reason||'レース名・競馬場・対象条件を確認してください。解析後も続く場合はレース入力を開いてください。'};
  if(s.code==='scope_out'||gate?.kind==='scope')return{status:'skip',title:'見送り',reason:'対象レースの条件を満たしていません。'};
  if(s.code==='ability_rank_tie'||s.code==='wait')return{status:'skip',title:'見送り',reason:'軸馬の順位を一意に判定できませんでした。'};
  const candidates=Array.isArray(s.candidates)?s.candidates:[];
@@ -22,11 +23,14 @@ function classify(transition,decision,gate){
      return{status:'skip',title:'見送り',reason:'Pair構造の信頼条件を満たしていません。'};
    if(gate?.status!=='open')return{status:'checking',title:'Pair判定中',reason:'対象レースとAbility・M3の安全条件を確認しています。'};
    if(f.level==='red'||f.level==='neutral')return{status:'skip',title:'見送り',reason:'本番の安全条件を満たしていません。'};
-   if(!d.market?.complete||f.level==='wait')
-     return{status:'market',title:'市場判定待ち',reason:'Pair構造を確認しました。全頭単勝オッズ入力後に、Pair候補を含む全頭分析を表示します。'};
-   if(f.code!=='double'||f.level!=='yellow')
-     return{status:'checking',title:'Pair判定中',reason:'2頭一致の本番構造を照合しています。'};
-   return{status:'pair',title:'',reason:'',candidates:candidates.map(x=>({no:String(x.no),name:String(x.name||''),abilityRank:Number(x.ar),m3Rank:Number(x.m3)}))};
+   // Pair is a research view, not a final betting recommendation. It may be
+   // inspected without all win odds; ticket eligibility remains unconfirmed.
+   const marketPending=!d.market?.complete;
+   if(marketPending&&!(f.level==='wait'&&f.code==='market_wait'))
+     return{status:'checking',title:'Pair判定中',reason:'モデルと市場入力状態を照合しています。'};
+   if(!marketPending&&(f.code!=='double'||f.level!=='yellow'))
+     return{status:'checking',title:'Pair判定中',reason:'2頭一致の構造を確認しています。'};
+   return{status:'pair',title:'',reason:'',marketPending,marketCount:Number(d.market?.rows?.length)||0,field:Number(d.market?.field)||0,candidates:candidates.map(x=>({no:String(x.no),name:String(x.name||''),abilityRank:Number(x.ar),m3Rank:Number(x.m3)}))};
  }
  if(candidates.length!==1)return{status:'skip',title:'見送り',reason:'単独で採用できる軸馬が決まりませんでした。'};
  if(!['A1','A2'].includes(s.kind))return{status:'skip',title:'見送り',reason:'軸馬の採用条件を満たしていません。'};
