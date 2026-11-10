@@ -1,6 +1,6 @@
 (()=>{'use strict';
 if(!window.RSAMobileLean||window.__MOBILE_OPPONENT_ANALYSIS_V1)return;window.__MOBILE_OPPONENT_ANALYSIS_V1=true;
-const V='mobile-opponent-analysis-v1.6-mineta-insights',BUILD='20261110mineta1',$=id=>document.getElementById(id);
+const V='mobile-opponent-analysis-v1.7-mineta-h3',BUILD='20261110minetaH3a',$=id=>document.getElementById(id);
 let raf=0,timer=0,last='',currentRaceKey='',selectedNo='',paceOpen=false,m4Open=false;
 const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const N=v=>{if(v===null||v===undefined||v==='')return NaN;const x=Number(v);return Number.isFinite(x)?x:NaN};
@@ -112,6 +112,30 @@ const MINETA_LABELS={
  sandwich:"逃げハサミ",outside:"逃げ馬のすぐ外",
  advance:"位置取り前進候補",recover:"道中後退から巻き返し"
 };
+function minetaRaceOverview(){
+ const st=window.MinetaPositionStudyV1?.raceSummary?.();
+ if(!st?.ready)return '';
+ return '<div class="moaMinetaOverview" aria-label="みねた式・先行馬占有率">'+
+   '<div><small>位置取り研究｜前走に先行実績がある馬</small><strong>'+E(st.front)+' / '+E(st.field)+'頭 <em>'+Math.round(st.share*100)+'%</em></strong></div>'+
+   '<div><small>前走通過順位を確認できた馬</small><strong>'+E(st.known)+' / '+E(st.field)+'頭</strong></div>'+
+   '<p>前走のいずれかの有効通過地点で3番手以内。今回のハイペース確率ではありません。</p></div>';
+}
+function minetaCompat(ref){
+ const c=ref.compatibility;if(!c)return '';
+ const m=c.m4||{},count=Number(m.evaluated)||0,matched=Number(m.bothTop3)||0;
+ const m4Line=count?
+   '4つのM4仮想展開のうち、両馬がともに推定3位以内：'+matched+' / '+count+'展開'+
+   (Array.isArray(m.matching)&&m.matching.length?'（'+m.matching.map(E).join('・')+'）':''):
+   'M4の共通上位展開：比較データ不足';
+ return '<section class="moaMinetaH3" aria-label="軸と相手の決着形・研究">'+
+  '<div class="moaMinetaH3Tag">軸 × 相手｜決着形 H3研究</div>'+
+  '<strong>'+E(c.label)+'</strong>'+
+  '<div class="moaMinetaH3Row"><span>想定する展開</span><p>'+E(c.scenario)+'</p></div>'+
+  '<div class="moaMinetaH3Row risk"><span>両立を妨げる条件</span><p>'+E(c.caution)+'</p></div>'+
+  '<div class="moaMinetaM4"><small>'+E(m4Line)+'</small>'+
+  '<p>M4は展開別の仮順位。展開の起こりやすさ・2頭同時好走率・馬券期待値ではありません。</p></div>'+
+  '</section>';
+}
 function minetaDetail(h){
  const I=window.MinetaPositionStudyV1;
  const info=I?.inspectHorse?.(h.no);
@@ -130,9 +154,10 @@ function minetaDetail(h){
  const refs=(info.refs||[]).map(ref=>
   '<div class="moaMinetaRelation"><small>'+E(ref.label)+'</small>'+
   '<b>'+E(ref.no)+'番 '+E(ref.name)+'</b>'+
-  '<p>'+E(ref.relation)+'</p></div>').join('');
+  '<p>'+E(ref.relation)+'</p>'+minetaCompat(ref)+'</div>').join('');
  return '<section class="moaMineta" aria-label="みねた式・研究分析">'+
   '<header><span>POSITION STUDY / RESEARCH</span><h4>みねた式｜位置取りと決着形</h4><small>仮説の表示・買い目に非連動</small></header>'+
+  '<div class="moaMinetaShare"><b>先行馬占有率 '+E(info.front)+' / '+E(info.field)+'頭（'+Math.round(info.frontShare*100)+'%）</b><small>前走の通過確認 '+E(info.known)+' / '+E(info.field)+'頭。割合は今回の先行圧予測とは別です。</small></div>'+ 
   '<div class="moaMinetaPosition"><div><small>前走の通過</small><b>'+E(prior)+'</b></div>'+
   '<div><small>今回の予測位置</small><b>'+E(expected)+'</b></div></div>'+
   '<div class="moaMinetaSignals"><h5>前走と枠の並びから見た特徴</h5>'+chips+'</div>'+
@@ -194,6 +219,7 @@ function render(){
  <div class="moaHead">
   <small>ALL HORSES / ANALYSIS</small><h2>全頭のバランス比較</h2>
   <p>全${all.length}頭を馬番順に同じ大きさで表示します。${pairMode?'Pairの2頭も他馬と同じサイズです。':'軸馬も含めて全頭を確認できます。'} 気になる馬をタップすると詳細を開けます。</p>
+  ${minetaRaceOverview()}
  </div>
  <section class="moaSec moaBalancedSection">
   <div class="moaSecHead"><h3>全馬一覧</h3><span>${all.length}頭 / 馬番順</span></div>
