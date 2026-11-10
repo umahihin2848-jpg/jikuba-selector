@@ -59,3 +59,20 @@ html[data-axis-access="pair"] body #mpuConclusion .mpuAxisCard {border-color:#44
 
 html[data-axis-access="pair"] body .mpuHorse.pair{border-color:#557a86;background:#102c38}
 html[data-axis-access="pair"] body .mpuHorse.pair .mpuHorseNo{border-color:#649ba2}
+
+/* Unified research unlock: solo A1/A2 and Pair can be studied without odds.
+ * Ticket/price verdict controls require an explicit solo market-verified gate.
+ * Fail closed on missing data-axis-bet (e.g. initial load or stale state).
+ */
+html:not([data-axis-bet="eligible"]) body #imsTicket > :not(#mpuConclusion),
+html:not([data-axis-bet="eligible"]) body #mobilePredictionLedger,
+html:not([data-axis-bet="eligible"]) body #mobilePredictionLedgerV1,
+html:not([data-axis-bet="eligible"]) body #mfs1,
+html:not([data-axis-bet="eligible"]) body #mobileFinalSummaryV1,
+html:not([data-axis-bet="eligible"]) body #moaAxisExtra,
+html:not([data-axis-bet="eligible"]) body #moaRoot .moaPriceBox,
+html:not([data-axis-bet="eligible"]) body #moaRoot [data-oa-open-ledger],
+html:not([data-axis-bet="eligible"]) body #marketMispricingResultCard,
+html:not([data-axis-bet="eligible"]) body #marketMispricingInputCard {
+ display:none!important;
+}
