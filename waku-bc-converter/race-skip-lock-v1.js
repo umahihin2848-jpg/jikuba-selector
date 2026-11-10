@@ -20,7 +20,7 @@ const raceGateDecision=function raceGateDecision(x) {
   if(m3.size!==3||core.some(h=>!Number.isInteger(Number(h.no)))) return "checking";
   return core.some(h=>m3.has(String(Number(h.no))))?"open":"skip";
 };
-let requested=false,requestedAt=0,status="";
+let requested=false,requestedAt=0,status="",dirty=false;
 function diagnose(r,next){
   if(next!=="skip")return{kind:"",reason:next==="checking"?"AbilityとM3を照合中です":""};
   const name=String(r.name||"").normalize("NFKC"),grade=String(r.grade||"").normalize("NFKC").toUpperCase().trim(),field=Number(r.field);
@@ -43,7 +43,9 @@ function ensureCard(){
 }
 function read(){
  return {name:$("raceName")?.value,venue:$("venue")?.value,grade:$("grade")?.value,field:$("fieldSize")?.value,
- requested,requestedAt,ability:window.M3PureAbilityState,finish:window.Finish600State};
+ requested:requested||(!dirty&&window.RSAAnalysisTransitionState?.status==="ready"),
+ requestedAt:requestedAt||(!dirty?Number(window.RSAAnalysisTransitionState?.startedWall)||0:0),
+ ability:window.M3PureAbilityState,finish:window.Finish600State};
 }
 function render(){
  const r=read(),next=raceGateDecision(r),diagnostic=diagnose(r,next),card=ensureCard();
@@ -57,7 +59,7 @@ function render(){
  status=next;
  window.RaceSkipLockV1State={status:next,blocked:next!=="open",kind:diagnostic.kind,reason:diagnostic.reason,updatedAt:Date.now()};
 }
-function invalidate(){requested=false;requestedAt=0;render()}
+function invalidate(){requested=false;requestedAt=0;dirty=true;render()}
 document.addEventListener("input",e=>{
  if(["raceName","raceDate","venue","fieldSize","surface","distance","grade","going"].includes(e.target?.id))invalidate();
 },true);
@@ -66,8 +68,11 @@ document.addEventListener("change",e=>{
 },true);
 document.addEventListener("click",e=>{
  if(e.target?.id!=="analyzeBtn")return;
- requested=true;requestedAt=Date.now();render();
+ requested=true;dirty=false;requestedAt=Number(window.RSAAnalysisTransitionState?.startedWall)||Date.now();render();
 },true);
+addEventListener("rsa-analysis-start",()=>{
+ requested=true;dirty=false;requestedAt=Number(window.RSAAnalysisTransitionState?.startedWall)||Date.now();render();
+});
 ["rsa-analysis-complete","m3-pure-ability-ready","finish600-ready","decision-shell-v2-ready","rsa-addons-ready"].forEach(ev=>addEventListener(ev,render));
 window.RaceSkipLockV1={version:"1.2.0-skip-diagnostics",evaluate:raceGateDecision,refresh:render};
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",render,{once:true});
