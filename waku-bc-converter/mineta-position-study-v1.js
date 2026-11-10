@@ -355,7 +355,7 @@ function snapshotRows(state,meta,at){
     race_date:String(m.raceDate||''),race_name:String(m.raceName||''),venue:String(m.venue||''),
     grade:String(m.grade||''),surface:String(m.surface||''),distance:String(m.distance||''),
     field_size:state.field,source_csv:String(m.csv||''),
-    horse_no:r.no,horse_name:r.name,axis_no:axis,axis_candidate:r.no===axis?1:0,
+    horse_no:r.no,horse_name:r.name,axis_no:pair.length===2?'':axis,axis_candidate:pair.length===2?(pair.includes(r.no)?1:0):(r.no===axis?1:0),
     pair_research:pair.length===2?1:0,pair_ref_nos:pair.join('|'),
     prior_date:r.prior?.date||'',prior_known:r.known?1:0,
     prior_front_any_corner:r.known&&r.priorFront?1:0,
