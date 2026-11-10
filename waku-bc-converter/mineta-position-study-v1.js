@@ -3,7 +3,7 @@
 if(window.MinetaPositionStudyV1)return;
 const C=window.ShapeCore;
 if(!C)return;
-const V="mineta-position-study-v1.2-integrated-insights";
+const V="mineta-position-study-v1.3-h3-compatibility-research";
 const $=id=>document.getElementById(id);
 const esc=v=>String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const num=v=>v==null||String(v).trim()===""?NaN:Number(String(v).normalize("NFKC").trim());
@@ -127,6 +127,89 @@ function evaluate(ctx){
     rows,warning:"候補は位置取り仮説の一致であり、勝率・回収率・期待値を示しません"
   };
 }
+// H3: qualitative compatibility only. These are app-defined research scenarios,
+// NOT the author's official thresholds, joint probabilities or bet suggestions.
+const POSITION_FOUR=["強前傾","前傾","標準","スロー"];
+function positionZone(rank,field){
+ if(rank==null||!Number.isFinite(rank))return "unknown";
+ if(rank<=Math.max(4,Math.ceil(field*.35)))return "front";
+ if(rank>=Math.ceil(field*.67))return "rear";
+ return "mid";
+}
+function scenarioM4(selected,reference){
+ const F=window.Finish600State?.rows||[];
+ const a=F.find(x=>String(x.no)===String(selected.no));
+ const b=F.find(x=>String(x.no)===String(reference.no));
+ const sc1=Array.isArray(a?.sc)?a.sc:[],sc2=Array.isArray(b?.sc)?b.sc:[];
+ const found=[];
+ for(let i=0;i<4;i++){
+   const x=num(sc1[i]?.rank),y=num(sc2[i]?.rank);
+   if(!Number.isInteger(x)||x<1||!Number.isInteger(y)||y<1)continue;
+   found.push({scenario:POSITION_FOUR[i],axisRank:y,horseRank:x,bothTop3:x<=3&&y<=3});
+ }
+ return{evaluated:found.length,bothTop3:found.filter(x=>x.bothTop3).length,
+  cases:found,matching:found.filter(x=>x.bothTop3).map(x=>x.scenario)};
+}
+function synergy(selected,reference,field,frontShare,known){
+ const a=positionZone(reference.expected,field),b=positionZone(selected.expected,field);
+ const m4=scenarioM4(selected,reference);
+ if(a==="unknown"||b==="unknown"){
+  return{label:"想定位置の確認待ち",type:"unknown",
+   scenario:"軸または相手の有効な初角予測が不足しています。前後関係だけでは判断しません。",
+   caution:"位置取りの材料が足りないため、両立可否を判定しません。",m4};
+ }
+ let label="",scenario="",caution="",type="mixed";
+ if(a==="front"&&b==="front"){
+  label="前方同士・位置争い",type="competition";
+  scenario="両馬が先行する想定。前が残る展開なら両立する余地があります。";
+  caution="同じ位置の取り合いや先行馬の多さで消耗し、共倒れになる可能性があります。";
+ }else if(a==="rear"&&b==="front"){
+  label="差し軸＋前残り相手",type="mixed";
+  scenario="軸が後方から届きつつ、相手が前で粘る決着形を想定します。";
+  caution="前が総崩れなら相手が残れず、前が止まらなければ軸が届きにくい組み合わせです。";
+ }else if(a==="front"&&b==="rear"){
+  label="先行軸＋後方からの相手",type="mixed";
+  scenario="軸が前で粘り、相手が後方から届く決着形を想定します。";
+  caution="極端な前残り・前崩れのどちらかへ寄ると、片方の条件を満たしにくくなります。";
+ }else if(a==="rear"&&b==="rear"){
+  label="後方同士・前崩れ待ち",type="shared";
+  scenario="先行馬が失速し、後方の2頭がともに届く展開を想定します。";
+  caution="前残り展開では2頭同時に不利になり得ます。";
+ }else if(a==="mid"&&b==="mid"){
+  label="中団同士・進路の競合",type="competition";
+  scenario="中団からそれぞれ進路を確保して伸びる展開を想定します。";
+  caution="直線入口で同じ進路を狙うと両立しない可能性があります。";
+ }else{
+  label="異なる位置からの組み合わせ",type="mixed";
+  scenario="2頭が異なる位置取りから脚を使い、同時に上位へ進む展開を想定します。";
+  caution="実際のペース・進路・馬場で片方だけ有利になる可能性があります。";
+ }
+ const pressureNote=known<field
+  ? "前走の位置取り履歴に欠損あり。先行占有率は参考値です。"
+  : "先行占有率は前走の先行経験であり、今回の先行ペース確率ではありません。";
+ return{label,type,scenario,caution,positionRisk:pressureNote,m4};
+}
+function raceSummary(){
+ const access=String(document.documentElement?.dataset?.axisAccess||"");
+ if(!["pass","pair"].includes(access)||window.RaceSkipLockV1State?.status!=="open"||
+    window.RSAAnalysisTransitionState?.status!=="ready")return{ready:false,reason:"軸の安全条件が未通過です"};
+ const file=$("csvFile")?.files?.[0],horses=window.Finish600State?.rows||[];
+ if(!parsed||!file||!currentFile||!sameCsv(file,currentFile))return{ready:false,reason:"TARGET CSVの読み込み待ちです"};
+ const field=Number($("fieldSize")?.value)||horses.length;
+ const core=window.DecisionShellV2State,axisNo=String(core?.structure?.axis?.no||"");
+ if(!core?.ready||!["green","yellow"].includes(core?.structure?.level)||!axisNo)
+  return{ready:false,reason:"Ability・M3の構造判定待ちです"};
+ const st=evaluate({field,raceDate:$("raceDate")?.value||"",axisNo,horses,past:parsed.past,
+   queue:window.ValidatedQueueState?.byNo||{},ability:window.M3PureAbilityState?.byNo||{},
+   market:core.market?.complete?core.market.byNo||{}:{}});
+ if(!st.ready)return{ready:false,reason:st.reason};
+ return{ready:true,version:V,displayOnly:true,field:st.field,front:st.front,known:st.known,
+   share:st.share,coverage:st.coverage,rows:st.rows,axisNo,st};
+}
+function sameCsv(a,b){
+ return [["name",""],["size",0],["lastModified",0]].every(([k,d])=>String(a?.[k]??d)===String(b?.[k]??d));
+}
+
 // Display-only research access for the new per-horse iPhone detail. Always use the same CSV snapshot.
 function relation(selected,reference,field){
  if(selected?.expected==null||reference?.expected==null)return "想定位置のデータ不足で比較できません";
@@ -137,41 +220,37 @@ function relation(selected,reference,field){
  return "両馬は近い位置を進める想定";
 }
 function inspectHorse(no){
- const access=String(document.documentElement?.dataset?.axisAccess||"");
- if(access!=="pass"&&access!=="pair")return{ready:false,reason:"軸判定が未通過のため研究結果は非表示です"};
- if(window.RaceSkipLockV1State?.status!=="open"||window.RSAAnalysisTransitionState?.status!=="ready")
-   return{ready:false,reason:"軸判定・解析完了を確認中です"};
- const file=$("csvFile")?.files?.[0];
- if(!parsed||!file||!currentFile||![["name",""],["size",0],["lastModified",0]].every(([k,d])=>String(file[k]??d)===String(currentFile[k]??d)))return{ready:false,reason:lastError?"CSVの確認に失敗しました":"TARGET CSVの研究用読み込み待ちです"};
- const horses=window.Finish600State?.rows||[],field=Number($("fieldSize")?.value)||horses.length;
- const core=window.DecisionShellV2State,structure=core?.structure||{};
- if(!core?.ready||!["green","yellow"].includes(structure.level)||field<12||field>18||horses.length!==field)
-   return{ready:false,reason:"今回のレースと研究条件を確認できません"};
- const isPair=access==="pair"&&structure.kind==="double"&&Array.isArray(structure.candidates)&&structure.candidates.length===2;
- const pair=isPair?structure.candidates.map(r=>String(r.no)):[];
- const axisNo=String(structure.axis?.no||"");
- if(!axisNo)return{ready:false,reason:"軸情報が取得できません"};
- const st=evaluate({field,raceDate:$("raceDate")?.value||"",axisNo,horses,past:parsed.past,
-   queue:window.ValidatedQueueState?.byNo||{},ability:window.M3PureAbilityState?.byNo||{},
-   market:window.DecisionShellV2State?.market?.byNo||{}});
- if(!st.ready)return{ready:false,reason:st.reason};
- const row=st.rows.find(r=>r.no===String(Number(no)));
+ const summary=raceSummary();
+ if(!summary.ready)return{ready:false,reason:summary.reason};
+ const st=summary.st,row=st.rows.find(r=>r.no===String(Number(no)));
  if(!row)return{ready:false,reason:"選択馬とCSVの馬番を照合できません"};
- const refs=[];
+ const core=window.DecisionShellV2State,structure=core.structure;
+ const isPair=String(document.documentElement?.dataset?.axisAccess)==="pair"&&
+   structure.kind==="double"&&Array.isArray(structure.candidates)&&structure.candidates.length===2;
+ const pair=isPair?structure.candidates.map(r=>String(r.no)):[];
+ const axisNo=String(structure.axis.no),refs=[];
+ const makeRef=(ref,label)=>({no:ref.no,name:ref.name,label,relation:relation(row,ref,summary.field),
+   compatibility:synergy(row,ref,summary.field,st.share,st.known)});
  if(isPair){
-   for(const peer of pair){if(peer===row.no)continue;const other=st.rows.find(r=>r.no===peer);if(other)refs.push({no:peer,name:other.name,label:"Pair候補を軸と仮定",relation:relation(row,other,field)})}
-   // For other horses, show the two mutually exclusive anchor assumptions.
+   for(const peer of pair){
+    if(peer===row.no)continue;
+    const ref=st.rows.find(r=>r.no===peer);
+    if(ref)refs.push(makeRef(ref,"Pair候補を軸と仮定"));
+   }
  }else if(row.no===axisNo){
-   refs.push({no:axisNo,name:row.name,label:"この馬が単独軸",relation:"ほかの馬との同時好走は各相手馬の詳細で確認"});
+   refs.push({no:axisNo,name:row.name,label:"この馬が単独軸",
+     relation:"ほかの馬との同時好走は各相手馬の詳細で確認",compatibility:null});
  }else{
-   const other=st.rows.find(r=>r.no===axisNo);
-   if(other)refs.push({no:axisNo,name:other.name,label:"確定した軸を基準",relation:relation(row,other,field)});
+   const ref=st.rows.find(r=>r.no===axisNo);
+   if(ref)refs.push(makeRef(ref,"単独軸を基準"));
  }
  return{ready:true,version:V,productionLogicChanged:false,displayOnly:true,
   raceDate:st.raceDate,field:st.field,known:st.known,coverage:st.coverage,
-  isPair,axisConfirmed:!isPair,refs,row:{...row},signals:[...row.signals],notes:[...row.notes],
-  warning:"過去走と予測位置の研究用フラグであり、同時好走確率・回収率・馬券期待値ではありません"};
+  front:st.front,frontShare:st.share,isPair,axisConfirmed:!isPair,
+  refs,row:{...row},signals:[...row.signals],notes:[...row.notes],
+  warning:"過去走・予測位置・M4仮順位から記述した研究仮説です。両馬の同時好走確率・回収率・馬券期待値ではありません"};
 }
+
 let parsed=null,currentFile=null,fileToken=0,timer=0,lastSig="",lastError="";
 async function parseFile(file){
   const token=++fileToken;
@@ -342,6 +421,6 @@ function init(){
     window.addEventListener(event,()=>schedule(120));
   schedule(250);setTimeout(()=>schedule(),900);
 }
-window.MinetaPositionStudyV1={version:V,parseGrid,evaluate,inspectHorse,render,schedule,snapshotRows,snapshotCsv};
+window.MinetaPositionStudyV1={version:V,parseGrid,evaluate,inspectHorse,raceSummary,synergy,scenarioM4,render,schedule,snapshotRows,snapshotCsv};
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
 })();
