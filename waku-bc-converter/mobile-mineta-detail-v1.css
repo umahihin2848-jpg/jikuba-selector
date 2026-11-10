@@ -44,3 +44,25 @@ body.iosMobileShellV2 #mpsRoot{display:none!important}
 #moaRoot #moaHorseDetail .moddLabel {font-size:11px!important;line-height:1.5!important}
 #moaRoot #moaHorseDetail .moddTitle {font-size:13px!important;line-height:1.5!important;margin-top:5px!important}
 #moaRoot #moaHorseDetail .moddText {font-size:12px!important;line-height:1.7!important;margin-top:6px!important}
+
+/* Mineta H3 scenario compatibility: explanatory only, consistent with equal-size cards. */
+#moaRoot .moaMinetaOverview{margin-top:12px;padding:12px;border-radius:12px;background:#0c2a36;border:1px solid #386675;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#moaRoot .moaMinetaOverview>div{min-width:0;padding:6px}
+#moaRoot .moaMinetaOverview small{display:block;color:#a6cbd8;font-size:11px!important;line-height:1.55!important}
+#moaRoot .moaMinetaOverview strong{display:block;color:#eff9fd;font-size:15px!important;line-height:1.6!important;margin-top:3px;white-space:nowrap}
+#moaRoot .moaMinetaOverview em{font-style:normal;color:#abdfcd;font-weight:800}
+#moaRoot .moaMinetaOverview>p{grid-column:1/-1;font-size:11px!important;color:#adcad3;line-height:1.65!important;margin:0!important;padding:2px 6px}
+#moaRoot .moaMinetaShare{padding:11px 12px 3px}
+#moaRoot .moaMinetaShare b{display:block;font-size:13px!important;line-height:1.55!important;color:#d5f1e8}
+#moaRoot .moaMinetaShare small{display:block;font-size:11px!important;line-height:1.65!important;color:#aac6d1;margin-top:4px}
+#moaRoot .moaMinetaH3{border:1px solid #507f76;border-radius:10px;background:#0b2b2c;margin-top:10px;padding:11px}
+#moaRoot .moaMinetaH3Tag{font-size:10px!important;font-weight:850;letter-spacing:.035em;color:#a6e4d3}
+#moaRoot .moaMinetaH3>strong{display:block;font-size:14px!important;line-height:1.5!important;margin:5px 0 11px;color:#f1fcf8}
+#moaRoot .moaMinetaH3Row{border-top:1px solid #416f68;padding-top:9px;margin-top:9px}
+#moaRoot .moaMinetaH3Row>span{display:block;font-size:11px!important;font-weight:900;color:#b3e4d8}
+#moaRoot .moaMinetaH3Row.risk>span{color:#f1c8a6}
+#moaRoot .moaMinetaH3Row>p{font-size:12px!important;line-height:1.75!important;margin:4px 0 0!important;color:#d2e4e1}
+#moaRoot .moaMinetaM4{border-top:1px solid #416f68;margin-top:12px;padding-top:10px}
+#moaRoot .moaMinetaM4 small{display:block;font-size:12px!important;line-height:1.65!important;font-weight:800;color:#d7ead3}
+#moaRoot .moaMinetaM4 p{font-size:11px!important;line-height:1.65!important;color:#9fc2bf;margin:6px 0 0!important}
+@media(max-width:355px){#moaRoot .moaMinetaOverview{grid-template-columns:1fr}#moaRoot .moaMinetaOverview>p{grid-column:1}}
