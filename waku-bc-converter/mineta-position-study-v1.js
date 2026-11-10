@@ -334,14 +334,29 @@ function buildHtml(state,phase){
   return html;
 }
 function snapshotRows(state,meta,at){
-  if(!state?.ready||!Array.isArray(state.rows))return [];
-  const t=String(at||new Date().toISOString()),m=meta||{},axis=String(state.axis?.no||'');
-  return state.rows.map(r=>({
+ if(!state?.ready||!Array.isArray(state.rows))return [];
+ const t=String(at||new Date().toISOString()),m=meta||{},axis=String(state.axis?.no||'');
+ const core=window.DecisionShellV2State?.structure||{};
+ const pair=(core.kind==='double'&&Array.isArray(core.candidates)&&core.candidates.length===2)
+  ?core.candidates.map(x=>String(x.no)):[];
+ const anchors=pair.length===2?pair:[axis],byNo=Object.fromEntries(state.rows.map(r=>[String(r.no),r]));
+ const layer=(r,no)=>{
+  const ref=byNo[no];
+  if(!ref||!no)return {ref:'',shape:'',zone:'',m4_top3:'',m4_evaluated:''};
+  if(String(r.no)===String(no))return{ref:no,shape:'self_axis',zone:positionZone(r.expected,state.field),m4_top3:'',m4_evaluated:''};
+  const c=synergy(r,ref,state.field,state.share,state.known);
+  return{ref:no,shape:c.label,zone:positionZone(r.expected,state.field),
+   m4_top3:c.m4.bothTop3,m4_evaluated:c.m4.evaluated};
+ };
+ return state.rows.map(r=>{
+  const h1=layer(r,anchors[0]),h2=anchors.length>1?layer(r,anchors[1]):layer(r,'');
+  return{
     snapshot_utc:t,model_build:String(m.build||''),signal_version:V,
     race_date:String(m.raceDate||''),race_name:String(m.raceName||''),venue:String(m.venue||''),
     grade:String(m.grade||''),surface:String(m.surface||''),distance:String(m.distance||''),
     field_size:state.field,source_csv:String(m.csv||''),
     horse_no:r.no,horse_name:r.name,axis_no:axis,axis_candidate:r.no===axis?1:0,
+    pair_research:pair.length===2?1:0,pair_ref_nos:pair.join('|'),
     prior_date:r.prior?.date||'',prior_known:r.known?1:0,
     prior_front_any_corner:r.known&&r.priorFront?1:0,
     prior_initial_lead:r.known&&r.priorLead?1:0,
@@ -353,9 +368,15 @@ function snapshotRows(state,meta,at){
     signal_sandwich:r.signals.includes('sandwich')?1:0,
     signal_outside:r.signals.includes('outside')?1:0,
     signal_advance:r.signals.includes('advance')?1:0,
-    signal_recover:r.signals.includes('recover')?1:0
-  }));
+    signal_recover:r.signals.includes('recover')?1:0,
+    h3_reference1_no:h1.ref,h3_reference1_shape:h1.shape,h3_reference1_zone:h1.zone,
+    h3_reference1_m4_both_top3:h1.m4_top3,h3_reference1_m4_evaluated:h1.m4_evaluated,
+    h3_reference2_no:h2.ref,h3_reference2_shape:h2.shape,h3_reference2_zone:h2.zone,
+    h3_reference2_m4_both_top3:h2.m4_top3,h3_reference2_m4_evaluated:h2.m4_evaluated
+  };
+ });
 }
+
 function snapshotCsv(rows){
   if(!rows?.length)return '';
   const keys=Object.keys(rows[0]),q=x=>'"'+String(x??'').replace(/"/g,'""')+'"';
