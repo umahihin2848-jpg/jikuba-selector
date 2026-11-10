@@ -1,6 +1,6 @@
 (()=>{'use strict';
 if(window.AxisAccessGateV1)return;
-const V='axis-access-gate-v1.2-pair-preview-no-odds-lock',D=document.documentElement,$=id=>document.getElementById(id);
+const V='axis-access-gate-v1.3-unified-research-unlock',D=document.documentElement,$=id=>document.getElementById(id);
 const E=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let phase='idle',startAt=0,last='',timer=0;
 function classify(transition,decision,gate){
@@ -30,15 +30,25 @@ function classify(transition,decision,gate){
      return{status:'checking',title:'Pair判定中',reason:'モデルと市場入力状態を照合しています。'};
    if(!marketPending&&(f.code!=='double'||f.level!=='yellow'))
      return{status:'checking',title:'Pair判定中',reason:'2頭一致の構造を確認しています。'};
-   return{status:'pair',title:'',reason:'',marketPending,marketCount:Number(d.market?.rows?.length)||0,field:Number(d.market?.field)||0,candidates:candidates.map(x=>({no:String(x.no),name:String(x.name||''),abilityRank:Number(x.ar),m3Rank:Number(x.m3)}))};
+   return{status:'pair',title:'',reason:'',marketPending,marketBlocked:false,betEligible:false,marketCount:Number(d.market?.rows?.length)||0,field:Number(d.market?.field)||0,candidates:candidates.map(x=>({no:String(x.no),name:String(x.name||''),abilityRank:Number(x.ar),m3Rank:Number(x.m3)}))};
  }
  if(candidates.length!==1)return{status:'skip',title:'見送り',reason:'単独で採用できる軸馬が決まりませんでした。'};
  if(!['A1','A2'].includes(s.kind))return{status:'skip',title:'見送り',reason:'軸馬の採用条件を満たしていません。'};
  if(gate?.status==='skip')return{status:'skip',title:'見送り',reason:'軸馬の安全条件を満たしていません。'};
- if(f.code==='market_range'||f.level==='neutral'||f.level==='red')return{status:'skip',title:'見送り',reason:'本番の市場条件を満たしていません。'};
- if(!d.market?.complete||f.code==='market_wait'||f.level==='wait')return{status:'market',title:'市場判定待ち',reason:'軸候補はいます。全頭分の単勝オッズを確認するまで分析は開きません。'};
- if(!['green','yellow'].includes(f.level))return{status:'checking',title:'軸馬を判定中',reason:'最終判定を確認しています。'};
- return{status:'pass',title:'',reason:'',axisNo:String(s.axis.no),kind:s.kind,conditional:f.level==='yellow'};
+ // A1/A2 may open the same full-field research view as Pair as soon as
+ // the structural gate passes. Only ticket eligibility depends on full odds.
+ const marketPending=!d.market?.complete;
+ const marketBlocked=!marketPending&&f.code==='market_range';
+ if(marketPending&&!(f.level==='wait'&&f.code==='market_wait'))
+   return{status:'checking',title:'軸馬を判定中',reason:'市場入力と軸判定の整合性を確認しています。'};
+ if(!marketPending&&!marketBlocked&&(f.level==='neutral'||f.level==='red'))
+   return{status:'skip',title:'見送り',reason:'軸選定の安全条件を満たしていません。'};
+ if(!marketPending&&!marketBlocked&&!['green','yellow'].includes(f.level))
+   return{status:'checking',title:'軸馬を判定中',reason:'最終判定を確認しています。'};
+ return{status:'pass',title:'',reason:'',axisNo:String(s.axis.no),kind:s.kind,
+  conditional:marketPending||marketBlocked||f.level==='yellow',marketPending,marketBlocked,
+  betEligible:!marketPending&&!marketBlocked&&['green','yellow'].includes(f.level),
+  marketCount:Number(d.market?.rows?.length)||0,field:Number(d.market?.field)||0};
 }
 function ensure(){
  let el=$('axisAccessScreen');if(el)return el;
@@ -64,8 +74,10 @@ function read(){
 function render(){
  const el=ensure();if(!el)return;const r=read(),status=r.status;
  D.dataset.axisAccess=status;
+ D.dataset.axisBet=r.betEligible===true?'eligible':'locked';
+ D.dataset.axisMarket=r.marketPending?'pending':r.marketBlocked?'blocked':r.betEligible?'verified':'none';
  el.hidden=!['skip','market','checking','error'].includes(status);
- if(el.hidden){last='';window.AxisAccessGateV1State={ready:true,status,version:V,at:Date.now()};return}
+ if(el.hidden){last='';window.AxisAccessGateV1State={ready:true,status,version:V,betEligible:r.betEligible===true,marketPending:Boolean(r.marketPending),marketBlocked:Boolean(r.marketBlocked),axisNo:r.axisNo||'',at:Date.now()};return}
  const sig=JSON.stringify([status,r.title,r.reason]);
  if(sig!==last){
  last=sig;el.innerHTML='<div class="aasIcon">'+(status==='skip'?'×':status==='error'?'!':'…')+'</div>'+
@@ -74,7 +86,7 @@ function render(){
  '<button type="button" data-axis-retry>'+(status==='market'?'単勝オッズを入力する':status==='error'?'入力とCSVを確認する':status==='checking'?'レース入力を確認する':'別のレースを入力する')+'</button>';
  }
  if(['skip','market'].includes(status)){const setup=$('mpuSetup');if(setup)setup.open=false}
- window.AxisAccessGateV1State={ready:true,status,reason:r.reason,axisNo:r.axisNo||'',version:V,at:Date.now()};
+ window.AxisAccessGateV1State={ready:true,status,reason:r.reason,axisNo:r.axisNo||'',version:V,betEligible:false,marketPending:false,marketBlocked:false,at:Date.now()};
 }
 function schedule(ms=30){clearTimeout(timer);timer=setTimeout(render,ms)}
 function invalidate(){phase='editing';startAt=0;D.dataset.axisAccess='editing';schedule(20)}
