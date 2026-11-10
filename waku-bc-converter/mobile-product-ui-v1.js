@@ -31,7 +31,7 @@ function pairMap(){const st=window.MobilePairProbabilityReferenceV1State;return 
 function conclusionHtml(){
  const pair=window.DecisionShellV2State?.structure;
  if(pair?.kind==='double'&&pair.candidates?.length===2){
-   const m=raceMeta(),market=window.DecisionShellV2State?.market?.byNo||{},Q=window.ValidatedQueueState?.byNo||{},P=window.PositionRiskState?.byNo||{},A=window.M3PureAbilityState?.byNo||{};
+   const m=raceMeta(),market=window.DecisionShellV2State?.market?.complete?(window.DecisionShellV2State.market.byNo||{}):{},Q=window.ValidatedQueueState?.byNo||{},P=window.PositionRiskState?.byNo||{},A=window.M3PureAbilityState?.byNo||{};
    const title=[m.venue,m.name].filter(Boolean).join(' '),sub=[m.sf+(m.dist?m.dist+'m':''),m.grade,m.going?'馬場 '+m.going:''].filter(Boolean).join('｜');
    const cards=pair.candidates.map(r=>{
      const no=String(r.no),q=Q[no]||{},risk=P[no]||{},ab=A[no]||{},od=market[no]||{};
