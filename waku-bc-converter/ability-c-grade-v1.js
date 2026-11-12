@@ -26,7 +26,7 @@ function parse(rows,headers){
  }
  for(const a of byName.values())a.sort((x,y)=>x.d.ms-y.d.ms||x.id.localeCompare(y.id));return{ok:true,byName,invalid};
 }
-function eligible(meta,n){return ['G1','G2','G3'].includes(head(meta.grade))&&venues.includes(norm(meta.venue))&&!!surface(meta.surface)&&Number.isInteger(+meta.fieldSize)&&+meta.fieldSize>=12&&+meta.fieldSize<=18&&+meta.fieldSize===n&&!!day(meta.date)&&+meta.distance>600;}
+function eligible(meta,n){return ['G1','G2','G3'].includes(head(meta.grade))&&venues.includes(norm(meta.venue))&&!!surface(meta.surface)&&Number.isInteger(+meta.fieldSize)&&+meta.fieldSize>=12&&+meta.fieldSize<=18&&!/障害|ジャンプ|J[- ]?G[123]/i.test(norm(meta.raceName))&&+meta.fieldSize===n&&!!day(meta.date)&&+meta.distance>600;}
 function evaluate(rows,meta,ctx,rs){
  const fallback=reason=>({active:false,reason,rows});if(!eligible(meta,rows.length))return fallback('対象外（JRA G1〜G3・12頭以上）');if(!ctx?.ok)return fallback(ctx?.reason||'対戦データ未読込');if(!rs?.strength)return fallback('Elo参照データ未読込');
  const cutoff=day(meta.date),s=surface(meta.surface),di=+meta.distance,history=rows.map(r=>(ctx.byName.get(norm(r.name))||[]).filter(a=>a.d.ms<cutoff.ms));
