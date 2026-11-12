@@ -7,7 +7,7 @@ const VERSION='ability-c-grade-v1.0',BETA=.4062284404659212,MEAN=1654.6364547216
 const norm=x=>String(x??'').normalize('NFKC').trim(),num=x=>{const s=norm(x);return s!==''&&Number.isFinite(Number(s))?Number(s):NaN;};
 const clip=(x,l,h)=>Math.max(l,Math.min(h,x)),venues=['札幌','函館','福島','新潟','東京','中山','中京','京都','阪神','小倉'];
 const head=x=>norm(x).replace(/[\s_]/g,'').toUpperCase();
-const grade=x=>{const s=head(x);return ({G1:195,G2:179,G3:163,'重賞':163,'3勝':67,'3勝クラス':67,'1600万':67,'1600万下':67,'OP(L)':115,L:115,OP:131,'オープン':131,'ｵｰﾌﾟﾝ':131})[s]||0;};
+const grade=x=>{const s=head(x);return ({G1:195,G2:179,G3:163,'3勝':67,'3勝クラス':67,'1600万':67,'1600万下':67,'OP(L)':115,L:115,OP:131,'オープン':131,'ｵｰﾌﾟﾝ':131})[s]||0;};
 const surface=x=>{const s=norm(x);return s==='芝'?'芝':s==='ダ'||s==='ダート'?'ダ':'';};
 function day(x){const s=norm(x),m=s.match(/^(\d{4})\D+(\d{1,2})\D+(\d{1,2})$/);let v=m?m[1]+m[2].padStart(2,'0')+m[3].padStart(2,'0'):s.replace(/\D/g,'');if(v.length===6)v='20'+v;if(v.length!==8)return null;const d=Date.UTC(+v.slice(0,4),+v.slice(4,6)-1,+v.slice(6,8));return Number.isFinite(d)&&new Date(d).toISOString().slice(0,10).replace(/-/g,'')===v?{key:v,ms:d}:null;}
 function time(x){const s=norm(x),m=s.match(/^(\d{1,2})[.:](\d{2})[.](\d)$/);if(m)return +m[1]*60+(+m[2])+(+m[3])/10;const n=num(s);if(!Number.isFinite(n))return NaN;if(s.includes('.')&&n>=20&&n<600)return n;if(/^\d{3,5}$/.test(s)){const sec=n%1000/10;return sec<60?Math.floor(n/1000)*60+sec:NaN;}return NaN;}
