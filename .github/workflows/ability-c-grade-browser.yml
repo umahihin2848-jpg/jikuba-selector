@@ -1,0 +1,31 @@
+name: Ability C grade browser QA
+on:
+  push:
+    paths:
+      - 'waku-bc-converter/ability-c-grade-v1.js'
+      - 'waku-bc-converter/mobile-ability-core-v1.js'
+      - 'waku-bc-converter/v3.html'
+      - 'tests/ability-c-grade-browser.cjs'
+      - '.github/workflows/ability-c-grade-browser.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, webkit]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --package-lock=false playwright@1.55.0
+      - run: npx playwright install --with-deps ${{ matrix.engine }}
+      - run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/ability-c-http.log 2>&1 &
+          sleep 2
+      - run: node tests/ability-c-grade-browser.cjs ${{ matrix.engine }}
