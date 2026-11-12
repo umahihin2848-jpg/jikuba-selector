@@ -1,0 +1,25 @@
+name: Ability C grade release gate
+on:
+  push:
+    branches: [ability-c-grade-integration-20261112]
+    paths:
+      - 'waku-bc-converter/**'
+      - '.github/workflows/ability-c-grade-release.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --package-lock=false playwright@1.55.0
+      - run: npx playwright install --with-deps chromium webkit
+      - run: |
+          python3 -m http.server 8080 --bind 127.0.0.1 > /tmp/rsa-http.log 2>&1 &
+          sleep 2
+      - run: node waku-bc-converter/regression/ability-c-grade-browser-v1.mjs
