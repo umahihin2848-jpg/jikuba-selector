@@ -31,6 +31,22 @@ async function run(browser,{grade,bytes,field=12,venue='東京',distance=1800,da
  assert(x.d.tickets.win&&x.d.tickets.quinella&&x.d.tickets.wide);assert.equal(x.p.shadowInputsUsed,false);assert.equal(x.p.manualCombination,true);assert.equal(x.p.manualStake,true);assert.equal(x.p.stages.price.pairPriceConnected,false);assert.equal(x.d.market.rows.length,field);
  const candidates=x.d.structure.candidates||[];for(const c of candidates){assert(c.ar<=3&&c.m3<=3);assert.equal(x.a.byNo[c.no].abilityRank,c.ar);}
  if(x.d.structure.axis)assert.equal(x.a.byNo[x.d.structure.axis.no].abilityRank,x.d.structure.axis.abilityRank);
+
+ // Exercise a deliberately single-overlap race in the real browser using controlled
+ // model states: old #1, new #4 (market favorite outside Ability Top3).
+ if(grade==='G1'){
+ const qa=await page.evaluate(()=>{
+ const names=Array.from({length:12},(_,i)=>'AxisQA'+(i+1)),mr=[1,7,8,2,3,4,5,6,9,10,11,12],saved={a:window.M3PureAbilityState,f:window.Finish600State,q:window.ValidatedQueueState,p:window.PositionRiskState,m:window.MobileAnalysisCoreState,od:document.getElementById('oddsPaste').value};
+ const a=names.map((name,i)=>({no:String(i+1),name,abilityRank:i+1,logit:1-i*.15,contextWeight:.1,histN:5,axisHistory:{front:.5,rest:30,priorTop3:.4,lastfp:.5}}));
+ window.M3PureAbilityState={ready:true,activeModel:'C',rows:a,byNo:Object.fromEntries(a.map(r=>[r.no,r]))};window.Finish600State={ready:true,rows:names.map((name,i)=>({no:String(i+1),name,finishRank:mr[i],score:mr[i]*.02}))};
+ window.ValidatedQueueState={byNo:{'1':{frontness5:.8},'4':{frontness5:.4}}};window.PositionRiskState={byNo:{'1':{p10:.1},'4':{p10:.6}}};window.MobileAnalysisCoreState={meta:{grade:'G1'}};
+ const od=document.getElementById('oddsPaste');od.value=names.map((_,i)=>(i+1)+' '+(i===3?1.4:i===0?5:10+i)).join('\n');window.MobileDecisionCoreV1.render();
+ const d=window.DecisionShellV2State,gate=window.AxisAccessGateV1.classify({status:'ready'},d,{status:'open'}),result={active:d.axisSelection.active,changed:d.axisSelection.changed,old:d.originalStructure.axis.no,chosen:d.structure.axis.no,candidate:d.structure.candidates[0].no,win:d.tickets.win.level,wide:d.tickets.wide.level,gate:gate.status,gateAxis:gate.axisNo,p3:d.axisSelection.chosen.p3,sum:d.axisSelection.rows.reduce((s,r)=>s+r.p3,0)};
+ od.value='';window.MobileDecisionCoreV1.render();result.noOdds=window.DecisionShellV2State.structure.axis.no;result.noOddsActive=window.DecisionShellV2State.axisSelection.active;
+ window.M3PureAbilityState=saved.a;window.Finish600State=saved.f;window.ValidatedQueueState=saved.q;window.PositionRiskState=saved.p;window.MobileAnalysisCoreState=saved.m;od.value=saved.od;window.MobileDecisionCoreV1.render();return result;
+ });
+ assert(qa.active&&qa.changed);assert.equal(qa.old,'1');assert.equal(qa.chosen,'4');assert.equal(qa.candidate,'1');assert.equal(qa.win,'red');assert.equal(qa.wide,'yellow');assert.equal(qa.gate,'pass');assert.equal(qa.gateAxis,'4');assert.equal(qa.noOdds,'1');assert.equal(qa.noOddsActive,false);assert(Math.abs(qa.sum-3)<1e-8);assert(Math.abs(qa.p3-.6456160869090499)<1e-10);console.log(kind+' Axis Selection reselection and fallback PASS');
+ }
  assert.deepEqual(errors,[],'uncaught browser error: '+errors.join('; '));
  console.log(JSON.stringify({kind,grade,model:st.ability.activeModel,coverage:st.ability.abilityC?.coverage,eloMatched:st.ability.abilityC?.eloMatched,reason:st.ability.abilityC?.reason,decision:x.d.final.code,warnings:warnings.slice(0,5),PASS:true}));
  return st.ability.rows;
