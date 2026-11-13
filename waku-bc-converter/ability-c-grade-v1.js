@@ -13,15 +13,15 @@ function day(x){const s=norm(x),m=s.match(/^(\d{4})\D+(\d{1,2})\D+(\d{1,2})$/);l
 function time(x){const s=norm(x),m=s.match(/^(\d{1,2})[.:](\d{2})[.](\d)$/);if(m)return +m[1]*60+(+m[2])+(+m[3])/10;const n=num(s);if(!Number.isFinite(n))return NaN;if(s.includes('.')&&n>=20&&n<600)return n;if(/^\d{3,5}$/.test(s)){const sec=n%1000/10;return sec<60?Math.floor(n/1000)*60+sec:NaN;}return NaN;}
 function hash(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0;}return h.toString(16).padStart(8,'0');}
 function parse(rows,headers){
- const aliases={name:['馬名'],date:['日付','日付S','年月日'],venue:['場所','競馬場','開催場'],cls:['クラス名','クラス','格'],surface:['芝・ダート','芝・ダ','芝ダ','芝ダート'],distance:['距離'],field:['頭数','出走頭数'],finish:['確定着順','着順'],kg:['斤量'],gap:['上3F地点差','上３Ｆ地点差','-3F差'],c4:['通過4','4角','通過順4'],time:['タイムS','走破タイム.1','走破タイム','タイム'],rp:['レースPCI','RPCI'],rid:['レースID(新・馬番無16桁)','レースID(新)'],rno:['R','レース番号'],abnormal:['異常コード']};
+ const aliases={name:['馬名'],date:['日付','日付S','年月日'],venue:['場所','競馬場','開催場'],cls:['クラス名','クラス','格'],surface:['芝・ダート','芝・ダ','芝ダ','芝ダート'],distance:['距離'],field:['頭数','出走頭数'],finish:['確定着順','着順'],kg:['斤量'],gap:['上3F地点差','上３Ｆ地点差','-3F差'],c1:['通過1','1角','通過順1'],c2:['通過2','2角','通過順2'],c3:['通過3','3角','通過順3'],c4:['通過4','4角','通過順4'],time:['タイムS','走破タイム.1','走破タイム','タイム'],rp:['レースPCI','RPCI'],rid:['レースID(新・馬番無16桁)','レースID(新)'],rno:['R','レース番号'],abnormal:['異常コード']};
  const m={};for(const [k,a] of Object.entries(aliases)){m[k]=a.map(head).map(h=>headers.find(v=>head(v)===h)).find(Boolean);}
- const missing=Object.keys(aliases).filter(k=>!['rid','rno','abnormal'].includes(k)&&!m[k]);if(!m.rid&&!m.rno)missing.push('レースIDまたはR');if(missing.length)return{ok:false,reason:'必要列不足: '+missing.join(', '),byName:new Map()};
+ const missing=Object.keys(aliases).filter(k=>!['rid','rno','abnormal','c1','c2','c3'].includes(k)&&!m[k]);if(!m.rid&&!m.rno)missing.push('レースIDまたはR');if(missing.length)return{ok:false,reason:'必要列不足: '+missing.join(', '),byName:new Map()};
  const byName=new Map(),seen=new Set();let invalid=0;
  for(const r of rows){const get=k=>m[k]?r[m[k]]:undefined,name=norm(get('name')),d=day(get('date')),v=norm(get('venue')),g=grade(get('cls')),s=surface(get('surface')),di=num(get('distance')),f=num(get('field')),fin=num(get('finish'));if(!name||!d||!venues.includes(v)||!g||!s||d.key<'20160101')continue;if(m.abnormal&&num(get('abnormal'))!==0&&norm(get('abnormal'))!=='')continue;if(!(di>600&&f>=2&&fin>=1&&fin<=f)){invalid++;continue;}
  let id=norm(get('rid'));if(/^\d{18}$/.test(id))id=id.slice(0,16);if(!/^\d{16}$/.test(id)){const rn=num(get('rno'));if(!Number.isInteger(rn)||rn<1||rn>12){invalid++;continue;}id=d.key+'|'+v+'|'+rn;}
  const key=name+'|'+id;if(seen.has(key))continue;seen.add(key);
  const k=num(get('kg')),gap=num(get('gap')),c4=num(get('c4')),rp=num(get('rp')),t=time(get('time')),pos=c4>=1&&c4<=f?(c4-1)/(f-1):NaN;
- const a={name,d,v,g,s,di,f,fin,kg:k,gap,pos,rp,t,id,fp:(f-fin)/(f-1)};
+ const first=[num(get('c1')),num(get('c2')),num(get('c3')),c4].find(x=>x>=1&&x<=f);const a={name,d,v,g,s,di,f,fin,kg:k,gap,pos,rp,t,id,fp:(f-fin)/(f-1),front:Number.isFinite(first)?(f-first)/(f-1):NaN};
  if(!byName.has(name))byName.set(name,[]);byName.get(name).push(a);
  }
  for(const a of byName.values())a.sort((x,y)=>x.d.ms-y.d.ms||x.id.localeCompare(y.id));return{ok:true,byName,invalid};
@@ -38,7 +38,7 @@ function evaluate(rows,meta,ctx,rs){
  const w=2**(-((cutoff.ms-a.d.ms)/86400000)/365)*Math.exp(-Math.abs(a.di-di)/800-Math.abs(a.gap-b.gap)/.5-Math.abs(a.kg-b.kg)/1.5-Math.abs(a.pos-b.pos)/.25);
  sum+=clip((b.t-a.t)*1000/a.di,-2,2)*w;wSum+=w;count++;}}
  const sim=sum/(3+wSum),e=elo[i],v2=r.logit+BETA*(e.rating-MEAN)/SD,score=v2+C*sim;
- return {...r,v1Logit:r.logit,v2Logit:v2,logit:score,contextSimilar:sim,contextPairN:count,contextWeight:wSum,elo:e.rating,eloMatched:e.matched,eloTotal:e.total};});
+ const past=history[i].slice(-5),last=past[past.length-1],fronts=past.map(h=>h.front).filter(Number.isFinite),axisHistory={front:fronts.length?fronts.reduce((s,v)=>s+v,0)/fronts.length:NaN,rest:last?(cutoff.ms-last.d.ms)/86400000:NaN,priorTop3:past.length?past.filter(h=>h.fin<=3).length/past.length:NaN,lastfp:last?last.fp:NaN};return {...r,axisHistory,v1Logit:r.logit,v2Logit:v2,logit:score,contextSimilar:sim,contextPairN:count,contextWeight:wSum,elo:e.rating,eloMatched:e.matched,eloTotal:e.total};});
  if(out.some(r=>!Number.isFinite(r.logit)))return fallback('非有限スコア：v1維持');
  if(out.every(r=>!r.contextPairN))return fallback('条件比較可能な対戦なし：v1維持');
  return{active:true,reason:'G1〜G3重賞限定 / Elo近似・C係数固定',rows:out,coverage:out.filter(r=>r.contextPairN>0).length,eloMatched:elo.reduce((s,e)=>s+e.matched,0),eloTotal:elo.reduce((s,e)=>s+e.total,0)};
