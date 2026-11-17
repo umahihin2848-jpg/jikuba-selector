@@ -17,10 +17,13 @@ assert.strictEqual(res.rows.length,16);assert(Math.abs(res.rows.reduce((p,r)=>p+
 const top=view.selectVisiblePartners(res,{no:'1'},4);
 assert.strictEqual(top.length,4);assert(!top.some(x=>x.no==='1'));
 assert(!view.selectVisiblePartners(res,null).length,'no confirmed axis means no partners');
+assert.deepEqual(JSON.parse(JSON.stringify(view.partnerRankLabels([{no:'11',finishRank:4}],'11',{v3Rank:7}))),{m3:'4位',v3:'7位'});
+assert.deepEqual(JSON.parse(JSON.stringify(view.partnerRankLabels([{no:'11',finishRank:4}],'9',null))),{m3:'評価待ち',v3:'更新待ち'});
+assert(f.includes('M3展開順位')&&f.includes('V3能力順位'),'selected partner cards must display ranks');
 assert(!view.cMarketRank(roster,api.buildMarket('1 2.2',roster),cState,model.models['2026']).ready,'odds incomplete');
 assert(!view.cMarketRank(roster,mk,{...cState,activeModel:'v1'},model.models['2026']).ready,'no C fallback proxy');
 const header=fs.readFileSync(__dirname+'/../waku-bc-converter/v3.html','utf8');
-assert(header.includes('mobile-focused-3tabs-v1.js?v=20261117p331a'));
+assert(header.includes('mobile-focused-3tabs-v1.js?v=20261117p332a'));
 assert(header.includes(':not(#rsaFocusedView){display:none!important}'),'gate CSS must not hide three-tab wrapper');
 const gateCss=fs.readFileSync(__dirname+'/../waku-bc-converter/axis-access-gate-v1.css','utf8');
 assert(gateCss.includes(':not(#axisAccessScreen):not(#rsaFocusedView),'),'axis-access gate CSS must not hide focused view');

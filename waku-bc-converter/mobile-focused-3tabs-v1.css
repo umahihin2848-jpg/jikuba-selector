@@ -46,3 +46,9 @@ body.iosMobileShellV2.rsaFocusedThreeTabs #rsaFocusedView{display:block!importan
 #rsafReceiptTools{border:1px solid #2e5060;border-radius:12px;background:#0b2230;margin:12px 0}#rsafReceiptTools[hidden]{display:none!important}
 #rsafReceiptTools>summary{list-style:none;cursor:pointer;min-height:45px;padding:13px;color:#aac2cb;font-size:11px;font-weight:800}#rsafReceiptTools>summary::-webkit-details-marker{display:none}
 #rsafReceiptMount{padding:0 9px 10px}#rsafReceiptMount:empty{display:none}
+
+/* P3-32: readable M3 / V3 context on selected partner cards only. */
+.rsaf-rankline{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.rsaf-rankline span{display:inline-flex;align-items:baseline;gap:7px;border:1px solid #335769;background:#112d3d;border-radius:9px;padding:6px 9px;min-width:0}
+.rsaf-rankline b{font-size:11px;color:#9ebcca;font-weight:700}
+.rsaf-rankline strong{font-size:13px;color:#e9f7fb;font-weight:900}

@@ -32,6 +32,11 @@ function selectVisiblePartners(ranked,officialAxis,k=4){
  if(!officialAxis||!ranked?.ready)return[];
  return ranked.rows.filter(r=>r.no!==String(officialAxis.no)).slice(0,k);
 }
+function partnerRankLabels(roster,no,v3){
+ const m3=roster.find(r=>String(r.no)===String(no));
+ return {m3:Number.isFinite(N(m3?.finishRank))&&N(m3.finishRank)>0?F(m3.finishRank,'位'):'評価待ち',
+  v3:Number.isFinite(N(v3?.v3Rank))&&N(v3.v3Rank)>0?F(v3.v3Rank,'位'):'更新待ち'};
+}
 function modelState(){try{const a=root.AbilityV3ResearchPanelBridgeV1?.getCurrent();return a?.ok?a:{ok:false,reason:a?.reason||''};}catch(e){return{ok:false,reason:String(e?.message||e)}}}
 function decisionContext(){
  const r=roster(),d=root.DecisionShellV2State||{},pipeline=root.ProductionDecisionPipelineV1State||{},s=d.structure||{},final=d.final||{},a=pipeline.stages?.axis;
@@ -53,7 +58,7 @@ function decisionContext(){
  return{r,official,odds:mk,m:o,ranked,partners,sc,q,risk,v3,v3Horse,m3,decision:d,pipeline,structure:s,final,analyzed,year};
 }
 // Exposed for deterministic Node tests; no betting or production writes.
-root.RSAFocusedThreeTabsCoreV1=Object.freeze({version:VERSION,cMarketRank,selectVisiblePartners});
+root.RSAFocusedThreeTabsCoreV1=Object.freeze({version:VERSION,cMarketRank,selectVisiblePartners,partnerRankLabels});
 if(!root.document?.createElement||typeof root.addEventListener!=='function')return;
 const STORE={active:'axis',frozen:null,last:'',timer:0,dirty:false};
 root.RSAFocusedThreeTabsV1=STORE;
@@ -90,9 +95,9 @@ function partnerHtml(x){if(!x.analyzed)return alert('レース構造の解析後
  if(!x.ranked.ready)return alert(x.ranked.reason||STORE.error||'Ability C＋市場の計算待ちです。');
  if(x.partners.length!==4)return alert('相手4頭を確定できません。再解析してください。');
  const byNo=Object.fromEntries((x.v3?.rows||[]).map(o=>[String(o.no),o]));
- const cards=x.partners.map((r,i)=>{const v3=byNo[r.no],hint=v3&&Number.isFinite(N(v3.v3Rank))?'V3 '+F(v3.v3Rank,'位'):'';
- return '<article class="rsaf-horse"><div class="rsaf-horse-main"><b class="rsaf-horse-no">'+H(r.no)+'</b><div><small>'+(i<2?'相手候補 '+(i+1):'追加候補 '+(i+1))+'</small><h3>'+H(r.name)+'</h3></div>'+badge(i<2?'本線候補':'追加候補',i<2?'go':'neutral')+'</div><div class="rsaf-grid">'+fact('推定3着内',P(r.p3))+fact('Ability C',F(r.cRank,'位'))+fact('人気',F(r.pop,'人気'))+fact('単勝',F(r.od,'倍',1))+'</div>'+(hint?'<p class="rsaf-inline">'+H(hint)+'</p>':'')+'</article>';}).join('');
- return '<div class="rsaf-intro"><b>相手馬｜C＋単勝市場で選定</b><p>軸の馬を除いて推定3着内率順に上位4頭だけ表示しています。'+(x.v3?'':' V3の能力DBは更新待ちのため、この選定には使用していません。')+'</p></div>'+cards+'<p class="rsaf-foot">上位2頭が優先候補、3・4頭目は追加候補。馬券の期待値・購入推奨は別判定です。馬番はCSVの並びからの仮番号なので確定枠順との照合が必要です。</p>';
+ const cards=x.partners.map((r,i)=>{const ranks=partnerRankLabels(x.r,r.no,byNo[r.no]);
+ return '<article class="rsaf-horse"><div class="rsaf-horse-main"><b class="rsaf-horse-no">'+H(r.no)+'</b><div><small>'+(i<2?'相手候補 '+(i+1):'追加候補 '+(i+1))+'</small><h3>'+H(r.name)+'</h3></div>'+badge(i<2?'本線候補':'追加候補',i<2?'go':'neutral')+'</div><div class="rsaf-grid">'+fact('推定3着内',P(r.p3))+fact('Ability C',F(r.cRank,'位'))+fact('人気',F(r.pop,'人気'))+fact('単勝',F(r.od,'倍',1))+'</div>'+'<div class="rsaf-rankline"><span><b>M3展開順位</b><strong>'+H(ranks.m3)+'</strong></span><span><b>V3能力順位</b><strong>'+H(ranks.v3)+'</strong></span></div></article>';}).join('');
+ return '<div class="rsaf-intro"><b>相手馬｜C＋単勝市場で選定</b><p>軸の馬を除いて推定3着内率順に上位4頭だけ表示。M3は展開順位として併記し、相手選定のスコアには加えていません。'+(x.v3?'':' V3の能力DBは更新待ちのため、この選定には使用していません。')+'</p></div>'+cards+'<p class="rsaf-foot">上位2頭が優先候補、3・4頭目は追加候補。馬券の期待値・購入推奨は別判定です。馬番はCSVの並びからの仮番号なので確定枠順との照合が必要です。</p>';
 }
 function formationHtml(x){if(!x.analyzed)return alert('隊列は過去走CSV解析後に表示します。');
  const q=root.ValidatedQueueState||{},byNo=q.byNo||{},total=x.r.length;
