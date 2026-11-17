@@ -56,3 +56,19 @@ This strongly directs the *investigation* toward features or historical input-ve
 Important: the protected P3-40 ZIP and P3-22b raw full CSV fixtures were not available as extractable raw bytes in this session. This cannot be escalated to all 4,250 horses or to point-in-time browser parity, and the original 6.8% remains unresolved.
 
 Next high-yield step: compare the exact `P3-22b_research/inputs/fixtures/2024010606010111.csv` with the original `umadete.csv` values **feature by feature**, including `PCI`, `RPCI`, surface, date, frontness, late-3F, `same_surface_n`; and compare P3-22b runtime's `Finish600State.rows[].x` against the new reconstruction. Then replay all 271 races using the **same** exact JS and input snapshots. No changes to production gates or model coefficients.
+
+## P3-42 verified upstream defect: duplicate historical TARGET starts
+
+**Finding:** the raw `umadete.csv` contains **439,416 rows but only 74,724 unique (horse name, historical race ID) starts**: 364,692 repeated rows. The 15 inspected stable historical result fields have **zero conflicting duplicate groups**. After the same obstacle/nonfinish exclusion as `target-csv-compat-v1.js`, **421,678 rows become 70,769 unique starts; 350,909 are duplicate**.
+
+**Actual code path:** the main app's `target-csv-compat-v1.js` previously passed duplicate past-start rows to `ShapeCore.summarize`, `validated-queue-model-v1.js`, and `finish600-simulator-v2.js`. Each chooses the most recent **five rows**, not the five distinct races, so repeated starts can over-weight or fully replace the intended last-five history. This is a concrete input flaw for such TARGET all-horse exports; it does not prove that historical P3-40's specific 6.8% cross-replay mismatch is caused by it.
+
+**Representative 17-runner Nakayama Kimpai, 2024-01-06:** 3,457 eligible preceding rows represented only 339 unique historical starts. 16 of 17 runners' last five *raw rows* did not represent five distinct races. Recomputing the core model with saved remaining-600 prediction fixed:
+- raw vs unique historical rows changed **15/17 M3 ranks**, average absolute change **0.203 sec** in estimated closing.
+- against the frozen 2024 research M3 output, **raw 1/17 rank equal**; **deduplicated 2/17 rank equal**; mean absolute closing difference 0.347 sec vs 0.312 sec. This demonstrates a material duplicate effect, **not** confirmed parity or recovery of archived M3.
+
+**Research-only fix now in this draft branch:** `target-csv-compat-v1.js` drops repeat history rows only when a stable 16-character historical race ID and horse name are present. No ID means no unsafe date-only dedup. Original first-appearance roster ordering is retained; conflicting duplicate data is recorded as `historyConflictCount`; `historyDuplicateRowsSkipped` and `historyKeyUnavailable` are observable diagnostic counters. `tests/p3-42-target-history-dedup-smoke.cjs` verifies normal duplicates, horse numbers, corner-zero, conflicting duplicates and missing IDs. CI: **P3-42 M3 research input parity** isolated GitHub action passed (2026-11-17). Main production regression workflow is failing at an unrelated pre-existing mobile UI label assertion (`product UI missing label 相手分析`); this PR remains **Draft and unmerged**.
+
+**Separate P3-42 analysis-tool hardening:** `p341_fixture_parity.py` must reject identical race ID with conflicting date. `p342_input_gate.py` must reject duplicate manifest race IDs. Both corrected in the downloadable P3-42 v2 strict validation kit; 1 positive and 7 negative tests passed.
+
+**Next acceptance requirement:** Run full 271-race replay using the **actual archived P3-22b source ZIP and point-in-time snapshots**; verify same pre-race history IDs, model coefficients, 19 feature values, predicted gap, closing, M3 rank and Top3 across a browser/runtime receipt. Preserve unchanged betting gates until measured.
