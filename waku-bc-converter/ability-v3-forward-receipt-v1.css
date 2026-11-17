@@ -1,0 +1,14 @@
+.av3-forward{border:1px solid #426981;border-radius:12px;background:#0b2434;padding:14px;color:#e7f1f8;display:grid;gap:10px;font-size:12px}
+.av3-forward h3{font-size:14px;margin:0;color:#c3eeec}
+.av3-forward p{line-height:1.65;margin:0;color:#a9c5d3}
+.av3-forward label{font-weight:700;font-size:12px}
+.av3-forward input[type=time],.av3-forward input[type=text]{background:#f7fbfd;color:#13293c;padding:10px;border:1px solid #628092;border-radius:7px;font-size:16px;max-width:100%}
+.av3-forward input[type=file]{max-width:100%}
+.av3-forward-check{display:flex;align-items:flex-start;gap:9px;line-height:1.6;font-weight:500!important}
+.av3-forward-check input{width:19px;height:19px;flex-shrink:0;margin:1px 0 0}
+.av3-forward button{width:100%;max-width:100%;justify-self:stretch!important;white-space:normal}
+.av3-forward-divider{border-top:1px solid #39566b;margin-top:3px}
+.av3-forward-info{white-space:pre-wrap;overflow-wrap:anywhere;background:#10344a;border-radius:8px;padding:10px;line-height:1.7}
+.av3-forward-status{line-height:1.65;color:#acd1c7;overflow-wrap:anywhere}
+.av3-forward-status[data-error="1"]{color:#ffbdad}
+@media(max-width:400px){.av3-forward{padding:11px}}

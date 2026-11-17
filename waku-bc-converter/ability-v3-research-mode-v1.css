@@ -1,0 +1,29 @@
+.av3-research{margin-top:16px;border:1px solid #35516a;border-radius:13px;background:#0b2030;color:#e7f1f8;font-size:13px;overflow:hidden}
+.av3-research summary{cursor:pointer;padding:14px 13px;list-style:none;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;justify-content:space-between;font-weight:800}
+.av3-research summary::before{content:'◇';color:#7fdbdb;margin-right:5px}
+.av3-research summary small{font-size:11px;line-height:1.5;color:#a1bece;font-weight:500}
+.av3-research[open] summary{border-bottom:1px solid #35516a}
+.av3-body{padding:12px;display:grid;gap:12px}
+.av3-notice{padding:11px;background:#10283a;border:1px solid #31516b;border-radius:9px;color:#b9d2e3;line-height:1.6}
+.av3-label{display:block;font-size:12px;font-weight:700}
+.av3-body input[type=file]{width:100%;max-width:100%;font-size:12px;color:#d4eaf5}
+.av3-hint{font-size:11px;color:#9bb4c5;line-height:1.6}
+.av3-body button{justify-self:start;cursor:pointer;border-radius:9px;padding:9px 13px;font-weight:750}
+.av3-result{display:grid;gap:12px}
+.av3-note{font-size:12px;color:#94cbd6}
+.av3-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.av3-metrics>div,.av3-tile{background:#0d2839;border:1px solid #2b4d61;border-radius:10px;padding:10px;min-width:0;line-height:1.5}
+.av3-metrics small,.av3-tile>small{display:block;color:#a1bbc9;font-size:10px;margin-bottom:4px}
+.av3-metrics b,.av3-tile b{display:block;font-size:13px;overflow-wrap:anywhere}
+.av3-caution{color:#ffc373}
+.av3-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.av3-chips{display:flex;flex-wrap:wrap;gap:5px;margin:7px 0}
+.av3-chip{display:inline-flex;padding:5px 8px;border:1px solid #407089;border-radius:100px;background:#143347;font-size:11px}
+.av3-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:10px;border:1px solid #2b4d61}
+.av3-table{font-size:11px;border-collapse:collapse;width:100%;min-width:730px;color:#e7f1f8}
+.av3-table th{background:#1c3547;font-weight:700;position:sticky;top:0}
+.av3-table th,.av3-table td{padding:8px 6px;text-align:center;border-bottom:1px solid #2a4154;white-space:nowrap}
+.av3-table td:nth-child(2){text-align:left}
+.av3-table tr:nth-child(even){background:#102637}
+.av3-footnote{font-size:11px;color:#9fb9c8;line-height:1.7;margin:0}
+@media(max-width:530px){.av3-metrics{grid-template-columns:1fr 1fr}.av3-metrics>div:last-child{grid-column:1/-1}.av3-columns{grid-template-columns:1fr}}
