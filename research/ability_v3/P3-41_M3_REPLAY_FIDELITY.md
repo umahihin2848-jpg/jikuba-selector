@@ -49,7 +49,7 @@ To isolate core M3 from the upstream remaining600 queue, the preserved `pred_rem
 - Top3 overlap: **2/3**.
 - M3 rank Spearman rho: **0.434**.
 - Predicted closing MAE vs saved: **~0.31 sec**.
-- `hist_front_mean` agrees with archived `validated_frontness5` to < 1e-10 for **16/17** horses. These two quantities are related but not guaranteed to be strictly identical in all runtimes.
+- On the **unfiltered** 5-run-history extraction, `hist_front_mean` agrees with archived `validated_frontness5` to < 1e-10 for **16/17** horses. On the obstacle/nonfinish-filtered replay candidate, **15/17** match (notably an obstacle start in one runner's unfiltered prior five starts). The two quantities are related but not guaranteed to be strictly identical in all runtimes.
 
 This strongly directs the *investigation* toward features or historical input-version differences before rank sorting. It does **not** establish what was present in the exact P3-22b synthetic per-race fixtures. A sensitivity-only experiment setting PCI- or RPCI-derived features to model fallback values lowered 17-runner closing MAE to about **0.12 sec**, but neither simulated input omission matched the whole frozen output. **Do not claim missing PCI/RPCI as a confirmed cause.**
 
