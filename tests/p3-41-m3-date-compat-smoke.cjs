@@ -39,4 +39,19 @@ const source = ['2026.10. 4','2026. 6. 7','2026. 4. 5','2026. 3. 1',
 const recent5 = source.map(v => C.dateVal(v)).filter(d => d && d < raceDate)
   .sort((a,b) => b-a).slice(0,5);
 assert.deepEqual(Array.from(recent5), [20260607,20260405,20260301,20251130,20251102]);
+// The upstream pace/queue summary must use only strictly earlier races,
+// even when the full TARGET archive contains future and race-day results.
+const priors={fixed_priors:{recent_window:5,escape:.1,front:.3,prior_weight:1}};
+const history=[
+ {date:'2026. 6. 7',rpci:99,pci:97,ave3f:33,minus3f:0,style:'逃げ'},
+ {date:'2026. 4. 1',rpci:95,pci:94,ave3f:34,minus3f:0.1,style:'逃げ'},
+ {date:'n/a',rpci:91,pci:92,ave3f:34,minus3f:0.2,style:'逃げ'},
+ {date:'2026. 3. 1',rpci:53,pci:52,ave3f:35,minus3f:0.7,style:'先行'},
+ {date:'2026. 2. 1',rpci:48,pci:47,ave3f:36,minus3f:0.8,style:'差し'}
+];
+const h=[{name:'履歴監査馬',horseNo:'1',history}];
+const summary=C.summarize(h,priors,'2026-04-01')[0];
+assert.equal(summary.nRecent,2,'future, same-day and missing-date starts must be excluded');
+assert.equal(summary.rpci,50.5,'the pace signal must use strictly prior results');
+assert.equal(summary.gap3f,0.75,'the predicted remaining-600 input must not see future performance');
 console.log('PASS P3-41 date contract: '+cases.length+' cases; strictly prior last-5 starts');
