@@ -60,7 +60,7 @@ assert.strictEqual(view.manualPartnerChoice('2','5',onlyThree,'1'),'2','the four
 assert.strictEqual(view.selectVisiblePartners(res,{no:'1'},3).length,3,'exactly three candidates');
 assert(!f.includes('rsafFourthCandidate'),'no fourth candidate disclosure or accordion');
 assert(f.includes('rsaf-pick-action'),'manual one-partner UI present');
-assert(f.includes('selectVisiblePartners(ranked,official,3)'),'only 3 candidate rows are selected');
+assert(f.includes('selectVisiblePartners(ranked,visibleAxis,3)'),'only 3 candidate rows are selected for either official or research axis');
 assert(f.includes("x.partners.length!==3"),'the three candidate limit is enforced');
 
 const referenceRanked={ready:true,rows:[{no:'3',name:'参考1',p3:.55},{no:'4',name:'参考2',p3:.3},{no:'5',name:'参考3',p3:.2},{no:'6',name:'参考4',p3:.15}]};
