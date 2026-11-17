@@ -6,6 +6,9 @@ on:
       - 'waku-bc-converter/target-csv-compat-v1.js'
       - 'tests/p3-41-m3-date-compat-smoke.cjs'
       - 'tests/p3-42-target-history-dedup-smoke.cjs'
+      - 'tests/p3-43-m3-missing-upstream-smoke.cjs'
+      - 'waku-bc-converter/remaining600-validated-v1.js'
+      - 'waku-bc-converter/finish600-simulator-v2.js'
       - '.github/workflows/p3-42-research-smoke.yml'
   workflow_dispatch:
 
@@ -27,7 +30,9 @@ jobs:
           node --check waku-bc-converter/target-csv-compat-v1.js
           node --check tests/p3-41-m3-date-compat-smoke.cjs
           node --check tests/p3-42-target-history-dedup-smoke.cjs
+          node --check tests/p3-43-m3-missing-upstream-smoke.cjs
       - name: Input contract tests (no model/gate mutation)
         run: |
           node tests/p3-41-m3-date-compat-smoke.cjs
           node tests/p3-42-target-history-dedup-smoke.cjs
+          node tests/p3-43-m3-missing-upstream-smoke.cjs
