@@ -9,7 +9,14 @@ const {chromium}=require('playwright');
   await page.waitForFunction(()=>document.body.classList.contains('rsaFocusedThreeTabs')&&Boolean(document.querySelector('#rsafAxis .rsaf-alert, #rsafAxis .rsaf-decision')),{timeout:30000});
   const labels=await page.locator('#rsafTabs [role=tab]').allTextContents();
   assert.deepEqual(labels.map(x=>x.trim()),['軸馬情報','相手馬情報','展開隊列']);
-  // Existing mobile boot deliberately hides main.view until initialization settles.
+  // Diagnose any inherited race-gate or startup visibility restrictions.
+  await page.waitForTimeout(4200);
+  const diagnostic=await page.evaluate(()=>{
+   const result=[];let el=document.querySelector('#rsafAxis');
+   while(el&&result.length<9){const st=getComputedStyle(el),r=el.getBoundingClientRect();result.push({tag:el.tagName,id:el.id,cls:el.className,display:st.display,visibility:st.visibility,opacity:st.opacity,w:r.width,h:r.height,hidden:el.hidden});el=el.parentElement;}
+   return {elements:result,htmlClass:document.documentElement.className,htmlRaceGate:document.documentElement.dataset.raceGate,coreAnalyzed:document.documentElement.dataset.rsaCoreAnalyzed,bodyClass:document.body.className,axisText:document.querySelector('#rsafAxis')?.textContent?.slice(0,120)};
+  });
+  console.log('RS-AFOCUS-DIAG',JSON.stringify(diagnostic));
   await page.locator('#rsafAxis').waitFor({state:'visible',timeout:14000});
   assert.equal(await page.locator('#rsafPartners').isVisible(),false);
   assert.equal(await page.locator('#av3ResearchPanel').isVisible(),false);
