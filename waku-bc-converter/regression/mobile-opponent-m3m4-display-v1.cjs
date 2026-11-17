@@ -1,4 +1,4 @@
-// Regression test for display-only M3/M4 opponent comparisons. Synthetic races only.
+// Regression test for display-only, all-horse M3/M4 comparisons. Synthetic races only.
 // Run: node waku-bc-converter/regression/mobile-opponent-m3m4-display-v1.cjs
 'use strict';
 const assert=require('node:assert/strict');
@@ -38,8 +38,8 @@ assert.match(html,/M3 #9 → M4 #3/);
 assert.match(html,/↑6 ／ 上位5 1\/4/);
 assert.match(html,/上位5 4\/4/);
 assert.match(html,/3着内確率・着順やワイド期待値を意味しません/);
-assert(!html.includes('class="moaM4Names"><b>軸馬'),'the axis must be excluded from opponent table');
-assert(html.indexOf('浮上候補')<html.indexOf('安定候補'),'rising scenario partner should be discoverable before stable group');
+assert(html.includes('class="moaM4Names"><b>軸馬'),'all-horse comparison must include the axis for manual assessment');
+assert(html.indexOf('安定候補')<html.indexOf('浮上候補'),'the all-horse table must preserve number order instead of recommendation order');
 app.RaceProgressVisualV1State={ready:true,scenarioSource:'manual',scenarioBand:0,generation:5};
 choice=v.chosenM4();
 assert.equal(choice.band,0);assert.equal(choice.source,'manual');
