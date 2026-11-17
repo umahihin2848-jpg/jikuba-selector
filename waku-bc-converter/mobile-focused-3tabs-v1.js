@@ -76,7 +76,7 @@ function axisHtml(x){const d=x.decision,s=x.structure,f=x.final,m=x.odds;
  const a=x.official,c=x.sc,q=x.q,r=x.risk,p=x.m;
  const marketMissing=!m.complete;
  const label=s.kind==='A2'?'A2 条件付き':s.kind==='A1'?'A1 単独軸':'構造候補';
- const v3=x.v3Horse?'V3 '+F(x.v3Horse.v3Rank,'位')+'／Dynamic '+F(x.v3Horse.h730,'',3)+'／Peak '+F(x.v3Horse.peak,'',3):'V3: 能力DB更新待ち・比較保留';
+ const v3=x.v3Horse?'V3 '+F(x.v3Horse.v3Rank,'位')+'／Dynamic '+F(x.v3Horse.h730,'',3)+'／Peak '+(x.v3Horse.miss?'履歴不足':F(x.v3Horse.peak,'',3)):'V3: 能力DB更新待ち・比較保留';
  return '<div class="rsaf-decision">'+status+'<p>'+H(f.reason||s.reason||'')+'</p></div>'+
  '<article class="rsaf-horse rsaf-axis"><div class="rsaf-horse-main"><b class="rsaf-horse-no">'+H(a.no)+'</b><div><small>'+H(label)+'</small><h3>'+H(a.name)+'</h3></div></div><div class="rsaf-grid">'+
  fact('Ability C',cRank(c))+fact('M3',F(x.m3,'位'))+fact('P10',P(r?.p10))+fact('先行力',P(q?.frontness5))+
@@ -133,5 +133,5 @@ root.addEventListener('rsa-analysis-complete',()=>{STORE.dirty=false;schedule(90
 document.addEventListener('change',e=>{if(inputs.includes(e.target?.id)){STORE.dirty=true;schedule(50)}},true);
 document.addEventListener('input',e=>{if(e.target?.id==='oddsPaste')schedule(90);else if(inputs.includes(e.target?.id)){STORE.dirty=true;schedule(80)}},true);
 document.addEventListener('click',e=>{if(['analyzeBtn','parseCsvBtn'].includes(e.target?.id)){STORE.dirty=false;STORE.last='';schedule(140)}else if(['applyOddsBtn','clearOddsBtn'].includes(e.target?.id))schedule(120)},true);
-if(document.readyState==='loading')root.addEventListener('DOMContentLoaded',()=>{ensure();schedule(170);setTimeout(()=>schedule(0),1100)},{once:true});else{ensure();schedule(170)}
+if(document.readyState==='loading')root.addEventListener('DOMContentLoaded',()=>{ensure();render(true);schedule(170);setTimeout(()=>schedule(0),1100)},{once:true});else{ensure();render(true);schedule(170)}
 })(typeof window!=='undefined'?window:globalThis);

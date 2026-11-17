@@ -6,7 +6,7 @@ const {chromium}=require('playwright');
   const page=await browser.newPage({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1'});
   await page.goto('http://127.0.0.1:4173/waku-bc-converter/v3.html',{waitUntil:'domcontentloaded',timeout:30000});
   await page.waitForSelector('#rsaFocusedView',{state:'attached',timeout:30000});
-  await page.waitForFunction(()=>document.body.classList.contains('rsaFocusedThreeTabs'),{timeout:30000});
+  await page.waitForFunction(()=>document.body.classList.contains('rsaFocusedThreeTabs')&&Boolean(document.querySelector('#rsafAxis .rsaf-alert, #rsafAxis .rsaf-decision')),{timeout:30000});
   const labels=await page.locator('#rsafTabs [role=tab]').allTextContents();
   assert.deepEqual(labels.map(x=>x.trim()),['軸馬情報','相手馬情報','展開隊列']);
   assert.equal(await page.locator('#rsafAxis').isVisible(),true);
