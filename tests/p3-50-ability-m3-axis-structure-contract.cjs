@@ -51,7 +51,7 @@ expect([1,4,5],{tie:'leader'},'ability_rank_tie');
 expect([1,4,5],{tie:'boundary'},'ability_rank_tie');
 setup([1,4,5]);
 const mk=(p,near=false)=>({
- complete:true,field:12,byNo:{'1':{pop:p,od:p===6?10:8}},
+ complete:true,field:12,byNo:{'1':{pop:p,od:p===6?10:8},'2':{pop:p,od:p===6?10:8}},
  rows:Array.from({length:12},(_,i)=>({no:String(i+1),pop:i+1,od:near&&i===6?10.7:10+i*2}))
 });
 assert.equal(final(structure(),mk(7)).code,'market_range','top7 must not be auto eligible');
