@@ -9,7 +9,23 @@ C.parseCSV=t=>{let out=[],row=[],cell='',q=false;for(let i=0;i<t.length;i++){let
 C.normHead=s=>String(s||'').replace(/[\s_　]/g,'').toUpperCase();
 C.autoMap=(headers,mapSpec)=>{let out={};for(let f of mapSpec){let aa=f[2].map(C.normHead),hit='';for(let h of headers){if(aa.includes(C.normHead(h))){hit=h;break}}if(!hit)for(let h of headers){let n=C.normHead(h);if(aa.some(a=>n.includes(a))){hit=h;break}}out[f[0]]=hit}return out};
 C.rowsToObjects=grid=>{let h=grid[0].map(x=>String(x).trim());return{headers:h,rows:grid.slice(1).map(r=>{let o={};h.forEach((k,i)=>o[k]=r[i]??'');return o})}};
-C.dateVal=v=>{let s=String(v||'').replace(/\D/g,'');if(s.length===6)s='20'+s;if(s.length>=8)return Number(s.slice(0,8));let d=Date.parse(v);return Number.isFinite(d)?d:0};
+C.dateVal=v=>{
+  const s=String(v??'').normalize('NFKC').trim();
+  if(!s)return 0;
+  let y,m,d,match;
+  // TARGET exports contain non-zero-padded dates such as "2026. 6. 7".
+  // Return one comparable YYYYMMDD integer; never mix Date.parse milliseconds with it.
+  if((match=s.match(/^(\d{4})\D+(\d{1,2})\D+(\d{1,2})(?:\D.*)?$/))){
+    y=+match[1];m=+match[2];d=+match[3];
+  }else if(/^\d{8,14}$/.test(s)){
+    y=+s.slice(0,4);m=+s.slice(4,6);d=+s.slice(6,8);
+  }else if(/^\d{6}$/.test(s)){
+    y=2000+(+s.slice(0,2));m=+s.slice(2,4);d=+s.slice(4,6);
+  }else return 0;
+  const check=new Date(Date.UTC(y,m-1,d));
+  return check.getUTCFullYear()===y&&check.getUTCMonth()===m-1&&check.getUTCDate()===d
+    ? y*10000+m*100+d : 0;
+};
 C.buildHistories=(rows,m)=>{let hs=[];for(let r of rows){let name=m.horseName?String(r[m.horseName]||'').trim():'',no=m.horseNo?String(r[m.horseNo]||'').trim():'';if(!name&&!no)continue;hs.push({horseName:name,horseNo:no,rpci:m.rpci?C.num(r[m.rpci]):null,pci:m.pci?C.num(r[m.pci]):null,ave3f:m.ave3f?C.num(r[m.ave3f]):null,minus3f:m.minus3f?C.num(r[m.minus3f]):null,style:m.style?String(r[m.style]||'').trim():'',date:m.date?String(r[m.date]||''):'',distance:m.distance?String(r[m.distance]||''):'',track:m.track?String(r[m.track]||''):'',finish:m.finish?C.num(r[m.finish]):null,raceClass:m.raceClass?String(r[m.raceClass]||''):''})}let groups={};for(let h of hs){let k=h.horseName||('馬番'+h.horseNo);if(!groups[k])groups[k]={name:h.horseName||k,horseNo:String(Object.keys(groups).length+1),horseNoSource:'csv_order_unverified',history:[]};groups[k].history.push(h)}return{histories:hs,horses:Object.values(groups)}};
 C.parseOdds=text=>{let o={},errs=[];String(text||'').trim().split(/\n+/).forEach((line,i)=>{let p=line.trim().split(/[\s,\t]+/).filter(Boolean);if(p.length<2)return;let no=parseInt(p[0],10),v=C.num(p[1]);if(!Number.isFinite(no)||!Number.isFinite(v)||v<=0){errs.push(`${i+1}行目`);return}if(o[no])errs.push(`馬番${no}重複`);o[no]=v});return{odds:o,errors:errs}};
 C.market=(odds,M)=>{let list=Object.entries(odds).map(([no,o])=>({no:String(no),o:Number(o)})).filter(x=>x.o>0).sort((a,b)=>a.o-b.o);if(list.length<2)return null;let s=list.reduce((z,x)=>z+1/x.o,0);list.forEach((x,i)=>{x.rank=i+1;x.p=(1/x.o)/s});let hhi=list.reduce((z,x)=>z+x.p*x.p,0),neff=1/hhi,n=list.length,ent=-list.reduce((z,x)=>z+x.p*Math.log(x.p),0)/Math.log(n),top3=list.slice(0,3).reduce((z,x)=>z+x.p,0),gaps=[];for(let i=0;i<Math.min(9,list.length-1);i++)gaps.push(list[i+1].o/list[i].o);let maxGap=Math.max(...gaps,1),f=M.market_mci.formula,mci=f.intercept+f.entropy*ent+f.neff_ratio*(neff/n)+f.top3_share*top3+f.max_gap_top10*maxGap,t=M.market_mci.thresholds,shape=mci>=t.concentrated_min?'集中':mci<=t.dispersed_max?'分散':'中間';return{list,over:s,entropy:ent,neff,neffRatio:neff/n,top3,maxGap,mci,shape}};
