@@ -6,6 +6,7 @@
 const VERSION='ability-v3-research-mode-v1-20261117';
 const DATA_MODEL='data/ability_v3_research_models_2026.json';
 const DATA_ARCHIVE='data/research_v3_reference_271.json';
+const DATA_SNAPSHOT='data/ability_v3_network_snapshot_20261004.json';
 const NUMBER=x=>x===null||x===undefined||String(x).trim()===''?NaN:Number(x);
 const NORMAL=x=>String(x??'').normalize('NFKC').trim();
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -105,54 +106,63 @@ function analyze(data){const {meta,roster,cState,decision,oddsText,v3Card,models
   const productionAxis=decision?.structure?.axis||null;
   const prodCode=String(decision?.final?.code||decision?.structure?.code||'unknown');
   const recheck=market.complete&&ms!==null&&ms>=.60&&['no_auto_axis','ability_rank_tie'].includes(prodCode);
-  return{ready:true,version:VERSION,year,modelTrainThrough:year-1,meta,cValid,market,marketP:ms,recheck,prodCode,productionAxis,rows,abilityRanking:v3AbilityRank,cPick,vPick,cMix,hasMarket:market.complete,cardRid:v3Card.rid||'',notes:'歴史データは研究凍結特徴量。現行C＋M3および購入ロックは無変更。全推定確率は研究値・未較正。'};
+  return{ready:true,version:VERSION,year,modelTrainThrough:year-1,meta,cValid,market,marketP:ms,recheck,prodCode,productionAxis,rows,abilityRanking:v3AbilityRank,cPick,vPick,cMix,hasMarket:market.complete,cardRid:v3Card.rid||'',notes:'V3計算は2026-10-04までのJRA全体データに基づきます。現行C＋M3および購入ロックは維持。全推定確率はモデル推定値・未較正。'};
 }
 // Pure interface for independent Node regression tests.
 root.AbilityV3ResearchCoreV1={version:VERSION,modelScore,projected,marketStructure,buildMarket,validateCard,matchReference,rowsFromCsv,analyze};
 if(!root.document||typeof root.addEventListener!=='function')return;
-let models=null,archive=null,manual=null,initialized=false,opened=false,fetching=false,lastState=null,raf=0,lastSignature='',lastSource='';
+let models=null,archive=null,snapshot=null,snapshotIndex=null,targetLedger=null,initialized=false,opened=false,fetching=false,lastState=null,raf=0,lastSignature='',lastSource='';
 const $=id=>document.getElementById(id);
 function renderError(reason){lastSource='';const out=$('av3Result');if(out)out.innerHTML=`<div class="av3-notice">${esc(reason)}</div>`;lastState=null;}
 const htmlNames=a=>a.map(r=>`<span class="av3-chip">${esc(r.no)} ${esc(r.name)}</span>`).join(' ');
 function draw(res,source){lastSource=source;const o=$('av3Result');if(!o)return;lastState=res;
   const tags=res.rows.map(r=>`<tr><td>${esc(r.no)}</td><td>${esc(r.name)}</td><td>${Number.isFinite(r.cRank)?r.cRank:'—'}</td><td><b>${r.v3Rank}</b></td><td>${nFmt(r.h730,3)}</td><td>${r.miss?'—':nFmt(r.peak,3)}</td><td>${Number.isFinite(r.m3)?r.m3:'—'}</td><td>${Number.isFinite(r.pop)?r.pop:'—'}</td><td>${pFmt(r.CW)}</td><td>${pFmt(r.V3W)}</td></tr>`).join('');
   const fmtAxis=p=>p?`<b>${esc(p.axis.no)} ${esc(p.axis.name)}</b> <small>推定3着内 ${pFmt(p.axis.p3)}</small>`:'<span>必要データ不足</span>';
-  const f=res.productionAxis,mode=res.recheck?'<span class="av3-caution">再点検対象（購入ロック維持）</span>':res.prodCode==='unknown'?'<span>本番判定待ち</span>':`<span>現行判定：${esc(res.prodCode)}</span>`;
+  const f=res.productionAxis,mode=res.recheck?'<span class="av3-caution">軸再点検（購入ロック維持）</span>':res.prodCode==='unknown'?'<span>本番判定待ち</span>':`<span>既存ゲート：${esc(res.prodCode)}</span>`;
   o.innerHTML=`<div class="av3-note"><b>V3データ：${esc(source)}</b> ｜モデル：${res.year}年用（${res.modelTrainThrough}年まで学習）</div>
     <div class="av3-metrics"><div><small>市場構造：1番人気3着内推定</small><b>${pFmt(res.marketP)}</b></div><div><small>現行構造軸</small><b>${f?esc(f.no)+' '+esc(f.name):'なし'}</b></div><div><small>見送り再点検</small><b>${mode}</b></div></div>
-    <div class="av3-columns"><div class="av3-tile"><small>市場＋C 研究軸</small>${fmtAxis(res.cPick)}</div><div class="av3-tile"><small>市場＋V3 研究軸</small>${fmtAxis(res.vPick)}</div></div>
-    <div class="av3-tile"><b>相手4頭｜市場＋C</b><div class="av3-chips">${res.cPick?htmlNames(res.cPick.partners):'Cまたは全頭単勝オッズ待ち'}</div><small>研究用。現行の市場Top2相手は維持</small></div>
-    <div class="av3-tile"><b>相手4頭｜C軸＋C/V3混合</b><div class="av3-chips">${res.cMix?htmlNames(res.cMix.partners):'Cまたは全頭単勝オッズ待ち'}</div><small>以前のP3-14使い分け研究との比較用</small></div>
+    <div class="av3-columns"><div class="av3-tile"><small>C＋市場の軸候補</small>${fmtAxis(res.cPick)}</div><div class="av3-tile"><small>V3＋市場の軸候補</small>${fmtAxis(res.vPick)}</div></div>
+    <div class="av3-tile"><b>相手4頭｜市場＋C</b><div class="av3-chips">${res.cPick?htmlNames(res.cPick.partners):'Cまたは全頭単勝オッズ待ち'}</div><small>C＋市場の相手4頭（従来Top2は別途維持）</small></div>
+    <div class="av3-tile"><b>相手4頭｜C/V3併用</b><div class="av3-chips">${res.cMix?htmlNames(res.cMix.partners):'Cまたは全頭単勝オッズ待ち'}</div><small>CとV3の評価差を反映した別候補</small></div>
     <div class="av3-tile"><b>V3単独の能力番付 上位5頭</b><div class="av3-chips">${htmlNames(res.abilityRanking.slice(0,5))}</div><small>単勝オッズを含めない能力評価</small></div>
     <div class="av3-scroll"><table class="av3-table"><thead><tr><th>番</th><th>馬名</th><th>C位</th><th>V3位</th><th>Dynamic</th><th>Peak</th><th>M3位</th><th>人気</th><th>C＋市場</th><th>V3＋市場</th></tr></thead><tbody>${tags}</tbody></table></div>
-    <p class="av3-footnote">${esc(res.notes)} 市場構造の0.60は探索済み研究閾値で、馬券期待値・軸＋相手の同時好走確率ではありません。C/V3の3着内推定にも較正ずれがあります。発走前の実績検証前に本番の見送りを解除しません。</p>`;
+    <p class="av3-footnote">${esc(res.notes)} 市場構造の0.60は探索済み閾値で、馬券期待値・軸＋相手の同時好走確率ではありません。C/V3の3着内推定にも較正ずれがあります。発走前の実績検証前に購入ロックを自動解除しません。</p>`;
 }
 function roster(){const F=root.Finish600State;return F?.ready?(F.rows||[]).map(r=>({no:integerNo(r.no),name:NORMAL(r.name),finishRank:r.finishRank})).filter(r=>r.no):[];}
 function stateSignature(){const m=raceMeta(document),a=root.M3PureAbilityState,d=root.DecisionShellV2State;
- return JSON.stringify([m,roster().map(r=>[r.no,r.name,r.finishRank]),a?.at,a?.activeModel,d?.at,$('oddsPaste')?.value,manual?.rid]);}
-function compute(){if(!opened||!models||!archive)return;const sig=stateSignature();if(sig===lastSignature&&lastState)return;lastSignature=sig;
- const r=roster(),meta=raceMeta(document),card=(manual&&validateCard(manual,meta,r).ok)?manual:matchReference(archive,meta,r);
- if(!card){renderError(manual?'持込V3データは現在の出走馬・レース条件に一致しません。過去271レース内にも一致なし。':'このレースのV3特徴量がありません。実証済みデータを読み込むまでV3能力を推定しません。');return;}
+ return JSON.stringify([m,roster().map(r=>[r.no,r.name,r.finishRank]),a?.at,a?.activeModel,d?.at,$('oddsPaste')?.value,targetLedger?.fileName,targetLedger?.latest]);}
+function compute(){if(!opened||!models||!archive||!snapshot)return;const sig=stateSignature();if(sig===lastSignature&&lastState)return;lastSignature=sig;
+ const r=roster(),meta=raceMeta(document),historic=matchReference(archive,meta,r);
+ const auto=historic?null:root.AbilityV3AutoCoreV1?.buildCard(snapshot,meta,r,targetLedger,snapshotIndex);
+ const card=historic||(auto?.ok?auto.card:null);
+ if(!card){renderError(auto?.reason||'レース条件・出走馬・通常CSVを解析してください。V3計算に必要なデータが不足しています。');return;}
  const result=analyze({meta,roster:r,cState:root.M3PureAbilityState,decision:root.DecisionShellV2State,oddsText:$('oddsPaste')?.value,v3Card:card,models});
- if(!result.ready){renderError(result.reason);return;}draw(result,card===manual?'手動インポート（全馬照合済み）':'保存済み271レースの凍結研究データ');
+ if(!result.ready){renderError(result.reason);return;}draw(result,historic?'保存済み時点別データ（過去271R）':auto.source);
 }
 function schedule(){if(!opened||raf)return;raf=(root.requestAnimationFrame||((f)=>setTimeout(f,0)))(()=>{raf=0;compute()});}
-async function prepare(){if(models&&archive)return true;if(fetching)return false;fetching=true;renderError('研究モデル・過去V3特徴量を読み込み中');try{
- const [mr,ar]=await Promise.all([fetch(DATA_MODEL,{cache:'no-store'}),fetch(DATA_ARCHIVE,{cache:'no-store'})]);if(!mr.ok||!ar.ok)throw new Error('HTTP '+mr.status+'/'+ar.status);
- const [m,a]=await Promise.all([mr.json(),ar.json()]);if(m.version!=='P3-27-v1'||a.version!=='P3-27-v1'||a.races?.length!==271)throw new Error('研究モデルのバージョン不一致');
- models=m;archive=a;fetching=false;return true;
+async function prepare(){if(models&&archive&&snapshot)return true;if(fetching)return false;fetching=true;renderError('Ability V3モデル・JRA能力DBを読み込み中');try{
+ const [mr,ar,sr]=await Promise.all([fetch(DATA_MODEL,{cache:'no-store'}),fetch(DATA_ARCHIVE,{cache:'no-store'}),fetch(DATA_SNAPSHOT,{cache:'no-store'})]);if(!mr.ok||!ar.ok||!sr.ok)throw new Error('HTTP '+mr.status+'/'+ar.status+'/'+sr.status);
+ const [m,a,x]=await Promise.all([mr.json(),ar.json(),sr.json()]);if(m.version!=='P3-27-v1'||a.version!=='P3-27-v1'||a.races?.length!==271||x.version!=='P3-30-v1')throw new Error('Abilityデータのバージョン不一致');
+ models=m;archive=a;snapshot=x;snapshotIndex=root.AbilityV3AutoCoreV1.makeIndex(x);fetching=false;return true;
  }catch(e){fetching=false;renderError('研究データの取得に失敗：'+e.message+'。ZIPを展開してHTTPサーバーで開いてください（file://直開き非対応）。');return false;}}
-async function importFile(file){if(!file)return;try{
- const buff=await file.arrayBuffer(),decode=root.ShapeCore?.decode?.(buff)||new TextDecoder('utf-8').decode(buff),card=rowsFromCsv(decode,root.ShapeCore);
- if(!strictField(card))throw new Error('1レース12〜18頭にしてください');manual=card;lastSignature='';$('av3ImportStatus').textContent=`読込済み：${file.name}（${card.field}頭）。一致した出走表のみ適用`;
- if(await prepare())schedule();
- }catch(e){manual=null;lastSignature='';$('av3ImportStatus').textContent='読込失敗：'+e.message;renderError('V3 CSVの形式または内容が正しくありません：'+e.message);}}
+// Read the SAME normal TARGET CSV used by C/M3. No second upload or manual V3 feature card.
+async function inspectTargetFile(file){if(!file){targetLedger=null;lastSignature='';return;}
+ try{const buf=root.RSATargetCsvCache?.arrayBuffer?await root.RSATargetCsvCache.arrayBuffer(file):await file.arrayBuffer();
+  const parsed=root.ShapeCore.rowsToObjects(root.ShapeCore.parseCSV(root.ShapeCore.decode(buf)));
+  const hd=parsed.headers;
+  const col=xs=>hd.find(h=>xs.some(x=>root.ShapeCore.normHead(h)===root.ShapeCore.normHead(x)))||'';
+  const nm=col(['馬名']),dt=col(['日付']),sf=col(['芝・ダート','芝・ダ','芝ダ']);
+  if(!nm||!dt||!sf)throw new Error('馬名・日付・芝ダートの列が必要');
+  const lastByKey={};let latest=0;
+  for(const row of parsed.rows){const name=NORMAL(row[nm]),s=normSurface(row[sf]),day=root.AbilityV3AutoCoreV1.dateKey(row[dt]);if(!name||!day)continue;const key=name+'|'+s;lastByKey[key]=Math.max(lastByKey[key]||0,day);latest=Math.max(latest,day);}
+  targetLedger={fileName:file.name,lastByKey,latest};lastSignature='';schedule();
+ }catch(e){targetLedger={fileName:file.name,lastByKey:{},error:e.message,latest:0};renderError('通常CSVのV3履歴監査に失敗：'+e.message);}}
 // Read-only, current-race-only bridge for P3-28 prospective receipt export.
 // This does not modify any production gate, axis or betting state.
 root.AbilityV3ResearchPanelBridgeV1=Object.freeze({
   getCurrent(){
-    if(!opened)return{ok:false,reason:'研究パネルを開いて解析結果を表示してください'};
-    if(!models||!archive)return{ok:false,reason:'研究モデルの読み込みが完了していません'};
+    if(!opened)return{ok:false,reason:'Ability診断を開いて解析してください'};
+    if(!models||!archive||!snapshot)return{ok:false,reason:'V3モデルの読み込みが完了していません'};
     compute();
     if(!lastState?.ready||lastSignature!==stateSignature())return{ok:false,reason:'現在のレースの解析結果が有効ではありません。再解析してください'};
     const res=lastState;
@@ -162,14 +172,13 @@ root.AbilityV3ResearchPanelBridgeV1=Object.freeze({
 });
 function init(){if(initialized)return;initialized=true;const odds=$('oddsCard');if(!odds)return;
  const details=document.createElement('details');details.id='av3ResearchPanel';details.className='av3-research';
- details.innerHTML=`<summary><span>Ability C × V3 研究モード</span><small>能力番付・軸比較・相手4頭・見送り再点検</small></summary>
- <div class="av3-body"><div class="av3-notice">本番とは完全に別の比較表示です。Ability C・M3・購入ロック・市場Top2相手は変更しません。研究用V3は730日Dynamic＋Peakを使用します。</div>
- <label class="av3-label" for="av3FeatureFile">追加V3特徴量 CSV（任意・現在の出走表と全馬一致した場合のみ）</label><input id="av3FeatureFile" type="file" accept=".csv,text/csv" />
- <div id="av3ImportStatus" class="av3-hint">保存済み2024〜2026年271レースは自動照合。新規レースはV3特徴量CSVが必要です。</div>
- <button type="button" id="av3Refresh" class="secondary">研究比較を更新</button><div id="av3Result" aria-live="polite" class="av3-result"><div class="av3-notice">開くとモデルを読み込み、出走馬を照合します。</div></div></div>`;
+ details.innerHTML=`<summary><span>Ability総合診断｜C × V3</span><small>能力番付・軸・相手4頭・見送り再点検</small></summary>
+ <div class="av3-body"><div class="av3-notice">通常のTARGET過去走CSVだけでAbility C・V3を自動比較します。V3はJRA全体の対戦データから算出した730日Dynamic＋Peak。M3・従来の購入ロックは保持しています。</div>
+ <div id="av3ImportStatus" class="av3-hint">V3専用CSVは不要。C/M3と同じCSVを解析し、単勝オッズを入力すると軸・相手候補も表示します。</div>
+ <button type="button" id="av3Refresh" class="secondary">能力・軸・相手を再計算</button><div id="av3Result" aria-live="polite" class="av3-result"><div class="av3-notice">通常CSVの解析待ちです。</div></div></div>`;
  odds.appendChild(details);
- details.addEventListener('toggle',async()=>{opened=details.open;if(opened&&await prepare()){lastSignature='';compute();}});
- $('av3FeatureFile').addEventListener('change',e=>importFile(e.target.files?.[0]));
+ details.addEventListener('toggle',async()=>{opened=details.open;if(opened&&await prepare()){lastSignature='';compute();}});details.open=true;opened=true;prepare().then(ok=>{if(ok){lastSignature='';schedule()}});
+ const csv=$('csvFile');if(csv){csv.addEventListener('change',e=>inspectTargetFile(e.target.files?.[0]));if(csv.files?.[0])inspectTargetFile(csv.files[0]);}
  $('av3Refresh').addEventListener('click',()=>{lastSignature='';schedule()});
  ['m3-pure-ability-ready','finish600-ready','decision-shell-v2-ready','rsa-analysis-complete'].forEach(ev=>root.addEventListener(ev,schedule));
  document.addEventListener('input',e=>{if(['oddsPaste','raceDate','venue','surface','distance','fieldSize','grade'].includes(e.target?.id))schedule()},true);

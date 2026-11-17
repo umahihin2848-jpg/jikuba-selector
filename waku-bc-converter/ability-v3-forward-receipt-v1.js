@@ -23,7 +23,7 @@ function preRaceGuard(meta,clock,confirmed,nowMs=Date.now()){
 function horseRef(h){return{no:Number(h.no),name:String(h.name),cRank:N(h.cRank),v3Rank:N(h.v3Rank),m3Rank:N(h.m3),popularity:N(h.pop),odds:N(h.odds),h730:N(h.h730),peak:N(h.peak),peakMissing:Number(h.miss)===1,historyCount:N(h.histN),historyGapDays:N(h.gap),v3AbilityP3:N(h.V3A),cMarketP3:N(h.CW),v3MarketP3:N(h.V3W),mixedP3:N(h.CWV3)};}
 function choice(p){return p?{axis:{no:Number(p.axis.no),name:String(p.axis.name),p3:N(p.axis.p3)},partners:p.partners.map(r=>({no:Number(r.no),name:String(r.name),p3:N(r.p3)}))}:null;}
 function buildPayload(current,clock,confirmed,nowMs=Date.now(),raceName=''){
- if(!current?.ok||!current.analysis?.ready)throw new Error(current?.reason||'研究解析が完成していません');
+ if(!current?.ok||!current.analysis?.ready)throw new Error(current?.reason||'能力診断が完了していません');
  const a=current.analysis,m=a.meta,sd=preRaceGuard(m,clock,confirmed,nowMs);if(!String(raceName||'').trim()&&!String(a.cardRid||'').trim())throw new Error('レース名か識別IDを入力してください');
  if(!a.cValid||!a.hasMarket||!a.cPick||!a.vPick||!a.cMix||!a.market?.complete)throw new Error('C・V3・全頭オッズの揃った解析が必要です');
  const hs=a.rows.map(horseRef).sort((x,y)=>x.no-y.no),noSet=new Set(hs.map(h=>h.no));
@@ -35,7 +35,7 @@ function buildPayload(current,clock,confirmed,nowMs=Date.now(),raceName=''){
   decision:{productionGateCode:String(a.prodCode||'unknown'),productionStructureAxis:a.productionAxis?{no:Number(a.productionAxis.no),name:String(a.productionAxis.name)}:null,marketStructureP1Top3:N(a.marketP),marketStructureRecheck:Boolean(a.recheck),marketStructureThresholdResearchOnly:0.60},
   picks:{cMarket:choice(a.cPick),v3Market:choice(a.vPick),cAxisMixedPartners:choice(a.cMix)},
   horses:hs,
-  notes:'研究専用。個別推定は未較正。発走前の予測固定は端末時刻・利用者申告に依存し、第三者の時刻証明ではない。本番の購入・見送りロックは無変更。'
+  notes:'個別推定は未較正。発走前の予測固定は端末時刻・利用者申告に依存し、第三者の時刻証明ではない。本番の購入・見送りロックは無変更。'
  };
  validatePayload(payload);return payload;
 }
@@ -64,7 +64,7 @@ function safeName(x){return String(x||'race').replace(/[^\p{L}\p{N}_-]+/gu,'_').
 async function freeze(){try{
  const state=root.AbilityV3ResearchPanelBridgeV1?.getCurrent();if(!state?.ok)throw new Error(state?.reason||'先に研究解析を実行してください');
  const clock=$('av3ScheduledStart')?.value,confirmed=$('av3OfficialConfirmed')?.checked,accept=$('av3PreRaceDeclaration')?.checked;
- if(!accept)throw new Error('発走前の研究予測であることを確認してください');
+ if(!accept)throw new Error('発走前の予測であることを確認してください');
  const payload=buildPayload(state,clock,confirmed,Date.now(),$('raceName')?.value||'');const receipt=await seal(payload);
  const today=payload.race.date.replace(/-/g,''),venue=safeName(payload.race.venue),hash=receipt.sha256.slice(0,12);
  download(`P3-28_${today}_${venue}_C-V3_before_${hash}.json`,receipt);
@@ -89,12 +89,12 @@ async function resultCheck(){try{
  msg('結果照合JSONを別ファイルで出力しました。発走前予測の原本は書き換えていません。実際の払戻・ROIは未計算です。');
  }catch(e){msg('結果を保存できません：'+e.message,true);}}
 function init(){const panel=$('av3ResearchPanel'),body=panel?.querySelector('.av3-body');if(!body||$('av3ForwardPanel'))return;
- const div=document.createElement('section');div.id='av3ForwardPanel';div.className='av3-forward';div.innerHTML=`<h3>発走前予測の固定・結果照合（研究専用）</h3>
- <p>現在のC・V3研究予測、全頭オッズ、軸、相手4頭、見送り理由をハッシュ付きJSONに保存。予測は端末外で保管し、結果は別ファイルで照合します。</p>
+ const div=document.createElement('section');div.id='av3ForwardPanel';div.className='av3-forward';div.innerHTML=`<h3>発走前予測の記録・結果照合</h3>
+ <p>現在のC・V3診断結果、全頭オッズ、軸、相手4頭、見送り理由をハッシュ付きJSONに保存。予測は端末外で保管し、結果は別ファイルで照合します。</p>
  <label for="av3ScheduledStart">公式の発走予定時刻（日本時間）</label><input type="time" id="av3ScheduledStart" autocomplete="off" />
  <label class="av3-forward-check"><input type="checkbox" id="av3OfficialConfirmed" />公式発走時刻と照合しました</label>
  <label class="av3-forward-check"><input type="checkbox" id="av3PreRaceDeclaration" />発走前の予測であり、現在の出走表・オッズを確認しました</label>
- <button type="button" id="av3FreezeBtn">発走前の研究予測をJSON保存</button>
+ <button type="button" id="av3FreezeBtn">発走前の予測をJSON保存</button>
  <div class="av3-forward-divider"></div>
  <label for="av3ReceiptFile">保存した発走前JSONを読み込んで検証</label><input id="av3ReceiptFile" type="file" accept="application/json,.json" />
  <div id="av3ReceiptInfo" class="av3-forward-info" aria-live="polite">予測JSON未検証</div>
