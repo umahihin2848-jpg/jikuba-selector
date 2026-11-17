@@ -2,7 +2,7 @@
    C×M3 purchase gate and separately trained C+market / V3 models.
    Never reassigns the official axis or overrides stop decisions. */
 (function(root){'use strict';
-const VERSION='P3-35-manual-single-partner-v1';
+const VERSION='P3-36-three-candidates-only-v1';
 const $=id=>document.getElementById(id);
 const H=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const N=v=>v===null||v===undefined||String(v).trim()===''?NaN:Number(v);
@@ -76,7 +76,7 @@ function decisionContext(){
  const cFit=root.RSAFocusedThreeTabsV1?.frozen?.models?.[year];
  const ranked=cMarketRank(r,mk,root.M3PureAbilityState,cFit);
  const v=modelState(),v3=v?.ok?v.analysis:null;
- const partners=mk.complete&&official&&ranked.ready?selectVisiblePartners(ranked,official,4):[];
+ const partners=mk.complete&&official&&ranked.ready?selectVisiblePartners(ranked,official,3):[];
  const sc=official?root.M3PureAbilityState?.byNo?.[official.no]:null;
  const q=official?root.ValidatedQueueState?.byNo?.[official.no]:null;
  const risk=official?root.PositionRiskState?.byNo?.[official.no]:null;
@@ -138,7 +138,7 @@ function partnerHtml(x){
  if(!x.official)return alert('単独軸が確定していないため、相手馬の推薦を保留します。');
  if(!x.odds.complete)return alert('相手馬を計算するには、今回の確定馬番と全'+x.r.length+'頭の単勝オッズが必要です（現在'+x.odds.rows.length+'/'+x.r.length+'頭）。');
  if(!x.ranked.ready)return alert(x.ranked.reason||STORE.error||'Ability C＋市場の計算待ちです。');
- if(x.partners.length!==4)return alert('相手候補を確定できません。再解析してください。');
+ if(x.partners.length!==3)return alert('相手候補3頭を確定できません。再解析してください。');
  const v3ByNo=Object.fromEntries((x.v3?.rows||[]).map(o=>[String(o.no),o]));
  const chosen=x.partners.find(r=>String(r.no)===String(STORE.selectedPartnerNo??''));
  const summary='<div class="rsaf-manual-summary" role="status" aria-live="polite">'+
@@ -157,13 +157,10 @@ function partnerHtml(x){
     '<button type="button" class="rsaf-pick-action" data-rsaf-pick-no="'+H(r.no)+'" aria-pressed="'+selected+'">'+
     (selected?'選択を解除':'この馬を相手に選ぶ')+'</button></article>';
  };
- const firstThree=x.partners.slice(0,3).map(card).join('');
- const fourth=x.partners[3],fourthChosen=chosen&&String(chosen.no)===String(fourth.no);
- const extra='<details id="rsafFourthCandidate" class="rsaf-fourth"'+(fourthChosen?' open':'')+'>'+
-   '<summary>4頭目の追加候補を確認'+(fourthChosen?'（選択中）':'')+'</summary>'+card(fourth,3)+'</details>';
- return '<div class="rsaf-intro"><b>相手馬｜自分で1頭選ぶ</b>'+
-   '<p>市場＋Ability Cが候補を提示。基本3頭、4頭目は折りたたみで確認できます。選ぶ馬は自分で決めます。</p></div>'+
-   summary+firstThree+extra+
+ const threeCards=x.partners.map(card).join('');
+ return '<div class="rsaf-intro"><b>相手馬｜3頭から自分で1頭選ぶ</b>'+
+   '<p>市場＋Ability Cが選んだ相手候補は3頭だけ表示。3頭の中から自分で1頭を決めます。</p></div>'+
+   summary+threeCards+
    '<p class="rsaf-foot">M3・V3は比較情報で、相手候補の選定順には使っていません。'+
    'ここで選んだ相手は画面内のメモであり、馬券の自動購入・見送り解除は行いません。'+
    '馬番はCSVの仮番号なので確定枠順と照合してください。</p>';

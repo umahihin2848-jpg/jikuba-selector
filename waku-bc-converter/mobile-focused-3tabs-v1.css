@@ -61,13 +61,10 @@ body.iosMobileShellV2.rsaFocusedThreeTabs #rsaFocusedView{display:block!importan
 .rsaf-skip-review .rsaf-badge{border-color:#bea163;background:#4a3a1f;color:#ffdf99}
 .rsaf-skip-skip{border-color:#895f62}
 
-/* P3-35: one manual partner choice; default three candidates, optional fourth. */
+/* P3-36: one manual partner choice from exactly three visible candidates. */
 .rsaf-manual-summary{border:1px solid #396e69;background:#112f2d;padding:12px;border-radius:12px;display:grid;gap:5px}
 .rsaf-manual-summary strong{color:#e3fdf1;font-size:13px}
 .rsaf-manual-summary small{color:#9cbfb6;font-size:11px;line-height:1.5}
 .rsaf-pick-card.rsaf-picked{border-color:#75c69f;background:linear-gradient(145deg,#123e34,#0c2530)}
 .rsaf-pick-action{margin-top:12px;min-height:44px!important;width:100%;font-size:13px!important;font-weight:800!important;border-radius:10px!important;background:#153b42!important;color:#e2f7f0!important;border:1px solid #447f77!important;box-shadow:none!important}
 .rsaf-pick-action[aria-pressed="true"]{background:#2c5445!important;color:#edfff2!important;border-color:#77b690!important}
-.rsaf-fourth{border:1px solid #354f60;border-radius:12px;background:#0a202c;padding:8px}
-.rsaf-fourth>summary{cursor:pointer;padding:9px;font-size:12px;font-weight:800;color:#bdd3dc;min-height:42px}
-.rsaf-fourth>.rsaf-horse{margin-top:6px}
