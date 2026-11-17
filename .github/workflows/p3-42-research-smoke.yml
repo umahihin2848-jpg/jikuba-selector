@@ -11,6 +11,9 @@ on:
       - 'tests/p3-46-m3-required-schema-guard.cjs'
       - 'tests/p3-47-m3-feature-contract.cjs'
       - 'tests/p3-50-ability-m3-axis-structure-contract.cjs'
+      - 'tests/p355-prospective-axis-snapshot-contract.cjs'
+      - 'waku-bc-converter/p355-prospective-axis-snapshot-v1.js'
+      - 'waku-bc-converter/v3.html'
       - 'waku-bc-converter/remaining600-validated-v1.js'
       - 'waku-bc-converter/finish600-simulator-v2.js'
       - '.github/workflows/p3-42-research-smoke.yml'
@@ -39,6 +42,8 @@ jobs:
           node --check tests/p3-46-m3-required-schema-guard.cjs
           node --check tests/p3-47-m3-feature-contract.cjs
           node --check tests/p3-50-ability-m3-axis-structure-contract.cjs
+          node --check waku-bc-converter/p355-prospective-axis-snapshot-v1.js
+          node --check tests/p355-prospective-axis-snapshot-contract.cjs
       - name: Input contract tests (no model/gate mutation)
         run: |
           node tests/p3-41-m3-date-compat-smoke.cjs
@@ -48,3 +53,4 @@ jobs:
           node tests/p3-46-m3-required-schema-guard.cjs
           node tests/p3-47-m3-feature-contract.cjs
           node tests/p3-50-ability-m3-axis-structure-contract.cjs
+          node tests/p355-prospective-axis-snapshot-contract.cjs
