@@ -14,6 +14,8 @@ The raw user-supplied `umadete.csv` contains 439,416 rows. Reading the `日付` 
 - 6 digits: 89,243 (20.31%)
 - **6 or 7 digits: 352,278 / 439,416 (80.17%)**
 
+Deduplicating by **horse name + race ID** (the same key as P3-40) yields **74,724 unique historical runs**. Their date lengths are 7 digits: 45,430; 6 digits: 15,081; 8 digits: 14,213. In this exact normalized universe, **60,511 / 74,724 (80.98%)** would require padding if a raw-date parser were used. No literal zero corner positions were observed in these deduplicated runs.
+
 Examples: `2026.10. 4`, `2026. 6. 7`, `2025.11.30`.
 
 Old `ShapeCore.dateVal` stripped punctuation and, for six digits, prefixed `20` to an already four-digit year (e.g. `2026. 6. 7` became `20202667`); for seven digits it could return `Date.parse` **milliseconds** (e.g. `2026.10. 4` produced `1791072000000`). Mixing milliseconds with integer `YYYYMMDD` makes history ordering and strictly-prior filters invalid **if untransformed raw data reaches the date parser**.
