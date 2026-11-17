@@ -44,4 +44,44 @@ assert.equal(flags.lastSig,'');
 assert.match(root.innerHTML,/M3を停止/);
 assert(src.includes('const missing=m3MissingFields(m);if(missing.length)'), 'parser must enforce full schema');
 assert(src.includes('if(busy||!parsed||!MODEL'), 'renderer must not emit an all-imputed rank without a valid CSV');
-console.log('PASS P3-46 full-column schema gate, no PCI3/racePCI fallback, stale M3 state invalidation');
+
+const vm=require('node:vm');
+const scode=fs.readFileSync(path.join(__dirname,'../waku-bc-converter/shape-core-v2.js'),'utf8');
+const browser={};vm.runInNewContext(scode,{window:browser,TextDecoder,Date,console});
+const C=browser.ShapeCore;
+let paints=0;
+const userWindow={Finish600State:{ready:true,rows:[{no:'1',finishRank:1}]}};
+const ui={innerHTML:''};
+const source=get('function col(headers,names','function hist(name,raceDate){');
+const runtime=new Function('C','window','
+,'E','generation','num','clamp','schedule','TextEncoder',
+  'let parsed=false,rawByHorse=new Map(),lastSig="";'+source+
+  'return {parseFile,state:()=>({parsed,rawByHorse})};')(
+  C,userWindow,()=>ui,String,()=>3,
+  v=>v===null||v===undefined||v===''?NaN:Number(String(v).trim()),
+  (v,a,b)=>Math.max(a,Math.min(b,v)),()=>{paints++},TextEncoder
+);
+const toFile=s=>({arrayBuffer:async()=>new TextEncoder().encode(s).buffer});
+const headers=['馬名','日付','芝・ダート','上り3F','上3F地点差','RPCI',' PCI','頭数','3角'];
+const goodRows=[headers,['テスト馬','2025.11. 1','芝','35.0','0.8','51.0','50.0','16','5']];
+const goodCsv=goodRows.map(a=>a.join(',')).join('\n');
+const badCsv=[headers.filter(x=>x!==' PCI'),goodRows[1].filter((_,i)=>headers[i]!==' PCI')]
+ .map(a=>a.join(',')).join('\n');
+(async()=>{
+  await runtime.parseFile(toFile(badCsv));
+  assert.equal(runtime.state().parsed,false,'incomplete CSV must not be declared ready');
+  assert.equal(userWindow.Finish600State.ready,false);
+  assert.match(userWindow.Finish600State.reason,/馬PCI/);
+  assert.equal(paints,0,'invalid data must never schedule M3');
+  await runtime.parseFile(toFile(goodCsv));
+  assert.equal(runtime.state().parsed,true,'valid TARGET-compatible CSV must become ready');
+  assert.equal(paints,1);
+  const h=runtime.state().rawByHorse.get('テスト馬');
+  assert.equal(h.length,1);
+  assert.equal(h[0].pci,50);
+  assert.equal(h[0].rpci,51);
+  assert.equal(h[0].date,20251101);
+  assert.equal(h[0].firstCorner,5);
+  console.log('PASS P3-46 full-column schema gate, live parse red/green, stale M3 invalidation');
+})().catch(e=>{console.error(e);process.exitCode=1});
+
