@@ -53,8 +53,7 @@ let paints=0;
 const userWindow={Finish600State:{ready:true,rows:[{no:'1',finishRank:1}]}};
 const ui={innerHTML:''};
 const source=get('function col(headers,names','function hist(name,raceDate){');
-const runtime=new Function('C','window','
-,'E','generation','num','clamp','schedule','TextEncoder',
+const runtime=new Function('C','window',String.fromCharCode(36),'E','generation','num','clamp','schedule','TextEncoder',
   'let parsed=false,rawByHorse=new Map(),lastSig="";'+source+
   'return {parseFile,state:()=>({parsed,rawByHorse})};')(
   C,userWindow,()=>ui,String,()=>3,
