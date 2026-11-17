@@ -21,5 +21,6 @@ assert(!view.cMarketRank(roster,api.buildMarket('1 2.2',roster),cState,model.mod
 assert(!view.cMarketRank(roster,mk,{...cState,activeModel:'v1'},model.models['2026']).ready,'no C fallback proxy');
 const header=fs.readFileSync(__dirname+'/../waku-bc-converter/v3.html','utf8');
 assert(header.includes('mobile-focused-3tabs-v1.js?v=20261117p331a'));
+assert(header.includes(':not(#rsaFocusedView){display:none!important}'),'gate CSS must not hide three-tab wrapper');
 assert(f.includes('軸馬情報')&&f.includes('相手馬情報')&&f.includes('展開隊列'));
 console.log('P3-31 focus_core_test PASS',top.map(x=>x.no));
