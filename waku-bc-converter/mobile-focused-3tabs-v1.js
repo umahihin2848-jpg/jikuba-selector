@@ -2,7 +2,7 @@
    C×M3 purchase gate and separately trained C+market / V3 models.
    Never reassigns the official axis or overrides stop decisions. */
 (function(root){'use strict';
-const VERSION='P3-36-three-candidates-only-v1';
+const VERSION='P3-38-manual-rescue-axis-v1';
 const $=id=>document.getElementById(id);
 const H=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const N=v=>v===null||v===undefined||String(v).trim()===''?NaN:Number(v);
@@ -39,6 +39,13 @@ function manualPartnerChoice(current,clicked,partners,axisNo){
  if(!eligible.some(r=>String(r.no)===value))return eligible.some(r=>String(r.no)===String(current??''))?String(current):null;
  return String(current??'')===value?null:value;
 }
+// The historic 0.60 screen only opens a research comparison, never the purchase gate.
+function researchAxisChoice(diag,ranked){
+ if(diag?.state!=='review'||!ranked?.ready||!Array.isArray(ranked.rows)||ranked.rows.length<4)return null;
+ const r=ranked.rows[0];
+ if(!r||!r.no||!r.name||!Number.isFinite(N(r.p3)))return null;
+ return {no:String(r.no),name:String(r.name),p3:r.p3,kind:'research'};
+}
 function partnerRankLabels(roster,no,v3){
  const m3=roster.find(r=>String(r.no)===String(no));
  return {m3:Number.isFinite(N(m3?.finishRank))&&N(m3.finishRank)>0?F(m3.finishRank,'位'):'評価待ち',
@@ -69,14 +76,13 @@ function skipDiagnosis(input={}){
 function modelState(){try{const a=root.AbilityV3ResearchPanelBridgeV1?.getCurrent();return a?.ok?a:{ok:false,reason:a?.reason||''};}catch(e){return{ok:false,reason:String(e?.message||e)}}}
 function decisionContext(){
  const r=roster(),d=root.DecisionShellV2State||{},pipeline=root.ProductionDecisionPipelineV1State||{},s=d.structure||{},final=d.final||{},a=pipeline.stages?.axis;
- const official=s.axis?{no:String(s.axis.no),name:String(s.axis.name||r.find(x=>x.no===String(s.axis.no))?.name||'')}:a?.no?{no:String(a.no),name:String(a.label||'').replace(/^\d+番\s*/, '')}:null;
+ const official=s.axis?{no:String(s.axis.no),name:String(s.axis.name||r.find(x=>x.no===String(s.axis.no))?.name||'')}:['A1','A2'].includes(s.kind)&&a?.no?{no:String(a.no),name:String(a.label||'').replace(/^\d+番\s*/, '')}:null;
  const odds=String($('oddsPaste')?.value||'');const mk=parseMarket(r,odds);
  const o=official?mk.byNo?.[official.no]:null;
  const year=String($('raceDate')?.value||'').slice(0,4);
  const cFit=root.RSAFocusedThreeTabsV1?.frozen?.models?.[year];
  const ranked=cMarketRank(r,mk,root.M3PureAbilityState,cFit);
  const v=modelState(),v3=v?.ok?v.analysis:null;
- const partners=mk.complete&&official&&ranked.ready?selectVisiblePartners(ranked,official,3):[];
  const sc=official?root.M3PureAbilityState?.byNo?.[official.no]:null;
  const q=official?root.ValidatedQueueState?.byNo?.[official.no]:null;
  const risk=official?root.PositionRiskState?.byNo?.[official.no]:null;
@@ -88,10 +94,13 @@ function decisionContext(){
  const marketP=mk.complete&&marketFit&&CORE()?.marketStructure?CORE().marketStructure(mk,marketFit):null;
  const access=root.AxisAccessGateV1State||{};
  const skipDiag=skipDiagnosis({analyzed,code:s.code,finalCode:final.code,scope:root.RaceSkipLockV1State?.kind==='scope',marketComplete:mk.complete,marketP,pair:s.kind==='double',unsafe:s.kind==='A3',officialAxis:Boolean(official),betEligible:access.betEligible===true});
- return{r,official,odds:mk,m:o,ranked,partners,sc,q,risk,v3,v3Horse,m3,decision:d,pipeline,structure:s,final,analyzed,year,marketP,skipDiag};
+ const researchAxis=!official&&mk.complete?researchAxisChoice(skipDiag,ranked):null;
+ const visibleAxis=official||researchAxis;
+ const partners=mk.complete&&visibleAxis&&ranked.ready?selectVisiblePartners(ranked,visibleAxis,3):[];
+ return{r,official,researchAxis,odds:mk,m:o,ranked,partners,sc,q,risk,v3,v3Horse,m3,decision:d,pipeline,structure:s,final,analyzed,year,marketP,skipDiag};
 }
 // Exposed for deterministic Node tests; no betting or production writes.
-root.RSAFocusedThreeTabsCoreV1=Object.freeze({version:VERSION,cMarketRank,selectVisiblePartners,partnerRankLabels,skipDiagnosis,manualPartnerChoice});
+root.RSAFocusedThreeTabsCoreV1=Object.freeze({version:VERSION,cMarketRank,selectVisiblePartners,partnerRankLabels,skipDiagnosis,manualPartnerChoice,researchAxisChoice});
 if(!root.document?.createElement||typeof root.addEventListener!=='function')return;
 const STORE={active:'axis',frozen:null,last:'',timer:0,dirty:false,selectedPartnerNo:null};
 root.RSAFocusedThreeTabsV1=STORE;
@@ -121,7 +130,18 @@ function axisHtml(x){const d=x.decision,s=x.structure,f=x.final,m=x.odds;
  const diag=x.skipDiag||{state:'pending',label:'確認待ち',reason:'判定を確認中',marketNote:''};
  const dgKind=diag.state==='pass'?'go':diag.state==='skip'?'stop':'neutral';
  const diagnostic='<div class="rsaf-skip-diagnostic rsaf-skip-'+H(diag.state)+'">'+badge(diag.label,dgKind)+'<p>'+H(diag.reason)+'</p>'+(diag.marketNote?'<small>'+H(diag.marketNote)+'</small>':'')+'</div>';
- if(!x.official){return diagnostic+alert('本番では軸馬が未確定です。再点検と表示されても自動購入や見送りロックの解除は行いません。');}
+ if(!x.official){
+  if(!x.researchAxis)return diagnostic+alert('本番では軸馬が未確定です。参考軸を計算できないレースは従来どおり見送ります。');
+  const ref=x.researchAxis,rt=x.ranked.rows.find(h=>String(h.no)===ref.no)||{};
+  const mr=x.r.find(h=>String(h.no)===ref.no);
+  const v=x.v3?.rows?.find(h=>String(h.no)===ref.no);
+  return diagnostic+
+   '<article class="rsaf-horse rsaf-research-axis"><div class="rsaf-horse-main"><b class="rsaf-horse-no">'+H(ref.no)+'</b><div><small>研究用・市場＋Cの参考軸</small><h3>'+H(ref.name)+'</h3></div></div>'+
+   '<div class="rsaf-grid">'+fact('研究用推定3着内',P(rt.p3))+fact('Ability C',F(rt.cRank,'位'))+
+   fact('M3',F(mr?.finishRank,'位'))+fact('単勝',F(rt.od,'倍',1))+
+   fact('人気',F(rt.pop,'人気'))+fact('V3',v?F(v.v3Rank,'位'):'更新待ち')+'</div></article>'+
+   alert('これは「軸未確定・再点検」の参考馬で、本番の確定軸ではありません。購入ロックは解除されず、過去の研究成績や推定確率も購入時の利益を保証しません。');
+ }
  const a=x.official,c=x.sc,q=x.q,r=x.risk,p=x.m;
  const marketMissing=!m.complete;
  const label=s.kind==='A2'?'A2 条件付き':s.kind==='A1'?'A1 単独軸':'構造候補';
@@ -135,7 +155,7 @@ function axisHtml(x){const d=x.decision,s=x.structure,f=x.final,m=x.odds;
 }
 function partnerHtml(x){
  if(!x.analyzed)return alert('レース構造の解析後に表示します。');
- if(!x.official)return alert('単独軸が確定していないため、相手馬の推薦を保留します。');
+ if(!x.official&&!x.researchAxis)return alert('単独軸が確定していないため、相手馬の推薦を保留します。');
  if(!x.odds.complete)return alert('相手馬を計算するには、今回の確定馬番と全'+x.r.length+'頭の単勝オッズが必要です（現在'+x.odds.rows.length+'/'+x.r.length+'頭）。');
  if(!x.ranked.ready)return alert(x.ranked.reason||STORE.error||'Ability C＋市場の計算待ちです。');
  if(x.partners.length!==3)return alert('相手候補3頭を確定できません。再解析してください。');
@@ -159,7 +179,8 @@ function partnerHtml(x){
  };
  const threeCards=x.partners.map(card).join('');
  return '<div class="rsaf-intro"><b>相手馬｜3頭から自分で1頭選ぶ</b>'+
-   '<p>市場＋Ability Cが選んだ相手候補は3頭だけ表示。3頭の中から自分で1頭を決めます。</p></div>'+
+   (x.researchAxis?'<p><strong>研究用の再点検候補：</strong>参考軸から相手3頭を比較できます。本番の購入ロックは解除していません。</p>':
+    '<p>市場＋Ability Cが選んだ相手候補は3頭だけ表示。3頭の中から自分で1頭を決めます。</p>')+'</div>'+
    summary+threeCards+
    '<p class="rsaf-foot">M3・V3は比較情報で、相手候補の選定順には使っていません。'+
    'ここで選んだ相手は画面内のメモであり、馬券の自動購入・見送り解除は行いません。'+
@@ -171,24 +192,24 @@ function formationHtml(x){if(!x.analyzed)return alert('隊列は過去走CSV解�
  if(items.some(v=>!Number.isFinite(v.one)))return alert('初角の位置取り予測が不足しています。過去走データと解析状態を確認してください。');
  items.sort((a,b)=>a.one-b.one||Number(a.no)-Number(b.no));
  const breaks=[Math.max(1,Math.round(total/3)),Math.max(2,Math.round(total*2/3))];
- const axis=x.official?.no,pt=new Set(x.partners.map(p=>p.no));
+ const axis=x.official?.no||x.researchAxis?.no,pt=new Set(x.partners.map(p=>p.no));
  const lane=(group,title,why)=>'<div class="rsaf-lane"><div class="rsaf-lane-title"><strong>'+H(title)+'</strong><small>'+H(why)+'</small></div><div class="rsaf-lane-horses">'+group.map(v=>'<span class="rsaf-runner'+(v.no===axis?' axis':pt.has(v.no)?' partner':'')+'"><b>'+H(v.no)+'</b>'+H(v.name)+'<small>'+F(v.one,'番手',1)+'</small></span>').join('')+'</div></div>';
  const a=items.slice(0,breaks[0]),b=items.slice(breaks[0],breaks[1]),c=items.slice(breaks[1]);
  const rpci=String($('rpciText')?.textContent||'').trim();
  return '<div class="rsaf-intro"><b>スタート → 初角の隊列予測</b><p>過去走からの予測番手順。実際の内外位置や着順を保証するものではありません。</p></div>'+
  lane(a,'前方','先行グループ')+lane(b,'中団','中位グループ')+lane(c,'後方','差し・追い込みグループ')+
- '<div class="rsaf-legend"><span>● 軸馬</span><span>● 相手候補</span><span>● その他</span></div>'+(rpci?'<p class="rsaf-inline">'+H(rpci.slice(0,240))+'</p>':'');
+ '<div class="rsaf-legend"><span>● '+(x.researchAxis?'研究用参考軸':'軸馬')+'</span><span>● 相手候補</span><span>● その他</span></div>'+(rpci?'<p class="rsaf-inline">'+H(rpci.slice(0,240))+'</p>':'');
 }
 function render(force=false){const panel=ensure();if(!panel)return;
  const receipt=$('av3ForwardPanel'),mount=$('rsafReceiptMount');if(receipt&&mount&&!mount.contains(receipt))mount.appendChild(receipt);
  const receiptDetails=$('rsafReceiptTools');if(receiptDetails){receiptDetails.hidden=STORE.active!=='axis';if(STORE.active!=='axis')receiptDetails.open=false;}
  const r=decisionContext();
- if(!r.analyzed||!r.odds.complete||!r.ranked.ready||!r.official||!r.partners.some(p=>String(p.no)===String(STORE.selectedPartnerNo??'')))STORE.selectedPartnerNo=null;
+ if(!r.analyzed||!r.odds.complete||!r.ranked.ready||!(r.official||r.researchAxis)||!r.partners.some(p=>String(p.no)===String(STORE.selectedPartnerNo??'')))STORE.selectedPartnerNo=null;
  const n=$('raceName')?.value||'レース分析',v=$('venue')?.value||'',d=$('distance')?.value||'',g=$('grade')?.value||'',sf=$('surface')?.value||'';
  const header=[v,sf+(d?d+'m':''),g].filter(Boolean).join(' ｜ ');
  $('rsafRaceName').textContent=n;$('rsafRaceMeta').textContent=header;
  const status=STORE.dirty?'再解析が必要':!r.analyzed?'分析待ち':!r.odds.complete?'市場待ち':'市場入力済み';$('rsafStatus').textContent=status;
- const sig=JSON.stringify([STORE.active,STORE.dirty,r.year,r.analyzed,r.r.map(o=>[o.no,o.name,o.finishRank]),r.official,r.decision?.at,r.pipeline?.at,r.ranked?.rows?.map?.(z=>[z.no,z.p3]),r.odds?.rows?.map?.(z=>[z.no,z.od]),r.v3?.version,r.v3?.rows?.map?.(z=>[z.no,z.v3Rank]),r.marketP,r.skipDiag?.state,STORE.selectedPartnerNo,root.AxisAccessGateV1State?.at,root.ValidatedQueueState?.at,$('rpciText')?.textContent,header,n]);
+ const sig=JSON.stringify([STORE.active,STORE.dirty,r.year,r.analyzed,r.r.map(o=>[o.no,o.name,o.finishRank]),r.official,r.researchAxis,r.decision?.at,r.pipeline?.at,r.ranked?.rows?.map?.(z=>[z.no,z.p3]),r.odds?.rows?.map?.(z=>[z.no,z.od]),r.v3?.version,r.v3?.rows?.map?.(z=>[z.no,z.v3Rank]),r.marketP,r.skipDiag?.state,STORE.selectedPartnerNo,root.AxisAccessGateV1State?.at,root.ValidatedQueueState?.at,$('rpciText')?.textContent,header,n]);
  if(force||sig!==STORE.last){STORE.last=sig;
   for(const [tab,id] of [['axis','rsafAxis'],['partners','rsafPartners'],['formation','rsafFormation']]){
    const el=$(id),show=STORE.active===tab;el.hidden=!show;
@@ -196,7 +217,7 @@ function render(force=false){const panel=ensure();if(!panel)return;
    if(show)el.innerHTML=STORE.dirty?alert('レース条件・CSVが変更されています。「レース構造を解析」を押して再計算してください。'):tab==='axis'?axisHtml(r):tab==='partners'?partnerHtml(r):formationHtml(r);
   }
  }
- root.RSAFocusedThreeTabsState={ready:true,version:VERSION,active:STORE.active,axisNo:r.official?.no||null,partnerNos:r.partners.map(o=>o.no),selectedPartnerNo:STORE.selectedPartnerNo,v3Ready:Boolean(r.v3),marketReady:Boolean(r.odds.complete),analysisReady:r.analyzed,at:Date.now()};
+ root.RSAFocusedThreeTabsState={ready:true,version:VERSION,active:STORE.active,axisNo:r.official?.no||null,researchAxisNo:r.researchAxis?.no||null,reviewOnly:Boolean(r.researchAxis),partnerNos:r.partners.map(o=>o.no),selectedPartnerNo:STORE.selectedPartnerNo,v3Ready:Boolean(r.v3),marketReady:Boolean(r.odds.complete),analysisReady:r.analyzed,at:Date.now()};
 }
 function schedule(ms=55){clearTimeout(STORE.timer);STORE.timer=setTimeout(()=>render(),ms);}
 const inputs=['raceDate','venue','surface','distance','grade','going','fieldSize','raceName','csvFile'];

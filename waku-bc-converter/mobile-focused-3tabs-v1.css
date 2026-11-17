@@ -68,3 +68,8 @@ body.iosMobileShellV2.rsaFocusedThreeTabs #rsaFocusedView{display:block!importan
 .rsaf-pick-card.rsaf-picked{border-color:#75c69f;background:linear-gradient(145deg,#123e34,#0c2530)}
 .rsaf-pick-action{margin-top:12px;min-height:44px!important;width:100%;font-size:13px!important;font-weight:800!important;border-radius:10px!important;background:#153b42!important;color:#e2f7f0!important;border:1px solid #447f77!important;box-shadow:none!important}
 .rsaf-pick-action[aria-pressed="true"]{background:#2c5445!important;color:#edfff2!important;border-color:#77b690!important}
+
+/* P3-38: research-only rescues remain visibly distinct from certified axes. */
+.rsaf-horse.rsaf-research-axis{background:linear-gradient(150deg,#332b18,#132532);border-color:#a88a53}
+.rsaf-research-axis .rsaf-horse-no{background:#5a4722;border-color:#ae8e4c}
+.rsaf-research-axis .rsaf-horse-main small{color:#f2ce93}

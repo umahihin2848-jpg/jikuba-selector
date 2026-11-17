@@ -23,7 +23,7 @@ assert(f.includes('M3展開順位')&&f.includes('V3能力順位'),'selected part
 assert(!view.cMarketRank(roster,api.buildMarket('1 2.2',roster),cState,model.models['2026']).ready,'odds incomplete');
 assert(!view.cMarketRank(roster,mk,{...cState,activeModel:'v1'},model.models['2026']).ready,'no C fallback proxy');
 const header=fs.readFileSync(__dirname+'/../waku-bc-converter/v3.html','utf8');
-assert(header.includes('mobile-focused-3tabs-v1.js?v=20261117p336a'));
+assert(header.includes('mobile-focused-3tabs-v1.js?v=20261117p338a'));
 assert(header.includes(':not(#rsaFocusedView){display:none!important}'),'gate CSS must not hide three-tab wrapper');
 const gateCss=fs.readFileSync(__dirname+'/../waku-bc-converter/axis-access-gate-v1.css','utf8');
 assert(gateCss.includes(':not(#axisAccessScreen):not(#rsaFocusedView),'),'axis-access gate CSS must not hide focused view');
@@ -62,3 +62,16 @@ assert(!f.includes('rsafFourthCandidate'),'no fourth candidate disclosure or acc
 assert(f.includes('rsaf-pick-action'),'manual one-partner UI present');
 assert(f.includes('selectVisiblePartners(ranked,official,3)'),'only 3 candidate rows are selected');
 assert(f.includes("x.partners.length!==3"),'the three candidate limit is enforced');
+
+const referenceRanked={ready:true,rows:[{no:'3',name:'参考1',p3:.55},{no:'4',name:'参考2',p3:.3},{no:'5',name:'参考3',p3:.2},{no:'6',name:'参考4',p3:.15}]};
+const reviewState=view.skipDiagnosis({analyzed:true,code:'no_auto_axis',marketComplete:true,marketP:.64});
+assert.strictEqual(reviewState.betEligible,false,'research unlock must never unlock buying');
+assert.deepEqual(JSON.parse(JSON.stringify(view.researchAxisChoice(reviewState,referenceRanked))),
+ {no:'3',name:'参考1',p3:.55,kind:'research'});
+assert.strictEqual(view.researchAxisChoice(view.skipDiagnosis({analyzed:true,code:'no_auto_axis',marketComplete:true,marketP:.59}),referenceRanked),null,'weak structure stays skipped');
+assert.strictEqual(view.researchAxisChoice(view.skipDiagnosis({analyzed:true,code:'validated_stop',marketComplete:true,marketP:.8}),referenceRanked),null,'safety rejection cannot be rescued');
+assert.strictEqual(view.researchAxisChoice(reviewState,{ready:false,rows:referenceRanked.rows}),null,'model incomplete cannot be used');
+assert.strictEqual(view.researchAxisChoice(reviewState,{ready:true,rows:[{no:'3',name:'bad',p3:NaN},...referenceRanked.rows.slice(1)]}),null,'invalid predicted probability not permitted');
+assert.strictEqual(view.selectVisiblePartners({ready:true,rows:referenceRanked.rows}, {no:'3'},3).length,3);
+assert(f.includes('研究用・市場＋Cの参考軸') && f.includes('購入ロックは解除されず'),'research must retain purchase lock copy');
+assert(f.includes('const visibleAxis=official||researchAxis;'),'research reference should use 3 different partners');
