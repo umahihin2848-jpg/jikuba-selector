@@ -47,7 +47,7 @@ function transform(buf){
   // TARGET all-horse exports repeat the same historical horse/race record.
   // Keep the first instance only, preserving first-appearance current horse numbers.
   const seenStarts=new Map();
-  const auditedColumns=['日付S','日付','芝・ダート','距離','頭数','レースPCI',' PCI','上3F地点差','上り3F','通過1','通過2','通過3','通過4','着順']
+  const auditedColumns=['日付S','日付','芝・ダート','距離','頭数','レースPCI','PCI','上3F地点差','上り3F','通過1','通過2','通過3','通過4','着順']
     .map(idx).filter(i=>i>=0);
   const signature=r=>auditedColumns.map(i=>String(r[i]??'').normalize('NFKC').trim()).join('\u001e');
   const out=[outH];
