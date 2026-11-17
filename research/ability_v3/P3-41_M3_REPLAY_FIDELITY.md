@@ -38,3 +38,21 @@ In the supplied `umadete.csv` sample, `通過1..4` contained **zero literal '0' 
 5. Keep production gates unchanged until browser-versus-replay parity is demonstrated.
 
 Status: **DATE PARSER HARDENED IN UNMERGED RESEARCH BRANCH; P3-40 271-RACE PARITY NOT YET ESTABLISHED.**
+
+
+## P3-41 follow-up: actual frozen-source probe (17 November 2026)
+
+Additional previously exported research sources were reopened: `horse_m3_p10.csv` (P3-22b) and P3-22b README. The P3-22b report states that the original Node VM ran *unmodified* M3 JavaScript against all **271 races / 4,250 horses** in the preserved 2026-11-13 runtime. The currently accessible indexed text from its `horse_m3_p10.csv` exposes **955 rows across 61 races from January–August 2024**; this is an accessible excerpt, **not** the full archived CSV. Within the excerpt: saved `m3_score = pred_remaining600_gap - pred_closing` holds for **955/955 horses**, and sorting scores ascending reproduces `m3_rank` for **955/955 horses**.
+
+To isolate core M3 from the upstream remaining600 queue, the preserved `pred_remaining600_gap` values for **17 runners of the 2024-01-06 Nakayama Kimpai (rid 2024010606010111)** were injected unchanged. Five strictly prior unique history runs per horse were reconstructed from the currently attached `umadete.csv` (CP932). Core close prediction was recomputed against `finish600_model_v1.json` feature coefficients:
+- Exact M3 rank: **2/17 runners**.
+- Top3 overlap: **2/3**.
+- M3 rank Spearman rho: **0.434**.
+- Predicted closing MAE vs saved: **~0.31 sec**.
+- `hist_front_mean` agrees with archived `validated_frontness5` to < 1e-10 for **16/17** horses. These two quantities are related but not guaranteed to be strictly identical in all runtimes.
+
+This strongly directs the *investigation* toward features or historical input-version differences before rank sorting. It does **not** establish what was present in the exact P3-22b synthetic per-race fixtures. A sensitivity-only experiment setting PCI- or RPCI-derived features to model fallback values lowered 17-runner closing MAE to about **0.12 sec**, but neither simulated input omission matched the whole frozen output. **Do not claim missing PCI/RPCI as a confirmed cause.**
+
+Important: the protected P3-40 ZIP and P3-22b raw full CSV fixtures were not available as extractable raw bytes in this session. This cannot be escalated to all 4,250 horses or to point-in-time browser parity, and the original 6.8% remains unresolved.
+
+Next high-yield step: compare the exact `P3-22b_research/inputs/fixtures/2024010606010111.csv` with the original `umadete.csv` values **feature by feature**, including `PCI`, `RPCI`, surface, date, frontness, late-3F, `same_surface_n`; and compare P3-22b runtime's `Finish600State.rows[].x` against the new reconstruction. Then replay all 271 races using the **same** exact JS and input snapshots. No changes to production gates or model coefficients.
