@@ -12,14 +12,14 @@ const fix=read('mobile-product-ui-fix-v1.js');
 const html=read('v3.html');
 const extract=(s,a,b)=>{const i=s.indexOf(a),j=s.indexOf(b,i+a.length);assert.ok(i>=0&&j>i,'Cannot find script section: '+a);return s.slice(i,j)};
 
-// 1. Every script that names the three old tabs must agree.
+// 1. Keep regression expectations aligned with shipped tabs (no automatic opponent suggestions).
 // The fourth race-progress tab is not renamed here.
-for(const name of ['軸馬','相手分析','全馬比較']){
+for(const name of ['軸馬','全馬分析','全馬比較']){
  assert.ok(product.includes(name),'product UI missing label '+name);
  assert.ok(fix.includes(name),'stability UI missing label '+name);
 }
-assert.ok(product.includes("const map={ticket:'軸馬',axis:'相手分析',pace:'全馬比較'}"));
-assert.ok(fix.includes("const m={ticket:'軸馬',axis:'相手分析',pace:'全馬比較'}"));
+assert.ok(product.includes("const map={ticket:'軸馬',axis:'全馬分析',pace:'全馬比較'}"));
+assert.ok(fix.includes("const m={ticket:'軸馬',axis:'全馬分析',pace:'全馬比較'}"));
 assert.ok(product.includes('grid-template-columns:repeat(4,minmax(0,1fr))'),'mobile tab CSS must retain four columns');
 assert.ok(!product.includes('grid-template-columns:repeat(3,1fr)!important'),'old mobile three-column override must not return');
 
