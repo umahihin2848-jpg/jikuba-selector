@@ -7,6 +7,7 @@ on:
       - 'tests/p3-41-m3-date-compat-smoke.cjs'
       - 'tests/p3-42-target-history-dedup-smoke.cjs'
       - 'tests/p3-43-m3-missing-upstream-smoke.cjs'
+      - 'tests/p3-45-m3-pci-column-contract.cjs'
       - 'waku-bc-converter/remaining600-validated-v1.js'
       - 'waku-bc-converter/finish600-simulator-v2.js'
       - '.github/workflows/p3-42-research-smoke.yml'
@@ -31,8 +32,10 @@ jobs:
           node --check tests/p3-41-m3-date-compat-smoke.cjs
           node --check tests/p3-42-target-history-dedup-smoke.cjs
           node --check tests/p3-43-m3-missing-upstream-smoke.cjs
+          node --check tests/p3-45-m3-pci-column-contract.cjs
       - name: Input contract tests (no model/gate mutation)
         run: |
           node tests/p3-41-m3-date-compat-smoke.cjs
           node tests/p3-42-target-history-dedup-smoke.cjs
           node tests/p3-43-m3-missing-upstream-smoke.cjs
+          node tests/p3-45-m3-pci-column-contract.cjs
