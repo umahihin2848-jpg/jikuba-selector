@@ -1,0 +1,56 @@
+name: P3-42 M3 research input parity
+on:
+  pull_request:
+    paths:
+      - 'waku-bc-converter/shape-core-v2.js'
+      - 'waku-bc-converter/target-csv-compat-v1.js'
+      - 'tests/p3-41-m3-date-compat-smoke.cjs'
+      - 'tests/p3-42-target-history-dedup-smoke.cjs'
+      - 'tests/p3-43-m3-missing-upstream-smoke.cjs'
+      - 'tests/p3-45-m3-pci-column-contract.cjs'
+      - 'tests/p3-46-m3-required-schema-guard.cjs'
+      - 'tests/p3-47-m3-feature-contract.cjs'
+      - 'tests/p3-50-ability-m3-axis-structure-contract.cjs'
+      - 'tests/p355-prospective-axis-snapshot-contract.cjs'
+      - 'waku-bc-converter/p355-prospective-axis-snapshot-v1.js'
+      - 'waku-bc-converter/v3.html'
+      - 'waku-bc-converter/remaining600-validated-v1.js'
+      - 'waku-bc-converter/finish600-simulator-v2.js'
+      - '.github/workflows/p3-42-research-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  input-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax checks
+        run: |
+          node --check waku-bc-converter/shape-core-v2.js
+          node --check waku-bc-converter/target-csv-compat-v1.js
+          node --check tests/p3-41-m3-date-compat-smoke.cjs
+          node --check tests/p3-42-target-history-dedup-smoke.cjs
+          node --check tests/p3-43-m3-missing-upstream-smoke.cjs
+          node --check tests/p3-45-m3-pci-column-contract.cjs
+          node --check tests/p3-46-m3-required-schema-guard.cjs
+          node --check tests/p3-47-m3-feature-contract.cjs
+          node --check tests/p3-50-ability-m3-axis-structure-contract.cjs
+          node --check waku-bc-converter/p355-prospective-axis-snapshot-v1.js
+          node --check tests/p355-prospective-axis-snapshot-contract.cjs
+      - name: Input contract tests (no model/gate mutation)
+        run: |
+          node tests/p3-41-m3-date-compat-smoke.cjs
+          node tests/p3-42-target-history-dedup-smoke.cjs
+          node tests/p3-43-m3-missing-upstream-smoke.cjs
+          node tests/p3-45-m3-pci-column-contract.cjs
+          node tests/p3-46-m3-required-schema-guard.cjs
+          node tests/p3-47-m3-feature-contract.cjs
+          node tests/p3-50-ability-m3-axis-structure-contract.cjs
+          node tests/p355-prospective-axis-snapshot-contract.cjs
