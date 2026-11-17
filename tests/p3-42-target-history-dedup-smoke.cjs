@@ -66,5 +66,16 @@ const lines = [
   const raw=ctx.ShapeCore.parseCSV(ctx.ShapeCore.decode(await noIdFile.arrayBuffer()));
   assert.equal(raw.length-1,2,'no-id rows must be retained, not falsely collapsed');
   assert(st.historyKeyUnavailable>=2);
+  // Same metadata is NOT proof of same content: two different files can have
+  // the same name, size, lastModified, and type. Reusing a previous buffer
+  // corrupts the entire horse roster and M3 histories.
+  const one = new TestFile([headers, r('C馬',id1,'2026. 9. 1','53.1')].map(x=>x.join(',')).join('\n'));
+  const two = new TestFile([headers, r('D馬',id1,'2026. 9. 1','53.1')].map(x=>x.join(',')).join('\n'));
+  assert.equal(one.size,two.size,'test fixture must collide on file metadata');
+  assert.equal(one.name,two.name);
+  assert.equal(one.lastModified,two.lastModified);
+  const decodeHorse=async f=>ctx.ShapeCore.rowsToObjects(ctx.ShapeCore.parseCSV(ctx.ShapeCore.decode(await f.arrayBuffer()))).rows[0]['馬名'];
+  assert.equal(await decodeHorse(one),'C馬');
+  assert.equal(await decodeHorse(two),'D馬','different File objects must not share a transformed buffer');
   console.log('PASS P3-42 TARGET historical dedup: duplicates, roster, zero corners, conflict and missing-ID cases');
 })().catch(e=>{console.error(e);process.exitCode=1});
