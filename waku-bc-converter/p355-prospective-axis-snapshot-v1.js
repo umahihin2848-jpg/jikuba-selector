@@ -44,6 +44,7 @@
   }
   const start=U.startLocal?new Date(U.startLocal):null;
   required(!U.startLocal||Number.isFinite(start.getTime()),'発走予定時刻の入力形式が不正です');
+  required(!U.startLocal||String(U.startLocal).slice(0,10)===date,'レース日付と発走予定日時の日付が一致しません');
   if(start)required(start.getTime()>at.getTime(),'発走予定時刻以降の記録を発走前扱いにできません');
   const minutes=start?(start.getTime()-at.getTime())/60000:null;
   const windowTag=!start?'START_TIME_NOT_ENTERED':minutes>=12&&minutes<=18?'T15_APPROX_USER_ENTERED':'OTHER_PRE_RACE_TIME';
