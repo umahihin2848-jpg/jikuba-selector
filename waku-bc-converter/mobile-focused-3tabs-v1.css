@@ -1,0 +1,48 @@
+/* P3-31 focused three-tab view: hide legacy all-horse/cards, never disable engines. */
+body.iosMobileShellV2.rsaFocusedThreeTabs #iosMobileShellV2,
+body.iosMobileShellV2.rsaFocusedThreeTabs #iosMobileSaved,
+body.iosMobileShellV2.rsaFocusedThreeTabs #av3ResearchPanel,
+body.iosMobileShellV2.rsaFocusedThreeTabs #raceProgressV1,
+body.iosMobileShellV2.rsaFocusedThreeTabs #m3RaceLab,
+body.iosMobileShellV2.rsaFocusedThreeTabs #mobileCompactResult{display:none!important}
+body.iosMobileShellV2.rsaFocusedThreeTabs #rsaFocusedView{display:block!important}
+.rsa-focused{color:#e9f4fa;margin:10px 0 16px;font-size:13px}
+.rsaf-head{background:linear-gradient(135deg,#10283a,#081925);border:1px solid #345b70;border-radius:15px;padding:13px;display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:10px}
+.rsaf-head small{color:#86abbf;letter-spacing:.14em;font-size:10px;font-weight:800}
+.rsaf-head h2{font-size:18px;line-height:1.35;margin:4px 0;color:#f0f8fc}
+.rsaf-head p{font-size:11px;color:#93b0bd;margin:0;line-height:1.5}
+.rsaf-status{border:1px solid #547182;padding:5px 8px;border-radius:999px;color:#b6d4dc;background:#142d3c;font-size:10px;white-space:nowrap}
+#rsafTabs{position:sticky;top:max(0px,env(safe-area-inset-top));z-index:36;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;padding:5px 0 9px;background:#07131f}
+#rsafTabs button{min-height:51px!important;min-width:0!important;background:#0c1d2b!important;color:#a4bcc9!important;border:1px solid #375467!important;border-radius:12px!important;font-size:12px!important;font-weight:850!important;white-space:nowrap!important;padding:8px 2px!important;box-shadow:none!important}
+#rsafTabs button[aria-selected="true"]{background:#163e37!important;color:#ddfff0!important;border-color:#568b77!important}
+#rsafAxis,#rsafPartners,#rsafFormation{display:grid;gap:10px}
+#rsafAxis[hidden],#rsafPartners[hidden],#rsafFormation[hidden]{display:none!important}
+.rsaf-decision{border:1px solid #6c6544;background:#2a251c;border-radius:14px;padding:13px}
+.rsaf-decision p{font-size:11px;color:#d4c4a3;margin:7px 0 0;line-height:1.65}
+.rsaf-badge{font-size:10px;font-weight:800;border:1px solid #647687;border-radius:99px;padding:4px 8px;color:#bed5e0;display:inline-flex;line-height:1.6;white-space:nowrap}
+.rsaf-badge.go{border-color:#477b61;background:#0e3028;color:#94e7bd}.rsaf-badge.stop{border-color:#965d62;background:#382126;color:#ffc0c2}
+.rsaf-horse{background:#0b2230;border:1px solid #345469;border-radius:15px;padding:13px;min-width:0}
+.rsaf-horse.rsaf-axis{border-color:#5b9c83;background:linear-gradient(140deg,#10352e,#0c2131)}
+.rsaf-horse-main{display:flex;align-items:center;gap:11px;min-width:0}
+.rsaf-horse-no{border:1px solid #47758a;background:#204457;width:44px;height:44px;border-radius:13px;display:grid;place-items:center;font-size:24px;flex-shrink:0}
+.rsaf-horse-main>div{flex:1;min-width:0}.rsaf-horse-main small{display:block;color:#9fc1cc;font-size:10px;margin-bottom:4px}
+.rsaf-horse-main h3{color:#f5fbfd;font-size:17px;margin:0;overflow-wrap:anywhere}
+.rsaf-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:11px}
+.rsaf-fact{min-width:0;border:1px solid #2e5060;background:rgba(7,20,30,.65);border-radius:10px;padding:9px}
+.rsaf-fact small{font-size:10px;color:#94b4c2;display:block}.rsaf-fact strong{font-size:14px;color:#eaf6fa;display:block;line-height:1.4;margin-top:4px;overflow-wrap:anywhere}
+.rsaf-inline{font-size:11px;line-height:1.65;color:#b2d8d9;margin:10px 0 0;overflow-wrap:anywhere}
+.rsaf-alert{border:1px solid #556978;background:#152a39;color:#d6e4ed;border-radius:13px;padding:14px;line-height:1.75;font-size:12px}
+.rsaf-intro{background:#102837;border:1px solid #315468;border-radius:13px;padding:13px}.rsaf-intro b{font-size:14px;color:#e5f4f9}.rsaf-intro p{margin:5px 0 0;color:#9fb6c2;font-size:11px;line-height:1.65}
+.rsaf-foot{line-height:1.7;color:#94aebb;font-size:11px;margin:3px 2px 10px}
+.rsaf-lane{border:1px solid #315267;background:#0b2330;border-radius:14px;padding:11px}
+.rsaf-lane-title{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:10px}.rsaf-lane-title strong{font-size:13px;color:#dceff3}.rsaf-lane-title small{font-size:10px;color:#8faeb9}
+.rsaf-lane-horses{display:flex;flex-wrap:wrap;gap:6px}
+.rsaf-runner{display:inline-grid;grid-template-columns:20px 1fr;align-items:center;gap:4px;background:#122c3d;border:1px solid #325266;border-radius:10px;padding:6px;color:#b6c9d3;font-size:10px;line-height:1.4}
+.rsaf-runner b{width:20px;height:20px;border-radius:7px;background:#29495c;color:#fff;text-align:center;line-height:20px;font-size:11px}.rsaf-runner small{grid-column:2;color:#8eacb9}
+.rsaf-runner.axis{border-color:#65b38d;color:#eafff0;background:#1a453b}.rsaf-runner.partner{border-color:#d1a95d;color:#ffebc1;background:#403721}
+.rsaf-legend{display:flex;gap:9px;flex-wrap:wrap;color:#9eb5c3;font-size:10px}.rsaf-legend span:first-child{color:#75c29b}.rsaf-legend span:nth-child(2){color:#d9b97c}
+@media(max-width:390px){.rsaf-head{padding:10px}.rsaf-head h2{font-size:16px}#rsafTabs button{font-size:11px!important}.rsaf-horse{padding:10px}}
+
+#rsafReceiptTools{border:1px solid #2e5060;border-radius:12px;background:#0b2230;margin:12px 0}#rsafReceiptTools[hidden]{display:none!important}
+#rsafReceiptTools>summary{list-style:none;cursor:pointer;min-height:45px;padding:13px;color:#aac2cb;font-size:11px;font-weight:800}#rsafReceiptTools>summary::-webkit-details-marker{display:none}
+#rsafReceiptMount{padding:0 9px 10px}#rsafReceiptMount:empty{display:none}

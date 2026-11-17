@@ -1,0 +1,35 @@
+name: Focused three-tab iPhone smoke
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'waku-bc-converter/mobile-focused-3tabs-v1.js'
+      - 'waku-bc-converter/mobile-focused-3tabs-v1.css'
+      - 'waku-bc-converter/v3.html'
+      - 'tests/mobile-focused-three-tabs-browser.cjs'
+      - 'tests/mobile-focused-three-tabs-core.cjs'
+      - '.github/workflows/focused-three-tabs-smoke.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mobile-focus:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Focused model selection tests
+        run: node tests/mobile-focused-three-tabs-core.cjs
+      - name: Install browser
+        run: |
+          npm install --no-save playwright@latest
+          npx playwright install --with-deps chromium
+      - name: Start static site
+        run: |
+          python3 -m http.server 4173 >/tmp/rsa-focus-server.log 2>&1 &
+          sleep 2
+      - name: Verify iPhone tabs
+        run: node tests/mobile-focused-three-tabs-browser.cjs
