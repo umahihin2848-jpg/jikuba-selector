@@ -3,7 +3,7 @@ const C=window.ShapeCore;if(!C||!window.File||!File.prototype.arrayBuffer)return
 if(File.prototype.__rsaTargetCompat)return;
 const origArrayBuffer=File.prototype.arrayBuffer,origDecode=C.decode.bind(C),origParseCSV=C.parseCSV.bind(C);
 const fileBufferCache=new WeakMap(),fileSignatureCache=new Map(),decodeCache=new WeakMap();let lastCsvText=null,lastCsvGrid=null;
-const stats={rawReads:0,transforms:0,bufferHits:0,weakHits:0,signatureHits:0,decodeHits:0,parseHits:0,obstacleRowsSkipped:0,nonFinishRowsSkipped:0,cornerZeroNormalized:0,rawReadKeys:[],hitKeys:[]};
+const stats={rawReads:0,transforms:0,bufferHits:0,weakHits:0,signatureHits:0,decodeHits:0,parseHits:0,obstacleRowsSkipped:0,nonFinishRowsSkipped:0,cornerZeroNormalized:0,historyDuplicateRowsSkipped:0,historyConflictCount:0,historyKeyUnavailable:0,rawReadKeys:[],hitKeys:[]};
 const q=v=>{v=String(v??'');return /[",\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
 const fileMeta=f=>({name:String(f?.name||''),size:Number(f?.size)||0,lastModified:Number(f?.lastModified)||0,type:String(f?.type||'')});
 const fileSignature=f=>{const m=fileMeta(f);return `${m.name}|${m.size}|${m.lastModified}|${m.type}`};
@@ -36,7 +36,7 @@ function transform(buf){
   const h=grid[0].map(x=>String(x||'').trim());
   const hasTarget=h.includes('何走目')&&h.includes('馬名')&&(h.includes('レースPCI')||h.includes('RPCI'));
   if(!hasTarget)return buf;
-  const idx=name=>h.indexOf(name),iName=idx('馬名'),iMeet=idx('開催'),iHistNo=idx('馬番'),iRpci=idx('レースPCI'),iStyle=idx('決手'),iDate=idx('日付'),i1=idx('通過1'),i2=idx('通過2'),i3=idx('通過3'),i4=idx('通過4'),iRaceName=idx('レース名'),iRaceType=idx('競走種別コード'),iFinish=idx('着順');
+  const idx=name=>h.indexOf(name),iName=idx('馬名'),iMeet=idx('開催'),iHistNo=idx('馬番'),iRpci=idx('レースPCI'),iStyle=idx('決手'),iDate=idx('日付'),i1=idx('通過1'),i2=idx('通過2'),i3=idx('通過3'),i4=idx('通過4'),iRaceName=idx('レース名'),iRaceType=idx('競走種別コード'),iFinish=idx('着順'),iRaceId=idx('レースID(新・馬番無16桁)');
   if(iName<0)return buf;
   const outH=h.slice();
   if(iHistNo>=0)outH[iHistNo]='過去馬番';
@@ -44,6 +44,12 @@ function transform(buf){
   const ensure=name=>{if(!outH.includes(name)){outH.push(name);add.push(name)}};
   ensure('馬番');ensure('RPCI');ensure('脚質');ensure('決め手');ensure('場所');ensure('1角');ensure('2角');ensure('3角');ensure('4角');
   const order=new Map();let next=1;
+  // TARGET all-horse exports repeat the same historical horse/race record.
+  // Keep the first instance only, preserving first-appearance current horse numbers.
+  const seenStarts=new Map();
+  const auditedColumns=['日付S','日付','芝・ダート','距離','頭数','レースPCI',' PCI','上3F地点差','上り3F','通過1','通過2','通過3','通過4','着順']
+    .map(idx).filter(i=>i>=0);
+  const signature=r=>auditedColumns.map(i=>String(r[i]??'').normalize('NFKC').trim()).join('\u001e');
   const out=[outH];
   for(let rix=1;rix<grid.length;rix++){
     const r=grid[rix].slice();while(r.length<h.length)r.push('');
@@ -51,7 +57,18 @@ function transform(buf){
     if(isNonFinish(r,iFinish)){stats.nonFinishRowsSkipped++;continue}
     if(iDate>=0)r[iDate]=normalizeDate(r[iDate]);
     for(const i of [i1,i2,i3,i4])if(i>=0){const before=r[i],after=normalizeCorner(before);if(after!==before){r[i]=after;stats.cornerZeroNormalized++}}
-    const name=String(r[iName]||'').trim();if(name&&!order.has(name))order.set(name,next++);
+    const name=String(r[iName]||'').trim();
+    const historicalId=iRaceId>=0?String(r[iRaceId]??'').normalize('NFKC').trim().toUpperCase():'';
+    if(name&&/^[A-Z0-9]{16}$/.test(historicalId)){
+      const key=name+'\u0000'+historicalId, sig=signature(r);
+      if(seenStarts.has(key)){
+        stats.historyDuplicateRowsSkipped++;
+        if(seenStarts.get(key)!==sig)stats.historyConflictCount++;
+        continue;
+      }
+      seenStarts.set(key,sig);
+    }else if(name)stats.historyKeyUnavailable++;
+    if(name&&!order.has(name))order.set(name,next++);
     const extras={'馬番':name?String(order.get(name)||''):'','RPCI':iRpci>=0?r[iRpci]:'','脚質':iStyle>=0?r[iStyle]:'','決め手':iStyle>=0?r[iStyle]:'','場所':iMeet>=0?venueFromMeeting(r[iMeet]):'','1角':i1>=0?r[i1]:'','2角':i2>=0?r[i2]:'','3角':i3>=0?r[i3]:'','4角':i4>=0?r[i4]:''};
     for(const k of add)r.push(extras[k]??'');
     out.push(r);
