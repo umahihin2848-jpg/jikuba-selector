@@ -9,7 +9,8 @@ const {chromium}=require('playwright');
   await page.waitForFunction(()=>document.body.classList.contains('rsaFocusedThreeTabs')&&Boolean(document.querySelector('#rsafAxis .rsaf-alert, #rsafAxis .rsaf-decision')),{timeout:30000});
   const labels=await page.locator('#rsafTabs [role=tab]').allTextContents();
   assert.deepEqual(labels.map(x=>x.trim()),['軸馬情報','相手馬情報','展開隊列']);
-  assert.equal(await page.locator('#rsafAxis').isVisible(),true);
+  // Existing mobile boot deliberately hides main.view until initialization settles.
+  await page.locator('#rsafAxis').waitFor({state:'visible',timeout:14000});
   assert.equal(await page.locator('#rsafPartners').isVisible(),false);
   assert.equal(await page.locator('#av3ResearchPanel').isVisible(),false);
   assert.equal(await page.locator('#iosMobileShellV2').isVisible(),false);
