@@ -52,3 +52,11 @@ body.iosMobileShellV2.rsaFocusedThreeTabs #rsaFocusedView{display:block!importan
 .rsaf-rankline span{display:inline-flex;align-items:baseline;gap:7px;border:1px solid #335769;background:#112d3d;border-radius:9px;padding:6px 9px;min-width:0}
 .rsaf-rankline b{font-size:11px;color:#9ebcca;font-weight:700}
 .rsaf-rankline strong{font-size:13px;color:#e9f7fb;font-weight:900}
+
+/* P3-33: compact, non-binding skip diagnostic in the axis tab. */
+.rsaf-skip-diagnostic{border:1px solid #46677b;background:#102737;border-radius:14px;padding:12px;display:grid;gap:7px}
+.rsaf-skip-diagnostic p{margin:0;font-size:12px;line-height:1.6;color:#d7e5ed}
+.rsaf-skip-diagnostic small{font-size:10px;color:#8caaba;line-height:1.5}
+.rsaf-skip-review{border-color:#b09456;background:#302a19}
+.rsaf-skip-review .rsaf-badge{border-color:#bea163;background:#4a3a1f;color:#ffdf99}
+.rsaf-skip-skip{border-color:#895f62}

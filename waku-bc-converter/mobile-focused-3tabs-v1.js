@@ -2,7 +2,7 @@
    C×M3 purchase gate and separately trained C+market / V3 models.
    Never reassigns the official axis or overrides stop decisions. */
 (function(root){'use strict';
-const VERSION='P3-31-focused-tabs-v1';
+const VERSION='P3-33-skip-explanation-v1';
 const $=id=>document.getElementById(id);
 const H=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const N=v=>v===null||v===undefined||String(v).trim()===''?NaN:Number(v);
@@ -37,6 +37,28 @@ function partnerRankLabels(roster,no,v3){
  return {m3:Number.isFinite(N(m3?.finishRank))&&N(m3.finishRank)>0?F(m3.finishRank,'位'):'評価待ち',
   v3:Number.isFinite(N(v3?.v3Rank))&&N(v3.v3Rank)>0?F(v3.v3Rank,'位'):'更新待ち'};
 }
+// A diagnostic overlay only. Production betting/axis gates remain authoritative.
+function skipDiagnosis(input={}){
+ const analyzed=input.analyzed===true, code=String(input.code||''), finalCode=String(input.finalCode||'');
+ const complete=input.marketComplete===true;
+ const p=typeof input.marketP==='number'&&Number.isFinite(input.marketP)?input.marketP:null;
+ const note=p===null?'市場構造指標は未計算':'市場構造参考値 '+(100*p).toFixed(1)+'%（1番人気の3着内推定）';
+ const common='研究用の0.60基準は、購入の期待値や同時好走確率ではありません。';
+ if(!analyzed)return{state:'pending',label:'判定待ち',reason:'CSVの解析が完了していません。',marketNote:note,betEligible:false};
+ if(input.scope===true||code==='scope_out'||finalCode==='scope_out')return{state:'skip',label:'対象レース外',reason:'平地3勝以上・12〜18頭などの対象条件を満たしません。',marketNote:note,betEligible:false};
+ if(['no_auto_axis','ability_rank_tie'].includes(code)){
+  if(!complete)return{state:'pending',label:'軸未確定・市場待ち',reason:'C×M3で単独軸が決まりません。再点検には全頭の単勝オッズが必要です。',marketNote:note,betEligible:false};
+  if(p===null)return{state:'pending',label:'軸未確定・研究モデル待ち',reason:'市場構造の年次モデルを照合できません。見送りロックは維持します。',marketNote:note,betEligible:false};
+  if(p>=0.60)return{state:'review',label:'軸未確定・再点検',reason:'C×M3では単独軸なし。ただし市場構造の参考値が探索基準0.60以上です。'+common,marketNote:note,betEligible:false};
+  return{state:'skip',label:'見送り（軸未確定）',reason:'C×M3で軸が決まらず、市場構造の参考値も探索基準0.60未満です。'+common,marketNote:note,betEligible:false};
+ }
+ if(code==='double'||input.pair===true)return{state:'pair',label:'Pair構造・単独軸なし',reason:'2頭構造は単独軸の購入条件とは分けて扱います。',marketNote:note,betEligible:false};
+ if(code==='validated_stop'||code==='A3'||input.unsafe===true)return{state:'skip',label:'見送り（能力・M3）',reason:'軸馬がC×M3の安全条件を満たしていません。',marketNote:note,betEligible:false};
+ if(finalCode==='market_range')return{state:'skip',label:'見送り（人気条件外）',reason:'構造軸が検証対象の1〜6番人気から外れています。',marketNote:note,betEligible:false};
+ if(!complete)return{state:'pending',label:'市場判定待ち',reason:'最終判定には全頭の単勝オッズが必要です。',marketNote:note,betEligible:false};
+ if(input.betEligible===true&&input.officialAxis===true)return{state:'pass',label:'購入条件通過',reason:'現在の本番軸ゲートを通過しています。購入の期待値は別途確認してください。',marketNote:note,betEligible:true};
+ return{state:'pending',label:'本番判定の確認待ち',reason:'C×M3・市場・購入ロックの最終状態を確認しています。',marketNote:note,betEligible:false};
+}
 function modelState(){try{const a=root.AbilityV3ResearchPanelBridgeV1?.getCurrent();return a?.ok?a:{ok:false,reason:a?.reason||''};}catch(e){return{ok:false,reason:String(e?.message||e)}}}
 function decisionContext(){
  const r=roster(),d=root.DecisionShellV2State||{},pipeline=root.ProductionDecisionPipelineV1State||{},s=d.structure||{},final=d.final||{},a=pipeline.stages?.axis;
@@ -55,10 +77,14 @@ function decisionContext(){
  const m3=official?r.find(x=>x.no===official.no)?.finishRank:NaN;
  const afterStart=root.RSAAnalysisTransitionState?.status==='running';
  const analyzed=Boolean(r.length>=12&&!afterStart&&root.M3PureAbilityState?.ready&&d.ready);
- return{r,official,odds:mk,m:o,ranked,partners,sc,q,risk,v3,v3Horse,m3,decision:d,pipeline,structure:s,final,analyzed,year};
+ const marketFit=STORE.frozen?.market_structure_P4_1?.[year];
+ const marketP=mk.complete&&marketFit&&CORE()?.marketStructure?CORE().marketStructure(mk,marketFit):null;
+ const access=root.AxisAccessGateV1State||{};
+ const skipDiag=skipDiagnosis({analyzed,code:s.code,finalCode:final.code,scope:root.RaceSkipLockV1State?.kind==='scope',marketComplete:mk.complete,marketP,pair:s.kind==='double',unsafe:s.kind==='A3',officialAxis:Boolean(official),betEligible:access.betEligible===true});
+ return{r,official,odds:mk,m:o,ranked,partners,sc,q,risk,v3,v3Horse,m3,decision:d,pipeline,structure:s,final,analyzed,year,marketP,skipDiag};
 }
 // Exposed for deterministic Node tests; no betting or production writes.
-root.RSAFocusedThreeTabsCoreV1=Object.freeze({version:VERSION,cMarketRank,selectVisiblePartners,partnerRankLabels});
+root.RSAFocusedThreeTabsCoreV1=Object.freeze({version:VERSION,cMarketRank,selectVisiblePartners,partnerRankLabels,skipDiagnosis});
 if(!root.document?.createElement||typeof root.addEventListener!=='function')return;
 const STORE={active:'axis',frozen:null,last:'',timer:0,dirty:false};
 root.RSAFocusedThreeTabsV1=STORE;
@@ -77,12 +103,15 @@ function axisHtml(x){const d=x.decision,s=x.structure,f=x.final,m=x.odds;
  if(!x.analyzed)return alert('過去走CSVを読み込み「レース構造を解析」を押してください。');
  const kind=s.kind||'—';const verdict=f.level==='red'?'stop':f.level==='green'?'go':'wait';
  const status=badge((f.label||s.label||'構造判定中'),verdict);
- if(!x.official){return '<div class="rsaf-decision">'+status+'<p>'+H(s.reason||f.reason||'自動軸を確定できませんでした。')+'</p></div>'+alert('軸候補はありません。Ability C・M3の見送り条件は維持します。市場情報による再点検は別判定です。');}
+ const diag=x.skipDiag||{state:'pending',label:'確認待ち',reason:'判定を確認中',marketNote:''};
+ const dgKind=diag.state==='pass'?'go':diag.state==='skip'?'stop':'neutral';
+ const diagnostic='<div class="rsaf-skip-diagnostic rsaf-skip-'+H(diag.state)+'">'+badge(diag.label,dgKind)+'<p>'+H(diag.reason)+'</p>'+(diag.marketNote?'<small>'+H(diag.marketNote)+'</small>':'')+'</div>';
+ if(!x.official){return diagnostic+alert('本番では軸馬が未確定です。再点検と表示されても自動購入や見送りロックの解除は行いません。');}
  const a=x.official,c=x.sc,q=x.q,r=x.risk,p=x.m;
  const marketMissing=!m.complete;
  const label=s.kind==='A2'?'A2 条件付き':s.kind==='A1'?'A1 単独軸':'構造候補';
  const v3=x.v3Horse?'V3 '+F(x.v3Horse.v3Rank,'位')+'／Dynamic '+F(x.v3Horse.h730,'',3)+'／Peak '+(x.v3Horse.miss?'履歴不足':F(x.v3Horse.peak,'',3)):'V3: 能力DB更新待ち・比較保留';
- return '<div class="rsaf-decision">'+status+'<p>'+H(f.reason||s.reason||'')+'</p></div>'+
+ return diagnostic+'<div class="rsaf-decision">'+status+'<p>'+H(f.reason||s.reason||'')+'</p></div>'+
  '<article class="rsaf-horse rsaf-axis"><div class="rsaf-horse-main"><b class="rsaf-horse-no">'+H(a.no)+'</b><div><small>'+H(label)+'</small><h3>'+H(a.name)+'</h3></div></div><div class="rsaf-grid">'+
  fact('Ability C',cRank(c))+fact('M3',F(x.m3,'位'))+fact('P10',P(r?.p10))+fact('先行力',P(q?.frontness5))+
  fact('想定位置',q?.position||'—')+fact('単勝',p?F(p.od,'倍',1):'未入力')+'</div><p class="rsaf-inline">'+H(v3)+'</p></article>'+
@@ -120,7 +149,7 @@ function render(force=false){const panel=ensure();if(!panel)return;
  const header=[v,sf+(d?d+'m':''),g].filter(Boolean).join(' ｜ ');
  $('rsafRaceName').textContent=n;$('rsafRaceMeta').textContent=header;
  const status=STORE.dirty?'再解析が必要':!r.analyzed?'分析待ち':!r.odds.complete?'市場待ち':'市場入力済み';$('rsafStatus').textContent=status;
- const sig=JSON.stringify([STORE.active,STORE.dirty,r.year,r.analyzed,r.r.map(o=>[o.no,o.name,o.finishRank]),r.official,r.decision?.at,r.pipeline?.at,r.ranked?.rows?.map?.(z=>[z.no,z.p3]),r.odds?.rows?.map?.(z=>[z.no,z.od]),r.v3?.version,r.v3?.rows?.map?.(z=>[z.no,z.v3Rank]),root.ValidatedQueueState?.at,$('rpciText')?.textContent,header,n]);
+ const sig=JSON.stringify([STORE.active,STORE.dirty,r.year,r.analyzed,r.r.map(o=>[o.no,o.name,o.finishRank]),r.official,r.decision?.at,r.pipeline?.at,r.ranked?.rows?.map?.(z=>[z.no,z.p3]),r.odds?.rows?.map?.(z=>[z.no,z.od]),r.v3?.version,r.v3?.rows?.map?.(z=>[z.no,z.v3Rank]),r.marketP,r.skipDiag?.state,root.AxisAccessGateV1State?.at,root.ValidatedQueueState?.at,$('rpciText')?.textContent,header,n]);
  if(force||sig!==STORE.last){STORE.last=sig;
   for(const [tab,id] of [['axis','rsafAxis'],['partners','rsafPartners'],['formation','rsafFormation']]){
    const el=$(id),show=STORE.active===tab;el.hidden=!show;
