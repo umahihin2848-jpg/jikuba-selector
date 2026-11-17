@@ -1,7 +1,7 @@
 /* Strict single-axis review: only a completed valid axis can unlock any race analysis.
  * Hide UI only. Statistical models and predictions are not modified.
  */
-html:not([data-axis-access="pass"]):not([data-axis-access="pair"]) body main.view > :not(#mpuSetup):not(#raceCondCard):not(#csvCard):not(#oddsCard):not(#analyzeBtn):not(#axisAccessScreen),
+html:not([data-axis-access="pass"]):not([data-axis-access="pair"]) body main.view > :not(#mpuSetup):not(#raceCondCard):not(#csvCard):not(#oddsCard):not(#analyzeBtn):not(#axisAccessScreen):not(#rsaFocusedView),
 html:not([data-axis-access="pass"]):not([data-axis-access="pair"]) body #iosMobileShellV2,
 html:not([data-axis-access="pass"]):not([data-axis-access="pair"]) body #result,
 html:not([data-axis-access="pass"]):not([data-axis-access="pair"]) body #m3RaceLab,

@@ -22,5 +22,8 @@ assert(!view.cMarketRank(roster,mk,{...cState,activeModel:'v1'},model.models['20
 const header=fs.readFileSync(__dirname+'/../waku-bc-converter/v3.html','utf8');
 assert(header.includes('mobile-focused-3tabs-v1.js?v=20261117p331a'));
 assert(header.includes(':not(#rsaFocusedView){display:none!important}'),'gate CSS must not hide three-tab wrapper');
+const gateCss=fs.readFileSync(__dirname+'/../waku-bc-converter/axis-access-gate-v1.css','utf8');
+assert(gateCss.includes(':not(#axisAccessScreen):not(#rsaFocusedView),'),'axis-access gate CSS must not hide focused view');
+assert(header.includes('axis-access-gate-v1.css?v=20261117p331c'),'gate CSS cache key must be updated');
 assert(f.includes('軸馬情報')&&f.includes('相手馬情報')&&f.includes('展開隊列'));
 console.log('P3-31 focus_core_test PASS',top.map(x=>x.no));
