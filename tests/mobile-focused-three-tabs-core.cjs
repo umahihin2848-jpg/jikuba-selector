@@ -23,7 +23,7 @@ assert(f.includes('M3展開順位')&&f.includes('V3能力順位'),'selected part
 assert(!view.cMarketRank(roster,api.buildMarket('1 2.2',roster),cState,model.models['2026']).ready,'odds incomplete');
 assert(!view.cMarketRank(roster,mk,{...cState,activeModel:'v1'},model.models['2026']).ready,'no C fallback proxy');
 const header=fs.readFileSync(__dirname+'/../waku-bc-converter/v3.html','utf8');
-assert(header.includes('mobile-focused-3tabs-v1.js?v=20261117p333a'));
+assert(header.includes('mobile-focused-3tabs-v1.js?v=20261117p335a'));
 assert(header.includes(':not(#rsaFocusedView){display:none!important}'),'gate CSS must not hide three-tab wrapper');
 const gateCss=fs.readFileSync(__dirname+'/../waku-bc-converter/axis-access-gate-v1.css','utf8');
 assert(gateCss.includes(':not(#axisAccessScreen):not(#rsaFocusedView),'),'axis-access gate CSS must not hide focused view');
@@ -48,3 +48,13 @@ assert.strictEqual(api.marketStructure(mk,undefined),null,'do not substitute 202
 assert(f.includes('rsaf-skip-diagnostic')&&f.includes('購入条件通過'),'skip explanation must be visible and non-binding');
 
 console.log('P3-33 skip diagnostic core PASS',top.map(x=>x.no));
+
+const valid=[{no:'2',name:'B'},{no:'3',name:'C'},{no:'4',name:'D'},{no:'5',name:'E'}];
+assert.strictEqual(view.manualPartnerChoice(null,'2',valid,'1'),'2');
+assert.strictEqual(view.manualPartnerChoice('2','3',valid,'1'),'3','only one manually selected partner');
+assert.strictEqual(view.manualPartnerChoice('3','3',valid,'1'),null,'tap again deselects');
+assert.strictEqual(view.manualPartnerChoice('2','1',valid,'1'),'2','axis cannot be chosen');
+assert.strictEqual(view.manualPartnerChoice(null,'99',valid,'1'),null,'off-list horse cannot be chosen');
+assert.strictEqual(view.manualPartnerChoice('2','5',valid,'1'),'5','optional fourth is selectable');
+assert(f.includes('rsafFourthCandidate')&&f.includes('rsaf-pick-action'),'manual one-partner UI present');
+assert(f.includes('x.partners.slice(0,3)'),'only 3 cards are primary visible');
