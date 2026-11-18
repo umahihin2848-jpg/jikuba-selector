@@ -39,7 +39,7 @@ assert.match(html,/↑6 ／ 上位5 1\/4/);
 assert.match(html,/上位5 4\/4/);
 assert.match(html,/3着内確率・着順やワイド期待値を意味しません/);
 assert(html.includes('class="moaM4Names"><b>軸馬'),'the current all-horse M4 comparison must include the axis');
-assert(html.indexOf('浮上候補')<html.indexOf('安定候補'),'rising scenario partner should be discoverable before stable group');
+assert(html.indexOf('安定候補')<html.indexOf('浮上候補'),'all-horse M4 rows are ordered by horse number, not model recommendation');
 app.RaceProgressVisualV1State={ready:true,scenarioSource:'manual',scenarioBand:0,generation:5};
 choice=v.chosenM4();
 assert.equal(choice.band,0);assert.equal(choice.source,'manual');
