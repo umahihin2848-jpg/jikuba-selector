@@ -1,0 +1,66 @@
+name: P3-87 M3 input integrity
+on:
+  pull_request:
+    paths:
+      - 'waku-bc-converter/shape-core-v2.js'
+      - 'waku-bc-converter/target-csv-compat-v1.js'
+      - 'waku-bc-converter/remaining600-validated-v1.js'
+      - 'waku-bc-converter/finish600-simulator-v2.js'
+      - 'waku-bc-converter/v3.html'
+      - 'waku-bc-converter/v4.html'
+      - 'waku-bc-converter/v4-m3-engine-v1.js'
+      - 'waku-bc-converter/v3-addons-loader-p.js'
+      - 'tests/p3-*.cjs'
+      - '.github/workflows/p3-87-m3-input-integrity.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  m3-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax validate changed engine files
+        run: |
+          node --check waku-bc-converter/shape-core-v2.js
+          node --check waku-bc-converter/target-csv-compat-v1.js
+          node --check waku-bc-converter/remaining600-validated-v1.js
+          node --check waku-bc-converter/finish600-simulator-v2.js
+          node --check waku-bc-converter/v3-addons-loader-p.js
+          node --check waku-bc-converter/v4-m3-engine-v1.js
+      - name: M3 input and formula regression tests
+        run: |
+          node tests/p3-41-m3-date-compat-smoke.cjs
+          node tests/p3-42-target-history-dedup-smoke.cjs
+          node tests/p3-43-m3-missing-upstream-smoke.cjs
+          node tests/p3-45-m3-pci-column-contract.cjs
+          node tests/p3-46-m3-required-schema-guard.cjs
+          node tests/p3-47-m3-feature-contract.cjs
+          node tests/p3-87-cache-busting-smoke.cjs
+          node tests/p3-87-v4-m3-input-smoke.cjs
+          node tests/p3-87-cutoff-guard-smoke.cjs
+          node tests/p3-88-m3-v3-v4-feature-parity.cjs
+          node tests/p3-88-m3-history-receipt.cjs
+          node tests/p3-88-regression-fixture-schema.cjs
+          node tests/p3-89-target-18digit-id-contract.cjs
+          node tests/p3-88-m3-readiness-guard.cjs
+
+  browser-synthetic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright driver
+        run: npm install --no-save --package-lock=false playwright-core@1.55.0
+      - name: Start app server
+        run: |
+          python3 -m http.server 8080 --bind 127.0.0.1 > /tmp/p388-http.log 2>&1 &
+      - name: 12-horse real browser M3 as-of fixture
+        run: node tests/p3-88-m3-browser-synthetic.mjs

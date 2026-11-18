@@ -2,8 +2,8 @@
 const C=window.ShapeCore;if(!C||!window.File||!File.prototype.arrayBuffer)return;
 if(File.prototype.__rsaTargetCompat)return;
 const origArrayBuffer=File.prototype.arrayBuffer,origDecode=C.decode.bind(C),origParseCSV=C.parseCSV.bind(C);
-const fileBufferCache=new WeakMap(),fileSignatureCache=new Map(),decodeCache=new WeakMap();let lastCsvText=null,lastCsvGrid=null;
-const stats={rawReads:0,transforms:0,bufferHits:0,weakHits:0,signatureHits:0,decodeHits:0,parseHits:0,obstacleRowsSkipped:0,nonFinishRowsSkipped:0,cornerZeroNormalized:0,rawReadKeys:[],hitKeys:[]};
+let fileBufferCache=new WeakMap(),decodeCache=new WeakMap(),fileDiagnostics=new WeakMap();let lastCsvText=null,lastCsvGrid=null;
+const stats={rawReads:0,transforms:0,bufferHits:0,weakHits:0,signatureHits:0,decodeHits:0,parseHits:0,obstacleRowsSkipped:0,nonFinishRowsSkipped:0,cornerZeroNormalized:0,historyDuplicateRowsSkipped:0,historyConflictCount:0,historyKeyUnavailable:0,rawReadKeys:[],hitKeys:[]};
 const q=v=>{v=String(v??'');return /[",\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
 const fileMeta=f=>({name:String(f?.name||''),size:Number(f?.size)||0,lastModified:Number(f?.lastModified)||0,type:String(f?.type||'')});
 const fileSignature=f=>{const m=fileMeta(f);return `${m.name}|${m.size}|${m.lastModified}|${m.type}`};
@@ -36,14 +36,20 @@ function transform(buf){
   const h=grid[0].map(x=>String(x||'').trim());
   const hasTarget=h.includes('何走目')&&h.includes('馬名')&&(h.includes('レースPCI')||h.includes('RPCI'));
   if(!hasTarget)return buf;
-  const idx=name=>h.indexOf(name),iName=idx('馬名'),iMeet=idx('開催'),iHistNo=idx('馬番'),iRpci=idx('レースPCI'),iStyle=idx('決手'),iDate=idx('日付'),i1=idx('通過1'),i2=idx('通過2'),i3=idx('通過3'),i4=idx('通過4'),iRaceName=idx('レース名'),iRaceType=idx('競走種別コード'),iFinish=idx('着順');
+  const idx=name=>h.indexOf(name),iName=idx('馬名'),iMeet=idx('開催'),iHistNo=idx('馬番'),iRpci=idx('レースPCI'),iStyle=idx('決手'),iDate=idx('日付'),i1=idx('通過1'),i2=idx('通過2'),i3=idx('通過3'),i4=idx('通過4'),iRaceName=idx('レース名'),iRaceType=idx('競走種別コード'),iFinish=idx('着順'),iRaceId=idx('レースID(新・馬番無16桁)'),iRaceId18=idx('レースID(新)');
   if(iName<0)return buf;
   const outH=h.slice();
   if(iHistNo>=0)outH[iHistNo]='過去馬番';
   const add=[];
   const ensure=name=>{if(!outH.includes(name)){outH.push(name);add.push(name)}};
-  ensure('馬番');ensure('RPCI');ensure('脚質');ensure('決め手');ensure('場所');ensure('1角');ensure('2角');ensure('3角');ensure('4角');
+  ensure('馬番');if(iRaceId<0&&iRaceId18>=0)ensure('レースID(新・馬番無16桁)');ensure('RPCI');ensure('脚質');ensure('決め手');ensure('場所');ensure('1角');ensure('2角');ensure('3角');ensure('4角');
   const order=new Map();let next=1;
+  // TARGET all-horse exports repeat the same historical horse/race record.
+  // Keep the first instance only, preserving first-appearance current horse numbers.
+  const seenStarts=new Map();
+  const auditedColumns=['日付S','日付','芝・ダート','距離','頭数','レースPCI','PCI','上3F地点差','上り3F','通過1','通過2','通過3','通過4','着順']
+    .map(idx).filter(i=>i>=0);
+  const signature=r=>auditedColumns.map(i=>String(r[i]??'').normalize('NFKC').trim()).join('\u001e');
   const out=[outH];
   for(let rix=1;rix<grid.length;rix++){
     const r=grid[rix].slice();while(r.length<h.length)r.push('');
@@ -51,8 +57,24 @@ function transform(buf){
     if(isNonFinish(r,iFinish)){stats.nonFinishRowsSkipped++;continue}
     if(iDate>=0)r[iDate]=normalizeDate(r[iDate]);
     for(const i of [i1,i2,i3,i4])if(i>=0){const before=r[i],after=normalizeCorner(before);if(after!==before){r[i]=after;stats.cornerZeroNormalized++}}
-    const name=String(r[iName]||'').trim();if(name&&!order.has(name))order.set(name,next++);
-    const extras={'馬番':name?String(order.get(name)||''):'','RPCI':iRpci>=0?r[iRpci]:'','脚質':iStyle>=0?r[iStyle]:'','決め手':iStyle>=0?r[iStyle]:'','場所':iMeet>=0?venueFromMeeting(r[iMeet]):'','1角':i1>=0?r[i1]:'','2角':i2>=0?r[i2]:'','3角':i3>=0?r[i3]:'','4角':i4>=0?r[i4]:''};
+    const name=String(r[iName]||'').trim();
+    const id18=iRaceId18>=0?String(r[iRaceId18]??'').normalize('NFKC').trim().toUpperCase():'';
+    const priorNo=iHistNo>=0?String(r[iHistNo]??'').normalize('NFKC').trim():'';
+    // TARGET's 18-character race ID appends the previous race horse number (2 digits).
+    // Convert only after verifying the suffix; accept A-Z venue codes for overseas races.
+    const from18=/^[A-Z0-9]{18}$/.test(id18)&&/^\d{1,2}$/.test(priorNo)&&id18.slice(-2)===priorNo.padStart(2,'0')?id18.slice(0,16):'';
+    const historicalId=iRaceId>=0?String(r[iRaceId]??'').normalize('NFKC').trim().toUpperCase():from18;
+    if(name&&/^[A-Z0-9]{16}$/.test(historicalId)){
+      const key=name+'\u0000'+historicalId, sig=signature(r);
+      if(seenStarts.has(key)){
+        stats.historyDuplicateRowsSkipped++;
+        if(seenStarts.get(key)!==sig)stats.historyConflictCount++;
+        continue;
+      }
+      seenStarts.set(key,sig);
+    }else if(name)stats.historyKeyUnavailable++;
+    if(name&&!order.has(name))order.set(name,next++);
+    const extras={'馬番':name?String(order.get(name)||''):'','レースID(新・馬番無16桁)':historicalId,'RPCI':iRpci>=0?r[iRpci]:'','脚質':iStyle>=0?r[iStyle]:'','決め手':iStyle>=0?r[iStyle]:'','場所':iMeet>=0?venueFromMeeting(r[iMeet]):'','1角':i1>=0?r[i1]:'','2角':i2>=0?r[i2]:'','3角':i3>=0?r[i3]:'','4角':i4>=0?r[i4]:''};
     for(const k of add)r.push(extras[k]??'');
     out.push(r);
   }
@@ -63,19 +85,19 @@ function cachedBuffer(file){
   let p=fileBufferCache.get(file);
   const key=fileSignature(file);
   if(p){stats.bufferHits++;stats.weakHits++;pushBounded(stats.hitKeys,{kind:'weak',key,...fileMeta(file)});return p}
-  p=fileSignatureCache.get(key);
-  if(p){stats.bufferHits++;stats.signatureHits++;pushBounded(stats.hitKeys,{kind:'signature',key,...fileMeta(file)});fileBufferCache.set(file,p);return p}
+  // File name/size/lastModified/type are not a content identity. Only reuse
+  // the transformed buffer when the exact File object itself is reused.
   stats.rawReads++;
   pushBounded(stats.rawReadKeys,{key,...fileMeta(file)});
-  p=origArrayBuffer.call(file).then(transform);
-  fileBufferCache.set(file,p);fileSignatureCache.set(key,p);
+  p=origArrayBuffer.call(file).then(buf=>{const before=stats.historyConflictCount,out=transform(buf);fileDiagnostics.set(file,{historyConflictCount:stats.historyConflictCount-before});return out;});
+  fileBufferCache.set(file,p);
   return p
 }
 File.prototype.arrayBuffer=function(){return cachedBuffer(this)};
 File.prototype.__rsaTargetCompat=true;
 C.decode=function(buf){if(buf&&typeof buf==='object'){const hit=decodeCache.get(buf);if(hit!==undefined){stats.decodeHits++;return hit}const text=origDecode(buf);decodeCache.set(buf,text);return text}return origDecode(buf)};
 C.parseCSV=function(text){if(typeof text==='string'&&text===lastCsvText&&lastCsvGrid){stats.parseHits++;return lastCsvGrid}const grid=origParseCSV(text);if(typeof text==='string'&&text.length>256){lastCsvText=text;lastCsvGrid=grid}return grid};
-window.RSATargetCsvCache={version:'target-csv-cache-v6-corner-zero-missing',stats,arrayBuffer:cachedBuffer,clear(){lastCsvText=null;lastCsvGrid=null;fileSignatureCache.clear()}};
+window.RSATargetCsvCache={version:'target-csv-cache-v7-file-identity',stats,arrayBuffer:cachedBuffer,getDiagnostic(file){return fileDiagnostics.get(file)||null},clear(){lastCsvText=null;lastCsvGrid=null;fileBufferCache=new WeakMap();decodeCache=new WeakMap();fileDiagnostics=new WeakMap()}};
 function note(){setTimeout(()=>{const f=document.getElementById('csvFile'),info=document.getElementById('csvInfo');if(!f?.files?.[0]||!info)return;const n=f.files[0].name||'';if(!/\.csv$/i.test(n))return;if(!info.querySelector('[data-target-compat]')){const d=document.createElement('div');d.dataset.targetCompat='1';d.className='tiny';d.style.marginTop='6px';d.textContent='TARGET全馬一括CSVを共有キャッシュ：レースPCI→RPCI／決手→脚質／開催→競馬場／日付正規化／通過順位0は欠損化／障害・取消・除外・競走中止・失格を除外／全馬出力順→今回馬番';info.appendChild(d)}},180)}
 if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',()=>{document.getElementById('csvFile')?.addEventListener('change',note)});else document.getElementById('csvFile')?.addEventListener('change',note);
 })();
