@@ -18,6 +18,8 @@ const race={raceDate:'2026-10-04',surface:'芝',distance:1600,fieldSize:16},hors
  const base=await api.compute({blob:new Blob([csv]),race,horses,predGapByNo:{'1':null}});
  assert.equal(base.rows[0].histN,2,'must deduplicate historical race IDs');
  assert(base.rows[0].predGap>0.1,'missing remaining600 cannot become 0');
+ const nullFront=await api.compute({blob:new Blob([csv]),race,horses,predGapByNo:{'1':null},queueFrontByNo:{'1':null}});
+ assert(Math.abs(nullFront.rows[0].predGap-base.rows[0].predGap)<1e-12,'null queue frontness must use history fallback');
  const extra=csv+'\n'+row('2026.10. 4','75',id3).join(',');
  const sameDay=await api.compute({blob:new Blob([extra]),race,horses});
  assert.equal(sameDay.rows[0].histN,2,'race day result must not enter history');
@@ -25,5 +27,6 @@ const race={raceDate:'2026-10-04',surface:'芝',distance:1600,fieldSize:16},hors
  const conflict=csv+'\n'+row('2026. 8. 1','95',id1).join(',');
  await assert.rejects(()=>api.compute({blob:new Blob([conflict]),race,horses}),/矛盾/);
  await assert.rejects(()=>api.compute({blob:new Blob([csv]),race:{...race,raceDate:'2025-01-01'},horses}),/発走前過去走/);
+ await assert.rejects(()=>api.compute({blob:new Blob([csv]),race:{...race,raceDate:''},horses}),/日付/);
  console.log('PASS P3-87 v4 engine: distinct races, pre-start only, PCI exact, null gap, conflicts');
 })().catch(e=>{console.error(e);process.exitCode=1});
