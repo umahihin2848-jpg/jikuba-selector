@@ -36,13 +36,13 @@ function transform(buf){
   const h=grid[0].map(x=>String(x||'').trim());
   const hasTarget=h.includes('何走目')&&h.includes('馬名')&&(h.includes('レースPCI')||h.includes('RPCI'));
   if(!hasTarget)return buf;
-  const idx=name=>h.indexOf(name),iName=idx('馬名'),iMeet=idx('開催'),iHistNo=idx('馬番'),iRpci=idx('レースPCI'),iStyle=idx('決手'),iDate=idx('日付'),i1=idx('通過1'),i2=idx('通過2'),i3=idx('通過3'),i4=idx('通過4'),iRaceName=idx('レース名'),iRaceType=idx('競走種別コード'),iFinish=idx('着順'),iRaceId=idx('レースID(新・馬番無16桁)');
+  const idx=name=>h.indexOf(name),iName=idx('馬名'),iMeet=idx('開催'),iHistNo=idx('馬番'),iRpci=idx('レースPCI'),iStyle=idx('決手'),iDate=idx('日付'),i1=idx('通過1'),i2=idx('通過2'),i3=idx('通過3'),i4=idx('通過4'),iRaceName=idx('レース名'),iRaceType=idx('競走種別コード'),iFinish=idx('着順'),iRaceId=idx('レースID(新・馬番無16桁)'),iRaceId18=idx('レースID(新)');
   if(iName<0)return buf;
   const outH=h.slice();
   if(iHistNo>=0)outH[iHistNo]='過去馬番';
   const add=[];
   const ensure=name=>{if(!outH.includes(name)){outH.push(name);add.push(name)}};
-  ensure('馬番');ensure('RPCI');ensure('脚質');ensure('決め手');ensure('場所');ensure('1角');ensure('2角');ensure('3角');ensure('4角');
+  ensure('馬番');if(iRaceId<0&&iRaceId18>=0)ensure('レースID(新・馬番無16桁)');ensure('RPCI');ensure('脚質');ensure('決め手');ensure('場所');ensure('1角');ensure('2角');ensure('3角');ensure('4角');
   const order=new Map();let next=1;
   // TARGET all-horse exports repeat the same historical horse/race record.
   // Keep the first instance only, preserving first-appearance current horse numbers.
@@ -58,7 +58,12 @@ function transform(buf){
     if(iDate>=0)r[iDate]=normalizeDate(r[iDate]);
     for(const i of [i1,i2,i3,i4])if(i>=0){const before=r[i],after=normalizeCorner(before);if(after!==before){r[i]=after;stats.cornerZeroNormalized++}}
     const name=String(r[iName]||'').trim();
-    const historicalId=iRaceId>=0?String(r[iRaceId]??'').normalize('NFKC').trim().toUpperCase():'';
+    const id18=iRaceId18>=0?String(r[iRaceId18]??'').normalize('NFKC').trim().toUpperCase():'';
+    const priorNo=iHistNo>=0?String(r[iHistNo]??'').normalize('NFKC').trim():'';
+    // TARGET's 18-character race ID appends the previous race horse number (2 digits).
+    // Convert only after verifying the suffix; accept A-Z venue codes for overseas races.
+    const from18=/^[A-Z0-9]{18}$/.test(id18)&&/^\d{1,2}$/.test(priorNo)&&id18.slice(-2)===priorNo.padStart(2,'0')?id18.slice(0,16):'';
+    const historicalId=iRaceId>=0?String(r[iRaceId]??'').normalize('NFKC').trim().toUpperCase():from18;
     if(name&&/^[A-Z0-9]{16}$/.test(historicalId)){
       const key=name+'\u0000'+historicalId, sig=signature(r);
       if(seenStarts.has(key)){
@@ -69,7 +74,7 @@ function transform(buf){
       seenStarts.set(key,sig);
     }else if(name)stats.historyKeyUnavailable++;
     if(name&&!order.has(name))order.set(name,next++);
-    const extras={'馬番':name?String(order.get(name)||''):'','RPCI':iRpci>=0?r[iRpci]:'','脚質':iStyle>=0?r[iStyle]:'','決め手':iStyle>=0?r[iStyle]:'','場所':iMeet>=0?venueFromMeeting(r[iMeet]):'','1角':i1>=0?r[i1]:'','2角':i2>=0?r[i2]:'','3角':i3>=0?r[i3]:'','4角':i4>=0?r[i4]:''};
+    const extras={'馬番':name?String(order.get(name)||''):'','レースID(新・馬番無16桁)':historicalId,'RPCI':iRpci>=0?r[iRpci]:'','脚質':iStyle>=0?r[iStyle]:'','決め手':iStyle>=0?r[iStyle]:'','場所':iMeet>=0?venueFromMeeting(r[iMeet]):'','1角':i1>=0?r[i1]:'','2角':i2>=0?r[i2]:'','3角':i3>=0?r[i3]:'','4角':i4>=0?r[i4]:''};
     for(const k of add)r.push(extras[k]??'');
     out.push(r);
   }
