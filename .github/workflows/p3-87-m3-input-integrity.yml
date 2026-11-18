@@ -7,6 +7,8 @@ on:
       - 'waku-bc-converter/remaining600-validated-v1.js'
       - 'waku-bc-converter/finish600-simulator-v2.js'
       - 'waku-bc-converter/v3.html'
+      - 'waku-bc-converter/v4.html'
+      - 'waku-bc-converter/v4-m3-engine-v1.js'
       - 'waku-bc-converter/v3-addons-loader-p.js'
       - 'tests/p3-*.cjs'
       - '.github/workflows/p3-87-m3-input-integrity.yml'
@@ -29,6 +31,7 @@ jobs:
           node --check waku-bc-converter/remaining600-validated-v1.js
           node --check waku-bc-converter/finish600-simulator-v2.js
           node --check waku-bc-converter/v3-addons-loader-p.js
+          node --check waku-bc-converter/v4-m3-engine-v1.js
       - name: M3 input and formula regression tests
         run: |
           node tests/p3-41-m3-date-compat-smoke.cjs
@@ -38,3 +41,4 @@ jobs:
           node tests/p3-46-m3-required-schema-guard.cjs
           node tests/p3-47-m3-feature-contract.cjs
           node tests/p3-87-cache-busting-smoke.cjs
+          node tests/p3-87-v4-m3-input-smoke.cjs
