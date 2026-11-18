@@ -27,11 +27,11 @@ function parseHistory(text){
  field:col(headers,['頭数','出走頭数'],true),
  c1:col(headers,['1角','１角','通過1','通過１'],true),c2:col(headers,['2角','２角','通過2','通過２'],true),
  c3:col(headers,['3角','３角','通過3','通過３'],true),c4:col(headers,['4角','４角','通過4','通過４'],true),
- finish:col(headers,['着順','確定着順'],true),raceId:col(headers,['レースID(新・馬番無16桁)'],true)
+ finish:col(headers,['着順','確定着順'],true),raceId:col(headers,['レースID(新・馬番無16桁)'],true),raceId18:col(headers,['レースID(新)'],true),pastNo:col(headers,['過去馬番','馬番'],true)
  };
  const labels={name:'馬名',date:'日付',surface:'芝・ダート',last3f:'上り3F',gap:'上3F地点差',rpci:'RPCI',pci:'馬PCI',field:'頭数'};const missing=Object.entries(labels).filter(([k])=>!m[k]).map(([,v])=>v);
  if(![m.c1,m.c2,m.c3,m.c4].some(Boolean))missing.push('通過順位');
- if(headers.includes('何走目')&&!m.raceId)missing.push('レースID(新・馬番無16桁)');
+ if(headers.includes('何走目')&&!m.raceId&&!m.raceId18)missing.push('レースID(新・馬番無16桁) または レースID(新)');
  if(missing.length)throw new Error('M3入力CSVの必須列不足: '+missing.join(', '));
  const val=(r,k)=>k?String(r[idx[k]]??'').trim():'';
  const byName=new Map(),seen=new Map();let invalidDate=0;
@@ -39,7 +39,10 @@ function parseHistory(text){
  const r=grid[i],name=val(r,m.name);if(!name)continue;
  const date=dateVal(val(r,m.date));if(!date){invalidDate++;continue}
  const surface=surf(val(r,m.surface));if(!surface)continue;
- const id=val(r,m.raceId);
+ const id18=val(r,m.raceId18).toUpperCase(),priorNo=val(r,m.pastNo);
+ const from18=/^[A-Z0-9]{18}$/.test(id18)&&/^\d{1,2}$/.test(priorNo)&&id18.slice(-2)===priorNo.padStart(2,'0')?id18.slice(0,16):'';
+ if(m.raceId18&&!m.raceId&&!from18)throw new Error('18桁レースIDと過去馬番が一致しません: '+name);
+ const id=(m.raceId?val(r,m.raceId):from18).toUpperCase();
  if(id){
    if(!/^[A-Z0-9]{16}$/i.test(id))throw new Error('過去走レースIDが不正: '+name);
    const key=name+'|'+id.toUpperCase(),signature=[date,surface,val(r,m.last3f),val(r,m.gap),val(r,m.rpci),val(r,m.pci),val(r,m.field),val(r,m.c1),val(r,m.c2),val(r,m.c3),val(r,m.c4)].join('|');
