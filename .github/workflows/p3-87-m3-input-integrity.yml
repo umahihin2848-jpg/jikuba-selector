@@ -46,3 +46,19 @@ jobs:
           node tests/p3-88-m3-v3-v4-feature-parity.cjs
           node tests/p3-88-m3-history-receipt.cjs
           node tests/p3-88-regression-fixture-schema.cjs
+
+  browser-synthetic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright driver
+        run: npm install --no-save --package-lock=false playwright-core@1.55.0
+      - name: Start app server
+        run: |
+          python3 -m http.server 8080 --bind 127.0.0.1 > /tmp/p388-http.log 2>&1 &
+      - name: 12-horse real browser M3 as-of fixture
+        run: node tests/p3-88-m3-browser-synthetic.mjs
