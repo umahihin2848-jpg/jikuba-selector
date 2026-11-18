@@ -10,8 +10,16 @@ const id=x=>String(Number(x));
 const byNo=s=>s?.byNo||Object.fromEntries((s?.rows||[]).map(x=>[id(x.no),x]));
 const num=x=>Number.isFinite(x);
 function ranks(rows,key,desc){
+ // Same feature value -> same mid-rank. Never break a model tie by horse number.
  const arr=[...rows].sort((a,b)=>(desc?N(b[key])-N(a[key]):N(a[key])-N(b[key]))||N(a.no)-N(b.no));
- return Object.fromEntries(arr.map((r,i)=>[r.no,100*(arr.length-i-1)/(arr.length-1)]));
+ const result={};
+ for(let i=0;i<arr.length;){let end=i+1;
+  while(end<arr.length&&Math.abs(N(arr[end][key])-N(arr[i][key]))<=1e-10)end++;
+  const mid=(i+end-1)/2;
+  for(let j=i;j<end;j++)result[arr[j].no]=100*(arr.length-1-mid)/(arr.length-1);
+  i=end;
+ }
+ return result;
 }
 function scoreRows(rows){
  if(rows.length<12||rows.length>18||rows.some(r=>!num(r.ability)||!num(r.m3)||!num(r.p10)||!num(r.front)||!num(r.odds)||r.odds<=0))throw Error('全頭のAbility C・M3・P10・前方度・単勝オッズが必要です');
@@ -39,7 +47,7 @@ function current(){
  const original=f.partnerNos.map(no=>scored.find(h=>h.no===id(no)));if(original.some(x=>!x))return{ok:false,reason:'既存候補の馬番が全頭データと一致しません'};
  const manual=id(f.selectedPartnerNo||0),selected=original.find(x=>x.no===manual)||null,axis=scored.find(x=>x.no===id(f.axisNo));if(!axis)return{ok:false,reason:'軸馬の馬番が一致しません'};
  const fixed=sortScores(original),withoutMarket=sortScores(original,'scoreWithoutMarket');
- return{ok:true,version:VERSION,axis,original,manual:selected,fixed,withoutMarket,horses:scored,marketAt:root.MobileOpponentCoreV1?.oddsInputAt||null,
+ return{ok:true,version:VERSION,axis,original,manual:selected,fixed,withoutMarket,horses:scored,
   race:{date,venue:$('venue')?.value||'',raceName:$('raceName')?.value||'',grade,surface:$('surface')?.value||'',distance:N($('distance')?.value),going:$('going')?.value||'',field},
   provenance:{ability:a.version,m3:m3.version,p10:risk.version,queue:queue.version,decision:decision.version,axisSelection:decision.axisSelection?.version||null,focused:f.version},
   purchaseGate:{eligible:root.AxisAccessGateV1State?.betEligible===true,code:decision.final?.code||'',label:decision.final?.label||''}};
