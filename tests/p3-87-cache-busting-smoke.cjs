@@ -6,5 +6,5 @@ for(const name of ['shape-core-v2.js','target-csv-compat-v1.js','v3-addons-loade
   assert(html.includes(name+'?v='+v),'missing fresh browser URL '+name);
 for(const name of ['remaining600-validated-v1.js','finish600-simulator-v2.js'])
   assert.equal((loader.match(new RegExp(name.replaceAll('.','\\.')+'\\?v='+v,'g'))||[]).length,2,'mobile and desktop both need current '+name);
-assert(loader.includes("const BUILD='"+v+"'"),'build should be diagnosable');
+assert(loader.includes("const BUILD='20261101ability2'"),'unrelated Ability build marker must remain unchanged');
 console.log('PASS P3-87 cache contract for desktop and mobile M3');
