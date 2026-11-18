@@ -46,10 +46,10 @@ try{
           exact19:a?.rows?.every(x=>Object.keys(x.features).length===19),
           noLeaked:a?.rows?.every(x=>x.history.every(h=>h.date<a.raceDate)),
           scoreValid:a?.rows?.every(x=>Math.abs(x.predGap-x.closing-x.score)<1e-9),
-          m3Ranks:new Set(f?.rows?.map(r=>r.finishRank)),abilityN:ab?.rows?.length||0,
+          m3RankN:new Set(f?.rows?.map(r=>r.finishRank)).size,abilityN:ab?.rows?.length||0,
           conflict:window.RSATargetCsvCache?.getDiagnostic?.(document.getElementById('csvFile')?.files?.[0])?.historyConflictCount};
  });
- if(!out.ready||out.n!==12||out.abilityN!==12||out.histCounts.some(x=>x!==5)||!out.uniqueIds||!out.exact19||!out.noLeaked||!out.scoreValid||out.m3Ranks.size!==12||out.conflict!==0)
+ if(!out.ready||out.n!==12||out.abilityN!==12||out.histCounts.some(x=>x!==5)||!out.uniqueIds||!out.exact19||!out.noLeaked||!out.scoreValid||out.m3RankN!==12||out.conflict!==0)
   throw Error('P3-88 synthetic browser contract mismatch: '+JSON.stringify(out));
  console.log('PASS P3-88 full browser: 12 runners x 5 distinct previous races; M3+Ability ready; 19 features; receipts; no future leakage');
 }catch(e){
