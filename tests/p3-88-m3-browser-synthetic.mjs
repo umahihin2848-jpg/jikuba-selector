@@ -34,7 +34,7 @@ try{
  });
  await page.locator('#csvFile').setInputFiles({name:'asof-fixture-p388.csv',mimeType:'text/csv',buffer:Buffer.from(csv,'utf8')});
  await page.waitForFunction(()=>document.getElementById('csvFile')?.files?.length===1,null,{timeout:15000});
- await page.locator('#parseCsvBtn').click();
+ await page.evaluate(()=>document.getElementById('parseCsvBtn')?.click());
  await page.waitForFunction(()=>/解析済\s+12頭/.test(document.getElementById('csvState')?.textContent||''),null,{timeout:15000});
  await page.waitForFunction(()=>!document.getElementById('analyzeBtn')?.disabled,null,{timeout:15000});
  await page.locator('#analyzeBtn').click();
