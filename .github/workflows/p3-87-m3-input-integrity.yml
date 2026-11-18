@@ -46,6 +46,7 @@ jobs:
           node tests/p3-88-m3-v3-v4-feature-parity.cjs
           node tests/p3-88-m3-history-receipt.cjs
           node tests/p3-88-regression-fixture-schema.cjs
+          node tests/p3-88-m3-readiness-guard.cjs
 
   browser-synthetic:
     runs-on: ubuntu-latest
