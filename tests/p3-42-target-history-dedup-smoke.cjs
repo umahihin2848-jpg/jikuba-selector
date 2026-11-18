@@ -58,6 +58,8 @@ const lines = [
   const before = st.historyConflictCount;
   await conflictFile.arrayBuffer();
   assert.equal(st.historyConflictCount,before+1);
+  assert.equal(ctx.RSATargetCsvCache.getDiagnostic(conflictFile).historyConflictCount,1);
+  assert.equal(ctx.RSATargetCsvCache.getDiagnostic(file).historyConflictCount,0);
 
   // Without stable historical race IDs, do not deduplicate different rows by date.
   const noIdLines = [headers, r('A馬','','2026. 9. 1','53.1'),r('A馬','','2026. 9. 1','53.1')]
