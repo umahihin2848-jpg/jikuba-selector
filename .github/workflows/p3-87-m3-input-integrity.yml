@@ -42,3 +42,4 @@ jobs:
           node tests/p3-47-m3-feature-contract.cjs
           node tests/p3-87-cache-busting-smoke.cjs
           node tests/p3-87-v4-m3-input-smoke.cjs
+          node tests/p3-87-cutoff-guard-smoke.cjs
