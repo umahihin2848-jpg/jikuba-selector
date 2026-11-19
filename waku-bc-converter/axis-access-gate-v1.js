@@ -1,8 +1,15 @@
 (()=>{'use strict';
 if(window.AxisAccessGateV1)return;
-const V='axis-access-gate-v1.3-unified-research-unlock',D=document.documentElement,$=id=>document.getElementById(id);
+const V='axis-access-gate-v1.4-dedup-publish',D=document.documentElement,$=id=>document.getElementById(id);
 const E=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let phase='idle',startAt=0,last='',timer=0;
+let phase='idle',startAt=0,last='',timer=0,published='';
+function publishState(state){
+ const sig=JSON.stringify([state.status,state.reason||'',state.axisNo||'',state.betEligible===true,Boolean(state.marketPending),Boolean(state.marketBlocked)]);
+ window.AxisAccessGateV1State={...state,at:Date.now()};
+ if(sig===published)return;
+ published=sig;
+ window.dispatchEvent(new CustomEvent('axis-access-gate-ready',{detail:window.AxisAccessGateV1State}));
+}
 function classify(transition,decision,gate){
  const t=transition||{},d=decision||{},s=d.structure||{},f=d.final||{};
  if(t.status==='running')return{status:'checking',title:'軸馬を判定中',reason:'Ability・M3・P10を照合しています。'};
@@ -78,7 +85,7 @@ function render(){
  D.dataset.axisBet=r.betEligible===true?'eligible':'locked';
  D.dataset.axisMarket=r.marketPending?'pending':r.marketBlocked?'blocked':r.betEligible?'verified':'none';
  el.hidden=!['skip','market','checking','error'].includes(status);
- if(el.hidden){last='';window.AxisAccessGateV1State={ready:true,status,version:V,betEligible:r.betEligible===true,marketPending:Boolean(r.marketPending),marketBlocked:Boolean(r.marketBlocked),axisNo:r.axisNo||'',at:Date.now()};return}
+ if(el.hidden){last='';publishState({ready:true,status,reason:r.reason||'',version:V,betEligible:r.betEligible===true,marketPending:Boolean(r.marketPending),marketBlocked:Boolean(r.marketBlocked),axisNo:r.axisNo||''});return}
  const sig=JSON.stringify([status,r.title,r.reason]);
  if(sig!==last){
  last=sig;el.innerHTML='<div class="aasIcon">'+(status==='skip'?'×':status==='error'?'!':'…')+'</div>'+
@@ -87,7 +94,7 @@ function render(){
  '<button type="button" data-axis-retry>'+(status==='market'?'単勝オッズを入力する':status==='error'?'入力とCSVを確認する':status==='checking'?'レース入力を確認する':'別のレースを入力する')+'</button>';
  }
  if(['skip','market'].includes(status)){const setup=$('mpuSetup');if(setup)setup.open=false}
- window.AxisAccessGateV1State={ready:true,status,reason:r.reason,axisNo:r.axisNo||'',version:V,betEligible:false,marketPending:false,marketBlocked:false,at:Date.now()};
+ publishState({ready:true,status,reason:r.reason||'',axisNo:r.axisNo||'',version:V,betEligible:false,marketPending:false,marketBlocked:false});
 }
 function schedule(ms=30){clearTimeout(timer);timer=setTimeout(render,ms)}
 function invalidate(){phase='editing';startAt=0;D.dataset.axisAccess='editing';schedule(20)}
