@@ -77,7 +77,8 @@ function skipDiagnosis(input={}){
 function modelState(){try{const a=root.AbilityV3ResearchPanelBridgeV1?.getCurrent();return a?.ok?a:{ok:false,reason:a?.reason||''};}catch(e){return{ok:false,reason:String(e?.message||e)}}}
 function decisionContext(){
  const r=roster(),d=root.DecisionShellV2State||{},pipeline=root.ProductionDecisionPipelineV1State||{},s=d.structure||{},final=d.final||{},a=pipeline.stages?.axis;
- const official=s.kind!=='double'&&s.axis?{no:String(s.axis.no),name:String(s.axis.name||r.find(x=>x.no===String(s.axis.no))?.name||'')}:['A1','A2'].includes(s.kind)&&a?.no?{no:String(a.no),name:String(a.label||'').replace(/^\d+番\s*/, '')}:null;
+ const singleEligible=['A1','A2'].includes(String(s.kind||''))&&!['red','neutral'].includes(String(final.level||''));
+ const official=singleEligible&&s.axis?{no:String(s.axis.no),name:String(s.axis.name||r.find(x=>x.no===String(s.axis.no))?.name||'')}:singleEligible&&a?.no?{no:String(a.no),name:String(a.label||'').replace(/^\d+番\s*/, '')}:null;
  const odds=String($('oddsPaste')?.value||'');const mk=parseMarket(r,odds);
  const o=official?mk.byNo?.[official.no]:null;
  const year=String($('raceDate')?.value||'').slice(0,4);
