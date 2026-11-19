@@ -8,10 +8,11 @@ const raceGateDecision=function raceGateDecision(x) {
   // Do not hard-exclude named graded races: let the verified axis gate decide.
   const isObstacle=/障害|ジャンプ|J[- ]?G[123]/i.test(name);
   const eligibleGrade=/^(3勝|OP|L|G1|G2|G3)$/.test(grade);
-  if (isObstacle || (grade && !eligibleGrade) || (Number.isInteger(field)&&(field<12||field>18))) return "skip";
-  // Race name is optional in the UI. An explicit flat surface, eligible grade
-  // and venue suffice; an explicitly named obstacle race is still rejected above.
-  if ((!name&&!/^(芝|ダ|ダート)$/.test(surface))||!r.venue||!Number.isInteger(field)||field<1||field>18) return "idle";
+  // Incomplete form state must not be counted as a race skipped for poor axis quality.
+  if (!grade||!r.venue||!Number.isInteger(field)||field<1||!surface)return "idle";
+  // A known invalid field/class/obstacle/surface is out of scope and must fail closed.
+  const flat=/^(芝|ダ|ダート)$/.test(surface);
+  if (isObstacle||!eligibleGrade||!flat||field<12||field>18)return "skip";
   if (!r.requested) return "idle";
   const a=r.ability,f=r.finish,at=Number(r.requestedAt)||0;
   if (!a?.ready||!f?.ready||!a.at||!f.at||Number(a.at)<at||Number(f.at)<at) return "checking";
@@ -87,7 +88,7 @@ addEventListener("rsa-analysis-start",()=>{
  requested=true;dirty=false;requestedAt=Number(window.RSAAnalysisTransitionState?.startedWall)||Date.now();render();
 });
 ["rsa-analysis-complete","m3-pure-ability-ready","finish600-ready","decision-shell-v2-ready","rsa-addons-ready"].forEach(ev=>addEventListener(ev,render));
-window.RaceSkipLockV1={version:"1.3.0-scope12-18",evaluate:raceGateDecision,refresh:render};
+window.RaceSkipLockV1={version:"1.4.0-input-scope-safe",evaluate:raceGateDecision,refresh:render};
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",render,{once:true});
 else render();
 })();
