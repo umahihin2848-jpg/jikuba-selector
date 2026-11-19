@@ -1,4 +1,4 @@
-/* Race skip gate v1.1 - JRA flat 3-win+ (including OP/L/G1-G3), 12+ runners, strict CORE 1/2 x M3 top3. */
+/* Race skip gate: JRA flat 3-win+ 12-18 runners; 3-win/OP/L one Ability Top3 x M3 Top3 match only, without extra popularity/frontness gates. */
 (()=>{"use strict";
 if(window.RaceSkipLockV1)return;
 const $=id=>document.getElementById(id),d=document.documentElement;
@@ -22,7 +22,7 @@ const raceGateDecision=function raceGateDecision(x) {
   const m3=new Set(f.rows.filter(h=>Number(h.finishRank)>=1&&Number(h.finishRank)<=3).map(h=>String(Number(h.no))));
   if(m3.size!==3||core.some(h=>!Number.isInteger(Number(h.no)))) return "checking";
   // OP/L use one structural overlap only; Pair remains a research/skip condition.
-  if(['OP','L'].includes(grade)){
+  if(['3勝','OP','L'].includes(grade)){
     const overlaps=a.rows.filter(h=>Number(h.abilityRank)>=1&&Number(h.abilityRank)<=3&&m3.has(String(Number(h.no))));
     if(overlaps.length!==1||Number(overlaps[0].abilityRank)>2)return "skip";
   }
@@ -40,10 +40,10 @@ function diagnose(r,next){
   if(core.length!==2||core.some(h=>Number(h.abilityTieStart)<=2&&Number(h.abilityTieEnd)>2))
     return{kind:"axis",reason:"Ability上位2頭の境界が同点などで不明確なため軸なし"};
   const top3=new Set((f.rows||[]).filter(h=>Number(h.finishRank)>=1&&Number(h.finishRank)<=3).map(h=>String(Number(h.no))));
-  if(['OP','L'].includes(grade)){
+  if(['3勝','OP','L'].includes(grade)){
     const overlaps=(a.rows||[]).filter(h=>Number(h.abilityRank)>=1&&Number(h.abilityRank)<=3&&top3.has(String(Number(h.no))));
-    if(overlaps.length!==1)return{kind:'axis',reason:'OP・Lは単独軸のみ採用。Ability上位3頭×M3上位3頭の一致が'+overlaps.length+'頭のため見送り'};
-    if(Number(overlaps[0].abilityRank)>2)return{kind:'axis',reason:'OP・Lの単独一致がAbility3位のため見送り'};
+    if(overlaps.length!==1)return{kind:'axis',reason:(grade==='3勝'?'3勝クラス':'OP・L')+'は単独軸のみ購入候補。Ability上位3頭×M3上位3頭の一致が'+overlaps.length+'頭のため見送り'};
+    if(Number(overlaps[0].abilityRank)>2)return{kind:'axis',reason:(grade==='3勝'?'3勝クラス':'OP・L')+'の単独一致がAbility3位のため見送り'};
   }
   const hit=core.filter(h=>top3.has(String(Number(h.no))));
   return{kind:"axis",reason:hit.length?"軸の安全条件を確認できませんでした":"Ability上位2頭とM3上位3頭が一致しないため、購入軸は見送り"};
