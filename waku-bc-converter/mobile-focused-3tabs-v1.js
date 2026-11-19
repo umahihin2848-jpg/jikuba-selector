@@ -2,7 +2,7 @@
    C×M3 purchase gate and separately trained C+market / V3 models.
    Never reassigns the official axis or overrides stop decisions. */
 (function(root){'use strict';
-const VERSION='P3-39-three-partner-comparison-v1';
+const VERSION='P3-40-3win-single-axis-research-only-v1';
 const $=id=>document.getElementById(id);
 const H=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const N=v=>v===null||v===undefined||String(v).trim()===''?NaN:Number(v);
@@ -134,7 +134,7 @@ function axisHtml(x){const d=x.decision,s=x.structure,f=x.final,m=x.odds;
  const diagnostic='<div class="rsaf-skip-diagnostic rsaf-skip-'+H(diag.state)+'">'+badge(diag.label,dgKind)+'<p>'+H(diag.reason)+'</p>'+(diag.marketNote?'<small>'+H(diag.marketNote)+'</small>':'')+'</div>';
  if(s.kind==='double'){
   const pair=(s.candidates||[]).map(c=>'<div class="rsaf-decision"><strong>'+H(c.no)+'番 '+H(c.name||'')+'</strong><p>Ability '+H(c.ar)+'位・M3 '+H(c.m3)+'位</p></div>').join('');
-  return diagnostic+'<div class="rsaf-intro"><b>Pair構造｜一致する2頭</b><p>単独軸の◎・相手3頭とは別扱いです。研究用・購入判断も別に確認してください。</p></div>'+pair;
+  return diagnostic+'<div class="rsaf-intro"><b>Pair構造｜一致する2頭</b><p>'+(s.code==='no_auto_axis'?'このクラスではPairは本番購入を見送り。以下の2頭は研究用の比較表示です。購入ロックは解除しません。':'単独軸の◎・相手3頭とは別扱いです。研究用・購入判断も別に確認してください。')+'</p></div>'+pair;
  }
  if(!x.official){
   if(!x.researchAxis)return diagnostic+alert('本番では軸馬が未確定です。参考軸を計算できないレースは従来どおり見送ります。');
@@ -149,6 +149,9 @@ function axisHtml(x){const d=x.decision,s=x.structure,f=x.final,m=x.odds;
    alert('これは「軸未確定・再点検」の参考馬で、本番の確定軸ではありません。購入ロックは解除されず、過去の研究成績や推定確率も購入時の利益を保証しません。');
  }
  const a=x.official,c=x.sc,q=x.q,r=x.risk,p=x.m;
+ const abilityModel=root.M3PureAbilityState?.activeModel==='C'?'Ability C':'Ability v1';
+ const isThreeWin=String($('grade')?.value||'')==='3勝';
+ const researchMemo=isThreeWin?'<div class="rsaf-decision"><strong>3勝クラス｜人気・前方度は研究メモ</strong><p>現在の軸 '+H(p?F(p.pop,'人気'):'人気未入力')+'・前方度 '+H(P(q?.frontness5))+'。人気1〜2位・前方度70%以上は過去の代理検証で注目した条件ですが、ここで新たな購入ロックは追加しません。</p></div>':'';
  const marketMissing=!m.complete;
  const label=s.kind==='A2'?'A2 条件付き':s.kind==='A1'?'A1 単独軸':'構造候補';
  const sel=x.decision?.axisSelection||{};
@@ -156,11 +159,11 @@ function axisHtml(x){const d=x.decision,s=x.structure,f=x.final,m=x.odds;
  const v3=x.v3Horse?'V3 '+F(x.v3Horse.v3Rank,'位')+'／Dynamic '+F(x.v3Horse.h730,'',3)+'／Peak '+(x.v3Horse.miss?'履歴不足':F(x.v3Horse.peak,'',3)):'V3: 能力DB更新待ち・比較保留';
  return diagnostic+'<div class="rsaf-decision">'+status+'<p>'+H(f.reason||s.reason||'')+'</p></div>'+
  '<article class="rsaf-horse rsaf-axis"><div class="rsaf-horse-main"><b class="rsaf-horse-no">'+H(a.no)+'</b><div><small>'+H(label)+'</small><h3>'+H(a.name)+'</h3></div></div><div class="rsaf-grid">'+
- fact('Ability C',cRank(c))+fact('M3',F(x.m3,'位'))+fact('P10',P(r?.p10))+fact('先行力',P(q?.frontness5))+
+ fact(abilityModel,cRank(c))+fact('M3',F(x.m3,'位'))+fact('P10',P(r?.p10))+fact('先行力',P(q?.frontness5))+
  fact('想定位置',q?.position||'—')+fact('単勝',p?F(p.od,'倍',1):'未入力')+'</div><p class="rsaf-inline">'+H(v3)+'</p></article>'+
- shadowNote+
+ shadowNote+researchMemo+
  (marketMissing?alert('市場判定待ち：全'+x.r.length+'頭の単勝オッズ入力で、最終軸・相手候補を更新します。'):badge('全頭オッズを反映済み','go'))+
- '<p class="rsaf-foot">馬番はTARGET CSVの出走馬並びに付けた仮番号です。確定枠順と照合してください。C×M3の軸判定を維持し、V3未更新時にはV3の数値を代用表示しません。</p>';
+ '<p class="rsaf-foot">馬番はTARGET CSVの出走馬並びに付けた仮番号です。確定枠順と照合してください。Ability×M3の軸判定を維持し、V3未更新時にはV3の数値を代用表示しません。</p>';
 }
 function partnerHtml(x){
  if(!x.analyzed)return alert('レース構造を解析してください。');
