@@ -77,7 +77,7 @@ function skipDiagnosis(input={}){
 function modelState(){try{const a=root.AbilityV3ResearchPanelBridgeV1?.getCurrent();return a?.ok?a:{ok:false,reason:a?.reason||''};}catch(e){return{ok:false,reason:String(e?.message||e)}}}
 function decisionContext(){
  const r=roster(),d=root.DecisionShellV2State||{},pipeline=root.ProductionDecisionPipelineV1State||{},s=d.structure||{},final=d.final||{},a=pipeline.stages?.axis;
- const official=s.axis?{no:String(s.axis.no),name:String(s.axis.name||r.find(x=>x.no===String(s.axis.no))?.name||'')}:['A1','A2'].includes(s.kind)&&a?.no?{no:String(a.no),name:String(a.label||'').replace(/^\d+番\s*/, '')}:null;
+ const official=s.kind!=='double'&&s.axis?{no:String(s.axis.no),name:String(s.axis.name||r.find(x=>x.no===String(s.axis.no))?.name||'')}:['A1','A2'].includes(s.kind)&&a?.no?{no:String(a.no),name:String(a.label||'').replace(/^\d+番\s*/, '')}:null;
  const odds=String($('oddsPaste')?.value||'');const mk=parseMarket(r,odds);
  const o=official?mk.byNo?.[official.no]:null;
  const year=String($('raceDate')?.value||'').slice(0,4);
@@ -177,7 +177,6 @@ function partnerHtml(x){
  const marketTop3=new Set((x.odds.rows||[]).filter(r=>String(r.no)!==String(x.official?.no||x.researchAxis?.no)).slice(0,3).map(r=>String(r.no)));
  const qBy=root.ValidatedQueueState?.byNo||{},pBy=root.PositionRiskState?.byNo||{};
  const fBy=Object.fromEntries((root.Finish600State?.rows||[]).map(r=>[String(r.no),r]));
- const v3By=Object.fromEntries((x.v3?.rows||[]).map(r=>[String(r.no),r]));
  const pace=root.MobileAnalysisCoreState?.analysis?.pred?.p;
  const band=Array.isArray(pace)&&pace.length===4&&pace.every(p=>Number.isFinite(N(p))&&N(p)>=0)&&pace.some(p=>N(p)>0)?
    pace.map(N).indexOf(Math.max(...pace.map(N))):-1;
