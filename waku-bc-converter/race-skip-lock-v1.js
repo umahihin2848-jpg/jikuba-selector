@@ -8,7 +8,7 @@ const raceGateDecision=function raceGateDecision(x) {
   // Do not hard-exclude named graded races: let the verified axis gate decide.
   const isObstacle=/障害|ジャンプ|J[- ]?G[123]/i.test(name);
   const eligibleGrade=/^(3勝|OP|L|G1|G2|G3)$/.test(grade);
-  if (isObstacle || (grade && !eligibleGrade) || (Number.isInteger(field)&&field>=1&&field<12)) return "skip";
+  if (isObstacle || (grade && !eligibleGrade) || (Number.isInteger(field)&&(field<12||field>18))) return "skip";
   // Race name is optional in the UI. An explicit flat surface, eligible grade
   // and venue suffice; an explicitly named obstacle race is still rejected above.
   if ((!name&&!/^(芝|ダ|ダート)$/.test(surface))||!r.venue||!Number.isInteger(field)||field<1||field>18) return "idle";
@@ -21,7 +21,7 @@ const raceGateDecision=function raceGateDecision(x) {
   if (core.length!==2||a.leaderAmbiguous||core.some(h=>Number(h.abilityTieStart)<=2&&Number(h.abilityTieEnd)>2)) return "skip";
   const m3=new Set(f.rows.filter(h=>Number(h.finishRank)>=1&&Number(h.finishRank)<=3).map(h=>String(Number(h.no))));
   if(m3.size!==3||core.some(h=>!Number.isInteger(Number(h.no)))) return "checking";
-  // OP/L use one structural overlap only; Pair remains a research/skip condition.
+  // 3-win/OP/L use one structural overlap only; Pair remains a research/skip condition.
   if(['3勝','OP','L'].includes(grade)){
     const overlaps=a.rows.filter(h=>Number(h.abilityRank)>=1&&Number(h.abilityRank)<=3&&m3.has(String(Number(h.no))));
     if(overlaps.length!==1||Number(overlaps[0].abilityRank)>2)return "skip";
@@ -87,7 +87,7 @@ addEventListener("rsa-analysis-start",()=>{
  requested=true;dirty=false;requestedAt=Number(window.RSAAnalysisTransitionState?.startedWall)||Date.now();render();
 });
 ["rsa-analysis-complete","m3-pure-ability-ready","finish600-ready","decision-shell-v2-ready","rsa-addons-ready"].forEach(ev=>addEventListener(ev,render));
-window.RaceSkipLockV1={version:"1.2.0-skip-diagnostics",evaluate:raceGateDecision,refresh:render};
+window.RaceSkipLockV1={version:"1.3.0-scope12-18",evaluate:raceGateDecision,refresh:render};
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",render,{once:true});
 else render();
 })();
