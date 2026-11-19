@@ -21,6 +21,11 @@ const raceGateDecision=function raceGateDecision(x) {
   if (core.length!==2||a.leaderAmbiguous||core.some(h=>Number(h.abilityTieStart)<=2&&Number(h.abilityTieEnd)>2)) return "skip";
   const m3=new Set(f.rows.filter(h=>Number(h.finishRank)>=1&&Number(h.finishRank)<=3).map(h=>String(Number(h.no))));
   if(m3.size!==3||core.some(h=>!Number.isInteger(Number(h.no)))) return "checking";
+  // OP/L use one structural overlap only; Pair remains a research/skip condition.
+  if(['OP','L'].includes(grade)){
+    const overlaps=a.rows.filter(h=>Number(h.abilityRank)>=1&&Number(h.abilityRank)<=3&&m3.has(String(Number(h.no))));
+    if(overlaps.length!==1||Number(overlaps[0].abilityRank)>2)return "skip";
+  }
   return core.some(h=>m3.has(String(Number(h.no))))?"open":"skip";
 };
 let requested=false,requestedAt=0,status="",dirty=false;
@@ -35,6 +40,11 @@ function diagnose(r,next){
   if(core.length!==2||core.some(h=>Number(h.abilityTieStart)<=2&&Number(h.abilityTieEnd)>2))
     return{kind:"axis",reason:"Ability上位2頭の境界が同点などで不明確なため軸なし"};
   const top3=new Set((f.rows||[]).filter(h=>Number(h.finishRank)>=1&&Number(h.finishRank)<=3).map(h=>String(Number(h.no))));
+  if(['OP','L'].includes(grade)){
+    const overlaps=(a.rows||[]).filter(h=>Number(h.abilityRank)>=1&&Number(h.abilityRank)<=3&&top3.has(String(Number(h.no))));
+    if(overlaps.length!==1)return{kind:'axis',reason:'OP・Lは単独軸のみ採用。Ability上位3頭×M3上位3頭の一致が'+overlaps.length+'頭のため見送り'};
+    if(Number(overlaps[0].abilityRank)>2)return{kind:'axis',reason:'OP・Lの単独一致がAbility3位のため見送り'};
+  }
   const hit=core.filter(h=>top3.has(String(Number(h.no))));
   return{kind:"axis",reason:hit.length?"軸の安全条件を確認できませんでした":"Ability上位2頭とM3上位3頭が一致しないため、購入軸は見送り"};
 }
