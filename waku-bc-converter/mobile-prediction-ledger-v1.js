@@ -2,7 +2,7 @@
 'use strict';
 if(!window.RSAMobileLean||window.__MOBILE_PREDICTION_LEDGER_V1)return;
 window.__MOBILE_PREDICTION_LEDGER_V1=true;
-const V='mobile-prediction-ledger-v1.5-results',KEY='rsa-mobile-prediction-ledger-v1',MAX=500;
+const V='mobile-prediction-ledger-v1.6-class-frozen',KEY='rsa-mobile-prediction-ledger-v1',MAX=500;
 const $=id=>document.getElementById(id);
 const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const num=v=>v===null||v===undefined||v===''?null:Number.isFinite(Number(v))?Number(v):null;
@@ -88,20 +88,38 @@ function meta(){
  return{date:raceDateISO(val('raceDate')),venue:val('venue'),name:val('raceName')||val('mplRaceRef'),surface:val('surface'),distance:val('distance'),fieldSize:val('fieldSize'),grade:val('grade'),going:val('going')};
 }
 function snapshot(){
- const p=window.ProductionDecisionPipelineV1State,f=window.Finish600State,q=window.ValidatedQueueState,r=window.Remaining600ValidatedState,market=window.DecisionShellV2State?.market;
+ const pipe=window.ProductionDecisionPipelineV1State||{},finish=window.Finish600State||{},queue=window.ValidatedQueueState||{},remaining=window.Remaining600ValidatedState||{};
+ const ability=window.M3PureAbilityState||{},position=window.PositionRiskState||{},decision=window.DecisionShellV2State||{},structure=decision.structure||{},final=decision.final||{},market=decision.market||{},access=window.AxisAccessGateV1State||{};
+ const form=meta(),field=Number(form.fieldSize),grade=String(form.grade||'').normalize('NFKC').toUpperCase(),graded=['G1','G2','G3'].includes(grade);
+ const inScope=Number.isInteger(field)&&field>=12&&field<=18&&['G1','G2','G3','OP','L','3勝'].includes(grade);
  const odds=window.ShapeCore?.parseOdds?.(val('oddsPaste'))?.odds||{};
- const p4=window.MobileAnalysisCoreState?.analysis?.pred?.p||window.FourAxisIntegrationState?.p||null;
- const gap=new Map((r?.rows||[]).map(x=>[String(x.no),num(x.pred)]));
+ const pace=window.MobileAnalysisCoreState?.analysis?.pred?.p||window.FourAxisIntegrationState?.p||null;
+ const gap=new Map((remaining.rows||[]).map(x=>[String(x.no),num(x.pred)]));
+ const fRows=(finish.rows||[]).slice(0,18),aBy=ability.byNo||Object.fromEntries((ability.rows||[]).map(x=>[String(x.no),x])),qBy=queue.byNo||{},pBy=position.byNo||{};
+ const marketRows=market.complete&&Array.isArray(market.rows)&&market.rows.length===field?market.rows.map(x=>({no:String(x.no),pop:num(x.pop),winOdds:num(x.od)})):[];
+ const marketBy=market.byNo||{},horseNos=fRows.map(x=>String(x.no)),uniqueHorses=new Set(horseNos).size===field,rosterComplete=fRows.length===field&&uniqueHorses;
+ const abilityMatched=rosterComplete&&Boolean(ability.ready)&&horseNos.every(no=>aBy[no]&&String(aBy[no].name||'').normalize('NFKC').trim()===String(fRows.find(x=>String(x.no)===no)?.name||'').normalize('NFKC').trim());
+ const m3Matched=rosterComplete&&horseNos.every(no=>Number.isInteger(Number(fRows.find(x=>String(x.no)===no)?.finishRank))&&Number(fRows.find(x=>String(x.no)===no)?.finishRank)>=1);
+ const modelCorrect=graded?ability.activeModel==='C':ability.activeModel==='v1';
+ const inputRows=String(val('oddsPaste')||'').split(/\r?\n/).map(x=>x.normalize('NFKC').trim().match(/^(\d+)\s*[,\t ]+\s*([\d.]+)/)).filter(Boolean).map(m=>({no:String(Number(m[1])),od:Number(m[2])}));
+ const oddsSynced=market.complete&&inputRows.length===field&&new Set(inputRows.map(x=>x.no)).size===field&&inputRows.every(x=>Number.isFinite(x.od)&&x.od>0&&marketBy[x.no]&&Math.abs(Number(marketBy[x.no].od)-x.od)<.011);
+ const structuralKind=String(structure.kind||''),structureAxisNo=['A1','A2'].includes(structuralKind)?String(structure.axis?.no||''):null;
+ const eligibleAxisNo=access.betEligible===true&&access.status==='pass'&&String(access.axisNo||'')===structureAxisNo&&['ready','conditional'].includes(String(pipe.final?.status||''))?structureAxisNo:null;
+ const candidates=(structure.candidates||[]).map(x=>({no:String(x.no),name:String(x.name||''),abilityRank:num(x.ar),m3Rank:num(x.m3)}));
+ const status=String(pipe.final?.status||''),snapshotQuality={inScope,analysisReady:window.RSAAnalysisTransitionState?.status==='ready'&&analysisMatches(),rosterComplete,abilityMatched,m3Matched,modelCorrect,marketComplete:Boolean(market.complete),oddsSynced,gateReady:access.ready===true};
+ snapshotQuality.completeForForwardComparison=Boolean(inScope&&snapshotQuality.analysisReady&&rosterComplete&&abilityMatched&&m3Matched&&modelCorrect&&oddsSynced&&snapshotQuality.gateReady);
  return{
-  versions:{pipeline:p?.version||null,finish:f?.version||null,queue:q?.version||null,remaining600:r?.version||null},
-  appAxis:p?.stages?.axis?{no:String(p.stages.axis.no||''),name:String(p.stages.axis.name||''),status:String(p.stages.axis.status||''),abilityRank:num(p.stages.axis.abilityRank),m3Rank:num(p.stages.axis.m3Rank),popularity:num(p.stages.price?.axisPopularity)}:null,
-  marketRows:market?.complete&&Array.isArray(market.rows)&&market.rows.length===Number(val('fieldSize'))?market.rows.map(x=>({no:String(x.no),pop:num(x.pop),winOdds:num(x.od)})):[],
-  marketCapturedAs:'win_odds_popularity_before_race',
-  appOpponents:(p?.stages?.opponents?.rows||[]).slice(0,18).map(x=>({no:String(x.no),pop:num(x.pop),abilityRank:num(x.abilityRank),m3Rank:num(x.m3Rank)})),
-  paceProbabilities:Array.isArray(p4)&&p4.length===4?p4.map(num):null,
+  snapshotSchema:'class_frozen_v1',versions:{pipeline:pipe.version||null,decision:decision.version||null,ability:ability.version||null,finish:finish.version||null,queue:queue.version||null,position:position.version||null,remaining600:remaining.version||null},
+  appAxis:pipe.stages?.axis?{no:String(pipe.stages.axis.no||''),name:String(pipe.stages.axis.name||''),status:String(pipe.stages.axis.status||''),abilityRank:num(pipe.stages.axis.abilityRank),m3Rank:num(pipe.stages.axis.m3Rank),popularity:num(pipe.stages.price?.axisPopularity)}:null,
+  decisionFreeze:{grade,abilityModel:String(ability.activeModel||'unknown'),scopeEligible:inScope,structureKind:structuralKind,structureCode:String(structure.code||''),finalCode:String(final.code||''),productionStatus:status,productionLabel:String(pipe.final?.label||''),structuralAxisNo:structureAxisNo,eligibleAxisNo,betEligible:Boolean(eligibleAxisNo),pairNos:structuralKind==='double'?candidates.map(x=>x.no):[],overlapCandidates:candidates,marketComplete:Boolean(market.complete),gateStatus:String(access.status||''),gateBetEligible:Boolean(access.betEligible),gateReason:String(access.reason||''),skipReason:structureAxisNo?null:String(structure.reason||pipe.final?.reason||''),p10WinOnlyStop:Boolean(structure.winRiskStop),researchAxisNo:String(window.RSAFocusedThreeTabsState?.researchAxisNo||''),researchPartnerNos:(window.RSAFocusedThreeTabsState?.partnerNos||[]).map(String),researchPartnerRule:String(window.RSAFocusedThreeTabsState?.partnerRule||''),capturedFrom:'browser_runtime_pre_result'},
+  snapshotQuality,
+  marketRows,
+  marketCapturedAs:'entered_win_odds_not_verified_T15_or_T5',
+  appOpponents:(pipe.stages?.opponents?.rows||[]).slice(0,18).map(x=>({no:String(x.no),pop:num(x.pop),abilityRank:num(x.abilityRank),m3Rank:num(x.m3Rank)})),
+  paceProbabilities:Array.isArray(pace)&&pace.length===4?pace.map(num):null,
   pressure:window.MobileAnalysisCoreState?.analysis?.pressure||null,
   singleOdds:Object.fromEntries(Object.entries(odds).filter(([k,v])=>num(v)>0).map(([k,v])=>[k,num(v)])),
-  horses:(f?.rows||[]).slice(0,18).map(x=>({no:String(x.no),name:String(x.name||''),m3Rank:num(x.finishRank),scenarioM4Ranks:(x.sc||[]).slice(0,4).map(z=>num(z.rank)),firstCornerRank:num(q?.byNo?.[String(x.no)]?.expectedRank),remaining600Gap:gap.get(String(x.no))??null}))
+  horses:fRows.map(x=>{const no=String(x.no),a=aBy[no]||{},q=qBy[no]||{},p=pBy[no]||{},m=marketBy[no]||{};return{no,name:String(x.name||''),abilityRank:num(a.abilityRank),abilityLogit:num(a.logit),m3Rank:num(x.finishRank),scenarioM4Ranks:(x.sc||[]).slice(0,4).map(z=>num(z.rank)),positionRiskP10:num(p.p10),frontness5:num(q.frontness5),firstCornerRank:num(q.expectedRank),remaining600Gap:gap.get(no)??null,popularity:market.complete?num(m.pop):null,winOdds:market.complete?num(m.od):null}})
  };
 }
 function partners(text,field,axis){
