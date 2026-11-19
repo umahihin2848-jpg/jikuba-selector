@@ -2,7 +2,7 @@
    C×M3 purchase gate and separately trained C+market / V3 models.
    Never reassigns the official axis or overrides stop decisions. */
 (function(root){'use strict';
-const VERSION='P3-41-stable-partner-events-v1';
+const VERSION='P3-42-class-safe-partners-v1';
 const $=id=>document.getElementById(id);
 const H=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const N=v=>v===null||v===undefined||String(v).trim()===''?NaN:Number(v);
@@ -61,18 +61,18 @@ function skipDiagnosis(input={}){
  if(!analyzed)return{state:'pending',label:'判定待ち',reason:'CSVの解析が完了していません。',marketNote:note,betEligible:false};
  if(input.scope===true||code==='scope_out'||finalCode==='scope_out')return{state:'skip',label:'対象レース外',reason:'平地3勝以上・12〜18頭などの対象条件を満たしません。',marketNote:note,betEligible:false};
  if(['no_auto_axis','ability_rank_tie'].includes(code)){
-  if(!complete)return{state:'pending',label:'軸未確定・市場待ち',reason:'C×M3で単独軸が決まりません。再点検には全頭の単勝オッズが必要です。',marketNote:note,betEligible:false};
+  if(!complete)return{state:'pending',label:'軸未確定・市場待ち',reason:'Ability×M3で単独軸が決まりません。再点検には全頭の単勝オッズが必要です。',marketNote:note,betEligible:false};
   if(p===null)return{state:'pending',label:'軸未確定・研究モデル待ち',reason:'市場構造の年次モデルを照合できません。見送りロックは維持します。',marketNote:note,betEligible:false};
-  if(p>=0.60)return{state:'review',label:'軸未確定・再点検',reason:'C×M3では単独軸なし。ただし市場構造の参考値が探索基準0.60以上です。'+common,marketNote:note,betEligible:false};
-  return{state:'skip',label:'見送り（軸未確定）',reason:'C×M3で軸が決まらず、市場構造の参考値も探索基準0.60未満です。'+common,marketNote:note,betEligible:false};
+  if(p>=0.60)return{state:'review',label:'軸未確定・再点検',reason:'Ability×M3では単独軸なし。ただし市場構造の参考値が探索基準0.60以上です。'+common,marketNote:note,betEligible:false};
+  return{state:'skip',label:'見送り（軸未確定）',reason:'Ability×M3で軸が決まらず、市場構造の参考値も探索基準0.60未満です。'+common,marketNote:note,betEligible:false};
  }
  if(code==='ability_c_wait')return{state:'pending',label:'Ability C未成立',reason:'重賞向けAbility Cが未適用です。代替Ability v1では本番◎を決めません。',marketNote:note,betEligible:false};
  if(code==='double'||input.pair===true)return{state:'pair',label:'Pair構造・単独軸なし',reason:'2頭構造は単独軸の購入条件とは分けて扱います。',marketNote:note,betEligible:false};
- if(code==='validated_stop'||code==='A3'||input.unsafe===true)return{state:'skip',label:'見送り（能力・M3）',reason:'軸馬がC×M3の安全条件を満たしていません。',marketNote:note,betEligible:false};
+ if(code==='validated_stop'||code==='A3'||input.unsafe===true)return{state:'skip',label:'見送り（能力・M3）',reason:'軸馬がAbility×M3の安全条件を満たしていません。',marketNote:note,betEligible:false};
  if(finalCode==='market_range')return{state:'skip',label:'見送り（人気条件外）',reason:'構造軸が検証対象の1〜6番人気から外れています。',marketNote:note,betEligible:false};
  if(!complete)return{state:'pending',label:'市場判定待ち',reason:'最終判定には全頭の単勝オッズが必要です。',marketNote:note,betEligible:false};
  if(input.betEligible===true&&input.officialAxis===true)return{state:'pass',label:'購入条件通過',reason:'現在の本番軸ゲートを通過しています。購入の期待値は別途確認してください。',marketNote:note,betEligible:true};
- return{state:'pending',label:'本番判定の確認待ち',reason:'C×M3・市場・購入ロックの最終状態を確認しています。',marketNote:note,betEligible:false};
+ return{state:'pending',label:'本番判定の確認待ち',reason:'Ability×M3・市場・購入ロックの最終状態を確認しています。',marketNote:note,betEligible:false};
 }
 function modelState(){try{const a=root.AbilityV3ResearchPanelBridgeV1?.getCurrent();return a?.ok?a:{ok:false,reason:a?.reason||''};}catch(e){return{ok:false,reason:String(e?.message||e)}}}
 function decisionContext(){
@@ -167,8 +167,9 @@ function axisHtml(x){const d=x.decision,s=x.structure,f=x.final,m=x.odds;
 }
 function partnerHtml(x){
  if(!x.analyzed)return alert('レース構造を解析してください。');
- if(x.structure?.kind==='double')return alert('Pair構造の2頭は、単独◎＋相手3頭とは別の判断です。軸馬タブでPair構造を確認してください。');
- if(!x.official&&!x.researchAxis)return alert('単独軸がないため本番の相手3候補は確定しません。研究用の比較馬は本番に接続しません。');
+ if(x.structure?.kind==='double')return alert('Pairの2頭は単独◎とは別扱いです。本番購入対象外です。軸馬情報タブでは研究用として比較できます。');
+ if(!x.official&&!x.researchAxis)return alert('単独軸がないため本番の相手候補は確定しません。研究用の比較馬は本番の買い目に接続しません。');
+  if(!['G1','G2','G3'].includes(String($('grade')?.value||'').normalize('NFKC').toUpperCase()))return alert('3勝クラス・OP・LはAbility v1を使用。重賞専用のAbility C＋市場3頭モデルを適用しません。市場人気・Ability v1・M3・位置取りを全馬分析で比較し、相手は手動で判断してください。');
  if(!x.odds.complete)return alert('相手3頭の抽出には全頭の単勝オッズが必要です。現在 '+x.odds.rows.length+'/'+x.r.length+'頭。');
  if(!x.ranked.ready)return alert(x.ranked.reason||STORE.error||'Ability C＋市場モデルの照合待ちです。');
  if(x.partners.length!==3||new Set(x.partners.map(h=>String(h.no))).size!==3||
@@ -248,7 +249,7 @@ function render(force=false){const panel=ensure();if(!panel)return;
    if(show)el.innerHTML=STORE.dirty?alert('レース条件・CSVが変更されています。「レース構造を解析」を押して再計算してください。'):tab==='axis'?axisHtml(r):tab==='partners'?partnerHtml(r):formationHtml(r);
   }
  }
- root.RSAFocusedThreeTabsState={ready:true,version:VERSION,active:STORE.active,axisNo:r.official?.no||null,researchAxisNo:r.researchAxis?.no||null,reviewOnly:Boolean(r.researchAxis),partnerNos:r.partners.map(o=>o.no),partnerRule:'abilityC_plus_market_top3',partnerCount:r.partners.length,selectedPartnerNo:STORE.selectedPartnerNo,v3Ready:Boolean(r.v3),marketReady:Boolean(r.odds.complete),analysisReady:r.analyzed,at:Date.now()};
+ root.RSAFocusedThreeTabsState={ready:true,version:VERSION,active:STORE.active,axisNo:r.official?.no||null,researchAxisNo:r.researchAxis?.no||null,reviewOnly:Boolean(r.researchAxis),partnerNos:r.partners.map(o=>o.no),partnerRule:r.partners.length===3&&root.M3PureAbilityState?.activeModel==='C'?'abilityC_plus_market_top3':'not_validated_for_class',partnerCount:r.partners.length,selectedPartnerNo:STORE.selectedPartnerNo,v3Ready:Boolean(r.v3),marketReady:Boolean(r.odds.complete),analysisReady:r.analyzed,at:Date.now()};
  if(changed)root.dispatchEvent(new CustomEvent('rsa-focused-partner-ready',{detail:root.RSAFocusedThreeTabsState}));
 }
 function schedule(ms=55){clearTimeout(STORE.timer);STORE.timer=setTimeout(()=>render(),ms);}
