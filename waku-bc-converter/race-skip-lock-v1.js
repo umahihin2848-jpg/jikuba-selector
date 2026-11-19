@@ -16,6 +16,7 @@ const raceGateDecision=function raceGateDecision(x) {
   const a=r.ability,f=r.finish,at=Number(r.requestedAt)||0;
   if (!a?.ready||!f?.ready||!a.at||!f.at||Number(a.at)<at||Number(f.at)<at) return "checking";
   if (!Array.isArray(a.rows)||!Array.isArray(f.rows)||a.rows.length!==field||f.rows.length!==field) return "checking";
+  if (['G1','G2','G3'].includes(grade) && a.activeModel!=='C') return "checking";
   const core=a.rows.filter(h=>Number(h.abilityRank)===1||Number(h.abilityRank)===2);
   if (core.length!==2||a.leaderAmbiguous||core.some(h=>Number(h.abilityTieStart)<=2&&Number(h.abilityTieEnd)>2)) return "skip";
   const m3=new Set(f.rows.filter(h=>Number(h.finishRank)>=1&&Number(h.finishRank)<=3).map(h=>String(Number(h.no))));
@@ -55,7 +56,7 @@ function render(){
  d.dataset.raceSkipKind=diagnostic.kind;
  if(card){
   card.hidden=next!=="skip"&&next!=="checking";
-  const t=next==="skip"?((diagnostic.kind==="scope"?"対象外｜":"軸は見送り｜")+diagnostic.reason+(diagnostic.kind==="axis"?"。買い目・全馬分析は表示しません。":"")):next==="checking"?"判定中…":"";
+  const t=next==="skip"?((diagnostic.kind==="scope"?"対象外｜":"軸は見送り｜")+diagnostic.reason+(diagnostic.kind==="axis"?"。買い目・全馬分析は表示しません。":"")):next==="checking"?(/^(G1|G2|G3)$/.test(String(r.grade||"").toUpperCase())&&r.ability?.ready&&r.ability?.activeModel!=="C"?"Ability C未成立｜本番◎を保留中":"判定中…"):"";
   if(card.textContent!==t)card.textContent=t;
  }
  status=next;
