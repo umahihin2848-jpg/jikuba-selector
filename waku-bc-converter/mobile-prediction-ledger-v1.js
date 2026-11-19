@@ -383,11 +383,14 @@ function history(){
 }
 function init(){
  if(ready)return;
- const pane=$('imsTicket'),before=$('imsTicketBody');
+ const pane=$('imsTicket'),before=$('imsTicketBody'),main=document.querySelector('main.view'),anchor=$('axisAccessScreen')||$('analyzeBtn');
  if(!pane){if(++retries<=20)setTimeout(init,250);return}
  css();
  let root=$('mobilePredictionLedger');
- if(!root){root=document.createElement('details');root.id='mobilePredictionLedger';root.innerHTML=html();if(before?.parentNode===pane)pane.insertBefore(root,before);else pane.appendChild(root)}
+ if(!root){root=document.createElement('details');root.id='mobilePredictionLedger';root.innerHTML=html()}
+ // Keep the research ledger outside the purchase-locked ticket shell: skipped/Pair races are valid denominator records.
+ if(main&&root.parentElement!==main){if(anchor?.parentElement===main)anchor.insertAdjacentElement('afterend',root);else main.appendChild(root)}
+ else if(!main&&!root.parentElement){if(before?.parentNode===pane)pane.insertBefore(root,before);else pane.appendChild(root)}
  root.addEventListener('click',e=>{
   const id=e.target?.id;
   if(id==='mplSave')savePrediction();
