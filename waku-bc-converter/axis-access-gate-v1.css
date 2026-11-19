@@ -1,7 +1,7 @@
 /* Strict single-axis review: only a completed valid axis can unlock any race analysis.
  * Hide UI only. Statistical models and predictions are not modified.
  */
-html:not([data-axis-access="pass"]):not([data-axis-access="pair"]) body main.view > :not(#mpuSetup):not(#raceCondCard):not(#csvCard):not(#oddsCard):not(#analyzeBtn):not(#axisAccessScreen):not(#rsaFocusedView),
+html:not([data-axis-access="pass"]):not([data-axis-access="pair"]) body main.view > :not(#mpuSetup):not(#raceCondCard):not(#csvCard):not(#oddsCard):not(#analyzeBtn):not(#axisAccessScreen):not(#rsaFocusedView):not(#mobilePredictionLedger),
 html:not([data-axis-access="pass"]):not([data-axis-access="pair"]) body #iosMobileShellV2,
 html:not([data-axis-access="pass"]):not([data-axis-access="pair"]) body #result,
 html:not([data-axis-access="pass"]):not([data-axis-access="pair"]) body #m3RaceLab,
@@ -45,7 +45,6 @@ body #axisAccessScreen [data-axis-retry]{background:transparent!important;border
 html[data-axis-access="pair"] body #imsTicket > :not(#mpuConclusion),
 html[data-axis-access="pair"] body #mpsRoot,
 html[data-axis-access="pair"] body #axisReliabilityShadowV1,
-html[data-axis-access="pair"] body #mobilePredictionLedger,
 html[data-axis-access="pair"] body #moaRoot .moaM4ToLedger,
 html[data-axis-access="pair"] body #moaRoot [data-oa-open-ledger],
 html[data-axis-access="pair"] body #raceDissectionCardV1,
@@ -65,7 +64,6 @@ html[data-axis-access="pair"] body .mpuHorse.pair .mpuHorseNo{border-color:#649b
  * Fail closed on missing data-axis-bet (e.g. initial load or stale state).
  */
 html:not([data-axis-bet="eligible"]) body #imsTicket > :not(#mpuConclusion),
-html:not([data-axis-bet="eligible"]) body #mobilePredictionLedger,
 html:not([data-axis-bet="eligible"]) body #mobilePredictionLedgerV1,
 html:not([data-axis-bet="eligible"]) body #mfs1,
 html:not([data-axis-bet="eligible"]) body #mobileFinalSummaryV1,
