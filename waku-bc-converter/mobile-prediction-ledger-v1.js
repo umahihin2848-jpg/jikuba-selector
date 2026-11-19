@@ -42,7 +42,7 @@ function css(){
 function html(){
  return [
  '<summary>📝 予想判断を記録 <small id="mplCount" style="font-size:11px;color:#a7c5d2;font-weight:700">端末内保存</small></summary>',
- '<div class="mplBody"><p class="mplIntro">アプリの軸候補と予測データを参照し、実際に選んだ展開・馬場・シナリオを発走前に保存。見送りも記録できます。</p>',
+ '<div class="mplBody"><p class="mplIntro">手動の予想判断と、アプリの単独軸・Pair・見送りを発走前に別々に固定保存します。研究記録は購入指示ではありません。</p>',
  '<div id="mplContext" class="mplContext">レース分析待ち</div>',
  '<div class="mplGrid">',
  '<div class="mplField"><label for="mplRaceRef">レース識別名（未入力時のみ）</label><input id="mplRaceRef" placeholder="例：東京11R" maxlength="48"></div>',
@@ -55,7 +55,7 @@ function html(){
  '<div class="mplField"><label for="mplPrices">想定ワイドオッズ</label><input id="mplPrices" placeholder="例：6-11 8.5倍" maxlength="100"></div>',
  '<div class="mplField full" id="mplHypoBox" style="display:none"><label for="mplHypoStake">見送り時：仮に購入した場合の投資額（円・任意）</label><input id="mplHypoStake" type="number" min="0" step="100" inputmode="numeric" placeholder="例：500"><small style="font-size:11px;color:#a7c7d5">仮想買い目は実購入の収支と区別して保存</small></div><div class="mplField full"><label for="mplMemo">判断理由・映像メモ</label><textarea id="mplMemo" maxlength="500" placeholder="例：前残り予想、内が伸びないので外の先行馬を優遇"></textarea></div>',
  '</div><label class="mplCheck"><input id="mplBeforeStart" type="checkbox"><span>この予想は発走前に入力しました（予想とアプリの分析値を固定保存します）</span></label>',
- '<label class="mplCheck"><input id="mplTimeChecked" type="checkbox"><span>入力した発走予定時刻を公式発表と照合した（未確認ならオフ）</span></label><div class="mplBtns"><button type="button" class="mplPrimary" id="mplSave">発走前の予想を保存</button><button type="button" id="mplCsv">CSV書き出し</button><button type="button" id="mplJson">JSONバックアップ</button><button type="button" id="mplImportBtn">JSONから復元</button><input type="file" id="mplImportFile" accept="application/json,.json" style="display:none"></div>',
+ '<label class="mplCheck"><input id="mplTimeChecked" type="checkbox"><span>入力した発走予定時刻を公式発表と照合した（未確認ならオフ）</span></label><div class="mplBtns"><button type="button" class="mplPrimary" id="mplSave">手動予想を保存</button><button type="button" id="mplFreezeCurrent">アプリ判定だけ記録（見送り含む）</button><button type="button" id="mplCsv">CSV書き出し</button><button type="button" id="mplJson">JSONバックアップ</button><button type="button" id="mplImportBtn">JSONから復元</button><input type="file" id="mplImportFile" accept="application/json,.json" style="display:none"></div>',
  '<div id="mplStatus" class="mplStatus" role="status" aria-live="polite"></div><hr class="mplDivider">',
  '<div class="mplField full"><label for="mplResultSelect">レース後の結果を追記（発走前の選択は書き換えません）</label><select id="mplResultSelect"><option value="">保存済み予想を選択</option></select></div>',
  '<div class="mplField full" style="margin-top:8px"><label for="mplTop3Finish">確定1〜3着馬番（軸・相手の精度検証用）</label><input id="mplTop3Finish" placeholder="例：1, 4, 7" inputmode="text" maxlength="30"><small class="mplFine">成績検証に使います。任意入力／同じレースの3頭を入力</small></div>',
@@ -131,7 +131,7 @@ function partners(text,field,axis){
 function analysisMatches(){
  const a=window.MobileAnalysisCoreState?.meta;
  if(!a)return false;
- return String(a.date||'')===val('raceDate')&&String(a.venue||'')===val('venue')&&String(a.raceName||'')===val('raceName')&&String(a.surface||'')===val('surface')&&Number(a.distance)===Number(val('distance'))&&Number(a.fieldSize)===Number(val('fieldSize'));
+ return String(a.date||'')===val('raceDate')&&String(a.venue||'')===val('venue')&&String(a.raceName||'')===val('raceName')&&String(a.surface||'')===val('surface')&&Number(a.distance)===Number(val('distance'))&&Number(a.fieldSize)===Number(val('fieldSize'))&&String(a.grade||'').normalize('NFKC').toUpperCase()===val('grade').normalize('NFKC').toUpperCase()&&(!a.going||String(a.going)===val('going'));
 }
 function scheduleCheck(day){
  const time=val('mplStartTime'),checked=Boolean($('mplTimeChecked')?.checked);
@@ -142,16 +142,18 @@ function scheduleCheck(day){
  if(Date.now()>=start)return{error:'入力した発走予定時刻を過ぎています。発走前予想として保存できません。'};
  return{status:checked?'before_user_confirmed_time':'unverified_time_source',timeJst:iso,userChecked:checked};
 }
-function savePrediction(){
- const m=meta(),field=Number(m.fieldSize),d=val('mplDecision'),pace=val('mplPace'),front=val('mplFront'),track=val('mplTrack'),axis=Number(val('mplAxis'));
+function savePrediction(appOnly=false){
+ const m=meta(),field=Number(m.fieldSize),gate=window.AxisAccessGateV1State||{},appAxisNo=String(window.DecisionShellV2State?.structure?.axis?.no||''),isAppEligible=gate.status==='pass'&&gate.betEligible===true&&gate.axisNo===appAxisNo;
+ const d=appOnly?(isAppEligible?'hold':'skip'):val('mplDecision'),pace=appOnly?'unknown':val('mplPace'),front=appOnly?'neutral':val('mplFront'),track=appOnly?'unknown':val('mplTrack'),axis=appOnly?(isAppEligible?Number(appAxisNo):0):Number(val('mplAxis'));
+ if(appOnly&&gate.status!=='pass'&&gate.status!=='pair'&&gate.status!=='skip'){status('アプリの本番判定がまだ確定していません。オッズや解析を確認してください。',true);return}
  const shell=window.IOSMobileShellV3State||window.IOSMobileShellV2State;
  if(!shell?.analysisReady||!window.Finish600State?.ready||window.RSAAnalysisTransitionState?.status!=='ready'||!analysisMatches()){status('レース条件の分析が未完了、または入力が変更されています。現在のレースで再分析してください。',true);return}
  if(!m.date||!m.venue||!m.name){status('レース日・競馬場・レース名（または識別名）が必要です。',true);return}
  if(m.date<nowJST()){status('過去日付は「発走前の予想」として保存できません。',true);return}
  const check=scheduleCheck(m.date);if(check.error){status(check.error,true);return}
  if(!$('mplBeforeStart')?.checked){status('発走前のチェックを入れてください。',true);return}
- if(!Number.isInteger(field)||field<2||field>20){status('出走頭数を確認してください。',true);return}
- const pair=partners(val('mplPartners'),field,axis),hypoStake=num(val('mplHypoStake'));
+ if(!Number.isInteger(field)||field<12||field>18||!['G1','G2','G3','OP','L','3勝'].includes(String(m.grade||'').normalize('NFKC').toUpperCase())){status('平地3勝以上・12〜18頭の対象条件を確認してください。',true);return}
+ const pair=partners(appOnly?'':val('mplPartners'),field,axis),hypoStake=appOnly?null:num(val('mplHypoStake'));
  if(d==='skip'&&hypoStake!==null&&(!Number.isInteger(hypoStake)||hypoStake<0)){status('仮想投資額は0円以上の整数にしてください。',true);return}
  if(d==='skip'&&hypoStake>0&&(!Number.isInteger(axis)||axis<1||axis>field||!pair?.length)){status('見送りの仮想投資には軸馬番と相手馬番が必要です。',true);return}
  if(!['buy','skip','hold'].includes(d)||!pace||!front||!track){status('シナリオ・展開・馬場・購入判断を選択してください。',true);return}
@@ -159,15 +161,15 @@ function savePrediction(){
  if(pair===null){status('相手馬番の形式・範囲を確認してください。',true);return}
  const at=new Date().toISOString();
  const rec={kind:'pre_race',version:V,id:[m.date,m.venue,m.name,m.surface,m.distance,at,Math.random().toString(36).slice(2,8)].join('|'),capturedAt:at,meta:m,
-  choice:{axisNo:Number.isInteger(axis)&&axis>0&&axis<=field?axis:null,partners:pair,scenario:pace,scenarioOrigin,front,track,decision:d,wideOddsText:val('mplPrices'),memo:val('mplMemo'),hypothetical:d==='skip'&&pair?.length?{stakeYen:hypoStake||null,partners:pair,axisNo:Number.isInteger(axis)?axis:null,wideOddsText:val('mplPrices')}:null},
+  choice:{recordMode:appOnly?'app_snapshot_only':'manual',axisNo:Number.isInteger(axis)&&axis>0&&axis<=field?axis:null,partners:pair,scenario:pace,scenarioOrigin:appOnly?'not_selected_app_snapshot':scenarioOrigin,front,track,decision:d,wideOddsText:appOnly?'':val('mplPrices'),memo:appOnly?'アプリ判定を記録。購入判断ではありません。':val('mplMemo'),hypothetical:!appOnly&&d==='skip'&&pair?.length?{stakeYen:hypoStake||null,partners:pair,axisNo:Number.isInteger(axis)?axis:null,wideOddsText:val('mplPrices')}:null},
   timeValidation:{...check,checkedAt:at,method:'local_clock_and_user_supplied_schedule'},
   snapshot:snapshot(),outcome:null
  };
  const all=records();
  if(all.length>=MAX){status('保存件数の上限に達しました。バックアップを保存してから別の記録方法に移してください。',true);return}
- if(all.some(x=>x.meta?.date===m.date&&x.meta?.venue===m.venue&&x.meta?.name===m.name&&JSON.stringify(x.choice)===JSON.stringify(rec.choice))){status('同じレース・同じ選択内容が保存済みです。',true);return}
+ if(all.some(x=>x.meta?.date===m.date&&x.meta?.venue===m.venue&&x.meta?.name===m.name&&x.meta?.grade===m.grade&&JSON.stringify(x.choice)===JSON.stringify(rec.choice))){status('同じレース・同じ選択内容が保存済みです。',true);return}
  all.push(rec);
- try{write(all);$('mplBeforeStart').checked=false;status((check.status==='before_user_confirmed_time'?'時刻照合済（利用者確認）':'発走前未確認')+'｜予想を固定保存しました：'+new Date(at).toLocaleString('ja-JP'));history()}
+ try{write(all);$('mplBeforeStart').checked=false;const quality=rec.snapshot.snapshotQuality||{};status((check.status==='before_user_confirmed_time'?'時刻照合済（利用者確認）':'発走前未確認')+'｜'+(appOnly?'アプリ判定':'手動予想')+'を固定保存しました'+(quality.completeForForwardComparison?'｜全馬・市場照合済':'｜一部データ未照合（研究集計には使いません）')+'：'+new Date(at).toLocaleString('ja-JP'));history()}
  catch(e){status('ブラウザの保存領域へ書き込めません。容量やプライベートモードを確認してください。',true)}
 }
 function finishTop3(text,field){
@@ -235,7 +237,7 @@ async function importLog(file){
    if(!x||x.kind!=='pre_race'||typeof x.id!=='string'||x.id.length>400||!x.meta?.date||!x.meta?.venue||!x.meta?.name||!x.choice||typeof x.capturedAt!=='string')continue;
    if(known.has(x.id))continue;
    if(all.length>=MAX)break;
-   all.push({kind:'pre_race',version:String(x.version||obj.schema),id:x.id,capturedAt:x.capturedAt,meta:x.meta,choice:x.choice,snapshot:x.snapshot||null,outcome:x.outcome||null});known.add(x.id);added++;
+   all.push({kind:'pre_race',version:String(x.version||obj.schema),id:x.id,capturedAt:x.capturedAt,meta:x.meta,choice:x.choice,timeValidation:x.timeValidation||{status:'legacy_unverified',method:'import_without_time_validation'},snapshot:x.snapshot||null,outcome:x.outcome||null});known.add(x.id);added++;
   }
   all.sort((a,b)=>String(a.capturedAt).localeCompare(String(b.capturedAt)));
   write(all);history();status('JSONから'+added+'件を復元しました（既存記録は上書きしません）。');
@@ -245,7 +247,7 @@ function context(){
  const m=meta(),p=window.ProductionDecisionPipelineV1State?.stages?.axis;
  const summary=[m.date||'日付なし',m.venue,m.name||'レース名なし',m.surface,m.distance?m.distance+'m':'','アプリ軸 '+(p?.no?p.no+'番 '+(p.name||''):'未計算')].filter(Boolean).join('｜');
  const el=$('mplContext');if(el&&el.textContent!==summary)el.textContent=summary;
- const key=[m.date,m.venue,m.name,m.surface,m.distance].join('|');
+ const key=[m.date,m.venue,m.name,m.surface,m.distance,m.grade,m.fieldSize,m.going].join('|');
  if(key!==lastRace){
   if(lastRace){
    for(const id of ['mplAxis','mplPartners','mplPrices','mplMemo','mplPace','mplFront','mplTrack','mplHypoStake','mplStartTime'])if($(id))$(id).value='';
@@ -350,6 +352,7 @@ function init(){
  root.addEventListener('click',e=>{
   const id=e.target?.id;
   if(id==='mplSave')savePrediction();
+  else if(id==='mplFreezeCurrent')savePrediction(true);
   else if(id==='mplSaveResult')saveOutcome();
   else if(id==='mplCsv')exportLog('csv');
   else if(id==='mplJson')exportLog('json');
@@ -376,6 +379,6 @@ function refresh(){init();if(ready)context()}
 function schedule(){clearTimeout(timer);timer=setTimeout(refresh,130)}
 ['production-decision-pipeline-ready','finish600-ready','rsa-analysis-complete','rsa-addons-ready'].forEach(ev=>addEventListener(ev,schedule));
 addEventListener('race-progress-scenario-selected',e=>{const z=e.detail||{},m=window.MobileAnalysisCoreState?.meta||{};if(z.source!=='manual'||window.RSAAnalysisTransitionState?.status!=='ready'||String(z.date)!==String(m.date)||String(z.venue)!==String(m.venue)||String(z.raceName)!==String(m.raceName)||Number(z.distance)!==Number(m.distance)||Number(z.fieldSize)!==Number(m.fieldSize)||!Number.isInteger(z.band)||z.band<0||z.band>3)return;const sel=$('mplPace');if(sel){sel.value=String(z.band);scenarioOrigin='manual-timeline';const label=$('mplScenarioSource');if(label)label.textContent='選択方法：レース推移タブで手動指定（アプリ本線とは独立）'}});
-document.addEventListener('change',e=>{if(['raceDate','venue','raceName','distance','surface','fieldSize'].includes(e.target?.id))schedule()},true);
+document.addEventListener('change',e=>{if(['raceDate','venue','raceName','distance','surface','fieldSize','grade','going'].includes(e.target?.id))schedule()},true);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
