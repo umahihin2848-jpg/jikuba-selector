@@ -110,7 +110,7 @@ function view(d,quality,oddsCoherent){
  const missing=[...quality.reasons];if(!oddsCoherent)missing.push('入力中の全馬オッズと判定側のオッズが一致しません');
  const ok=quality.ok&&oddsCoherent;
  const exportStatus=ok?('✅ 記録可能｜'+(quality.noAxis?'軸なし・見送りレースも母数として保存':'最終◎と6項目を照合済み')):('⚠ 保存前の確認：'+missing.join('／'));
- return `<div class="psub">6項目を独立表示。過去検証で裏付けがあるのは「一部隊列履歴不足による初角予測誤差」。能力差・M3差・M4変動は研究候補です。</div><div class="plist">${items.join('')}</div><div class="pfooter">本番の◎・○、確率、購入／見送り判定は変更しません。モデル版と全馬の値を記録して、将来の年別・配当込み検証に使います。レース後の情報を予測値に混入しないよう、発走前の保存を推奨します。</div><p class="pnote" data-prsv-quality>${esc(exportStatus)}</p><button type="button" data-prsv="export" ${ok?'':'disabled'}>発走前の研究JSONを保存</button><div data-prsv-status role="status"></div>`;
+ return `<div class="psub">6項目を独立表示。過去検証で裏付けがあるのは「一部隊列履歴不足による初角予測誤差」。能力差・M3差・M4変動は研究候補です。</div><div class="plist">${items.join('')}</div><div class="pfooter">本番の◎・○、確率、購入／見送り判定は変更しません。モデル版と全馬の値を記録して、将来の年別・配当込み検証に使います。レース後の情報を予測値に混入しないよう、発走前の保存を推奨します。</div><p class="pnote" data-prsv-quality>${esc(exportStatus)}</p><button type="button" data-prsv="export" ${ok?'':'disabled'}>発走前の研究JSONを保存</button><div data-prsv-status role="status"></div><div style="margin-top:9px"><a href="forward-top3-audit.html" style="color:#8fe1d2;font-size:11px;text-decoration:underline">レース後の好走率を照合する（研究用）</a></div>`;
 }
 function render(){style();const node=mount();if(!node)return;const d=live();if(dirty){d.ready=false;d.reason='入力を変更しました。再解析してください';}root.PredictionReliabilityShadowState={...d,stale:dirty,at:Date.now()};latest=d;
  const quality=snapshotQuality(d),oddsCoherent=pastedOddsMatch(d,$('oddsPaste')?.value||'');
