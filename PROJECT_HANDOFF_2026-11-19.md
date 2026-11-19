@@ -1,11 +1,31 @@
 # 競馬分析Webアプリ — 完全引き継ぎ書（2026-11-19 18:00 JST）
 
+## 2026-11-19 追補：integrity2 実装完了（この節を最優先）
+
+- **公開アプリ最新版**：https://umahihin2848-jpg.github.io/jikuba-selector/waku-bc-converter/v3.html?v=20261119integrity2
+- **詳細**：`waku-bc-converter/validation/20261119_integrity_and_class_forward_capture.md`
+- 本番軸scopeを「平地芝/ダート・G1〜G3/OP/L/3勝・12〜18頭」に揃え、19頭以上や障害を対象外に修正。入力途中（頭数0・クラス空欄など）は未判定扱い。
+- 重賞Pairは研究のみ・購入不可、OP/L/3勝Pairは見送り。P10>=50%は単勝のみ停止。**予想係数・購入条件は変更していない。**
+- 最終まとめ画面では`AxisAccessGateV1State.betEligible`と軸馬番一致まで確認し、購入ロック中に「本番◎」と断定しない。ゲート変更イベントを重複抑制。
+- 3勝・OP/Lへ重賞専用Ability C＋市場の3頭表示を流用しない。共通表示の「C×M3」旧文言を整理。
+- 既存`mobile-prediction-ledger-v1.js`へ**「アプリ判定だけ記録（見送り含む）」**を追加。手動予想を変えず、G1〜G3/OP/L/3勝すべてで単独軸・Pair・見送りを発走前にユーザー操作で保存できる。
+- `#mobilePredictionLedger`を買い目用`#imsTicket`の外に置き、購入禁止中も**研究記録パネルだけ**見えるようCSS修正。安全ゲート・買い目パネルは非表示のまま。
+- 記録：全馬Ability順位/ログit、実M3、M4 4帯、P10、初角、単勝オッズ/人気、本人の購入判断とアプリ判定を区別。完全性フラグ`snapshotQuality.completeForForwardComparison`を追加。
+- 前向き集計：G1〜G3/OP・L/3勝の単独軸3着内・Pair・その他見送り・同レース1番人気の3着内を、品質が完全で発走時刻確認がある最新でなく**最初の有効記録**に限定して比較。着順は利用者入力につき公式照合前は暫定。
+- 既存の手動記録JSONインポートで失われていた`timeValidation`メタデータを保持するよう修正。過去データに未観測値は補完しない。
+- 模擬テスト：snapshot品質10ケース、アプリ判定専用保存5ケース、クラス別表示3クラス、ゲートスコープと見送り、公開HTML/CSS/JS整合性15項目、変更JS7本構文。**実機iPhone Safari E2Eと実CSVの一連操作は未確認。**
+- ここから先：まずiPhone実機で単独軸／重賞Pair／OP-L Pair／3勝Pair／見送り時の保存ボタン→JSON書出し→1〜3着追記を確認する。**研究目的の記録は自動常時保存ではなく、利用者が保存ボタンを押す方式**。
+
+**将来のチャットでは、追補の公開URL・現在のGitHub mainとその後の変更履歴を優先し、以下の旧時点の説明を優先しないこと。**
+
+
+
 > **最初に読むこと**：この文書は2026-11-19時点の運用方針と実装済みの状態を整理した引き継ぎ用スナップショット。将来はGitHub mainの実コードと最新コミットを必ず再取得して照合すること。2026-10月以前の古い検証文書には現在のPair方針と異なる記述がある。過去検証の数字を本番の確定好走率と扱わない。原データ（ユーザー提供CSV/7z）はこのGitHubに含まない。
 
 ## 0. 再開時の最重要リンク
 
 - リポジトリ： https://github.com/umahihin2848-jpg/jikuba-selector
-- 本番入口： https://umahihin2848-jpg.github.io/jikuba-selector/waku-bc-converter/v3.html?v=20261119pairlock1
+- 本番入口： https://umahihin2848-jpg.github.io/jikuba-selector/waku-bc-converter/v3.html?v=20261119integrity2
 - 本番HTML： waku-bc-converter/v3.html （GitHub Pages / 静的Webアプリ、iPhone Safari向け）
 - この文書： PROJECT_HANDOFF_2026-11-19.md
 - 2026-11-19最終の既知アプリ公開指定コミット：8a6d699873b14f9a82c95bee9c97c81ed39031fe（重賞Pair表示整合性、HTML更新）
@@ -162,7 +182,7 @@ OP・L全レースの市場3頭捕捉145/170=85.3%、3勝の市場3頭捕捉255/
 
 ## 9. 次チャットへ貼る短い再開プロンプト
 
-「競馬アプリ jikuba-selector の開発を引き継いでください。GitHubの PROJECT_HANDOFF_2026-11-19.md と waku-bc-converter/v3.html の**最新ソースを再取得**し、実際のコードを正として読んでください。G1〜G3はAbility C×M3の単独A1/A2購入候補、Pairは研究比較のみでBUY不可。OP・Lおよび3勝クラスはAbility v1×M3の単独A1/A2のみ購入候補、Pair見送り。P10>=50%は単勝のみ見送り。重賞相手3頭はC＋市場で表示し、M3/P10/M4は別表示。別クラスへCモデルや未検証の統合スコアを流用しない。最終オッズ/代理M3の過去検証を実運用精度と断言しない。まず現状の差分と未解決事項を整理してから、次の依頼を実行してください。公開アプリは https://umahihin2848-jpg.github.io/jikuba-selector/waku-bc-converter/v3.html?v=20261119pairlock1 です。」
+「競馬アプリ jikuba-selector の開発を引き継いでください。GitHubの PROJECT_HANDOFF_2026-11-19.md と waku-bc-converter/v3.html の**最新ソースを再取得**し、実際のコードを正として読んでください。G1〜G3はAbility C×M3の単独A1/A2購入候補、Pairは研究比較のみでBUY不可。OP・Lおよび3勝クラスはAbility v1×M3の単独A1/A2のみ購入候補、Pair見送り。P10>=50%は単勝のみ見送り。重賞相手3頭はC＋市場で表示し、M3/P10/M4は別表示。別クラスへCモデルや未検証の統合スコアを流用しない。最終オッズ/代理M3の過去検証を実運用精度と断言しない。まず現状の差分と未解決事項を整理してから、次の依頼を実行してください。公開アプリは https://umahihin2848-jpg.github.io/jikuba-selector/waku-bc-converter/v3.html?v=20261119integrity2 です。」
 
 ## 10. 引き継ぎ前のセルフチェック
 
