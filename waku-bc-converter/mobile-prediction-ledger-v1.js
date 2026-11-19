@@ -91,7 +91,8 @@ function snapshot(){
  const pipe=window.ProductionDecisionPipelineV1State||{},finish=window.Finish600State||{},queue=window.ValidatedQueueState||{},remaining=window.Remaining600ValidatedState||{};
  const ability=window.M3PureAbilityState||{},position=window.PositionRiskState||{},decision=window.DecisionShellV2State||{},structure=decision.structure||{},final=decision.final||{},market=decision.market||{},access=window.AxisAccessGateV1State||{};
  const form=meta(),field=Number(form.fieldSize),grade=String(form.grade||'').normalize('NFKC').toUpperCase(),graded=['G1','G2','G3'].includes(grade);
- const inScope=Number.isInteger(field)&&field>=12&&field<=18&&['G1','G2','G3','OP','L','3勝'].includes(grade);
+ const flatSurface=/^(芝|ダ|ダート)$/.test(String(form.surface||'').normalize('NFKC'));const obstacle=/障害|ジャンプ|J[- ]?G[123]/i.test(String(form.name||''));
+ const inScope=Number.isInteger(field)&&field>=12&&field<=18&&['G1','G2','G3','OP','L','3勝'].includes(grade)&&flatSurface&&!obstacle;
  const odds=window.ShapeCore?.parseOdds?.(val('oddsPaste'))?.odds||{};
  const pace=window.MobileAnalysisCoreState?.analysis?.pred?.p||window.FourAxisIntegrationState?.p||null;
  const gap=new Map((remaining.rows||[]).map(x=>[String(x.no),num(x.pred)]));
@@ -100,18 +101,21 @@ function snapshot(){
  const marketBy=market.byNo||{},horseNos=fRows.map(x=>String(x.no)),uniqueHorses=new Set(horseNos).size===field,rosterComplete=fRows.length===field&&uniqueHorses;
  const abilityMatched=rosterComplete&&Boolean(ability.ready)&&horseNos.every(no=>aBy[no]&&String(aBy[no].name||'').normalize('NFKC').trim()===String(fRows.find(x=>String(x.no)===no)?.name||'').normalize('NFKC').trim());
  const m3Matched=rosterComplete&&horseNos.every(no=>Number.isInteger(Number(fRows.find(x=>String(x.no)===no)?.finishRank))&&Number(fRows.find(x=>String(x.no)===no)?.finishRank)>=1);
+ const positionComplete=rosterComplete&&horseNos.every(no=>num(pBy[no]?.p10)!==null&&num(pBy[no].p10)>=0&&num(pBy[no].p10)<=1);
+ const queueComplete=rosterComplete&&horseNos.every(no=>num(qBy[no]?.expectedRank)!==null&&num(qBy[no]?.frontness5)!==null);
+ const m4Complete=rosterComplete&&fRows.every(x=>Array.isArray(x.sc)&&x.sc.length===4&&x.sc.every(t=>Number.isInteger(Number(t.rank))&&Number(t.rank)>=1&&Number(t.rank)<=field));
  const modelCorrect=graded?ability.activeModel==='C':ability.activeModel==='v1';
  const inputRows=String(val('oddsPaste')||'').split(/\r?\n/).map(x=>x.normalize('NFKC').trim().match(/^(\d+)\s*[,\t ]+\s*([\d.]+)/)).filter(Boolean).map(m=>({no:String(Number(m[1])),od:Number(m[2])}));
  const oddsSynced=market.complete&&inputRows.length===field&&new Set(inputRows.map(x=>x.no)).size===field&&inputRows.every(x=>Number.isFinite(x.od)&&x.od>0&&marketBy[x.no]&&Math.abs(Number(marketBy[x.no].od)-x.od)<.011);
  const structuralKind=String(structure.kind||''),structureAxisNo=['A1','A2'].includes(structuralKind)?String(structure.axis?.no||''):null;
  const eligibleAxisNo=access.betEligible===true&&access.status==='pass'&&String(access.axisNo||'')===structureAxisNo&&['ready','conditional'].includes(String(pipe.final?.status||''))?structureAxisNo:null;
  const candidates=(structure.candidates||[]).map(x=>({no:String(x.no),name:String(x.name||''),abilityRank:num(x.ar),m3Rank:num(x.m3)}));
- const status=String(pipe.final?.status||''),snapshotQuality={inScope,analysisReady:window.RSAAnalysisTransitionState?.status==='ready'&&analysisMatches(),rosterComplete,abilityMatched,m3Matched,modelCorrect,marketComplete:Boolean(market.complete),oddsSynced,gateReady:access.ready===true};
- snapshotQuality.completeForForwardComparison=Boolean(inScope&&snapshotQuality.analysisReady&&rosterComplete&&abilityMatched&&m3Matched&&modelCorrect&&oddsSynced&&snapshotQuality.gateReady);
+ const status=String(pipe.final?.status||''),snapshotQuality={inScope,analysisReady:window.RSAAnalysisTransitionState?.status==='ready'&&analysisMatches(),rosterComplete,abilityMatched,m3Matched,positionComplete,queueComplete,m4Complete,modelCorrect,marketComplete:Boolean(market.complete),oddsSynced,gateReady:access.ready===true};
+ snapshotQuality.completeForForwardComparison=Boolean(inScope&&snapshotQuality.analysisReady&&rosterComplete&&abilityMatched&&m3Matched&&positionComplete&&queueComplete&&m4Complete&&modelCorrect&&oddsSynced&&snapshotQuality.gateReady);
  return{
   snapshotSchema:'class_frozen_v1',versions:{pipeline:pipe.version||null,decision:decision.version||null,ability:ability.version||null,finish:finish.version||null,queue:queue.version||null,position:position.version||null,remaining600:remaining.version||null},
   appAxis:pipe.stages?.axis?{no:String(pipe.stages.axis.no||''),name:String(pipe.stages.axis.name||''),status:String(pipe.stages.axis.status||''),abilityRank:num(pipe.stages.axis.abilityRank),m3Rank:num(pipe.stages.axis.m3Rank),popularity:num(pipe.stages.price?.axisPopularity)}:null,
-  decisionFreeze:{grade,abilityModel:String(ability.activeModel||'unknown'),scopeEligible:inScope,structureKind:structuralKind,structureCode:String(structure.code||''),finalCode:String(final.code||''),productionStatus:status,productionLabel:String(pipe.final?.label||''),structuralAxisNo:structureAxisNo,eligibleAxisNo,betEligible:Boolean(eligibleAxisNo),pairNos:structuralKind==='double'?candidates.map(x=>x.no):[],overlapCandidates:candidates,marketComplete:Boolean(market.complete),gateStatus:String(access.status||''),gateBetEligible:Boolean(access.betEligible),gateReason:String(access.reason||''),skipReason:structureAxisNo?null:String(structure.reason||pipe.final?.reason||''),p10WinOnlyStop:Boolean(structure.winRiskStop),researchAxisNo:String(window.RSAFocusedThreeTabsState?.researchAxisNo||''),researchPartnerNos:(window.RSAFocusedThreeTabsState?.partnerNos||[]).map(String),researchPartnerRule:String(window.RSAFocusedThreeTabsState?.partnerRule||''),capturedFrom:'browser_runtime_pre_result'},
+  decisionFreeze:{grade,abilityModel:String(ability.activeModel||'unknown'),scopeEligible:inScope,structureKind:structuralKind,structureCode:String(structure.code||''),finalCode:String(final.code||''),productionStatus:status,productionLabel:String(pipe.final?.label||''),structuralAxisNo:structureAxisNo,eligibleAxisNo,betEligible:Boolean(eligibleAxisNo),pairNos:structuralKind==='double'?candidates.map(x=>x.no):[],overlapCandidates:candidates,marketComplete:Boolean(market.complete),gateStatus:String(access.status||''),gateBetEligible:Boolean(access.betEligible),gateReason:String(access.reason||''),skipReason:eligibleAxisNo?null:String(final.reason||structure.reason||pipe.final?.reason||''),p10WinOnlyStop:Boolean(structure.winRiskStop),researchAxisNo:graded&&ability.activeModel==='C'?String(window.RSAFocusedThreeTabsState?.researchAxisNo||''):'',researchPartnerNos:graded&&ability.activeModel==='C'?(window.RSAFocusedThreeTabsState?.partnerNos||[]).map(String):[],researchPartnerRule:graded&&ability.activeModel==='C'?String(window.RSAFocusedThreeTabsState?.partnerRule||''):'not_validated_for_class',capturedFrom:'browser_runtime_pre_result'},
   snapshotQuality,
   marketRows,
   marketCapturedAs:'entered_win_odds_not_verified_T15_or_T5',
@@ -145,6 +149,7 @@ function scheduleCheck(day){
 function savePrediction(appOnly=false){
  const m=meta(),field=Number(m.fieldSize),gate=window.AxisAccessGateV1State||{},appAxisNo=String(window.DecisionShellV2State?.structure?.axis?.no||''),isAppEligible=gate.status==='pass'&&gate.betEligible===true&&gate.axisNo===appAxisNo;
  const d=appOnly?(isAppEligible?'hold':'skip'):val('mplDecision'),pace=appOnly?'unknown':val('mplPace'),front=appOnly?'neutral':val('mplFront'),track=appOnly?'unknown':val('mplTrack'),axis=appOnly?(isAppEligible?Number(appAxisNo):0):Number(val('mplAxis'));
+ if(appOnly&&gate.status==='pass'&&!gate.betEligible){status('軸の構造は成立していますが、全頭単勝オッズなどの購入判定が未確認です。確認後に記録してください。',true);return}
  if(appOnly&&gate.status!=='pass'&&gate.status!=='pair'&&gate.status!=='skip'){status('アプリの本番判定がまだ確定していません。オッズや解析を確認してください。',true);return}
  const shell=window.IOSMobileShellV3State||window.IOSMobileShellV2State;
  if(!shell?.analysisReady||!window.Finish600State?.ready||window.RSAAnalysisTransitionState?.status!=='ready'||!analysisMatches()){status('レース条件の分析が未完了、または入力が変更されています。現在のレースで再分析してください。',true);return}
