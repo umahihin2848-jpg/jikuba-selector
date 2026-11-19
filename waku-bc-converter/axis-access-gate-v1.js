@@ -15,7 +15,7 @@ function classify(transition,decision,gate){
  if(s.code==='ability_c_wait')return{status:'checking',title:'Ability C判定保留',reason:s.reason||'重賞向けAbility Cの照合待ち'};
  if(s.code==='ability_rank_tie'||s.code==='wait')return{status:'skip',title:'見送り',reason:'軸馬の順位を一意に判定できませんでした。'};
  const candidates=Array.isArray(s.candidates)?s.candidates:[];
- if(s.code==='no_auto_axis'||s.code==='validated_stop'||s.kind==='A3'||!s.axis)return{status:'skip',title:'見送り',reason:'信頼条件を満たす軸馬がいません。'};
+ if(s.code==='no_auto_axis'||s.code==='validated_stop'||s.kind==='A3'||!s.axis)return{status:'skip',title:'見送り',reason:String(s.reason||'信頼条件を満たす軸馬がいません。')};
  if(s.kind==='double'||s.code==='double'){
    // Pair requires two validated overlaps including Ability #1.
    // The pre-existing model retains an Ability #1 anchor internally for compatibility,
