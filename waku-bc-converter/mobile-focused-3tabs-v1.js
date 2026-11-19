@@ -2,7 +2,7 @@
    C×M3 purchase gate and separately trained C+market / V3 models.
    Never reassigns the official axis or overrides stop decisions. */
 (function(root){'use strict';
-const VERSION='P3-40-3win-single-axis-research-only-v1';
+const VERSION='P3-41-stable-partner-events-v1';
 const $=id=>document.getElementById(id);
 const H=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const N=v=>v===null||v===undefined||String(v).trim()===''?NaN:Number(v);
@@ -240,7 +240,8 @@ function render(force=false){const panel=ensure();if(!panel)return;
  $('rsafRaceName').textContent=n;$('rsafRaceMeta').textContent=header;
  const status=STORE.dirty?'再解析が必要':!r.analyzed?'分析待ち':!r.odds.complete?'市場待ち':'市場入力済み';$('rsafStatus').textContent=status;
  const sig=JSON.stringify([STORE.active,STORE.dirty,r.year,r.analyzed,r.r.map(o=>[o.no,o.name,o.finishRank]),r.official,r.researchAxis,r.decision?.at,r.pipeline?.at,r.ranked?.rows?.map?.(z=>[z.no,z.p3]),r.odds?.rows?.map?.(z=>[z.no,z.od]),r.v3?.version,r.v3?.rows?.map?.(z=>[z.no,z.v3Rank]),r.marketP,r.skipDiag?.state,STORE.selectedPartnerNo,root.AxisAccessGateV1State?.at,root.ValidatedQueueState?.at,$('rpciText')?.textContent,header,n]);
- if(force||sig!==STORE.last){STORE.last=sig;
+ const changed=force||sig!==STORE.last;
+ if(changed){STORE.last=sig;
   for(const [tab,id] of [['axis','rsafAxis'],['partners','rsafPartners'],['formation','rsafFormation']]){
    const el=$(id),show=STORE.active===tab;el.hidden=!show;
    panel.querySelector('[data-rsaf-tab="'+tab+'"]').setAttribute('aria-selected',String(show));
@@ -248,7 +249,7 @@ function render(force=false){const panel=ensure();if(!panel)return;
   }
  }
  root.RSAFocusedThreeTabsState={ready:true,version:VERSION,active:STORE.active,axisNo:r.official?.no||null,researchAxisNo:r.researchAxis?.no||null,reviewOnly:Boolean(r.researchAxis),partnerNos:r.partners.map(o=>o.no),partnerRule:'abilityC_plus_market_top3',partnerCount:r.partners.length,selectedPartnerNo:STORE.selectedPartnerNo,v3Ready:Boolean(r.v3),marketReady:Boolean(r.odds.complete),analysisReady:r.analyzed,at:Date.now()};
- root.dispatchEvent(new CustomEvent('rsa-focused-partner-ready',{detail:root.RSAFocusedThreeTabsState}));
+ if(changed)root.dispatchEvent(new CustomEvent('rsa-focused-partner-ready',{detail:root.RSAFocusedThreeTabsState}));
 }
 function schedule(ms=55){clearTimeout(STORE.timer);STORE.timer=setTimeout(()=>render(),ms);}
 const inputs=['raceDate','venue','surface','distance','grade','going','fieldSize','raceName','csvFile'];
