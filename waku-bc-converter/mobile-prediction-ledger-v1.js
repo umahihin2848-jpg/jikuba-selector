@@ -360,9 +360,9 @@ function classStudySummary(all){
  }
  const pct=(n,d)=>d?(100*n/d).toFixed(1)+'%':'—';
  return '<div class="mplRecent"><b>③ クラス別のアプリ単独軸・見送り（研究）</b><div class="mplFine">時刻を利用者確認・全馬と市場が照合済・着順入力済の「アプリ判定だけ記録」をレース単位で集計。未記録のレースは分母に含まれません。</div>'+
- '<div style="overflow-x:auto"><table style="border-collapse:collapse;width:100%;font-size:10px"><thead><tr><th>区分</th><th>記録</th><th>単独◎</th><th>◎3着内</th><th>Pair</th><th>他見送り</th></tr></thead><tbody>'+
- tags.map(t=>{const r=rows[t];return '<tr><td>'+t+'</td><td>'+r.races+'</td><td>'+r.single+'</td><td>'+r.hit+'/'+r.single+' ('+pct(r.hit,r.single)+')</td><td>'+r.pair+'</td><td>'+r.skip+'</td></tr>'}).join('')+
- '</tbody></table></div><small class="mplFine">重賞はAbility C、非重賞はv1の記録だけを品質フラグで照合。表の◎は購入可能ゲートを通った単独軸で、Pairは別集計。参考の市場1番人気3着内との比較も可能ですが、同人気調整なしに精度優位とは判断できません。重複したレースで結果が衝突したものは除外 '+conflicts.size+'件。</small></div>';
+ '<div style="overflow-x:auto"><table style="border-collapse:collapse;width:100%;font-size:10px"><thead><tr><th>区分</th><th>記録</th><th>単独◎</th><th>◎3着内</th><th>同レース1人気</th><th>Pair</th><th>他見送り</th></tr></thead><tbody>'+
+ tags.map(t=>{const r=rows[t];return '<tr><td>'+t+'</td><td>'+r.races+'</td><td>'+r.single+'</td><td>'+r.hit+'/'+r.single+' ('+pct(r.hit,r.single)+')</td><td>'+r.favorite+'/'+r.single+' ('+pct(r.favorite,r.single)+')</td><td>'+r.pair+'</td><td>'+r.skip+'</td></tr>'}).join('')+
+ '</tbody></table></div><small class="mplFine">重賞はAbility C、非重賞はv1の記録だけを品質フラグで照合。表の◎は購入可能ゲートを通った単独軸で、Pairは別集計。同レース1番人気の3着内は参考比較で、同一人気順位による補正ではありません。ユーザー入力の着順を公式確定結果と照合するまでは実測の暫定値です。重複したレースで結果が衝突したものは除外 '+conflicts.size+'件。</small></div>';
 }
 function history(){
  const all=records(),count=$('mplCount'),sel=$('mplResultSelect'),box=$('mplRecords');
