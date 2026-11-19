@@ -27,3 +27,12 @@ Exclude duplicate same-race snapshots rather than choosing the profitable one. V
 - Test status: Python 10 tests, Node 12 checks, headless mobile Chromium export passed. Real pre-race C/final-axis snapshots not yet available for historical matching; therefore no new empirical final-axis Top3 rates claimed.
 
 Next: collect unedited pre-start JSON on future G1-G3 races, match exactly to TARGET confirmed finishes, then compute year/market-adjusted performance.
+
+## Forward snapshot capture quality addendum (2026-11-19 capturev1)
+- Live research panel blocks JSON export until actual Ability C, complete runner identities, M3, P10, queue, all four M4 bands, predicted pace, full odds, and completed decision are available.
+- An extra current-odds comparison rejects an outdated decision state after odds input changes. This is an integrity check, not a prediction improvement.
+- No-axis PASS races **may be saved** with `officialAxisNo=""` and `productionDecision="no_auto_axis"` to preserve the denominator. Do not assign a simulated axis to these races.
+- CLI validation now separates `matched_axes.csv` (final axis present) and `matched_no_axis.csv` (valid frozen PASS); `run_report.json` includes `valid_no_axis_races`, `complete_captured_races`, and `axis_coverage`.
+- The on-page saved state is not an independently verified time-stamped artifact. Freeze before the result and retain the original immutable file; duplicate same-race snapshots are rejected, not post-hoc chosen.
+- No changes to production axis, top3 probabilities, or betting state. Tests: 12 Python unit cases, Node checks and mobile browser export.
+- Script cache: `v3.html?v=20261119capturev1`; export script `prediction-reliability-shadow-v1.js?v=20261119capturev1`.
