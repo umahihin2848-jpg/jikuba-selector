@@ -149,7 +149,7 @@ function scheduleCheck(day){
 function savePrediction(appOnly=false){
  const m=meta(),field=Number(m.fieldSize),gate=window.AxisAccessGateV1State||{},appAxisNo=String(window.DecisionShellV2State?.structure?.axis?.no||''),isAppEligible=gate.status==='pass'&&gate.betEligible===true&&gate.axisNo===appAxisNo;
  const d=appOnly?(isAppEligible?'hold':'skip'):val('mplDecision'),pace=appOnly?'unknown':val('mplPace'),front=appOnly?'neutral':val('mplFront'),track=appOnly?'unknown':val('mplTrack'),axis=appOnly?(isAppEligible?Number(appAxisNo):0):Number(val('mplAxis'));
- if(appOnly&&gate.status==='pass'&&!gate.betEligible){status('軸の構造は成立していますが、全頭単勝オッズなどの購入判定が未確認です。確認後に記録してください。',true);return}
+ if(appOnly&&gate.status==='pass'&&!gate.betEligible&&!gate.marketBlocked){status('軸の構造は成立していますが、全頭単勝オッズなどの購入判定が未確認です。確認後に記録してください。',true);return}
  if(appOnly&&gate.status!=='pass'&&gate.status!=='pair'&&gate.status!=='skip'){status('アプリの本番判定がまだ確定していません。オッズや解析を確認してください。',true);return}
  const shell=window.IOSMobileShellV3State||window.IOSMobileShellV2State;
  if(!shell?.analysisReady||!window.Finish600State?.ready||window.RSAAnalysisTransitionState?.status!=='ready'||!analysisMatches()){status('レース条件の分析が未完了、または入力が変更されています。現在のレースで再分析してください。',true);return}
