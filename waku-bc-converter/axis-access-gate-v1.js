@@ -12,6 +12,7 @@ function classify(transition,decision,gate){
  if(gate?.status==='checking')return{status:'checking',title:'軸馬を判定中',reason:'Ability・M3の一致を確認しています。'};
  if(gate?.status==='idle'||!gate?.status)return{status:'checking',title:'レース条件の確認待ち',reason:gate?.reason||'レース名・競馬場・対象条件を確認してください。解析後も続く場合はレース入力を開いてください。'};
  if(s.code==='scope_out'||gate?.kind==='scope')return{status:'skip',title:'見送り',reason:'対象レースの条件を満たしていません。'};
+ if(s.code==='ability_c_wait')return{status:'checking',title:'Ability C判定保留',reason:s.reason||'重賞向けAbility Cの照合待ち'};
  if(s.code==='ability_rank_tie'||s.code==='wait')return{status:'skip',title:'見送り',reason:'軸馬の順位を一意に判定できませんでした。'};
  const candidates=Array.isArray(s.candidates)?s.candidates:[];
  if(s.code==='no_auto_axis'||s.code==='validated_stop'||s.kind==='A3'||!s.axis)return{status:'skip',title:'見送り',reason:'信頼条件を満たす軸馬がいません。'};
