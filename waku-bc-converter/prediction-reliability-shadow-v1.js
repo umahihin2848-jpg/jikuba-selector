@@ -29,7 +29,7 @@ function evaluate(state){
  const roster=Array.isArray(F.rows)?F.rows:[];
  const generationOk=T.status==='ready'&&finite(generation)&&generation>0&&finite(sourceGeneration)&&sourceGeneration===generation&&finite(analysisGeneration)&&analysisGeneration===generation;
  const metaFieldOk=roster.length===field&&new Set(roster.map(x=>cleanNo(x.no))).size===field;
- const base={ready:false,version:VERSION,schema:SCHEMA,eligible,reason:'',race:{date:String(m.date||''),venue:String(m.venue||''),name:String(m.raceName||''),grade,field:Number.isFinite(field)?field:null,surface:String(m.surface||''),distance:finite(m.distance)?N(m.distance):null},generation:finite(generation)?generation:null,versions:{ability:String(A.version||''),m3:String(F.version||''),queue:String(Q.version||''),position:String(P.version||'')},features:{},horses:[],officialAxisNo:cleanNo(D.structure?.axis?.no),marketComplete:Boolean(D.market?.complete),calibratedProbabilities:false,productionImpact:false,automaticBet:false};
+ const base={ready:false,version:VERSION,schema:SCHEMA,eligible,reason:'',race:{date:String(m.date||''),venue:String(m.venue||''),name:String(m.raceName||''),grade,field:Number.isFinite(field)?field:null,surface:String(m.surface||''),distance:finite(m.distance)?N(m.distance):null},generation:finite(generation)?generation:null,versions:{ability:String(A.version||''),m3:String(F.version||''),queue:String(Q.version||''),position:String(P.version||'')},features:{},horses:[],officialAxisNo:cleanNo(D.structure?.axis?.no),decisionCode:String(D.final?.code||''),marketComplete:Boolean(D.market?.complete),calibratedProbabilities:false,productionImpact:false,automaticBet:false};
  if(!eligible){base.reason='G1〜G3・12〜18頭の対象外';return base;}
  if(!generationOk||!F.ready||!metaFieldOk){base.reason='解析完了・最新M3の照合待ち';return base;}
  const abilityRosterOk=Boolean(A.ready&&A.activeModel==='C'&&compareRoster(roster,A.rows));
@@ -60,7 +60,35 @@ function evaluate(state){
  if(ab){const values=abilitySorted.map(x=>x.abilityLogit),avg=values.reduce((a,b)=>a+b,0)/values.length,sd=Math.sqrt(values.reduce((s,x)=>s+(x-avg)**2,0)/values.length);data.ability.top2StandardizedGap=sd>0?data.ability.top2RawGap/sd:null;data.ability.m3Top3Overlap=abilitySorted.slice(0,3).filter(r=>top3M3.includes(r.no)).length;}
  base.ready=true;base.reason='';base.features=data;base.horses=rows;return base;
 }
-root.PredictionReliabilityShadowV1=Object.freeze({version:VERSION,schema:SCHEMA,evaluate,normalizeP,compareRoster});
+
+function snapshotQuality(d){
+ const reasons=[],race=d?.race||{},f=d?.features||{},horses=d?.horses||[];
+ if(!d?.ready){reasons.push(d?.reason||'解析完了待ち');return{ok:false,reasons,noAxis:false};}
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(race.date||'')||!race.venue||!race.name)reasons.push('日付・競馬場・レース名を確認');
+ if(!d.eligible)reasons.push('G1〜G3・12〜18頭の対象外');
+ if(!f.ability?.available||f.ability?.model!=='C')reasons.push('本番Ability Cを全馬照合できていません');
+ if(!f.queue?.available)reasons.push('隊列データの馬名照合が未完了');
+ if(!f.pace?.available)reasons.push('発走前ペースの予測値が未取得');
+ if(!f.m4?.available)reasons.push('展開別M4の4帯順位が未完成');
+ if(!d.marketComplete)reasons.push('全馬の単勝オッズが未入力');
+ if(!d.decisionCode||['wait','market_wait','ability_rank_tie'].includes(d.decisionCode))reasons.push('最終判定・見送り理由の確定待ち');
+ if(!d.officialAxisNo&&d.decisionCode!=='no_auto_axis')reasons.push('軸なしの判定理由が不確定');
+ const n=Number(race.field),nos=horses.map(x=>cleanNo(x.no));
+ if(!(n>=12&&n<=18)||horses.length!==n||nos.some(x=>!x)||new Set(nos).size!==n)reasons.push('出走馬の頭数・馬番が一致しません');
+ if(horses.some(x=>!finite(x.abilityRank)||!finite(x.m3Rank)||!finite(x.m3Score)||!finite(x.p10)||!finite(x.odds)||!finite(x.pop)||N(x.odds)<=0))reasons.push('全馬のAbility・M3・P10・オッズが揃っていません');
+ if(d.officialAxisNo&&!nos.includes(d.officialAxisNo))reasons.push('本番◎の馬番が出走馬にありません');
+ return{ok:reasons.length===0,reasons,noAxis:!d.officialAxisNo};
+}
+function pastedOddsMatch(d,raw){
+ if(!d?.marketComplete||!Array.isArray(d.horses))return false;
+ const entered=new Map();for(const line of String(raw||'').split(/\r?\n/)){
+  const m=line.normalize('NFKC').trim().match(/^(\d+)\s*[,\t ]+\s*([\d.]+)/);
+  if(!m)continue;const no=cleanNo(m[1]),od=Number(m[2]);
+  if(!no||!(od>0)||entered.has(no))return false;entered.set(no,od);
+ }
+ return entered.size===d.horses.length&&d.horses.every(h=>entered.has(cleanNo(h.no))&&finite(h.odds)&&Math.abs(entered.get(cleanNo(h.no))-N(h.odds))<1e-8);
+}
+root.PredictionReliabilityShadowV1=Object.freeze({version:VERSION,schema:SCHEMA,evaluate,normalizeP,compareRoster,snapshotQuality,pastedOddsMatch});
 if(!root.document?.createElement||typeof root.addEventListener!=='function')return;
 const $=id=>root.document.getElementById(id);
 let last='',timer=0,dirty=false,latest=null;
@@ -69,7 +97,7 @@ function live(){return evaluate({meta:getMeta(),finish:root.Finish600State,abili
 function mount(){const focus=$('rsaFocusedView'),card=$('raceDifficultyDiagnosticV1'),desktop=$('result');let el=$('rsaPredictionReliability');if(!el){el=root.document.createElement('section');el.id='rsaPredictionReliability';el.className='prsv-card';}const host=focus||card||desktop;if(!host)return null;if(el.previousElementSibling!==host||el.parentElement!==host.parentElement)host.insertAdjacentElement('afterend',el);return el;}
 function style(){if($('prsv-css'))return;const s=root.document.createElement('style');s.id='prsv-css';s.textContent=`.prsv-card{margin:8px 0 12px;border:1px solid #315565;border-radius:14px;background:#091b26;color:#e9f5fb;padding:11px;font-size:12px}.prsv-card summary{cursor:pointer;font-weight:800;list-style:revert;font-size:13px}.prsv-card .psub{color:#96b0c0;font-size:10px;line-height:1.5;margin:6px 0 10px}.prsv-card .plist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.prsv-card .pitem{padding:9px;border:1px solid #294756;border-radius:10px;background:#0e2532;min-width:0}.prsv-card .pitem b{font-size:11px;display:block}.prsv-card .pitem small{font-size:9px;line-height:1.5;color:#a3c0cc;display:block;margin-top:4px}.prsv-card .pitem.alert{border-color:#9f7944}.prsv-card .pitem.missing{border-color:#705a65}.prsv-card .pfooter{font-size:9px;line-height:1.6;color:#a1b4bf;margin-top:10px}.prsv-card button{font-size:11px;border:1px solid #668c9e;color:#e8f7ff;padding:9px 13px;border-radius:9px;background:#244356;margin-top:9px}.prsv-card button:disabled{opacity:.45;cursor:not-allowed}.prsv-card [data-prsv-status]{font-size:10px;color:#b5d1e0}.prsv-card .pnote{font-size:10px;color:#d0bb96}@media(max-width:420px){.prsv-card .plist{grid-template-columns:1fr}}`;root.document.head.appendChild(s);}
 function card(label,headline,note,kind=''){return`<div class="pitem ${kind}"><b>${esc(label)}｜${esc(headline)}</b><small>${esc(note)}</small></div>`;}
-function view(d){
+function view(d,quality,oddsCoherent){
  if(!d.ready)return `<div class="psub">${esc(d.reason||'解析待ち')}。本番判定とは無関係の研究表示です。</div>`;
  const f=d.features,ax=d.horses.find(x=>x.no===d.officialAxisNo),m=f.m3,ab=f.ability,q=f.queue,p=f.pace,m4=f.m4;
  const items=[];
@@ -79,12 +107,16 @@ function view(d){
  items.push(card('④ 隊列・展開',q.available?q.label:'隊列未照合',q.available?`Queue有効 ${q.validated}/${q.total}頭。${q.missing?`不足 ${q.missing}頭で初角の予測精度低下が過去年に再現。`:'全頭の有効な位置取り履歴を確認。'}${p.available?`ペース本命 ${p.topBandLabel} ${pct(p.topBandProbability)}。`:'ペース予測未取得。'}馬券ROIの見送り条件とは未検証。`:'隊列の馬番・馬名が一致しません。ペース予測も独立検証が必要。',q.available&&q.missing>0?'alert':!q.available?'missing':''));
  items.push(card('⑤ 通常M3',`上位差 ${fmt(m.top2ScoreGap,3)}`,`M3上位馬番 ${m.top3Nos.join('・')}。${ax?'軸 '+ax.no+'番のM3順位 '+fmt(ax.m3Rank,0)+'位。':''}小差を理由に見送りません。`));
  items.push(card('⑥ 展開別M4',m4.available&&m4.mainTop3Nos?`通常との上位一致 ${m4.m3ToMainTop3Overlap}/3`:'一部未算出',m4.available?`想定 ${p.topBandLabel||'未確定'}｜軸の4帯順位レンジ ${m4.axisRankRange===null?'—':m4.axisRankRange}。シナリオの順位変動は研究指標、収益効果は未検証。`:`4帯の全馬順位 ${m4.completeHorses}/${d.horses.length}頭。欠損を安定とは扱いません。`,m4.available?'':'missing'));
- return `<div class="psub">6項目を独立表示。過去検証で裏付けがあるのは「一部隊列履歴不足による初角予測誤差」。能力差・M3差・M4変動は研究候補です。</div><div class="plist">${items.join('')}</div><div class="pfooter">本番の◎・○、確率、購入／見送り判定は変更しません。モデル版と全馬の値を記録して、将来の年別・配当込み検証に使います。レース後の情報を予測値に混入しないよう、発走前の保存を推奨します。</div><button type="button" data-prsv="export">研究データをJSON保存</button><div data-prsv-status role="status"></div>`;
+ const missing=[...quality.reasons];if(!oddsCoherent)missing.push('入力中の全馬オッズと判定側のオッズが一致しません');
+ const ok=quality.ok&&oddsCoherent;
+ const exportStatus=ok?('✅ 記録可能｜'+(quality.noAxis?'軸なし・見送りレースも母数として保存':'最終◎と6項目を照合済み')):('⚠ 保存前の確認：'+missing.join('／'));
+ return `<div class="psub">6項目を独立表示。過去検証で裏付けがあるのは「一部隊列履歴不足による初角予測誤差」。能力差・M3差・M4変動は研究候補です。</div><div class="plist">${items.join('')}</div><div class="pfooter">本番の◎・○、確率、購入／見送り判定は変更しません。モデル版と全馬の値を記録して、将来の年別・配当込み検証に使います。レース後の情報を予測値に混入しないよう、発走前の保存を推奨します。</div><p class="pnote" data-prsv-quality>${esc(exportStatus)}</p><button type="button" data-prsv="export" ${ok?'':'disabled'}>発走前の研究JSONを保存</button><div data-prsv-status role="status"></div>`;
 }
 function render(){style();const node=mount();if(!node)return;const d=live();if(dirty){d.ready=false;d.reason='入力を変更しました。再解析してください';}root.PredictionReliabilityShadowState={...d,stale:dirty,at:Date.now()};latest=d;
- const sig=JSON.stringify([dirty,d.ready,d.reason,d.generation,d.officialAxisNo,d.marketComplete,d.features,d.horses,root.RSAFocusedThreeTabsState?.selectedPartnerNo]);if(sig===last)return;last=sig;let details=node.querySelector('details');const open=details?.open||false;node.innerHTML=`<details ${open?'open':''}><summary>分析信頼性チェック（研究用）${d.ready&&d.features.queue?.missing?'｜隊列履歴に不足あり':''}</summary>${view(d)}</details>`;
+ const quality=snapshotQuality(d),oddsCoherent=pastedOddsMatch(d,$('oddsPaste')?.value||'');
+ const sig=JSON.stringify([dirty,d.ready,d.reason,d.generation,d.officialAxisNo,d.decisionCode,d.marketComplete,quality,oddsCoherent,d.features,d.horses,root.RSAFocusedThreeTabsState?.selectedPartnerNo]);if(sig===last)return;last=sig;let details=node.querySelector('details');const open=details?.open||false;node.innerHTML=`<details ${open?'open':''}><summary>分析信頼性チェック（研究用）${d.ready&&d.features.queue?.missing?'｜隊列履歴に不足あり':''}</summary>${view(d,quality,oddsCoherent)}</details>`;
 }
-function download(){const d=latest;if(!d?.ready||dirty)return;
+function download(){const d=live();if(dirty||!snapshotQuality(d).ok||!pastedOddsMatch(d,$('oddsPaste')?.value||''))return;
  const decision=root.DecisionShellV2State||{},structure=decision.structure||{},original=decision.originalStructure||{},selection=decision.axisSelection||{},gate=root.AxisAccessGateV1State||{};
  const finalNo=cleanNo(structure.axis?.no),originalNo=cleanNo(original.axis?.no||structure.originalAxis?.no||structure.axis?.no);
  const productionAxis={kind:String(structure.kind||''),originalNo,finalNo,selectionActive:Boolean(selection.active),selectionChanged:Boolean(selection.active&&selection.changed),selectionModel:String(selection.version||''),originalAbilityRank:Number(original.axis?.abilityRank||original.axis?.ar)||null,originalM3Rank:Number(original.axis?.m3Rank||original.axis?.m3)||null,finalAbilityRank:Number(structure.axis?.abilityRank||structure.axis?.ar)||null,finalM3Rank:Number(structure.axis?.m3Rank||structure.axis?.m3)||null,candidateNos:(original.candidates||[]).map(x=>cleanNo(x.no)).filter(Boolean),axisAccessGateStatus:String(gate.status||''),axisAccessGateAxisNo:cleanNo(gate.axisNo),consistentWithFrozenAxis:Boolean(finalNo&&finalNo===d.officialAxisNo)};
