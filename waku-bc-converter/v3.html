@@ -45,6 +45,9 @@ body.rsaFocusedThreeTabs #marketMispricingResultCard{display:none!important}
 body.rsaFocusedThreeTabs #rsaFocusedView{display:block!important;max-width:1060px;margin:14px auto 20px}
 body.rsaFocusedThreeTabs #rsaFocusedView .rsaf-horse{min-width:0}
 body.rsaFocusedThreeTabs #oddsCard{order:0}
+/* Hide legacy analysis/betting cards outside the three focused tabs. Keep data-entry controls and analysis feedback. */
+body.rsaFocusedThreeTabs main.view > :not(#raceCondCard):not(#csvCard):not(#oddsCard):not(#analyzeBtn):not(#mpuSetup):not(#rsaFocusedView):not(#rsaAnalysisFeedback){display:none!important}
+body.rsaFocusedThreeTabs main.view > #rsaFocusedView{display:block!important}
 </style>
 </head>
 <body data-build="20261120axisfocus1">
