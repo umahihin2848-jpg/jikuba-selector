@@ -14,16 +14,17 @@ function freeze(){
 if(root.RSAAnalysisTransitionState?.status!=='ready'||!root.Finish600State?.ready||!root.M3PureAbilityState?.ready||!root.ValidatedQueueState?.ready)return msg('全馬分析が完了してから保存してください。',true);
 const m=nowMeta(),s=root.DecisionShellV2State?.structure||{},focus=root.RSAFocusedThreeTabsState||{},ability=root.M3PureAbilityState||{};
 if(['G1','G2','G3'].includes(m.grade)&&ability.activeModel!=='C')return msg('重賞のAbility Cが未成立です。',true);
+if($('panNumbersConfirmed')?.checked!==true)return msg('表示馬番はCSVの仮番号の場合があります。公式結果と各馬を照合できることを確認してください。',true);
 const pair=s.kind==='pair_v1'?(s.sourcePairCandidates||[]):s.kind==='double'?(s.candidates||[]):[];
 const z=C.freeze({meta:m,startTime:val('panStart'),confirmed:$('panConfirm')?.checked===true,now:Date.now(),
 axisNo:s.axis?.no||null,axisKind:s.kind,axisCode:s.code,pairNos:pair.map(x=>x.no),
 partners:String(focus.axisNo||'')===String(s.axis?.no||'')?focus.partnerNos||[]:[],partnerMethod:focus.partnerRule,
 pace:root.MobileAnalysisCoreState?.analysis?.pred?.p||[],horses:makeHorses(),
-sourceVersions:{ability:ability.version,m3:root.Finish600State?.version,queue:root.ValidatedQueueState?.version,focused:focus.version}});
+sourceVersions:{ability:ability.version,m3:root.Finish600State?.version,queue:root.ValidatedQueueState?.version,focused:focus.version,numbering:'csv_display_numbers_user_confirmed'}});
 if(!z.ok)return msg(z.reason,true);const a=list();
 if(a.some(r=>r.key===z.record.key))return msg('同じレースの予測は固定済みです。上書きできません。',true);
 if(a.length>=600)return msg('保存上限です。JSONバックアップを作成してください。',true);
-try{a.push(z.record);write(a);$('panConfirm').checked=false;refresh();msg('軸・相手・初角の予測を発走前に固定しました。')}catch{msg('ブラウザの保存領域に書き込めません。',true)}
+try{a.push(z.record);write(a);$('panConfirm').checked=false;$('panNumbersConfirmed').checked=false;refresh();msg('軸・相手・初角の予測を発走前に固定しました。')}catch{msg('ブラウザの保存領域に書き込めません。',true)}
 }
 function top3(raw,field){const a=String(raw||'').normalize('NFKC').split(/[\s,、]+/).filter(Boolean);if(a.length!==3||a.some(x=>!/^\d+$/.test(x)))return null;const v=a.map(Number);return new Set(v).size===3&&v.every(x=>x>=1&&x<=field)?v.map(String):null}
 function result(){const a=list(),r=a.find(x=>x.key===val('panRace'));if(!r)return msg('レースを選んでください。',true);
@@ -64,11 +65,12 @@ function exportData(){const blob=new Blob([JSON.stringify({schema:'rsa-accuracy-
 function init(){if(installed)return;const target=$('rsafReceiptMount');if(!target)return;installed=true;
 const rootEl=document.createElement('section');rootEl.id='panAccuracy';rootEl.innerHTML='<header><b>予測精度ノート</b><small id="panN"></small></header>'+
 '<p>買い目不要。発走前に軸・相手・初角予測を保存し、後から結果だけを追記します。</p>'+
-'<label>公式発走時刻（JST）<input id="panStart" type="time"></label><label class="panCheck"><input id="panConfirm" type="checkbox">公式発走時刻を確認済み</label>'+
+'<label>公式発走時刻（JST）<input id="panStart" type="time"></label><label class="panCheck"><input id="panConfirm" type="checkbox">公式発走時刻を確認済み</label>'+ 
+'<label class="panCheck"><input id="panNumbersConfirmed" type="checkbox">CSV上の表示番号と実際の出走馬を照合できる</label>'+ 
 '<button id="panFreeze" type="button">いまの予測を固定保存</button><hr>'+
 '<label>結果を記録するレース<select id="panRace"></select></label>'+
-'<label>確定1〜3着馬番<input id="panTop3" placeholder="例：3, 7, 11"></label>'+
-'<label>初角通過順位（任意、馬番:順位）<textarea id="panCorner" placeholder="例：1:3 2:1 3:8"></textarea></label>'+
+'<label>確定1〜3着（CSVの表示番号で入力）<input id="panTop3" placeholder="例：3, 7, 11"></label><small>公式馬番とCSV表示番号が異なる場合は、CSV表示番号に読み替えて入力。例：公式1着馬がCSVの5番なら「5」を入力。</small>'+ 
+'<label>初角通過順位（任意、CSV表示番号:実際の順位）<textarea id="panCorner" placeholder="例：1:3 2:1 3:8"></textarea></label>'+ 
 '<button id="panResult" type="button">結果を追記</button><button id="panExport" type="button">JSONバックアップ</button>'+
 '<p role="status" id="panStatus"></p><div id="panReport"></div>';
 target.appendChild(rootEl);const st=document.createElement('style');st.textContent='#panAccuracy{border:1px solid #345d70;padding:11px;border-radius:12px;margin-top:10px;color:#d6eaf0;font-size:12px}#panAccuracy header{display:flex;justify-content:space-between}#panAccuracy p{line-height:1.6}#panAccuracy label{display:block;margin:8px 0}#panAccuracy input:not([type=checkbox]),#panAccuracy select,#panAccuracy textarea{width:100%;box-sizing:border-box;display:block;background:#0a2435;border:1px solid #476579;border-radius:8px;padding:9px;color:#fff;font-size:14px}#panAccuracy .panCheck{display:flex;gap:7px;align-items:center}#panAccuracy button{padding:10px;background:#154d3b;border:1px solid #398469;border-radius:9px;color:#eafff3;margin:5px 6px 5px 0;min-height:42px}#panAccuracy .panStats{display:grid;grid-template-columns:1fr 1fr;gap:7px}#panAccuracy .panStats div{padding:8px;border:1px solid #355366;border-radius:7px}#panAccuracy .panStats small{display:block;font-size:10px;color:#a1b6c4}#panAccuracy #panReport>small{font-size:10px;color:#a2b4bf}';document.head.appendChild(st);
