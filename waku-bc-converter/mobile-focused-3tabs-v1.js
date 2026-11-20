@@ -77,7 +77,7 @@ function skipDiagnosis(input={}){
 function modelState(){try{const a=root.AbilityV3ResearchPanelBridgeV1?.getCurrent();return a?.ok?a:{ok:false,reason:a?.reason||''};}catch(e){return{ok:false,reason:String(e?.message||e)}}}
 function decisionContext(){
  const r=roster(),d=root.DecisionShellV2State||{},pipeline=root.ProductionDecisionPipelineV1State||{},s=d.structure||{},final=d.final||{},a=pipeline.stages?.axis;
- const singleEligible=['A1','A2'].includes(String(s.kind||''))&&!['red','neutral'].includes(String(final.level||''));
+ const singleEligible=['A1','A2','pair_v1'].includes(String(s.kind||''))&&!['red','neutral'].includes(String(final.level||''));
  const official=singleEligible&&s.axis?{no:String(s.axis.no),name:String(s.axis.name||r.find(x=>x.no===String(s.axis.no))?.name||'')}:singleEligible&&a?.no?{no:String(a.no),name:String(a.label||'').replace(/^\d+番\s*/, '')}:null;
  const odds=String($('oddsPaste')?.value||'');const mk=parseMarket(r,odds);
  const o=official?mk.byNo?.[official.no]:null;
@@ -167,7 +167,7 @@ function axisHtml(x){const d=x.decision,s=x.structure,f=x.final,m=x.odds;
  const isThreeWin=String($('grade')?.value||'')==='3勝';
  const researchMemo=isThreeWin?'<div class="rsaf-decision"><strong>3勝クラス｜人気・前方度は研究メモ</strong><p>現在の軸 '+H(p?F(p.pop,'人気'):'人気未入力')+'・前方度 '+H(P(q?.frontness5))+'。人気1〜2位・前方度70%以上は過去の代理検証で注目した条件ですが、ここで新たな購入ロックは追加しません。</p></div>':'';
  const marketMissing=!m.complete;
- const label=s.kind==='A2'?'A2 条件付き':s.kind==='A1'?'A1 単独軸':'構造候補';
+ const label=s.kind==='pair_v1'?'Pair型→v1単独軸':s.kind==='A2'?'A2 条件付き':s.kind==='A1'?'A1 単独軸':'構造候補';
  const sel=x.decision?.axisSelection||{};
  const shadowNote=sel.active&&sel.changed?'<div class="rsaf-decision"><strong>研究参考｜軸再選定は本番未採用</strong><p>'+H(sel.original?.name||a.name)+' → '+H(sel.chosen?.name||'別馬')+'（本番◎・買い目には使いません）</p></div>':'';
  const v3=x.v3Horse?'V3 '+F(x.v3Horse.v3Rank,'位')+'／Dynamic '+F(x.v3Horse.h730,'',3)+'／Peak '+(x.v3Horse.miss?'履歴不足':F(x.v3Horse.peak,'',3)):'V3: 能力DB更新待ち・比較保留';
