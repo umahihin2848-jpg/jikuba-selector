@@ -28,6 +28,7 @@ try{a.push(z.record);write(a);$('panConfirm').checked=false;refresh();msg('軸�
 function top3(raw,field){const a=String(raw||'').normalize('NFKC').split(/[\s,、]+/).filter(Boolean);if(a.length!==3||a.some(x=>!/^\d+$/.test(x)))return null;const v=a.map(Number);return new Set(v).size===3&&v.every(x=>x>=1&&x<=field)?v.map(String):null}
 function result(){const a=list(),r=a.find(x=>x.key===val('panRace'));if(!r)return msg('レースを選んでください。',true);
 if(Date.now()<Date.parse(r.startAt))return msg('発走予定時刻より前は結果を登録できません。',true);
+if(r.outcome)return msg('結果は記録済みです。検証値の後付け変更を防ぐため再入力できません。修正が必要な場合はJSONで履歴を保全し、データを監査してください。',true);
 const top=top3(val('panTop3'),r.meta.field),corner=C.parsePositions(val('panCorner'),r.meta.field);
 if(!top)return msg('確定1〜3着を馬番で入力してください。',true);
 if(corner===null)return msg('初角順位は「馬番:順位」の形式で入力してください。',true);
@@ -45,7 +46,10 @@ box.innerHTML='<div class="panStats"><div><small>軸3着内</small><b>'+x.hits+'
 '<p>同オッズ帯の3着内：選んだ軸 '+pct(x.peerHits,x.peerN)+'、同レースの他馬平均 '+pct(x.peerExpected,x.peerN)+'。比較可能 '+x.peerN+'R。</p>'+
 '<p>相手3頭の3着内延べ：'+y.horsesHit+'頭。Ability上位3頭 '+y.abilityHits+'頭、M3上位3頭 '+y.m3Hits+'頭（対応レース数 '+y.abilityN+' / '+y.m3N+'）。</p>'+
 '<p>初角比較：'+q.races+'R、'+q.horses+'頭。順位相関 '+fmt(q.meanSpearman)+'。</p>'+
+'<p>予測のカバー率：軸候補 '+x.n+'/'+z.completed+'R、相手候補3頭 '+y.n+'/'+z.completed+'R。見送り・データ不足も分母に残します。</p>'+
 '<small>結果照合 '+z.completed+'R／結果待ち '+z.pending+'R。同オッズ帯は軸の2/3〜1.5倍。30R未満は探索的結果。発走時刻・確定順位とも利用者入力で公式認証ではありません。</small>';
+const g=new Map();for(const r of z.rows){const key=r.year+'｜'+(r.axisKind==='pair_v1'?'Pair→v1':r.axisKind==='A1'?'A1':r.axisKind==='A2'?'A2':'その他');if(!g.has(key))g.set(key,{n:0,h:0});const v=g.get(key);v.n++;if(r.axisHit)v.h++;}
+if(g.size)box.innerHTML+='<p><b>年別・軸型別（確定結果のみ）</b></p>'+[...g].sort((a,b)=>a[0].localeCompare(b[0])).map(([k,v])=>'<div>'+safe(k)+'：'+v.h+'/'+v.n+'（'+pct(v.h,v.n)+'）'+(v.n<30?'｜小標本':'')+'</div>').join('');
 }
 function exportData(){const blob=new Blob([JSON.stringify({schema:'rsa-accuracy-v1',createdAt:new Date().toISOString(),records:list()},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='競馬予測精度_事前記録.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 function init(){if(installed)return;const target=$('rsafReceiptMount');if(!target)return;installed=true;
