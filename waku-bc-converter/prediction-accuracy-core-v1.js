@@ -73,7 +73,7 @@ function diagnose(rec){
  return{key:rec.key,flags,messages,axisPositionError,abilityTop3Hits:abilityCoverage,m3Top3Hits:m3Coverage,axisHit:axes,partnerHits:pt,cornerComplete:evalResult.corner!==null,positionEvaluable:axisPositionError!==null};
 }
 function summarizeDiagnosis(records){
- const rows=(records||[]).filter(r=>r?.outcome).map(diagnose).filter(Boolean);
+ const seen=new Set();const rows=(records||[]).filter(r=>{if(!r?.outcome||!r.key||seen.has(r.key))return false;seen.add(r.key);return true;}).map(diagnose).filter(Boolean);
  const keys=['axisMiss','abilityShortlistMiss','axisChoiceMiss','opponentMissWithGoodAxis','axisMissWithGoodPartners','bothAxisAndOpponentMiss','largeAxisPositionError','fieldPositionError'];
  const counts=Object.fromEntries(keys.map(k=>[k,rows.filter(r=>r.flags[k]).length]));
  return{n:rows.length,counts,axisMissN:rows.filter(x=>x.axisHit===false).length,axisPositionN:rows.filter(x=>x.positionEvaluable).length,cornerN:rows.filter(x=>x.cornerComplete).length,rows};
