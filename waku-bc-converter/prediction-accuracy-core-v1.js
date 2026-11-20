@@ -36,7 +36,7 @@ function evaluate(rec){const f=rec?.frozen||{},horses=f.horses||[],top=rec?.outc
  const positions=rec.outcome?.corner||{},joined=horses.filter(h=>Number.isFinite(h.expectedCorner)&&Number.isFinite(n(positions[h.no]))),enough=joined.length>=Math.max(8,Math.ceil(horses.length/2)),actual=joined.map(h=>n(positions[h.no])),forecast=joined.map(h=>h.expectedCorner);
  const corner= enough?{n:joined.length,mae:joined.reduce((sum,h)=>sum+Math.abs(h.expectedCorner-n(positions[h.no])),0)/joined.length,spearman:pearson(forecast,actual)}:null;
  const marketTop=horses.find(h=>h.pop===1);
- return{key:rec.key,year:String(rec.meta?.date||'').slice(0,4),axisNo:axis,axisHit:a?winners.has(axis):null,axisPop:a?.pop,axisOdds:a?.odds,axisNonfavorite:Boolean(a&&a.pop>1),favoriteHit:marketTop?winners.has(marketTop.no):null,
+ return{key:rec.key,year:String(rec.meta?.date||'').slice(0,4),axisKind:String(f.axisKind||'unknown'),partnerMethod:String(f.partnerMethod||'unknown'),axisNo:axis,axisHit:a?winners.has(axis):null,axisPop:a?.pop,axisOdds:a?.odds,axisNonfavorite:Boolean(a&&a.pop>1),favoriteHit:marketTop?winners.has(marketTop.no):null,
   peerExpected:peers.length?hits(peers.map(h=>h.no))/peers.length:null,peerN:peers.length,partnerHitCount:partners.length===3?hits(partners):null,partnerHitAtLeastOne:partners.length===3?hits(partners)>0:null,
   m3HitCount:f.topM3?.length===3?hits(f.topM3):null,abilityHitCount:f.topAbility?.length===3?hits(f.topAbility):null,marketHitCount:f.topMarket?.length===3?hits(f.topMarket):null,corner};
 }
