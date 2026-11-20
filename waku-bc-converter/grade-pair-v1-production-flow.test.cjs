@@ -13,7 +13,7 @@ function simulate({grade='G1',v1A=-0.9,v1B=-0.2,bHist=5,bP10=0.25,oddsB=4.8,cAct
  const tick=cb=>{cb();return 1;};
  win.addEventListener=add;win.dispatchEvent=dispatch;
  const fields={grade,fieldSize:'14',surface:'芝',raceName:'検証用重賞',
-  oddsPaste:complete?Array.from({length:14},(_,i)=>`${i+1} ${i===1?oddsB:i===0?3.2:i===2?5.5:10+(i-3)*2}`).join('\\n'):''};
+  oddsPaste:complete?Array.from({length:14},(_,i)=>`${i+1} ${i===1?oddsB:i===0?3.2:i===2?5.5:10+(i-3)*2}`).join('\n'):''};
  const doc={readyState:'loading',getElementById:id=>id in fields?{value:fields[id]}:null,addEventListener(){}};
  win.Finish600State={ready:true,rows:Array.from({length:14},(_,i)=>({no:String(i+1),name:'馬'+(i+1),finishRank:i===0?1:i===1?2:i===4?3:i+4}))};
  win.M3PureAbilityState={ready:true,activeModel:cActive?'C':'v1',leaderAmbiguous:false,top3BoundaryAmbiguous:false,
