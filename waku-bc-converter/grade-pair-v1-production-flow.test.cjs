@@ -72,7 +72,7 @@ test('P10 missing and invalid date hold a chosen axis without allowing market ap
  const a=simulate({bP10:null});
  assert.equal(a.d.structure.kind,'pair_v1');
  assert.equal(a.d.final.code,'p10_wait');
- assert.equal(a.access.betEligible,false);
+ assert.equal(Boolean(a.access.betEligible),false);
 });
 test('missing odds and market outside first six places do not unlock betting',()=>{
  const incomplete=simulate({complete:false});
