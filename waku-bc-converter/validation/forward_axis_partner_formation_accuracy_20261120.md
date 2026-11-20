@@ -35,4 +35,14 @@
 3. レース後、レースを選び確定1〜3着馬番、任意で初角の馬番:通過順位を入力して「結果を追記」。
 4. 集計の軸3着内、同オッズ帯、相手候補、隊列順位誤差、年別・型別を確認し、定期的にJSONバックアップ。
 
-アプリ： https://umahihin2848-jpg.github.io/jikuba-selector/waku-bc-converter/v3.html?v=20261120accuracy1
+アプリ： https://umahihin2848-jpg.github.io/jikuba-selector/waku-bc-converter/v3.html?v=20261120diagnostic1
+
+## 2026-11-20 追加：誤差の分類
+- `prediction-accuracy-core-v1.js` の `diagnose()` により、能力候補の取りこぼし、軸1頭の選択ミス、相手3頭の取りこぼし、初角の誤差を分類。
+- **分類は原因の証明ではない。** 同じレースで複数の誤差は重なり得る。初角結果がないレースを「隊列成功」に数えない。
+- 初角の順位相関は元の数値相関（Pearson）から、予測値と実測値をそれぞれ順位に変換したSpearmanへ訂正。
+- 集計・診断ともに重複レースIDを除外。年別・軸型別の軸3着以内率、選定率、相手3頭のカバー率を併記。
+- 仮馬番と公式馬番の取り違え防止として、CSV表示番号と出走馬の対応を確認したチェックを発走前保存に必須化。結果は**CSV表示番号**で入力する。
+- `prediction-error-diagnosis-v1.test.cjs` で診断6件を追加。従来の `prediction-accuracy-core-v1.test.cjs` 5件と併せて11件の回帰テストが通過。
+- 過去のC再構成重賞18Rの失敗内訳は `axis_pair_miss_breakdown_20261120.md` へ記録。隊列は予測履歴がないため検証不可。
+- 公開GitHub Pagesの実配信・iPhone Safari E2Eはまだ未確認。今回の実装は測定と原因候補の整理であり、予測モデルの係数・軸選定の条件は変更していない。
