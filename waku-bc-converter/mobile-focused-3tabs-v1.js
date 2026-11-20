@@ -96,10 +96,11 @@ function decisionContext(){
  const marketP=mk.complete&&marketFit&&CORE()?.marketStructure?CORE().marketStructure(mk,marketFit):null;
  const access=root.AxisAccessGateV1State||{};
  const skipDiag=skipDiagnosis({analyzed,code:s.code,finalCode:final.code,scope:root.RaceSkipLockV1State?.kind==='scope',marketComplete:mk.complete,marketP,pair:s.kind==='double',unsafe:s.kind==='A3',officialAxis:Boolean(official),betEligible:access.betEligible===true});
- const researchAxis=!official&&mk.complete?researchAxisChoice(skipDiag,ranked):null;
+ const pairV1=s.kind==='double'?(pipeline.stages?.axis?.pairV1||root.GradePairV1AxisV1?.select(s,root.M3PureAbilityState,$('grade')?.value)||null):null;
+  const researchAxis=!official&&s.kind!=='double'&&mk.complete?researchAxisChoice(skipDiag,ranked):null;
  const visibleAxis=official||researchAxis;
  const partners=mk.complete&&visibleAxis&&ranked.ready?selectVisiblePartners(ranked,visibleAxis,3):[];
- return{r,official,researchAxis,odds:mk,m:o,ranked,partners,sc,q,risk,v3,v3Horse,m3,decision:d,pipeline,structure:s,final,analyzed,year,marketP,skipDiag};
+ return{r,official,researchAxis,pairV1,odds:mk,m:o,ranked,partners,sc,q,risk,v3,v3Horse,m3,decision:d,pipeline,structure:s,final,analyzed,year,marketP,skipDiag};
 }
 // Exposed for deterministic Node tests; no betting or production writes.
 root.RSAFocusedThreeTabsCoreV1=Object.freeze({version:VERSION,cMarketRank,selectVisiblePartners,partnerRankLabels,skipDiagnosis,manualPartnerChoice,researchAxisChoice});
@@ -134,6 +135,19 @@ function axisHtml(x){const d=x.decision,s=x.structure,f=x.final,m=x.odds;
  const diagnostic='<div class="rsaf-skip-diagnostic rsaf-skip-'+H(diag.state)+'">'+badge(diag.label,dgKind)+'<p>'+H(diag.reason)+'</p>'+(diag.marketNote?'<small>'+H(diag.marketNote)+'</small>':'')+'</div>';
  if(s.kind==='double'){
   const pair=(s.candidates||[]).map(c=>'<div class="rsaf-decision"><strong>'+H(c.no)+'番 '+H(c.name||'')+'</strong><p>Ability '+H(c.ar)+'位・M3 '+H(c.m3)+'位</p></div>').join('');
+  const pv=x.pairV1;
+  if(s.code==='double'&&pv?.applicable){
+   if(pv.status==='selected'&&pv.axis){
+    const a=pv.axis,b=pv.other||{};
+    return diagnostic+
+     '<div class="rsaf-intro"><b>重賞Pair型 → v1で1頭に絞る</b><p>Ability C×M3で一致した2頭だけを、Ability v1の元スコアで比較しました。これは研究用の軸候補で、購入判定は見送りです。</p></div>'+
+     '<article class="rsaf-horse rsaf-research-axis"><div class="rsaf-horse-main"><b class="rsaf-horse-no">'+H(a.no)+'</b><div><small>Pair型｜Ability v1で選んだ1頭軸候補</small><h3>'+H(a.name)+'</h3></div></div>'+
+     '<div class="rsaf-grid">'+fact('Ability C',F(a.cRank,'位'))+fact('Ability v1',F(a.v1Rank,'位'))+fact('M3',F(a.m3Rank,'位'))+fact('JRA高位履歴',F(a.histN,'走'))+'</div></article>'+
+     '<div class="rsaf-decision"><strong>もう1頭｜'+H(b.no)+'番 '+H(b.name||'')+'</strong><p>Ability C '+H(F(b.cRank,'位'))+'・v1 '+H(F(b.v1Rank,'位'))+'・M3 '+H(F(b.m3Rank,'位'))+'</p></div>'+
+     alert('この1頭は研究用の軸候補です。自動BUY・本番◎・馬券の推奨はまだ解除していません。');
+   }
+   return diagnostic+'<div class="rsaf-intro"><b>重賞Pair型｜v1軸選定保留</b><p>'+H(pv?.reason||'Ability v1データを確認中')+'。無理に1頭を選ばず購入見送りを維持します。</p></div>'+pair;
+  }
   return diagnostic+'<div class="rsaf-intro"><b>Pair構造｜一致する2頭</b><p>'+(s.code==='no_auto_axis'?'このクラスではPairは本番購入を見送り。以下の2頭は研究用の比較表示です。購入ロックは解除しません。':'単独軸の◎・相手3頭とは別扱いです。研究用・購入判断も別に確認してください。')+'</p></div>'+pair;
  }
  if(!x.official){
@@ -240,7 +254,7 @@ function render(force=false){const panel=ensure();if(!panel)return;
  const header=[v,sf+(d?d+'m':''),g].filter(Boolean).join(' ｜ ');
  $('rsafRaceName').textContent=n;$('rsafRaceMeta').textContent=header;
  const status=STORE.dirty?'再解析が必要':!r.analyzed?'分析待ち':!r.odds.complete?'市場待ち':'市場入力済み';$('rsafStatus').textContent=status;
- const sig=JSON.stringify([STORE.active,STORE.dirty,r.year,r.analyzed,r.r.map(o=>[o.no,o.name,o.finishRank]),r.official,r.researchAxis,r.decision?.at,r.pipeline?.at,r.ranked?.rows?.map?.(z=>[z.no,z.p3]),r.odds?.rows?.map?.(z=>[z.no,z.od]),r.v3?.version,r.v3?.rows?.map?.(z=>[z.no,z.v3Rank]),r.marketP,r.skipDiag?.state,STORE.selectedPartnerNo,root.AxisAccessGateV1State?.at,root.ValidatedQueueState?.at,$('rpciText')?.textContent,header,n]);
+ const sig=JSON.stringify([STORE.active,STORE.dirty,r.year,r.analyzed,r.r.map(o=>[o.no,o.name,o.finishRank]),r.official,r.researchAxis,r.pairV1?.status,r.pairV1?.axis?.no,r.pairV1?.reason,r.decision?.at,r.pipeline?.at,r.ranked?.rows?.map?.(z=>[z.no,z.p3]),r.odds?.rows?.map?.(z=>[z.no,z.od]),r.v3?.version,r.v3?.rows?.map?.(z=>[z.no,z.v3Rank]),r.marketP,r.skipDiag?.state,STORE.selectedPartnerNo,root.AxisAccessGateV1State?.at,root.ValidatedQueueState?.at,$('rpciText')?.textContent,header,n]);
  const changed=force||sig!==STORE.last;
  if(changed){STORE.last=sig;
   for(const [tab,id] of [['axis','rsafAxis'],['partners','rsafPartners'],['formation','rsafFormation']]){
@@ -249,7 +263,7 @@ function render(force=false){const panel=ensure();if(!panel)return;
    if(show)el.innerHTML=STORE.dirty?alert('レース条件・CSVが変更されています。「レース構造を解析」を押して再計算してください。'):tab==='axis'?axisHtml(r):tab==='partners'?partnerHtml(r):formationHtml(r);
   }
  }
- root.RSAFocusedThreeTabsState={ready:true,version:VERSION,active:STORE.active,axisNo:r.official?.no||null,researchAxisNo:r.researchAxis?.no||null,reviewOnly:Boolean(r.researchAxis),partnerNos:r.partners.map(o=>o.no),partnerRule:r.partners.length===3&&root.M3PureAbilityState?.activeModel==='C'?'abilityC_plus_market_top3':'not_validated_for_class',partnerCount:r.partners.length,selectedPartnerNo:STORE.selectedPartnerNo,v3Ready:Boolean(r.v3),marketReady:Boolean(r.odds.complete),analysisReady:r.analyzed,at:Date.now()};
+ root.RSAFocusedThreeTabsState={ready:true,version:VERSION,active:STORE.active,axisNo:r.official?.no||null,researchAxisNo:r.researchAxis?.no||null,pairV1AxisNo:r.pairV1?.status==='selected'?String(r.pairV1.axis.no):null,reviewOnly:Boolean(r.researchAxis||r.pairV1?.status==='selected'),partnerNos:r.partners.map(o=>o.no),partnerRule:r.partners.length===3&&root.M3PureAbilityState?.activeModel==='C'?'abilityC_plus_market_top3':'not_validated_for_class',partnerCount:r.partners.length,selectedPartnerNo:STORE.selectedPartnerNo,v3Ready:Boolean(r.v3),marketReady:Boolean(r.odds.complete),analysisReady:r.analyzed,at:Date.now()};
  if(changed)root.dispatchEvent(new CustomEvent('rsa-focused-partner-ready',{detail:root.RSAFocusedThreeTabsState}));
 }
 function schedule(ms=55){clearTimeout(STORE.timer);STORE.timer=setTimeout(()=>render(),ms);}
