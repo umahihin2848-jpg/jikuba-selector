@@ -41,7 +41,7 @@ function classify(transition,decision,gate){
    return{status:'pair',title:'',reason:'',marketPending,marketBlocked:false,betEligible:false,marketCount:Number(d.market?.rows?.length)||0,field:Number(d.market?.field)||0,candidates:candidates.map(x=>({no:String(x.no),name:String(x.name||''),abilityRank:Number(x.ar),m3Rank:Number(x.m3)}))};
  }
  if(candidates.length!==1)return{status:'skip',title:'見送り',reason:'単独で採用できる軸馬が決まりませんでした。'};
- if(!['A1','A2'].includes(s.kind))return{status:'skip',title:'見送り',reason:'軸馬の採用条件を満たしていません。'};
+ if(!['A1','A2','pair_v1'].includes(s.kind))return{status:'skip',title:'見送り',reason:'軸馬の採用条件を満たしていません。'};
  if(gate?.status==='skip')return{status:'skip',title:'見送り',reason:'軸馬の安全条件を満たしていません。'};
  // A1/A2 may open the same full-field research view as Pair as soon as
  // the structural gate passes. Only ticket eligibility depends on full odds.
