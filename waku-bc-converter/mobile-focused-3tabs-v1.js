@@ -198,15 +198,15 @@ function partnerHtml(x){
 function formationHtml(x){if(!x.analyzed)return alert('隊列は過去走CSV解析後に表示します。');
  const q=root.ValidatedQueueState||{},byNo=q.byNo||{},total=x.r.length;
  const items=x.r.map(h=>{const p=byNo[h.no]||{};return {...h,one:N(p.expectedRank),q:p}});
- if(items.some(v=>!Number.isFinite(v.one)))return alert('初角の位置取り予測が不足しています。過去走データと解析状態を確認してください。');
- items.sort((a,b)=>a.one-b.one||Number(a.no)-Number(b.no));
- const breaks=[Math.max(1,Math.round(total/3)),Math.max(2,Math.round(total*2/3))];
+ const known=items.filter(v=>Number.isFinite(v.one)),unknown=items.filter(v=>!Number.isFinite(v.one));if(!known.length)return alert('初角の位置取り予測が不足しています。過去走データを確認してください。');
+ known.sort((a,b)=>a.one-b.one||Number(a.no)-Number(b.no));
+ const groupN=known.length,breaks=[Math.max(1,Math.round(groupN/3)),Math.max(2,Math.round(groupN*2/3))];
  const axis=x.official?.no||x.researchAxis?.no,pt=new Set(x.partners.map(p=>p.no));
  const lane=(group,title,why)=>'<div class="rsaf-lane"><div class="rsaf-lane-title"><strong>'+H(title)+'</strong><small>'+H(why)+'</small></div><div class="rsaf-lane-horses">'+group.map(v=>'<span class="rsaf-runner'+(v.no===axis?' axis':pt.has(v.no)?' partner':'')+'"><b>'+H(v.no)+'</b>'+H(v.name)+'<small>'+F(v.one,'番手',1)+(v.q?.lane?' / '+H(v.q.lane):'')+'</small></span>').join('')+'</div></div>';
- const a=items.slice(0,breaks[0]),b=items.slice(breaks[0],breaks[1]),c=items.slice(breaks[1]);
+ const a=known.slice(0,breaks[0]),b=known.slice(breaks[0],breaks[1]),c=known.slice(breaks[1]);
  const rpci=String($('rpciText')?.textContent||'').trim();
  return '<div class="rsaf-intro"><b>スタート → 初角の隊列予測</b><p>過去走からの予測番手順。実際の内外位置や着順を保証するものではありません。</p></div>'+
- lane(a,'前方','先行グループ')+lane(b,'中団','中位グループ')+lane(c,'後方','差し・追い込みグループ')+
+ lane(a,'前方','先行グループ')+lane(b,'中団','中位グループ')+lane(c,'後方','差し・追い込みグループ')+(unknown.length?lane(unknown,'位置取り未確定',String(unknown.length)+'頭は過去走不足等で予測番手が不明'):'')+
  '<div class="rsaf-legend"><span>● '+(x.researchAxis?'研究用参考軸':'軸馬')+'</span><span>● 相手候補</span><span>● その他</span></div>'+(rpci?'<p class="rsaf-inline">'+H(rpci.slice(0,240))+'</p>':'');
 }
 function render(force=false){const panel=ensure();if(!panel)return;
