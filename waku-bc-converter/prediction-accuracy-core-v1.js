@@ -9,7 +9,7 @@ function raceKey(m){return[m.date,m.venue,m.name,m.surface,m.distance,m.field,m.
 function parsePositions(raw,field){
  const s=String(raw||'').normalize('NFKC').trim();if(!s)return{};
  const parts=s.split(/[,、;\s]+/).filter(Boolean),out={};
- for(const part of parts){const m=part.match(/^(\d+)[=:：](\d+(?:\.\d+)?)$/);if(!m)return null;const no=+m[1],pos=+m[2];if(!Number.isInteger(no)||no<1||no>field||!Number.isFinite(pos)||pos<1||pos>field||Object.hasOwn(out,String(no)))return null;out[no]=pos}
+ for(const part of parts){const m=part.match(/^(\d+)[=:：](\d+(?:\.\d+)?)$/);if(!m)return null;const no=+m[1],pos=+m[2];if(!Number.isInteger(no)||no<1||no>field||!Number.isInteger(pos)||pos<1||pos>field||Object.hasOwn(out,String(no)))return null;out[no]=pos}
  return out;
 }
 function pickTop(rows,axisNo,key,k=3){const src=rows.filter(x=>x.no!==axisNo&&Number.isFinite(n(x[key])));src.sort((a,b)=>n(a[key])-n(b[key])||Number(a.no)-Number(b.no));if(src.length<k)return[];if(src[k]&&Math.abs(n(src[k-1][key])-n(src[k][key]))<1e-12)return[];return src.slice(0,k).map(x=>x.no)}
@@ -19,7 +19,7 @@ function freeze(input){
  if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(time)||input?.confirmed!==true)return{ok:false,reason:'公式発走時刻を確認し、時刻と確認チェックを入力してください'};
  const start=Date.parse(m.date+'T'+time+':00+09:00');if(!Number.isFinite(start)||!Number.isFinite(now)||now>=start)return{ok:false,reason:'発走予定時刻を過ぎたため事前予想として保存できません'};
  const horses=(input.horses||[]).map(h=>({no:id(h.no),name:String(h.name||''),abilityRank:n(h.abilityRank),m3Rank:n(h.m3Rank),pop:n(h.pop),odds:n(h.odds),expectedCorner:n(h.expectedCorner),lane:String(h.lane||''),p10:n(h.p10),v1Rank:n(h.v1Rank)}));
- if(horses.length!==field||!uniq(horses.map(h=>h.no))||horses.some(h=>h.no==='NaN'||!h.name||!Number.isFinite(h.abilityRank)||!Number.isFinite(h.m3Rank)))return{ok:false,reason:'全頭の馬番・Ability・M3順位が揃っていません'};
+ if(horses.length!==field||!uniq(horses.map(h=>h.no))||horses.some(h=>!Number.isInteger(n(h.no))||n(h.no)<1||n(h.no)>field||!h.name||!Number.isFinite(h.abilityRank)||!Number.isFinite(h.m3Rank)))return{ok:false,reason:'全頭の馬番・Ability・M3順位が揃っていません'};
  const axisNo=input.axisNo?String(input.axisNo):null,partners=(input.partners||[]).map(String);
  if(axisNo&&!horses.some(h=>h.no===axisNo))return{ok:false,reason:'軸馬番が全頭リストにありません'};
  if(partners.length&&(!axisNo||partners.length!==3||!uniq(partners)||partners.includes(axisNo)||partners.some(no=>!horses.some(h=>h.no===no))))return{ok:false,reason:'相手候補3頭と軸馬番が一致しません'};
