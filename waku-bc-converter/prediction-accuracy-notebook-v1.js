@@ -8,11 +8,24 @@ function list(){try{const a=JSON.parse(localStorage.getItem(KEY)||'[]');return A
 function write(a){localStorage.setItem(KEY,JSON.stringify(a))}
 function msg(s,bad){const x=$('panStatus');if(x){x.textContent=s;x.style.color=bad?'#ffb6af':'#9de3c9'}}
 function nowMeta(){return{date:val('raceDate'),venue:val('venue'),name:val('raceName'),surface:val('surface'),distance:Number(val('distance')),field:Number(val('fieldSize')),grade:val('grade'),going:val('going')}}
+function sameAnalysisRace(m){
+ const current=root.MobileAnalysisCoreState?.meta||{};
+ const norm=x=>String(x??'').normalize('NFKC').trim();
+ return root.MobileAnalysisCoreState?.ready===true &&
+  ['date','venue','raceName','surface','grade','going'].every((key)=>{
+    const inputKey=key==='raceName'?'name':key;
+    if(key==='going'&&!current.going)return true;
+    return norm(current[key])===norm(m[inputKey]);
+  }) && Number(current.distance)===Number(m.distance) &&
+     Number(current.fieldSize)===Number(m.field);
+}
 function makeHorses(){const F=root.Finish600State?.rows||[],A=root.M3PureAbilityState?.byNo||{},Q=root.ValidatedQueueState?.byNo||{},P=root.PositionRiskState?.byNo||{},m=root.DecisionShellV2State?.market||{};
 return F.map(f=>{const no=String(f.no),a=A[no]||{},q=Q[no]||{},p=P[no]||{},od=m.complete?m.byNo?.[no]||{}:{};return{no,name:f.name||a.name,abilityRank:a.abilityRank,m3Rank:f.finishRank,expectedCorner:q.expectedRank,lane:q.lane,p10:p.p10,v1Rank:a.v1Rank,pop:od.pop,odds:od.od}})}
 function freeze(){
 if(root.RSAAnalysisTransitionState?.status!=='ready'||!root.Finish600State?.ready||!root.M3PureAbilityState?.ready||!root.ValidatedQueueState?.ready)return msg('全馬分析が完了してから保存してください。',true);
 const m=nowMeta(),s=root.DecisionShellV2State?.structure||{},focus=root.RSAFocusedThreeTabsState||{},ability=root.M3PureAbilityState||{};
+if(!sameAnalysisRace(m)||focus.analysisReady!==true)return msg('レース条件を変更したため、発走前の記録には再解析が必要です。',true);
+if(!Array.isArray(focus.partnerNos)||!focus.partnerNos.length&&s.axis?.no)return msg('表示中の相手馬候補を取得できません。3タブを再表示して確認してください。',true);
 if(['G1','G2','G3'].includes(m.grade)&&ability.activeModel!=='C')return msg('重賞のAbility Cが未成立です。',true);
 if($('panNumbersConfirmed')?.checked!==true)return msg('表示馬番はCSVの仮番号の場合があります。公式結果と各馬を照合できることを確認してください。',true);
 const pair=s.kind==='pair_v1'?(s.sourcePairCandidates||[]):s.kind==='double'?(s.candidates||[]):[];
