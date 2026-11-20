@@ -173,7 +173,7 @@ function axisHtml(x){const d=x.decision,s=x.structure,f=x.final,m=x.odds;
  const v3=x.v3Horse?'V3 '+F(x.v3Horse.v3Rank,'位')+'／Dynamic '+F(x.v3Horse.h730,'',3)+'／Peak '+(x.v3Horse.miss?'履歴不足':F(x.v3Horse.peak,'',3)):'V3: 能力DB更新待ち・比較保留';
  return diagnostic+'<div class="rsaf-decision">'+status+'<p>'+H(f.reason||s.reason||'')+'</p></div>'+
  '<article class="rsaf-horse rsaf-axis"><div class="rsaf-horse-main"><b class="rsaf-horse-no">'+H(a.no)+'</b><div><small>'+H(label)+'</small><h3>'+H(a.name)+'</h3></div></div><div class="rsaf-grid">'+
- fact(abilityModel,cRank(c))+fact('M3',F(x.m3,'位'))+fact('P10',P(r?.p10))+fact('先行力',P(q?.frontness5))+
+ fact(abilityModel,cRank(c))+(s.kind==='pair_v1'?fact('Ability v1',F(c?.v1Rank,'位')):'')+fact('M3',F(x.m3,'位'))+fact('P10',P(r?.p10))+fact('先行力',P(q?.frontness5))+
  fact('想定位置',q?.position||'—')+fact('単勝',p?F(p.od,'倍',1):'未入力')+'</div><p class="rsaf-inline">'+H(v3)+'</p></article>'+
  shadowNote+researchMemo+
  (marketMissing?alert('市場判定待ち：全'+x.r.length+'頭の単勝オッズ入力で、最終軸・相手候補を更新します。'):badge('全頭オッズを反映済み','go'))+
