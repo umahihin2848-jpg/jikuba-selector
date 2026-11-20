@@ -29,14 +29,14 @@ function cMarketRank(r,market,cState,model){
  return{ready:true,rows:projection.sort((a,b)=>b.p3-a.p3||Number(a.no)-Number(b.no))};
 }
 function partnerReference(roster,market,ability,cMarket){
- if(cMarket?.ready)return {...cMarket,method:'c_market',description:'Ability C＋市場（参考順位）'};
  if(!ability?.ready)return{ready:false,rows:[],reason:'Abilityの読込待ち'};
+ const marketByNo=cMarket?.ready?Object.fromEntries((cMarket.rows||[]).map(x=>[String(x.no),x])):{};
  const map=ability.byNo||Object.fromEntries((ability.rows||[]).map(r=>[String(r.no),r]));
  const byMarket=market?.byNo||{};
- const rows=roster.map(r=>{const a=map[String(r.no)]||{},m=byMarket[String(r.no)]||{};return{no:String(r.no),name:String(r.name),cRank:N(a.abilityRank),m3Rank:N(r.finishRank),pop:N(m.pop),od:N(m.od),p3:NaN};})
+ const rows=roster.map(r=>{const a=map[String(r.no)]||{},m=byMarket[String(r.no)]||{};return{no:String(r.no),name:String(r.name),cRank:N(a.abilityRank),m3Rank:N(r.finishRank),pop:N(m.pop),od:N(m.od),p3:N(marketByNo[String(r.no)]?.p3)};})
  .filter(r=>Number.isFinite(r.cRank)&&r.cRank>0&&Number.isFinite(r.m3Rank)&&r.m3Rank>0)
  .sort((a,b)=>a.cRank-b.cRank||a.m3Rank-b.m3Rank||Number(a.no)-Number(b.no));
- return{ready:rows.length===roster.length&&rows.length>=12,method:'ability_m3',description:ability.activeModel==='C'?'Ability C順位を優先・M3順位を参考':'Ability v1順位を優先・M3順位を参考',rows,reason:rows.length===roster.length?'':'Ability/M3の順位未確定'};
+ return{ready:rows.length===roster.length&&rows.length>=12,method:'ability_m3',marketReferenceReady:cMarket?.ready===true,description:ability.activeModel==='C'?'Ability C順位を優先・M3順位を参考（市場では相手3頭を変更しません）':'Ability v1順位を優先・M3順位を参考（市場では相手3頭を変更しません）',rows,reason:rows.length===roster.length?'':'Ability/M3の順位未確定'};
 }
 function selectVisiblePartners(ranked,officialAxis,k=4){
  if(!officialAxis||!ranked?.ready)return[];
@@ -172,7 +172,7 @@ function partnerHtml(x){
  if(!x.official&&!x.researchAxis)return '<div class="rsaf-intro"><b>相手馬候補は軸決定後に表示</b><p>現在は軸が一意に決まっていません。「軸馬情報」で一致馬と保留理由を確認してください。</p></div>';
  if(!x.ranked.ready)return alert(x.ranked.reason||'Ability・M3の順位待ち');
  if(x.partners.length!==3||x.partners.some(h=>String(h.no)===String(x.official?.no||x.researchAxis?.no)))return alert('候補の馬番照合ができません。解析をやり直してください。');
- const marketModel=x.ranked.method==='c_market',chosen=x.partners.find(r=>String(r.no)===String(STORE.selectedPartnerNo??'')),
+ const marketModel=x.ranked.marketReferenceReady===true,chosen=x.partners.find(r=>String(r.no)===String(STORE.selectedPartnerNo??'')),
   qBy=root.ValidatedQueueState?.byNo||{},pBy=root.PositionRiskState?.byNo||{},
   fBy=Object.fromEntries((root.Finish600State?.rows||[]).map(r=>[String(r.no),r]));
  const pace=root.MobileAnalysisCoreState?.analysis?.pred?.p;
@@ -195,7 +195,7 @@ function partnerHtml(x){
    '<button type="button" class="rsaf-pick-action" data-rsaf-pick-no="'+H(no)+'" aria-pressed="'+selected+'">'+(selected?'注目メモを解除':'注目馬としてメモ')+'</button></article>';
  };
  return '<div class="rsaf-intro"><b>相手馬候補 3頭</b><p>'+H(x.ranked.description||'Ability・M3の順位から比較')+
-  '。単勝オッズ未入力でも表示し、入力後は市場を含む参考順位に切り替わります。</p></div>'+
+  '。単勝オッズを入力しても相手候補3頭は変えず、市場人気と参考推定値を併記します。</p></div>'+
   (chosen?'<div class="rsaf-manual-summary"><strong>注目メモ：'+H(chosen.no)+'番 '+H(chosen.name)+'</strong><small>他の2頭も候補のままです。</small></div>':'')+
   x.partners.map(card).join('')+
   '<p class="rsaf-foot">候補は比較用の順位で、馬券の購入指示ではありません。市場人気を使った参考3着内率は未較正です。枠順を確認してください。</p>';
@@ -232,7 +232,7 @@ function render(force=false){const panel=ensure();if(!panel)return;
    if(show)el.innerHTML=STORE.dirty?alert('レース条件・CSVが変更されています。「レース構造を解析」を押して再計算してください。'):tab==='axis'?axisHtml(r):tab==='partners'?partnerHtml(r):formationHtml(r);
   }
  }
- root.RSAFocusedThreeTabsState={ready:true,version:VERSION,active:STORE.active,axisNo:r.official?.no||null,researchAxisNo:r.researchAxis?.no||null,pairV1AxisNo:r.pairV1?.status==='selected'?String(r.pairV1.axis.no):null,reviewOnly:Boolean(r.researchAxis),partnerNos:r.partners.map(o=>o.no),partnerRule:r.ranked?.method==='c_market'?'abilityC_plus_market_top3':'ability_m3_reference',partnerCount:r.partners.length,selectedPartnerNo:STORE.selectedPartnerNo,v3Ready:Boolean(r.v3),marketReady:Boolean(r.odds.complete),analysisReady:r.analyzed,at:Date.now()};
+ root.RSAFocusedThreeTabsState={ready:true,version:VERSION,active:STORE.active,axisNo:r.official?.no||null,researchAxisNo:r.researchAxis?.no||null,pairV1AxisNo:r.pairV1?.status==='selected'?String(r.pairV1.axis.no):null,reviewOnly:Boolean(r.researchAxis),partnerNos:r.partners.map(o=>o.no),partnerRule:'ability_m3_reference',partnerCount:r.partners.length,selectedPartnerNo:STORE.selectedPartnerNo,v3Ready:Boolean(r.v3),marketReady:Boolean(r.odds.complete),analysisReady:r.analyzed,at:Date.now()};
  if(changed)root.dispatchEvent(new CustomEvent('rsa-focused-partner-ready',{detail:root.RSAFocusedThreeTabsState}));
 }
 function schedule(ms=55){clearTimeout(STORE.timer);STORE.timer=setTimeout(()=>render(),ms);}
