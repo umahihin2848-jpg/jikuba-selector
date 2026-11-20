@@ -2,7 +2,7 @@
    C×M3 purchase gate and separately trained C+market / V3 models.
    Never reassigns the official axis or overrides stop decisions. */
 (function(root){'use strict';
-const VERSION='P3-43-axis-partner-formation-only';
+const VERSION='P3-44-axis-market-gate-independent';
 const $=id=>document.getElementById(id);
 const H=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const N=v=>v===null||v===undefined||String(v).trim()===''?NaN:Number(v);
@@ -85,10 +85,15 @@ function skipDiagnosis(input={}){
  return{state:'pending',label:'本番判定の確認待ち',reason:'Ability×M3・市場・購入ロックの最終状態を確認しています。',marketNote:note,betEligible:false};
 }
 function modelState(){try{const a=root.AbilityV3ResearchPanelBridgeV1?.getCurrent();return a?.ok?a:{ok:false,reason:a?.reason||''};}catch(e){return{ok:false,reason:String(e?.message||e)}}}
+function axisCandidateFromStructure(s,roster){
+ if(!['A1','A2','pair_v1'].includes(String(s?.kind||''))||!s?.axis?.no)return null;
+ const no=String(s.axis.no),r=roster.find(h=>h.no===no);
+ if(!r)return null;
+ return{no,name:String(s.axis.name||r.name||'')};
+}
 function decisionContext(){
  const r=roster(),d=root.DecisionShellV2State||{},pipeline=root.ProductionDecisionPipelineV1State||{},s=d.structure||{},final=d.final||{},a=pipeline.stages?.axis;
- const singleEligible=['A1','A2','pair_v1'].includes(String(s.kind||''))&&!['red','neutral'].includes(String(final.level||''));
- const official=singleEligible&&s.axis?{no:String(s.axis.no),name:String(s.axis.name||r.find(x=>x.no===String(s.axis.no))?.name||'')}:singleEligible&&a?.no?{no:String(a.no),name:String(a.label||'').replace(/^\d+番\s*/, '')}:null;
+ const official=axisCandidateFromStructure(s,r);
  const odds=String($('oddsPaste')?.value||'');const mk=parseMarket(r,odds);
  const o=official?mk.byNo?.[official.no]:null;
  const year=String($('raceDate')?.value||'').slice(0,4);
@@ -107,13 +112,13 @@ function decisionContext(){
  const access=root.AxisAccessGateV1State||{};
  const skipDiag=skipDiagnosis({analyzed,code:s.code,finalCode:final.code,scope:root.RaceSkipLockV1State?.kind==='scope',marketComplete:mk.complete,marketP,pair:s.kind==='double',unsafe:s.kind==='A3',officialAxis:Boolean(official),betEligible:access.betEligible===true});
  const pairV1=s.kind==='double'?(pipeline.stages?.axis?.pairV1||root.GradePairV1AxisV1?.select(s,root.M3PureAbilityState,$('grade')?.value)||null):null;
-  const researchAxis=!official&&s.kind!=='double'&&mk.complete?researchAxisChoice(skipDiag,ranked):null;
+  const researchAxis=null; // No market-driven replacement axis: use the structural Ability/M3 axis only.
  const visibleAxis=official||researchAxis;
  const partners=visibleAxis&&ranked.ready?selectVisiblePartners(ranked,visibleAxis,3):[];
  return{r,official,researchAxis,pairV1,odds:mk,m:o,ranked,partners,sc,q,risk,v3,v3Horse,m3,decision:d,pipeline,structure:s,final,analyzed,year,marketP,skipDiag};
 }
 // Exposed for deterministic Node tests; no betting or production writes.
-root.RSAFocusedThreeTabsCoreV1=Object.freeze({version:VERSION,cMarketRank,partnerReference,selectVisiblePartners,partnerRankLabels,skipDiagnosis,manualPartnerChoice,researchAxisChoice});
+root.RSAFocusedThreeTabsCoreV1=Object.freeze({version:VERSION,cMarketRank,partnerReference,selectVisiblePartners,partnerRankLabels,axisCandidateFromStructure,skipDiagnosis,manualPartnerChoice,researchAxisChoice});
 if(!root.document?.createElement||typeof root.addEventListener!=='function')return;
 const STORE={active:'axis',frozen:null,last:'',timer:0,dirty:false,selectedPartnerNo:null};
 root.RSAFocusedThreeTabsV1=STORE;
