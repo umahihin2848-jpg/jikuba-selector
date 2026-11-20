@@ -48,7 +48,7 @@ box.innerHTML='<div class="panStats"><div><small>軸3着内</small><b>'+x.hits+'
 '<p>初角比較：'+q.races+'R、'+q.horses+'頭。順位相関 '+fmt(q.meanSpearman)+'。</p>'+
 '<p>予測のカバー率：軸候補 '+x.n+'/'+z.completed+'R、相手候補3頭 '+y.n+'/'+z.completed+'R。見送り・データ不足も分母に残します。</p>'+
 '<small>結果照合 '+z.completed+'R／結果待ち '+z.pending+'R。同オッズ帯は軸の2/3〜1.5倍。30R未満は探索的結果。発走時刻・確定順位とも利用者入力で公式認証ではありません。</small>';
-const g=new Map();for(const r of z.rows){const key=r.year+'｜'+(r.axisKind==='pair_v1'?'Pair→v1':r.axisKind==='A1'?'A1':r.axisKind==='A2'?'A2':'その他');if(!g.has(key))g.set(key,{n:0,h:0});const v=g.get(key);v.n++;if(r.axisHit)v.h++;}
+const g=new Map();for(const r of z.rows){if(r.axisHit===null)continue;const key=r.year+'｜'+(r.axisKind==='pair_v1'?'Pair→v1':r.axisKind==='A1'?'A1':r.axisKind==='A2'?'A2':'その他');if(!g.has(key))g.set(key,{n:0,h:0});const v=g.get(key);v.n++;if(r.axisHit)v.h++;}
 if(g.size)box.innerHTML+='<p><b>年別・軸型別（確定結果のみ）</b></p>'+[...g].sort((a,b)=>a[0].localeCompare(b[0])).map(([k,v])=>'<div>'+safe(k)+'：'+v.h+'/'+v.n+'（'+pct(v.h,v.n)+'）'+(v.n<30?'｜小標本':'')+'</div>').join('');
 }
 function exportData(){const blob=new Blob([JSON.stringify({schema:'rsa-accuracy-v1',createdAt:new Date().toISOString(),records:list()},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='競馬予測精度_事前記録.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
