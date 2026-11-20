@@ -107,15 +107,17 @@ function snapshot(){
  const modelCorrect=graded?ability.activeModel==='C':ability.activeModel==='v1';
  const inputRows=String(val('oddsPaste')||'').split(/\r?\n/).map(x=>x.normalize('NFKC').trim().match(/^(\d+)\s*[,\t ]+\s*([\d.]+)/)).filter(Boolean).map(m=>({no:String(Number(m[1])),od:Number(m[2])}));
  const oddsSynced=market.complete&&inputRows.length===field&&new Set(inputRows.map(x=>x.no)).size===field&&inputRows.every(x=>Number.isFinite(x.od)&&x.od>0&&marketBy[x.no]&&Math.abs(Number(marketBy[x.no].od)-x.od)<.011);
- const structuralKind=String(structure.kind||''),structureAxisNo=['A1','A2'].includes(structuralKind)?String(structure.axis?.no||''):null;
+ const structuralKind=String(structure.kind||''),structureAxisNo=['A1','A2','pair_v1'].includes(structuralKind)?String(structure.axis?.no||''):null;
  const eligibleAxisNo=access.betEligible===true&&access.status==='pass'&&String(access.axisNo||'')===structureAxisNo&&['ready','conditional'].includes(String(pipe.final?.status||''))?structureAxisNo:null;
- const candidates=(structure.candidates||[]).map(x=>({no:String(x.no),name:String(x.name||''),abilityRank:num(x.ar),m3Rank:num(x.m3)}));
+ const originPair=(structuralKind==='pair_v1'?(structure.sourcePairCandidates||[]):structuralKind==='double'?(structure.candidates||[]):[]);
+  const candidates=(structure.candidates||[]).map(x=>({no:String(x.no),name:String(x.name||''),abilityRank:num(x.ar),m3Rank:num(x.m3)}));
+  const originalPair=originPair.map(x=>({no:String(x.no),name:String(x.name||''),abilityRank:num(x.ar),m3Rank:num(x.m3),v1Rank:num(aBy[String(x.no)]?.v1Rank),v1Logit:num(aBy[String(x.no)]?.v1Logit),jraHistN:num(aBy[String(x.no)]?.jraHistN)}));
  const status=String(pipe.final?.status||''),snapshotQuality={inScope,analysisReady:window.RSAAnalysisTransitionState?.status==='ready'&&analysisMatches(),rosterComplete,abilityMatched,m3Matched,positionComplete,queueComplete,m4Complete,modelCorrect,marketComplete:Boolean(market.complete),oddsSynced,gateReady:access.ready===true};
  snapshotQuality.completeForForwardComparison=Boolean(inScope&&snapshotQuality.analysisReady&&rosterComplete&&abilityMatched&&m3Matched&&positionComplete&&queueComplete&&m4Complete&&modelCorrect&&oddsSynced&&snapshotQuality.gateReady);
  return{
   snapshotSchema:'class_frozen_v1',versions:{pipeline:pipe.version||null,decision:decision.version||null,ability:ability.version||null,finish:finish.version||null,queue:queue.version||null,position:position.version||null,remaining600:remaining.version||null},
   appAxis:pipe.stages?.axis?{no:String(pipe.stages.axis.no||''),name:String(pipe.stages.axis.name||''),status:String(pipe.stages.axis.status||''),abilityRank:num(pipe.stages.axis.abilityRank),m3Rank:num(pipe.stages.axis.m3Rank),popularity:num(pipe.stages.price?.axisPopularity)}:null,
-  decisionFreeze:{grade,abilityModel:String(ability.activeModel||'unknown'),scopeEligible:inScope,structureKind:structuralKind,structureCode:String(structure.code||''),finalCode:String(final.code||''),productionStatus:status,productionLabel:String(pipe.final?.label||''),structuralAxisNo:structureAxisNo,eligibleAxisNo,betEligible:Boolean(eligibleAxisNo),pairNos:structuralKind==='double'?candidates.map(x=>x.no):[],overlapCandidates:candidates,marketComplete:Boolean(market.complete),gateStatus:String(access.status||''),gateBetEligible:Boolean(access.betEligible),gateReason:String(access.reason||''),skipReason:eligibleAxisNo?null:String(final.reason||structure.reason||pipe.final?.reason||''),p10WinOnlyStop:Boolean(structure.winRiskStop),researchAxisNo:graded&&ability.activeModel==='C'?String(window.RSAFocusedThreeTabsState?.researchAxisNo||''):'',researchPartnerNos:graded&&ability.activeModel==='C'?(window.RSAFocusedThreeTabsState?.partnerNos||[]).map(String):[],researchPartnerRule:graded&&ability.activeModel==='C'?String(window.RSAFocusedThreeTabsState?.partnerRule||''):'not_validated_for_class',capturedFrom:'browser_runtime_pre_result'},
+  decisionFreeze:{grade,abilityModel:String(ability.activeModel||'unknown'),scopeEligible:inScope,structureKind:structuralKind,structureCode:String(structure.code||''),finalCode:String(final.code||''),productionStatus:status,productionLabel:String(pipe.final?.label||''),structuralAxisNo:structureAxisNo,eligibleAxisNo,betEligible:Boolean(eligibleAxisNo),pairNos:originalPair.map(x=>x.no),originalPair,overlapCandidates:structuralKind==='pair_v1'?originalPair:candidates,pairV1:{status:String(structure.pairV1?.status||''),axisNo:String(structure.pairV1?.axis?.no||''),otherNo:String(structure.pairV1?.other?.no||''),scoreGap:num(structure.pairV1?.scoreGap),minHistory:num(structure.pairV1?.minHistory)},axisCandidateNo:structureAxisNo||null,marketComplete:Boolean(market.complete),gateStatus:String(access.status||''),gateBetEligible:Boolean(access.betEligible),gateReason:String(access.reason||''),skipReason:eligibleAxisNo?null:String(final.reason||structure.reason||pipe.final?.reason||''),p10WinOnlyStop:Boolean(structure.winRiskStop),researchAxisNo:graded&&ability.activeModel==='C'?String(window.RSAFocusedThreeTabsState?.researchAxisNo||''):'',researchPartnerNos:graded&&ability.activeModel==='C'?(window.RSAFocusedThreeTabsState?.partnerNos||[]).map(String):[],researchPartnerRule:graded&&ability.activeModel==='C'?String(window.RSAFocusedThreeTabsState?.partnerRule||''):'not_validated_for_class',capturedFrom:'browser_runtime_pre_result'},
   snapshotQuality,
   marketRows,
   marketCapturedAs:'entered_win_odds_not_verified_T15_or_T5',
@@ -123,7 +125,7 @@ function snapshot(){
   paceProbabilities:Array.isArray(pace)&&pace.length===4?pace.map(num):null,
   pressure:window.MobileAnalysisCoreState?.analysis?.pressure||null,
   singleOdds:Object.fromEntries(Object.entries(odds).filter(([k,v])=>num(v)>0).map(([k,v])=>[k,num(v)])),
-  horses:fRows.map(x=>{const no=String(x.no),a=aBy[no]||{},q=qBy[no]||{},p=pBy[no]||{},m=marketBy[no]||{};return{no,name:String(x.name||''),abilityRank:num(a.abilityRank),abilityLogit:num(a.logit),m3Rank:num(x.finishRank),scenarioM4Ranks:(x.sc||[]).slice(0,4).map(z=>num(z.rank)),positionRiskP10:num(p.p10),frontness5:num(q.frontness5),firstCornerRank:num(q.expectedRank),remaining600Gap:gap.get(no)??null,popularity:market.complete?num(m.pop):null,winOdds:market.complete?num(m.od):null}})
+  horses:fRows.map(x=>{const no=String(x.no),a=aBy[no]||{},q=qBy[no]||{},p=pBy[no]||{},m=marketBy[no]||{};return{no,name:String(x.name||''),abilityRank:num(a.abilityRank),abilityLogit:num(a.logit),v1Rank:num(a.v1Rank),v1Logit:num(a.v1Logit),v2Logit:num(a.v2Logit),m3Rank:num(x.finishRank),scenarioM4Ranks:(x.sc||[]).slice(0,4).map(z=>num(z.rank)),positionRiskP10:num(p.p10),frontness5:num(q.frontness5),firstCornerRank:num(q.expectedRank),remaining600Gap:gap.get(no)??null,popularity:market.complete?num(m.pop):null,winOdds:market.complete?num(m.od):null}})
  };
 }
 function partners(text,field,axis){
@@ -359,10 +361,10 @@ function classStudySummary(all){
   }else c.skip++;
  }
  const pct=(n,d)=>d?(100*n/d).toFixed(1)+'%':'—';
- return '<div class="mplRecent"><b>③ クラス別のアプリ単独軸・見送り（研究）</b><div class="mplFine">時刻を利用者確認・全馬と市場が照合済・着順入力済の「アプリ判定だけ記録」をレース単位で集計。未記録のレースは分母に含まれません。</div>'+
+ return '<div class="mplRecent"><b>③ クラス別の軸候補・判定保留（研究）</b><div class="mplFine">時刻を利用者確認・全馬と市場が照合済・着順入力済の「アプリ判定だけ記録」をレース単位で集計。未記録のレースは分母に含まれません。</div>'+
  '<div style="overflow-x:auto"><table style="border-collapse:collapse;width:100%;font-size:10px"><thead><tr><th>区分</th><th>記録</th><th>単独◎</th><th>◎3着内</th><th>同レース1人気</th><th>Pair</th><th>他見送り</th></tr></thead><tbody>'+
  tags.map(t=>{const r=rows[t];return '<tr><td>'+t+'</td><td>'+r.races+'</td><td>'+r.single+'</td><td>'+r.hit+'/'+r.single+' ('+pct(r.hit,r.single)+')</td><td>'+r.favorite+'/'+r.single+' ('+pct(r.favorite,r.single)+')</td><td>'+r.pair+'</td><td>'+r.skip+'</td></tr>'}).join('')+
- '</tbody></table></div><small class="mplFine">重賞はAbility C、非重賞はv1の記録だけを品質フラグで照合。表の◎は購入可能ゲートを通った単独軸で、Pairは別集計。同レース1番人気の3着内は参考比較で、同一人気順位による補正ではありません。ユーザー入力の着順を公式確定結果と照合するまでは実測の暫定値です。重複したレースで結果が衝突したものは除外 '+conflicts.size+'件。</small></div>';
+ '</tbody></table></div><small class="mplFine">重賞はAbility C、非重賞はv1の記録だけを品質フラグで照合。表の◎は当時の内部判定条件を通った単独軸で、旧Pairは別集計。同レース1番人気の3着内は参考比較で、同一人気順位による補正ではありません。ユーザー入力の着順を公式確定結果と照合するまでは実測の暫定値です。重複したレースで結果が衝突したものは除外 '+conflicts.size+'件。</small></div>';
 }
 function history(){
  const all=records(),count=$('mplCount'),sel=$('mplResultSelect'),box=$('mplRecords');
