@@ -64,6 +64,22 @@ box.innerHTML='<div class="panStats"><div><small>軸3着内</small><b>'+x.hits+'
 '<small>結果照合 '+z.completed+'R／結果待ち '+z.pending+'R。同オッズ帯は軸の2/3〜1.5倍。30R未満は探索的結果。発走時刻・確定順位とも利用者入力で公式認証ではありません。</small>';
 const g=new Map();for(const r of z.rows){if(r.axisHit===null)continue;const key=r.year+'｜'+(r.axisKind==='pair_v1'?'Pair→v1':r.axisKind==='A1'?'A1':r.axisKind==='A2'?'A2':'その他');if(!g.has(key))g.set(key,{n:0,h:0});const v=g.get(key);v.n++;if(r.axisHit)v.h++;}
 if(g.size)box.innerHTML+='<p><b>年別・軸型別（確定結果のみ）</b></p>'+[...g].sort((a,b)=>a[0].localeCompare(b[0])).map(([k,v])=>'<div>'+safe(k)+'：'+v.h+'/'+v.n+'（'+pct(v.h,v.n)+'）'+(v.n<30?'｜小標本':'')+'</div>').join('');
+
+const audit=root.PredictionBenchmarkAuditV1?.assess(a);
+if(audit){
+ const formatRate=(v)=>Number.isFinite(v)?(100*v).toFixed(1)+'%':'—';
+ const interval=(v)=>v?'（95%区間 '+formatRate(v.lower)+'〜'+formatRate(v.upper)+'）':'';
+ const same=(v)=>v.n?'軸 '+formatRate(v.axisRate)+'／同オッズ帯 '+formatRate(v.peerRate)+'（差 '+(v.gap>=0?'+':'')+formatRate(v.gap)+'）':'比較可能レースなし';
+ const categories=(obj)=>Object.entries(obj).map(([name,v])=>'<div>'+safe(name)+'：'+v.hits+'/'+v.n+'（'+formatRate(v.rate)+'）'+(v.n>=20?interval(v.ci95):'｜小標本')+'</div>').join('');
+ box.innerHTML+='<hr><p><b>市場に対する軸の精度（同一レース比較）</b></p>'+
+  '<div>全軸：'+audit.all.hits+'/'+audit.all.n+'（'+formatRate(audit.all.rate)+'）'+interval(audit.all.ci95)+'</div>'+
+  '<div>非1番人気の軸：'+audit.nonfavorite.hits+'/'+audit.nonfavorite.n+'（'+formatRate(audit.nonfavorite.rate)+'）'+interval(audit.nonfavorite.ci95)+'</div>'+
+  '<div>同オッズ帯の馬2頭以上：'+same(audit.matched)+'｜'+audit.matched.n+'R</div>'+
+  '<div>非1番人気だけの同オッズ帯比較：'+same(audit.nonfavoriteMatched)+'｜'+audit.nonfavoriteMatched.n+'R</div>'+
+  '<details><summary>人気帯・オッズ帯別の実績</summary><b>人気帯</b>'+categories(audit.popularity)+'<b>単勝オッズ帯</b>'+categories(audit.odds)+'</details>'+
+  '<small>市場データが揃う軸 '+audit.marketComplete+'/'+audit.completed+'R。比較不能 '+(audit.marketMissing+audit.ignored.peerUnavailable)+'R（市場欠損 '+audit.marketMissing+'、近いオッズの他馬が2頭未満 '+audit.ignored.peerUnavailable+'）。'+safe(audit.disclosure)+' 95%区間は標本不確実性の目安で、過学習や選択バイアスを除去するものではありません。</small>';
+}
+
 const diagnosis=C.summarizeDiagnosis(a),counts=diagnosis.counts;
 box.innerHTML+='<hr><p><b>外れ方の分類（重複あり）</b></p>'+
  '<div>軸馬が圏外：'+counts.axisMiss+'/'+diagnosis.n+'R。このうちAbility上位3頭が全滅：'+counts.abilityShortlistMiss+'R／Ability上位に好走馬がいた：'+counts.axisChoiceMiss+'R。</div>'+
