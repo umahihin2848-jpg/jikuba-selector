@@ -12,7 +12,7 @@ function simulate({grade='G1',v1A=-0.9,v1B=-0.2,bHist=5,bP10=0.25,oddsB=4.8,cAct
  const dispatch=ev=>{for(const cb of callbacks.get(ev.type)||[])cb(ev);};
  const tick=cb=>{cb();return 1;};
  win.addEventListener=add;win.dispatchEvent=dispatch;
- const fields={grade,fieldSize:'14',surface:'芝',raceName:'検証用重賞',
+ const fields={grade,fieldSize:'14',raceDate:'2026-11-22',surface:'芝',raceName:'検証用重賞',
   oddsPaste:complete?Array.from({length:14},(_,i)=>`${i+1} ${i===1?oddsB:i===0?3.2:i===2?5.5:10+(i-3)*2}`).join('\n'):''};
  const doc={readyState:'loading',getElementById:id=>id in fields?{value:fields[id]}:null,addEventListener(){}};
  win.Finish600State={ready:true,rows:Array.from({length:14},(_,i)=>({no:String(i+1),name:'馬'+(i+1),finishRank:i===0?1:i===1?2:i===4?3:i+4}))};
@@ -67,6 +67,12 @@ test('OP Pair stays excluded from this graded rule',()=>{
  const {d,p}=simulate({grade:'OP',cActive:false});
  assert.equal(d.structure.code,'no_auto_axis');
  assert.equal(p.final.status,'neutral');
+});
+test('P10 missing and invalid date hold a chosen axis without allowing market approval',()=>{
+ const a=simulate({bP10:null});
+ assert.equal(a.d.structure.kind,'pair_v1');
+ assert.equal(a.d.final.code,'p10_wait');
+ assert.equal(a.access.betEligible,false);
 });
 test('missing odds and market outside first six places do not unlock betting',()=>{
  const incomplete=simulate({complete:false});
