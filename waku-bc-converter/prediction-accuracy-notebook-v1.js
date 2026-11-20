@@ -50,6 +50,15 @@ box.innerHTML='<div class="panStats"><div><small>軸3着内</small><b>'+x.hits+'
 '<small>結果照合 '+z.completed+'R／結果待ち '+z.pending+'R。同オッズ帯は軸の2/3〜1.5倍。30R未満は探索的結果。発走時刻・確定順位とも利用者入力で公式認証ではありません。</small>';
 const g=new Map();for(const r of z.rows){if(r.axisHit===null)continue;const key=r.year+'｜'+(r.axisKind==='pair_v1'?'Pair→v1':r.axisKind==='A1'?'A1':r.axisKind==='A2'?'A2':'その他');if(!g.has(key))g.set(key,{n:0,h:0});const v=g.get(key);v.n++;if(r.axisHit)v.h++;}
 if(g.size)box.innerHTML+='<p><b>年別・軸型別（確定結果のみ）</b></p>'+[...g].sort((a,b)=>a[0].localeCompare(b[0])).map(([k,v])=>'<div>'+safe(k)+'：'+v.h+'/'+v.n+'（'+pct(v.h,v.n)+'）'+(v.n<30?'｜小標本':'')+'</div>').join('');
+const diagnosis=C.summarizeDiagnosis(a),counts=diagnosis.counts;
+box.innerHTML+='<hr><p><b>外れ方の分類（重複あり）</b></p>'+
+ '<div>軸馬が圏外：'+counts.axisMiss+'/'+diagnosis.n+'R。このうちAbility上位3頭が全滅：'+counts.abilityShortlistMiss+'R／Ability上位に好走馬がいた：'+counts.axisChoiceMiss+'R。</div>'+
+ '<div>軸が好走・相手3頭が全滅：'+counts.opponentMissWithGoodAxis+'R。軸が圏外・相手は好走：'+counts.axisMissWithGoodPartners+'R。両方圏外：'+counts.bothAxisAndOpponentMiss+'R。</div>'+
+ '<div>軸の初角が3頭以上ずれた：'+counts.largeAxisPositionError+'/'+diagnosis.axisPositionN+'R。レース全体の初角平均誤差が3頭以上：'+counts.fieldPositionError+'/'+diagnosis.cornerN+'R。</div>'+
+ '<small>これは原因の断定ではなく、観測された誤差の分類です。隊列の結果未入力は精度不明として分母から除外します。複数項目が重なる場合があります。</small>'+
+ (diagnosis.rows.some(r=>r.messages.length)?'<details><summary>レース別の外れ方を確認</summary>'+diagnosis.rows.filter(r=>r.messages.length).slice(-30).map(r=>
+  '<div class="panMiss"><strong>'+safe(r.key.split('|').slice(0,3).join(' '))+'</strong><small>'+safe(r.messages.join('／'))+'</small></div>').join('')+'</details>':'');
+
 }
 function exportData(){const blob=new Blob([JSON.stringify({schema:'rsa-accuracy-v1',createdAt:new Date().toISOString(),records:list()},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='競馬予測精度_事前記録.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 function init(){if(installed)return;const target=$('rsafReceiptMount');if(!target)return;installed=true;
