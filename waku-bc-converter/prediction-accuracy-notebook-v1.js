@@ -57,7 +57,7 @@ sel.innerHTML='<option value="">レースを選択</option>'+a.slice().reverse()
 if(a.some(x=>x.key===keep))sel.value=keep;
 const x=z.axes,y=z.partners,q=z.corner;
 box.innerHTML='<div class="panStats"><div><small>軸3着内</small><b>'+x.hits+'/'+x.n+'｜'+pct(x.hits,x.n)+'</b></div><div><small>非1番人気の軸</small><b>'+x.nonfavoriteHits+'/'+x.nonfavoriteN+'｜'+pct(x.nonfavoriteHits,x.nonfavoriteN)+'</b></div><div><small>相手候補3頭中1頭以上</small><b>'+y.hitsAtLeastOne+'/'+y.n+'｜'+pct(y.hitsAtLeastOne,y.n)+'</b></div><div><small>初角平均順位誤差</small><b>'+(q.horses?fmt(q.mae)+'頭':'—')+'</b></div></div>'+
-'<p>同オッズ帯の3着内：選んだ軸 '+pct(x.peerHits,x.peerN)+'、同レースの他馬平均 '+pct(x.peerExpected,x.peerN)+'。比較可能 '+x.peerN+'R。</p>'+
+
 '<p>相手3頭の3着内延べ：'+y.horsesHit+'頭。Ability上位3頭 '+y.abilityHits+'頭、M3上位3頭 '+y.m3Hits+'頭（対応レース数 '+y.abilityN+' / '+y.m3N+'）。</p>'+
 '<p>初角比較：'+q.races+'R、'+q.horses+'頭。順位相関 '+fmt(q.meanSpearman)+'。</p>'+
 '<p>予測のカバー率：軸候補 '+x.n+'/'+z.completed+'R、相手候補3頭 '+y.n+'/'+z.completed+'R。見送り・データ不足も分母に残します。</p>'+
@@ -69,7 +69,7 @@ const audit=root.PredictionBenchmarkAuditV1?.assess(a);
 if(audit){
  const formatRate=(v)=>Number.isFinite(v)?(100*v).toFixed(1)+'%':'—';
  const interval=(v)=>v?'（95%区間 '+formatRate(v.lower)+'〜'+formatRate(v.upper)+'）':'';
- const same=(v)=>v.n?'軸 '+formatRate(v.axisRate)+'／同オッズ帯 '+formatRate(v.peerRate)+'（差 '+(v.gap>=0?'+':'')+formatRate(v.gap)+'）':'比較可能レースなし';
+ const same=(v)=>v.n?'軸 '+formatRate(v.axisRate)+'／同オッズ帯 '+formatRate(v.peerRate)+'（差 '+(v.gap>=0?'+':'')+formatRate(v.gap)+'）'+(v.n>=30&&v.gapCI95Approx?'［差の95%近似区間 '+formatRate(v.gapCI95Approx.lower)+'〜'+formatRate(v.gapCI95Approx.upper)+'］':'［探索的・小標本］'):'比較可能レースなし';
  const categories=(obj)=>Object.entries(obj).map(([name,v])=>'<div>'+safe(name)+'：'+v.hits+'/'+v.n+'（'+formatRate(v.rate)+'）'+(v.n>=20?interval(v.ci95):'｜小標本')+'</div>').join('');
  box.innerHTML+='<hr><p><b>市場に対する軸の精度（同一レース比較）</b></p>'+
   '<div>全軸：'+audit.all.hits+'/'+audit.all.n+'（'+formatRate(audit.all.rate)+'）'+interval(audit.all.ci95)+'</div>'+
