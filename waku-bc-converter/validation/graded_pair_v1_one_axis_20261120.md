@@ -28,3 +28,16 @@
 
 ## URL
 https://umahihin2848-jpg.github.io/jikuba-selector/waku-bc-converter/v3.html?v=20261120pairv1prod1
+
+
+## 2026-11-20 最終改定：軸馬・相手馬候補・展開隊列に集中
+- BUY/PASS・券種別の購入アドバイスは画面から撤去。単勝オッズは任意の市場比較情報。
+- 重賞PairはAbility CとM3の重複2頭から元のv1スコアで1頭を選び、軸候補として表示する。Pair型のみを理由に除外しない。
+- 相手候補は3頭。オッズ未入力ならAbility順位優先・M3順位を参考、入力時はC＋市場研究モデルが利用可能なら市場を含む順位も参考表示する。
+- 展開隊列は初角予測番手と内外傾向。欠損馬は位置取り未確定グループに残す。
+- wide-signal、win-forward、旧mobile-final-summaryなど買い目シグナルの起動時読込を止めた。内部の購入判定状態は旧データ互換のため残すが、新しい画面には表示しない。
+- 日付不正時の未来走取り込み防止：Ability・M3・隊列・分析入口で日付を確認する。M3境界同点とP10欠損は安全保留。
+- 前向きログにpair_v1の軸候補、元のPair2頭、全馬のv1スコアと順位を記録。既存の過去ログの欠落値は復元不可。
+- 暫定18レースのv1選択軸には1番人気9頭を含む。非1番人気9頭の3着内は5頭。市場人気・オッズを揃えた比較が必要。
+- 既存Pair回帰テスト12件および相手候補純粋関数テストは通過。GitHub Pages配信・iPhone Safari実機の一連のテストは未完了。
+- 更新版 https://umahihin2848-jpg.github.io/jikuba-selector/waku-bc-converter/v3.html?v=20261120axisfocus1
