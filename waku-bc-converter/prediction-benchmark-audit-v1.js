@@ -38,7 +38,7 @@ function assess(records){
   if(!e||!axis||e.axisHit===null){ignored.invalid++;continue;}
   const a=h.find(x=>String(x.no)===String(axis));
   const base={key:rec.key,year:e.year,kind:e.axisKind,axisHit:e.axisHit,axisOdds:n(a?.odds),axisPop:n(a?.pop)};
-  const validOdds=h.length===Number(rec.meta?.field)&&h.every(x=>Number.isFinite(n(x.odds))&&n(x.odds)>1);
+  const validOdds=h.length===Number(rec.meta?.field)&&h.every(x=>Number.isFinite(n(x.odds))&&n(x.odds)>=1);
   const validPops=h.length===Number(rec.meta?.field)&&h.every(x=>Number.isInteger(n(x.pop))&&n(x.pop)>=1&&n(x.pop)<=h.length)&&new Set(h.map(x=>n(x.pop))).size===h.length;
   if(!validOdds||!validPops){ignored.marketIncomplete++;cases.push({...base,marketValid:false,peerRate:null});continue;}
   const peer=h.filter(x=>String(x.no)!==String(axis)&&n(x.odds)>=base.axisOdds/1.5&&n(x.odds)<=base.axisOdds*1.5);
