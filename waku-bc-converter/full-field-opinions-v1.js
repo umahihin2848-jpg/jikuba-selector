@@ -36,7 +36,8 @@ function report(meta,horses,notes,locked){
 }
 function keyOf(meta,horses){return JSON.stringify([meta.date,meta.venue,meta.name,meta.grade,meta.surface,meta.distance,horses.map(h=>[h.no,h.name])]);}
 function hash(v){let n=2166136261;for(let i=0;i<v.length;i++){n=Math.imul(n^v.charCodeAt(i),16777619);}return(n>>>0).toString(36);}
-root.RSAFullFieldOpinionsCoreV1=Object.freeze({version:VERSION,fair,summary,report,keyOf});
+function importOK(o,k){return !!(o&&o.version===VERSION&&o.record&&o.record.version===VERSION&&o.record.key===k&&o.record.notes&&typeof o.record.notes==='object'&&!Array.isArray(o.record.notes));}
+root.RSAFullFieldOpinionsCoreV1=Object.freeze({version:VERSION,fair,summary,report,keyOf,importOK});
 if(!root.document?.createElement||!root.addEventListener)return;
 let cur=null,record=null,active='',opened=false,timer=0,dirty=false;
 function context(){
@@ -98,6 +99,27 @@ function download(ext,body,type){
  a.href=url;a.download=(cur.meta.date+'_'+cur.meta.venue+'_'+cur.meta.name+'_全頭見解').replace(/[\\/:*?"<>|]/g,'_')+'.'+ext;
  root.document.body.appendChild(a);a.click();a.remove();root.setTimeout(()=>root.URL.revokeObjectURL(url),1200);
 }
+async function importBackup(file){
+ if(!cur||!record||!file)return;
+ if(record.lockedAt){status('固定済みの見解は上書き不可');return;}
+ try{
+  if(file.size>2000000)throw new Error('ファイルが大きすぎます');
+  const parsed=JSON.parse(await file.text());
+  if(!importOK(parsed,cur.key))throw new Error('このレースのバックアップではないか、バージョンが異なります');
+  if(typeof root.confirm==='function'&&!root.confirm('このレースの見解をJSONから読み戻します。現在の下書きを置き換えてよいですか？'))return;
+  flush();
+  const notes={};
+  for(const h of cur.horses){
+   const src=parsed.record.notes[h.no]||{},dst=empty();
+   for(const k of KEYS)dst[k]=String(src[k]??'').slice(0,1500);
+   notes[h.no]=dst;
+  }
+  record={version:VERSION,key:cur.key,meta:cur.meta,notes,createdAt:parsed.record.createdAt||new Date().toISOString(),
+   lockedAt:typeof parsed.record.lockedAt==='string'?parsed.record.lockedAt:null};
+  if(!save())return;
+  paint(true);status('JSONから復元しました');
+ }catch(e){status('復元エラー：'+String(e.message||e));}
+}
 function move(offset){
  flush();const i=cur.horses.findIndex(h=>h.no===active)+offset;
  if(i<0||i>=cur.horses.length)return;active=cur.horses[i].no;picker();editor();status();
@@ -129,12 +151,13 @@ function paint(force){
  '<p class="ffo-alert">CSV馬番は仮番号の場合があります。正式馬番を確認してください。見解は購入判定に反映しません。</p>'+
  '<p id="ffoStatus"></p><p id="ffoWarning" class="ffo-alert"></p>'+
  '<label class="ffo-field">評価する馬<select id="ffoHorse"></select></label><div id="ffoEditor"></div>'+
- '<div class="ffo-actions"><button type="button" id="ffoSave">保存</button><button type="button" id="ffoMarkdown">全頭見解を文章で出力</button><button type="button" id="ffoJSON">JSONバックアップ</button></div>'+
+ '<div class="ffo-actions"><button type="button" id="ffoSave">保存</button><button type="button" id="ffoMarkdown">全頭見解を文章で出力</button><button type="button" id="ffoJSON">JSONバックアップ</button><button type="button" id="ffoImport">JSONから復元</button><input id="ffoImportFile" type="file" accept=".json,application/json" style="display:none"></div>'+
  '<div class="ffo-lock"><label><input id="ffoAgree" type="checkbox"'+(record.lockedAt?' disabled':'')+'> 発走前に書いた見解であることを確認（自己申告）</label>'+
  '<button type="button" id="ffoLock"'+(record.lockedAt?' disabled':'')+'>'+(record.lockedAt?'固定済み':'発走前見解として固定')+'</button></div>'+
  '<p class="ffo-foot">自動保存はSafari内のローカル保存のみ。データ消去・端末変更に備えJSONをダウンロードしてください。固定の日時は端末時刻で、外部による発走前の証明ではありません。</p></div>';
  el.addEventListener('toggle',()=>{opened=el.open;});
  el.addEventListener('change',e=>{if(e.target.id==='ffoHorse'){flush();active=e.target.value;editor();status();}});
+ el.addEventListener('change',e=>{if(e.target.id==='ffoImportFile'){const file=e.target.files?.[0];e.target.value='';if(file)importBackup(file);}});
  el.addEventListener('input',e=>{
   const k=e.target.dataset?.ffoKey;if(!KEYS.includes(k)||record.lockedAt)return;
   if(!record.notes[active])record.notes[active]=empty();
@@ -147,6 +170,7 @@ function paint(force){
   const id=e.target.id;
   if(id==='ffoPrev')move(-1);
   if(id==='ffoNext')move(1);
+  if(id==='ffoImport')$('ffoImportFile')?.click();
   if(id==='ffoSave'){flush();save();}
   if(id==='ffoLock')seal();
   if(id==='ffoMarkdown'){flush();download('md',report(cur.meta,cur.horses,record.notes,record.lockedAt),'text/markdown;charset=utf-8');}
