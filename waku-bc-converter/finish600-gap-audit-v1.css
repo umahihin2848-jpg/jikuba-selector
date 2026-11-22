@@ -1,0 +1,25 @@
+/* Research-only human forecast and actual -3F gap audit */
+#rsafFormation .f6ga-panel{border:1px solid #557888;background:linear-gradient(155deg,#122d3b,#091e2c);border-radius:14px;overflow:hidden;color:#e5f2f6}
+#rsafFormation .f6ga-panel>summary{cursor:pointer;min-height:49px;padding:14px 12px;font-size:13px;font-weight:850;line-height:1.5;list-style-position:inside}
+#rsafFormation .f6ga-body{padding:0 12px 14px;display:grid;gap:11px}
+#rsafFormation .f6ga-body>p{font-size:11px;line-height:1.7;color:#b7ced9;margin:0}
+#rsafFormation .f6ga-body>.f6ga-caution{border:1px solid #8f7b55;border-radius:10px;padding:10px;background:#332c20;color:#f1dfb8}
+#rsafFormation .f6ga-body label:not(.f6ga-check){display:grid;gap:5px;font-size:11px;color:#c7d8e1;line-height:1.6}
+#rsafFormation .f6ga-body input[type="datetime-local"],#rsafFormation .f6ga-body textarea{background:#0d2938!important;color:#ecf7fb!important;border:1px solid #4c7387!important;border-radius:9px!important;padding:10px!important;box-sizing:border-box;width:100%;min-height:44px;font-size:16px!important;min-width:0}
+#rsafFormation .f6ga-body textarea{min-height:120px;line-height:1.5}
+#rsafFormation .f6ga-check{display:flex;gap:8px;align-items:flex-start;font-size:11px;line-height:1.6;color:#d0e0e8}
+#rsafFormation .f6ga-check input{flex:none;width:19px;height:19px;margin:0}
+#rsafFormation .f6ga-body button{min-height:44px!important;min-width:0!important;border-radius:9px!important;font-size:12px!important;font-weight:800!important;padding:9px!important;border:1px solid #608c83!important;color:#e9fff3!important;background:#174b3c!important}
+#rsafFormation .f6ga-actions{display:grid;gap:7px}
+#rsafFormation .f6ga-status{font-size:11px!important;color:#a8ead2!important;font-weight:800}
+#rsafFormation .f6ga-summary{border:1px solid #3c6675;border-radius:10px;background:#102c3a;padding:11px;display:grid;gap:6px;font-size:11px;line-height:1.7}
+#rsafFormation .f6ga-summary strong{font-size:13px;color:#ecf7fc}
+#rsafFormation .f6ga-summary b{color:#bbebd7}
+#rsafFormation .f6ga-summary small{color:#a8c4d1;font-size:10px;line-height:1.7}
+#rsafFormation .f6ga-summary p{margin:0;color:#bfd9e3;font-size:11px}
+#rsafFormation .f6ga-scroll{width:100%;max-width:100%;overflow-x:auto;border:1px solid #3b5c6e;border-radius:10px}
+#rsafFormation .f6ga-scroll table{border-collapse:collapse;width:100%;min-width:310px;font-size:10px;line-height:1.5}
+#rsafFormation .f6ga-scroll th,#rsafFormation .f6ga-scroll td{padding:8px 5px;text-align:right;border-bottom:1px solid #2b4b5d;white-space:nowrap}
+#rsafFormation .f6ga-scroll td:first-child,#rsafFormation .f6ga-scroll th:first-child{text-align:left}
+#rsafFormation .f6ga-scroll tr.f6ga-miss{background:#493027;color:#f7ded0}
+#rsafFormation .f6ga-body>.f6ga-foot{font-size:10px;color:#a1bcca}
