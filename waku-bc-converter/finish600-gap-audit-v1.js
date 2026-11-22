@@ -137,7 +137,7 @@ function showMessage(s,bad){const n=$('f6gaMessage');if(n){n.textContent=s;n.sty
 const fmt=(x,n=2)=>x===null||!Number.isFinite(x)?'—':x.toFixed(n);
 function hist(){const all=[];
  try{for(let i=0;i<root.localStorage.length;i++){const k=root.localStorage.key(i);if(!k?.startsWith(PFX))continue;
-  try{const x=JSON.parse(root.localStorage.getItem(k)||'null');if(x?.frozen&&x?.outcome)all.push(x);}catch(_){}}
+  try{const x=JSON.parse(root.localStorage.getItem(k)||'null');if(x?.frozen&&x?.outcome&&validateImport(x,x.raceKey))all.push(x);}catch(_){}}
  }catch(_){}
  return combine(all);
 }
