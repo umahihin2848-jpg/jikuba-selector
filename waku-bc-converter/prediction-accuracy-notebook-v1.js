@@ -48,6 +48,18 @@ if(ec&&String(focus.axisNo||'')===String(s.axis?.no||'')&&Array.isArray(focus.pa
    note:'Only agreement rank evidence; not calibrated joint top3 probability or betting guidance'};
  }
 }
+const pairSnapshot=root.RSAOpponentPairStudyV1?.snapshot?.();
+if(pairSnapshot?.ready&&String(pairSnapshot.axis?.no)===String(s.axis?.no)&&
+ pairSnapshot.partners.length===3&&pairSnapshot.partners.every(h=>focus.partnerNos.map(String).includes(h.no))){
+ z.record.frozen.opponentPairStudyV1={
+  version:pairSnapshot.version,referenceOnly:true,axisNo:String(s.axis.no),
+  axisContext:{p10:pairSnapshot.axis.p10,predPos:pairSnapshot.axis.predPos,style:pairSnapshot.axisStyle,frontCount:pairSnapshot.frontCount,pace:pairSnapshot.pace},
+  candidates:pairSnapshot.partners.map(h=>({no:h.no,abilityRank:h.abilityRank,m3Rank:h.m3Rank,p10:h.p10,predPos:h.predPos,style:h.style,gap:h.gap})),
+  methods:pairSnapshot.methods,
+  condition:'no_fixed_price_threshold;not_calibrated_pair_probability;no_automatic_selection'
+ };
+}
+
 const a=list();
 if(a.some(r=>r.key===z.record.key))return msg('同じレースの予測は固定済みです。上書きできません。',true);
 if(a.length>=600)return msg('保存上限です。JSONバックアップを作成してください。',true);
@@ -101,6 +113,15 @@ box.innerHTML+='<hr><p><b>相手本線候補の発走前検証（研究）</b></
  '<div>順位一致の比較優先1頭と軸のワイド成立：'+evWide+'/'+evRecords.length+'R（'+pct(evWide,evRecords.length)+'）</div>'+
  '<div>うち軸3着以内：'+evAxis+'/'+evRecords.length+'R。順位一致候補が複数・不在・同点のレースは本線未確定として扱い、上記の分母に含めません。</div>'+
  '<small>2026-11-22版以降に発走前固定した記録のみが対象です。小標本・未較正であり、購入オッズの判断に使える精度ではありません。</small>';
+const pMethods=[['ability','Ability最上位'],['m3','M3最上位'],['p10','P10最小'],['nearest','軸との位置差最小']];
+const pRecords=a.filter(r=>r?.outcome?.top3?.length===3&&r?.frozen?.opponentPairStudyV1?.version);
+const pLines=pMethods.map(([key,label])=>{
+ const z=pRecords.filter(r=>r.frozen.opponentPairStudyV1.methods?.[key]);
+ const wins=z.filter(r=>r.outcome.top3.map(String).includes(String(r.frozen.axisNo))&&r.outcome.top3.map(String).includes(String(r.frozen.opponentPairStudyV1.methods[key]))).length;
+ return '<div>'+safe(label)+'：'+wins+'/'+z.length+'R（'+pct(wins,z.length)+'）</div>';
+}).join('');
+box.innerHTML+='<hr><p><b>軸×相手ペア研究（発走前固定のみ）</b></p>'+pLines+
+ '<small>同じレースでAbility・M3・P10・予測位置差を比較。欠損や同点で候補が未確定の方式は分母に含めません。個別の同時好走確率・購入ボーダーではありません。</small>';
 const diagnosis=C.summarizeDiagnosis(a),counts=diagnosis.counts;
 box.innerHTML+='<hr><p><b>外れ方の分類（重複あり）</b></p>'+
  '<div>軸馬が圏外：'+counts.axisMiss+'/'+diagnosis.n+'R。このうちAbility上位3頭が全滅：'+counts.abilityShortlistMiss+'R／Ability上位に好走馬がいた：'+counts.axisChoiceMiss+'R。</div>'+
