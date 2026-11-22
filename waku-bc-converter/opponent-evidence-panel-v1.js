@@ -1,7 +1,7 @@
 /* Opponent evidence note; read only. No reranking of the three official partners,
    axis selection, betting gate, or expected ROI. */
 (function(root){'use strict';
-const VERSION='opponent-evidence-v1.0-20261122';
+const VERSION='opponent-evidence-v1.1-20261122';
 const N=v=>v===null||v===undefined||v===''?NaN:Number(v);
 const E=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const valid=v=>Number.isFinite(N(v))&&N(v)>0;
@@ -49,7 +49,11 @@ function notes(h,axis,field){
   if(axisZone!=='未確定') positional+=' 軸は'+axisZone+'想定'+(axisZone===where?'（同じ位置取り帯）':'（位置取り帯が異なる）')+'。';
   if(axisZone==='前方'&&where==='前方')positional+=' 軸・相手とも前方で、先行争いによる消耗リスクを確認（好走率への影響は未確定）。';
  }
- return {type,label:labels[type],support,caution,positional,zone:where,axisZone};
+ const p10=N(h?.p10);
+ const p10Note=Number.isFinite(p10)&&p10>=0&&p10<=1
+  ?('P10 '+(100*p10).toFixed(0)+'%：'+(p10>=.5?'10番手以降の可能性が高め。差し届く条件を確認（自動消去しません）。':'10番手以降になる予測確率。低くても3着内を保証しません。'))
+  :'P10未取得：後方化リスクの評価は保留。';
+ return {type,label:labels[type],support,caution,positional,p10Note,zone:where,axisZone};
 }
 function mainChoice(partners){
  const hits=(partners||[]).filter(h=>typeOf(h)==='agreement');
@@ -60,12 +64,12 @@ function mainChoice(partners){
 root.RSAOpponentEvidenceCoreV1=Object.freeze({version:VERSION,typeOf,zone,notes,mainChoice});
 if(!root.document?.getElementById||typeof root.addEventListener!=='function')return;
 function collect(){
- const st=root.RSAFocusedThreeTabsState||{},fo=root.Finish600State||{},ab=root.M3PureAbilityState||{},q=root.ValidatedQueueState||{};
+ const st=root.RSAFocusedThreeTabsState||{},fo=root.Finish600State||{},ab=root.M3PureAbilityState||{},q=root.ValidatedQueueState||{},risk=root.PositionRiskState||{};
  if(!st.analysisReady||!st.axisNo||!Array.isArray(st.partnerNos)||st.partnerNos.length!==3||!fo.ready||!ab.ready||root.RSAFocusedThreeTabsV1?.dirty)return null;
  const roster=(fo.rows||[]).map(h=>({no:String(h.no),name:String(h.name||'')}));
  if(roster.length<12||roster.length>18||roster.length!==new Set(roster.map(h=>h.no)).size)return null;
  const all=roster.map(h=>{const a=ab.byNo?.[h.no]||{},f=(fo.rows||[]).find(v=>String(v.no)===h.no)||{},pos=q.byNo?.[h.no]||{};
-  return {no:h.no,name:h.name,abilityRank:N(a.abilityRank),m3Rank:N(f.finishRank),expectedRank:N(pos.expectedRank),queueValidated:pos.validated===true};
+  return {no:h.no,name:h.name,abilityRank:N(a.abilityRank),m3Rank:N(f.finishRank),expectedRank:N(pos.expectedRank),queueValidated:pos.validated===true,p10:N(risk.byNo?.[h.no]?.p10)};
  });
  const idx=Object.fromEntries(all.map(h=>[h.no,h]));
  if(!idx[st.axisNo]||new Set(st.partnerNos).size!==3||st.partnerNos.some(no=>!idx[String(no)]||String(no)===String(st.axisNo)))return null;
@@ -96,9 +100,9 @@ function draw(){
  data.partners.forEach((h,i)=>{
   if(!cards[i])return;
   const n=notes(h,data.axis,data.field),selected=main.kind==='single'&&main.no===h.no;
-  cards[i].insertAdjacentHTML('beforeend','<div class="rsao-card-evidence"><div class="rsao-evidence-title"><span>選定根拠</span><strong class="'+(selected?'rsao-strong':'')+'">'+E(n.label)+(selected?'・比較優先':'')+'</strong></div><p><b>＋</b> '+E(n.support)+'</p><p><b>△</b> '+E(n.caution)+'</p><p><b>隊列</b> '+E(n.positional)+'</p></div>');
+  cards[i].insertAdjacentHTML('beforeend','<div class="rsao-card-evidence"><div class="rsao-evidence-title"><span>選定根拠</span><strong class="'+(selected?'rsao-strong':'')+'">'+E(n.label)+(selected?'・比較優先':'')+'</strong></div><p><b>＋</b> '+E(n.support)+'</p><p><b>△</b> '+E(n.caution)+'</p><p><b>隊列</b> '+E(n.positional)+'</p><p><b>P10</b> '+E(n.p10Note)+'</p></div>');
  });
 }
-['rsa-focused-partner-ready','validated-queue-ready','m3-pure-ability-ready','finish600-ready','rsa-analysis-complete'].forEach(ev=>root.addEventListener(ev,draw));
+['rsa-focused-partner-ready','validated-queue-ready','position-risk-ready','m3-pure-ability-ready','finish600-ready','rsa-analysis-complete'].forEach(ev=>root.addEventListener(ev,draw));
 if(root.document.readyState==='loading')root.addEventListener('DOMContentLoaded',draw,{once:true});else draw();
 })(typeof window!=='undefined'?window:globalThis);
