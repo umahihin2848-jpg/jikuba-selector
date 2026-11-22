@@ -1,0 +1,22 @@
+/* Research: manual price comparison within focused opponent tab */
+#rsafPartners .vtl-lab{border:1px solid #517a87;background:linear-gradient(145deg,#142c3b,#09202e);border-radius:14px;overflow:hidden;color:#e1eff5;min-width:0}
+#rsafPartners .vtl-lab>summary{min-height:49px;padding:14px 12px;font-size:13px;font-weight:850;line-height:1.55;color:#dff4f6;cursor:pointer;list-style-position:inside}
+#rsafPartners .vtl-lab>section{padding:2px 12px 13px;display:grid;gap:10px}
+#rsafPartners .vtl-intro{font-size:12px;line-height:1.7;color:#d4e7eb;margin:0}
+#rsafPartners .vtl-warning{font-size:11px;line-height:1.7;color:#f3dcae;background:#312b1b;border:1px solid #85734c;border-radius:10px;padding:10px;margin:0}
+#rsafPartners .vtl-row{border:1px solid #365969;background:#0d2433;border-radius:12px;padding:11px;display:grid;gap:8px;min-width:0}
+#rsafPartners .vtl-row>b{font-size:13px;color:#f5fcfd}
+#rsafPartners .vtl-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+#rsafPartners .vtl-fields label{display:grid;gap:6px;font-size:10px;color:#b3cad5;line-height:1.45;min-width:0}
+#rsafPartners .vtl-fields input{appearance:textfield;box-sizing:border-box;width:100%;min-height:44px;background:#08202e!important;border:1px solid #4b7182!important;border-radius:8px;color:#f7fcff!important;font-size:16px!important;padding:8px!important;min-width:0}
+#rsafPartners .vtl-computed{font-size:11px;line-height:1.65;color:#c9e8dc}
+#rsafPartners .vtl-computed b{color:#f4fcf8}
+#rsafPartners .vtl-plans{display:grid;gap:6px;border-top:1px solid #456575;padding-top:12px;font-size:11px;line-height:1.6}
+#rsafPartners .vtl-plans>b{font-size:12px;color:#e9f6fa}
+#rsafPartners .vtl-plans>p,#rsafPartners .vtl-plans>small{color:#a9c2ce;margin:0;font-size:10px;line-height:1.7}
+#rsafPartners .vtl-plan{border-radius:10px;background:#122d3b;border:1px solid #3f6272;padding:9px;display:grid;gap:3px}
+#rsafPartners .vtl-plan>span{color:#b8d1da}
+#rsafPartners .vtl-plan>strong{color:#e5f8ee;font-size:13px}
+#rsafPartners .vtl-plan>small{color:#a5c2d0;font-size:10px}
+#rsafPartners .vtl-foot{font-size:10px;color:#9ab5c1;line-height:1.7;margin:0}
+@media(max-width:390px){#rsafPartners .vtl-fields{grid-template-columns:repeat(2,minmax(0,1fr))}#rsafPartners .vtl-fields label:last-child{grid-column:1/-1}}
