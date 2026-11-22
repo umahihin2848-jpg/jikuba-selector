@@ -14,7 +14,8 @@ const assess=gap=>{
 };
 const keyOf=(m,hs)=>JSON.stringify([m.date,m.venue,m.race,m.grade,m.surface,m.dist,hs.map(h=>[h.no,h.name])]);
 const hash=t=>{let x=2166136261;for(const c of t){x=Math.imul(x^c.charCodeAt(0),16777619);}return(x>>>0).toString(36);};
-root.RSAFinish600GapReviewCoreV1=Object.freeze({version:VERSION,assess,label,color,keyOf});
+function importOK(o,k){return !!(o&&o.version===VERSION&&o.raceKey===k&&o.records&&typeof o.records==='object'&&!Array.isArray(o.records));}
+root.RSAFinish600GapReviewCoreV1=Object.freeze({version:VERSION,assess,label,color,keyOf,importOK});
 if(!root.document?.createElement||!root.addEventListener)return;
 let state=null,chosen='',open=false,timer=null,writeTimer=null,changed=false;
 function context(){
@@ -71,6 +72,26 @@ function exportJSON(){
  a.href=u;a.download=(state.ctx.meta.date+'_'+state.ctx.meta.venue+'_'+state.ctx.meta.race+'_600m差検討').replace(/[\\/:*?"<>|]/g,'_')+'.json';
  root.document.body.appendChild(a);a.click();a.remove();root.setTimeout(()=>root.URL.revokeObjectURL(u),1500);
 }
+async function importBackup(file){
+ if(!file||!state)return;
+ try{
+  if(file.size>2000000)throw new Error('ファイルサイズが大きすぎます');
+  const obj=JSON.parse(await file.text());
+  if(!importOK(obj,state.ctx.key))throw new Error('レース識別子またはバックアップ形式が異なります');
+  if(typeof root.confirm==='function'&&!root.confirm('このレースの想定600m差メモをJSONから復元しますか？ 既存の記録を上書きします。'))return;
+  flush();
+  const records={};
+  for(const h of state.ctx.rows){
+   const raw=obj.records[h.no]||{},gap=String(raw.gap??''),reason=String(raw.reason??'').slice(0,1200);
+   if(gap.trim()&&!assess(gap).valid)throw new Error(h.no+'番の秒差が不正です');
+   records[h.no]={gap,reason};
+  }
+  state.db={version:VERSION,raceKey:state.ctx.key,meta:state.ctx.meta,records,
+   createdAt:obj.createdAt||new Date().toISOString(),updatedAt:null};
+  if(!save())return;
+  const old=$('f6gPanel');old?.remove();paint();status('JSONから復元しました');
+ }catch(e){status('復元エラー：'+String(e.message||e));}
+}
 function paint(){
  const x=context(),host=$('rsafFormation');if(!x||!host||host.hidden)return;
  if(!state||state.ctx.key!==x.key){flush();state={ctx:x,db:load(x)};chosen=x.rows[0].no;open=false;}
@@ -82,11 +103,12 @@ function paint(){
  '<p class="f6g-caution">過去重賞108RでAbility/M3上位馬の<strong>実際の-3F差</strong>が1秒超なら3着内率26.2%（149頭）。ただし事後に観測した差。事前の「過去走の差」追加による予測精度改善は未確認。1.0秒を自動減点・消去基準にはしません。</p>'+
  '<p id="f6gStatus" class="f6g-status"></p><label class="f6g-choice">確認する馬<select id="f6gHorse"></select></label>'+
  '<div id="f6gItem"></div><div class="f6g-actions"><button type="button" id="f6gSave">この端末に保存</button>'+
- '<button type="button" id="f6gExport">全頭分をJSONで出力</button></div>'+
+ '<button type="button" id="f6gExport">全頭分をJSONで出力</button><button type="button" id="f6gImport">JSONから復元</button><input id="f6gImportFile" type="file" accept=".json,application/json" style="display:none"></div>'+
  '<p class="f6g-foot">CSV馬番は仮番号の場合があります。公式馬番と照合してください。ローカル保存のみで端末変更時にはJSONバックアップが必要。入力した差はAbility/M3・公式軸・相手3頭・購入判定に一切反映しません。</p></div>';
  host.appendChild(node);
  node.addEventListener('toggle',()=>{open=node.open;});
  node.addEventListener('change',e=>{if(e.target.id==='f6gHorse'){flush();chosen=e.target.value;renderItem();status();}});
+ node.addEventListener('change',e=>{if(e.target.id==='f6gImportFile'){const file=e.target.files?.[0];e.target.value='';if(file)importBackup(file);}});
  node.addEventListener('input',e=>{
   if(!['f6gGap','f6gReason'].includes(e.target.id))return;
   const db=state.db.records;if(!db[chosen])db[chosen]={gap:'',reason:''};
@@ -99,6 +121,7 @@ function paint(){
  node.addEventListener('click',e=>{
   if(e.target.id==='f6gSave'){flush();save();}
   if(e.target.id==='f6gExport')exportJSON();
+  if(e.target.id==='f6gImport')$('f6gImportFile')?.click();
  });
  renderSelect();renderItem();status();
 }
