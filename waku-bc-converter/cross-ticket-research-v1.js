@@ -10,13 +10,16 @@ const key=t=>String(t.type)+'|'+t.nos.join('-');
 function makeTickets(axis,partners){
  const a=String(axis),p=partners.map(String);
  if(p.length!==3||new Set([a,...p]).size!==4||[a,...p].some(x=>!/^\d+$/.test(x)||Number(x)<1))return[];
- const t=[],add=(type,nums)=>t.push({type,nos:nums,key:key({type,nos:nums})});
- add('単勝',[a]);add('複勝',[a]);
- for(const b of p){add('馬連',[a,b].sort((x,y)=>Number(x)-Number(y)));add('ワイド',[a,b].sort((x,y)=>Number(x)-Number(y)));add('馬単',[a,b]);add('馬単',[b,a]);}
- for(let i=0;i<3;i++)for(let j=i+1;j<3;j++){
-  const x=[a,p[i],p[j]];add('3連複',[...x].sort((u,v)=>Number(u)-Number(v)));
-  for(const f of x)for(const s of x)if(f!==s&&f===a){const th=x.find(z=>z!==f&&z!==s);add('3連単',[f,s,th]);}
+ const t=[],all=[a,...p],add=(type,nums)=>t.push({type,nos:nums,key:key({type,nos:nums})});
+ for(const h of all){add('単勝',[h]);add('複勝',[h]);}
+ for(let i=0;i<4;i++)for(let j=i+1;j<4;j++){
+  const pair=[all[i],all[j]].sort((x,y)=>Number(x)-Number(y));
+  add('馬連',pair);add('ワイド',pair);
  }
+ for(const x of all)for(const y of all)if(x!==y)add('馬単',[x,y]);
+ for(let i=0;i<4;i++)for(let j=i+1;j<4;j++)for(let k=j+1;k<4;k++)
+  add('3連複',[all[i],all[j],all[k]].sort((x,y)=>Number(x)-Number(y)));
+ for(const x of all)for(const y of all)for(const z of all)if(x!==y&&x!==z&&y!==z)add('3連単',[x,y,z]);
  return t;
 }
 function evaluate(probPct,odds,stake){
@@ -80,7 +83,7 @@ function render(){
  if(node&&node.parentElement===panel&&node.dataset.race===c.race)return;
  node?.remove();node=root.document.createElement('details');node.id='rscTickets';node.dataset.race=c.race;node.className='rsc-lab';node.open=state.open;
  node.innerHTML='<summary>券種横断ラボ｜単勝〜3連単の価格比較</summary><section>'+
-  '<p>現在の軸'+E(c.axis)+'番と相手'+E(c.partners.join('・'))+'番から、各券種の買い目を生成する研究用ツール。馬連・ワイド・3連複は順不同、馬単・3連単は着順どおり。</p>'+
+  '<p>現在の軸'+E(c.axis)+'番と相手'+E(c.partners.join('・'))+'番の計4頭から、各券種の単点とBOX候補（全60点）を生成する研究用ツール。馬連・ワイド・3連複は順不同、馬単・3連単は着順どおり。</p>'+
   '<p class="rsc-warning">今のアプリには券種別の較正済み的中確率がありません。確率とオッズは手入力の仮説です。入力した値に基づく数値を、推奨買い目や予測精度と誤解しないでください。</p>'+
   '<div class="rsc-add"><label>券種<select id="rscKind">'+TYPES.map(k=>'<option>'+k+'</option>').join('')+'</select></label>'+
   '<label>買い目<select id="rscChoice"></select></label><button type="button" id="rscAdd">比較に追加</button></div>'+
@@ -99,7 +102,7 @@ function render(){
  node.addEventListener('click',e=>{
   if(e.target.id==='rscAdd'){const chosen=c.tickets.find(t=>t.key===$('rscChoice')?.value);if(!chosen)return;
    if(state.rows.some(x=>x.ticketKey===chosen.key))return;
-   if(state.rows.length>=35)return;state.choice=chosen.key;state.rows.push({ticketKey:chosen.key,probPct:'',odds:'',stake:'100'});refresh();
+   if(state.rows.length>=60)return;state.choice=chosen.key;state.rows.push({ticketKey:chosen.key,probPct:'',odds:'',stake:'100'});refresh();
   }else if(e.target.dataset.rscRemove!==undefined){const idx=Number(e.target.dataset.rscRemove);state.rows.splice(idx,1);refresh();}
  });
  refresh();
