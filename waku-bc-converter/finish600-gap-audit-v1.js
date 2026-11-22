@@ -56,9 +56,9 @@ function combine(audits){
  const races=audits.filter(x=>x?.frozen?.roster&&x?.outcome?.actual&&x?.frozen?.predicted&&x?.raceKey);
  const all=[];
  for(const r of races){const m=stats(r.frozen.predicted,r.outcome.actual,r.frozen.roster);
-  for(const row of m.rows)all.push({...row,venue:r.meta?.venue||'',surface:r.meta?.surface||'',distance:Number(r.meta?.dist)||0,grade:r.meta?.grade||'',race:r.meta?.race||''});}
+  for(const row of m.rows)all.push({...row,date:r.meta?.date||'',venue:r.meta?.venue||'',surface:r.meta?.surface||'',distance:Number(r.meta?.dist)||0,grade:r.meta?.grade||'',race:r.meta?.race||'',pace:r.frozen?.pace||'未設定'});}
  const n=all.length,rate=(numer,den)=>den?numer/den:null;
- const aggregate=rs=>({n:rs.length,races:new Set(rs.map(r=>r.race+'|'+r.venue)).size,
+ const aggregate=rs=>({n:rs.length,races:new Set(rs.map(r=>r.date+'|'+r.race+'|'+r.venue)).size,
   mae:rs.length?rs.reduce((s,r)=>s+r.absError,0)/rs.length:null,
   bias:rs.length?rs.reduce((s,r)=>s+r.error,0)/rs.length:null,
   unexpected:rs.filter(r=>r.unexpectedBack).length});
@@ -70,7 +70,10 @@ function combine(audits){
   turf:aggregate(all.filter(r=>r.surface==='芝')),
   dirt:aggregate(all.filter(r=>r.surface==='ダート')),
   short:aggregate(all.filter(r=>r.distance<=1600)),
-  long:aggregate(all.filter(r=>r.distance>1600))};
+  long:aggregate(all.filter(r=>r.distance>1600)),
+  paceSlow:aggregate(all.filter(r=>r.pace==='スロー')),
+  paceMiddle:aggregate(all.filter(r=>r.pace==='平均')),
+  paceFast:aggregate(all.filter(r=>r.pace==='ハイ'))};
 }
 function validateImport(a,k){
  if(!a||a.version!==V||a.raceKey!==k||!a.meta||!a.frozen||!Array.isArray(a.frozen.roster)||!a.frozen.predicted||!a.frozen.startAt||!a.frozen.lockedAt)return false;
@@ -78,8 +81,13 @@ function validateImport(a,k){
  if(!checkForecast(r,a.frozen.predicted).ok)return false;
  if(!Number.isFinite(Date.parse(a.frozen.startAt))||!Number.isFinite(Date.parse(a.frozen.lockedAt))||Date.parse(a.frozen.lockedAt)>=Date.parse(a.frozen.startAt))return false;
  if(a.outcome?.recordedAt&&Date.parse(a.outcome.recordedAt)<Date.parse(a.frozen.startAt))return false;
- if(a.outcome){if(!a.outcome.actual||typeof a.outcome.actual!=='object')return false;
-  for(const h of r)if(!validGap(a.outcome.actual[String(h.no)]?.gap))return false;
+ if(a.outcome){
+  if(!a.outcome.actual||typeof a.outcome.actual!=='object'||!Number.isFinite(Date.parse(a.outcome.recordedAt))||Object.keys(a.outcome.actual).length!==r.length)return false;
+  for(const h of r){
+   const item=a.outcome.actual[String(h.no)];
+   if(!validGap(item?.gap))return false;
+   if(item.rank!==null&&item.rank!==undefined&&(!Number.isInteger(item.rank)||item.rank<1||item.rank>r.length))return false;
+  }
  }
  return true;
 }
@@ -157,6 +165,7 @@ function freeze(){
  record.frozen={startAt:stamp.toISOString(),lockedAt:now.toISOString(),roster:current.roster,predicted,
   versionContext:{ability:root.M3PureAbilityState?.version||null,m3:root.Finish600State?.version||null,
    position:root.ValidatedQueueState?.version||null,p10:root.PositionRiskState?.version||null},
+  pace:['スロー','平均','ハイ'].includes($('f6gaPace')?.value)?$('f6gaPace').value:'未設定',
   confirmation:'user_declared_before_off_not_externally_verified'};
  if(!persist()){record.frozen=null;return;}
  root.dispatchEvent(new CustomEvent('rsa-finish600-audit-frozen',{detail:{raceKey:current.key}}));
@@ -208,6 +217,7 @@ function resultHtml(){
  '<p>能力/M3上位：'+history.topAbility.n+'頭・平均差 '+fmt(history.topAbility.bias)+'秒 ／ 想定0.6秒以内：'+history.front.n+'頭・平均差 '+fmt(history.front.bias)+'秒</p>'+
  '<p>芝：'+history.turf.n+'頭・平均差 '+fmt(history.turf.bias)+'秒 ／ ダート：'+history.dirt.n+'頭・平均差 '+fmt(history.dirt.bias)+'秒</p>'+
  '<p>1600m以下：'+history.short.n+'頭・平均差 '+fmt(history.short.bias)+'秒 ／ 1600m超：'+history.long.n+'頭・平均差 '+fmt(history.long.bias)+'秒</p>'+
+ '<p>スロー想定：'+history.paceSlow.n+'頭・平均差 '+fmt(history.paceSlow.bias)+'秒 ／ 平均想定：'+history.paceMiddle.n+'頭・平均差 '+fmt(history.paceMiddle.bias)+'秒 ／ ハイ想定：'+history.paceFast.n+'頭・平均差 '+fmt(history.paceFast.bias)+'秒</p>'+
  '<small>参考集計。レース・年度・ペース条件の違いは調整していません。</small>')+'</div>';}
  return s;
 }
@@ -227,7 +237,8 @@ function render(){
   const d=draft(),a=checkForecast(current.roster,d);
   content+='<div class="f6ga-summary"><strong id="f6gaCount">全頭予想 '+a.count+'/'+current.roster.length+'頭</strong>'+
    '<small>全頭の想定先頭差を入力すると、発走前に記録を固定できます。</small></div>'+
-   '<label>発走予定日時（JSTで確認）<input id="f6gaStart" type="datetime-local" value="" /></label>'+
+   '<label>発走予定日時（端末の現地時刻）<input id="f6gaStart" type="datetime-local" value="" /></label>'+
+   '<label>想定ペース（任意・主観）<select id="f6gaPace"><option value="未設定">未設定</option><option value="スロー">スロー</option><option value="平均">平均</option><option value="ハイ">ハイ</option></select></label>'+
    '<label class="f6ga-check"><input id="f6gaNumbers" type="checkbox"/> CSV表示番号を公式馬番と照合しました</label>'+
    '<label class="f6ga-check"><input id="f6gaBefore" type="checkbox"/> 発走前に入力した自分の見立てです</label>'+
    '<button type="button" id="f6gaFreeze">全頭の予測を固定する</button>'+
