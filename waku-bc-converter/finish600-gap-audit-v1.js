@@ -116,12 +116,14 @@ function draft(){
  try{const key='rsa-600m-gap-v1:'+hash(current.key),d=JSON.parse(root.localStorage.getItem(key)||'null');
   return d?.raceKey===current.key&&d?.records&&typeof d.records==='object'?d.records:{};}catch(_){return{};}
 }
-function isLocked(key){
- if(current?.key===key&&record?.frozen)return true;
+function frozenFor(key){
+ if(current?.key===key&&record?.frozen)return record.frozen;
  try{const s=JSON.parse(root.localStorage.getItem(storageKey(key))||'null');
- return s?.raceKey===key&&s.version===V&&Boolean(s.frozen);}catch(_){return false;}
- }
-root.RSAFinish600GapAuditV1={version:V,isLocked};
+ return s?.raceKey===key&&s.version===V?s.frozen||null:null;}catch(_){return null;}
+}
+function isLocked(key){return Boolean(frozenFor(key));}
+function getFrozen(key){return frozenFor(key)?.predicted||null;}
+root.RSAFinish600GapAuditV1={version:V,isLocked,getFrozen};
 function updateDraftCount(){if(!current||record?.frozen)return;const el=$('f6gaCount');if(el){const a=checkForecast(current.roster,draft());el.textContent='全頭予想 '+a.count+'/'+current.roster.length+'頭';}}
 function showMessage(s,bad){const n=$('f6gaMessage');if(n){n.textContent=s;n.style.color=bad?'#ffc7b7':'#b4efd9';}}
 const fmt=(x,n=2)=>x===null||!Number.isFinite(x)?'—':x.toFixed(n);
