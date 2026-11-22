@@ -157,6 +157,7 @@ function freeze(){
  if(stamp.getTime()<=now.getTime())return showMessage('発走予定時刻を過ぎています。過去の予想として固定できません',true);
  if($('f6gaNumbers')?.checked!==true)return showMessage('公式馬番とCSV仮馬番の照合を確認してください',true);
  if($('f6gaBefore')?.checked!==true)return showMessage('発走前の自己申告にチェックしてください',true);
+ record.meta={...current.meta};
  const rec=draft(),z=checkForecast(current.roster,rec);
  if(!z.ok)return showMessage('全頭の想定差が必要です。'+z.errors.slice(0,3).join('、'),true);
  if(root.confirm&&!root.confirm('残り600m地点の全'+current.roster.length+'頭の予測を固定します。後から変更できません。よろしいですか？'))return;
@@ -206,11 +207,12 @@ function resultHtml(){
  '<div>平均絶対誤差（MAE） <b>'+fmt(m.mae)+'秒</b> ／ 平均差（実測−予測） <b>'+fmt(m.bias)+'秒</b></div>'+
  '<div>差を0.3秒超、小さく見積もった馬：'+m.underBy03+'頭 ／ 実測1秒超の見落とし：'+m.unexpectedBack+'頭</div>'+
  '<div>AbilityまたはM3上位3頭で実測1秒超を見落とした馬：'+m.highAbilityUnexpected+'頭</div>'+
+ '<div>事前も実測も1秒超：'+m.correctBack+'頭 ／ 予想は1秒超・実測は1秒以内：'+m.falseAlarm+'頭</div>'+
  '<small>平均差がプラスなら後方差を小さく見積もる傾向。0.3秒／1.0秒は探索用の区切りで、購入基準ではありません。</small></div>';
  s+='<div class="f6ga-scroll"><table><thead><tr><th>馬</th><th>予想</th><th>実測</th><th>ズレ</th><th>結果</th></tr></thead><tbody>'+
  m.rows.map(r=>'<tr'+(r.unexpectedBack?' class="f6ga-miss"':'')+'><td>'+html(r.no)+' '+html(r.name)+'</td>'+
  '<td>'+fmt(r.pred,1)+'</td><td>'+fmt(r.actual,1)+'</td><td>'+ (r.error>0?'+':'')+fmt(r.error,1)+'</td>'+
- '<td>'+ (r.unexpectedBack?'後方差の見落とし':r.rank!==null?r.rank+'着':'—')+'</td></tr>').join('')+'</tbody></table></div>';
+ '<td>'+ (r.unexpectedBack?'後方差の見落とし'+(r.rank!==null?' / '+r.rank+'着':''):r.rank!==null?r.rank+'着':'—')+'</td></tr>').join('')+'</tbody></table></div>';
  if(history.races>0){s+='<div class="f6ga-summary"><strong>保存済み'+history.races+'レース／'+history.horses+'頭の累積</strong>'+
  '<p>平均絶対誤差 '+fmt(history.all.mae)+'秒 ／ 平均差 '+fmt(history.all.bias)+'秒 ／ 1秒超の見落とし '+history.all.unexpected+'頭</p>'+
  (history.races<3?'<small>レース数が少ないため傾向判定は保留</small>':
