@@ -31,6 +31,9 @@ test('backward low-M3 and two-front-runner warnings are descriptive, not exclusi
  assert.match(back.positional,/差し届く根拠/);
  const front=c.notes({abilityRank:2,m3Rank:12,expectedRank:2,queueValidated:true},{expectedRank:3,queueValidated:true},12);
  assert.match(front.positional,/先行争い/);
+ const behind=c.notes({abilityRank:2,m3Rank:11,p10:.63,queueValidated:true,expectedRank:11},{queueValidated:true,expectedRank:2},12);
+ assert.match(behind.p10Note,/63%/);assert.match(behind.p10Note,/自動消去しません/);
+ assert.match(c.notes({abilityRank:2,m3Rank:3,p10:NaN},null,16).p10Note,/未取得/);
  assert.equal(c.typeOf({abilityRank:2,m3Rank:12}),'ability_only');
 });
 test('research overlay source does not write gate or silently change partner shortlist',()=>{
