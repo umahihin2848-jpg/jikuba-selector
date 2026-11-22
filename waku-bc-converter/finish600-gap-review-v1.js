@@ -38,8 +38,9 @@ function load(ctx){
 }
 function status(msg){
  const h=$('f6gStatus');if(!h||!state)return;
- const all=state.ctx.rows.filter(r=>assess(state.db.records[r.no]?.gap).valid);
- h.textContent='想定差の記入 '+all.length+'/'+state.ctx.rows.length+'頭'+(msg?'｜'+msg:'');
+ const frozen=root.RSAFinish600GapAuditV1?.getFrozen?.(state.ctx.key);
+ const all=state.ctx.rows.filter(r=>assess((frozen||state.db.records)[r.no]?.gap).valid);
+ h.textContent='想定差の記入 '+all.length+'/'+state.ctx.rows.length+'頭'+(frozen?'｜予測固定済み':'')+(msg?'｜'+msg:'');
 }
 function save(){
  if(!state)return false;
@@ -51,7 +52,7 @@ function later(){changed=true;status('入力中');clearTimeout(writeTimer);write
 root.RSAFinish600GapReviewV1=Object.freeze({version:VERSION,flush});
 function renderItem(){
  const p=$('f6gItem');if(!state||!p)return;
- const r=state.ctx.rows.find(r=>r.no===chosen)||state.ctx.rows[0],d=state.db.records[r.no]||{},a=assess(d.gap),locked=Boolean(root.RSAFinish600GapAuditV1?.isLocked?.(state.ctx.key));
+ const r=state.ctx.rows.find(r=>r.no===chosen)||state.ctx.rows[0],d=(root.RSAFinish600GapAuditV1?.getFrozen?.(state.ctx.key)||state.db.records)[r.no]||{},a=assess(d.gap),locked=Boolean(root.RSAFinish600GapAuditV1?.isLocked?.(state.ctx.key));
  p.innerHTML='<div class="f6g-name"><strong>'+E(r.no)+'番 '+E(r.name)+'</strong>'+
  '<small>Ability '+(r.ability??'—')+'位 ／ M3 '+(r.m3??'—')+'位 ／ 初角予測 '+(r.initial===null?'—':r.initial.toFixed(1)+'番手')+
  ' ／ P10 '+(r.p10===null?'—':(100*r.p10).toFixed(1)+'%')+'</small></div>'+
