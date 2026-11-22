@@ -1,0 +1,24 @@
+/* Research-only price and probability input for seven bet types. */
+#rsafFormation .rsc-lab{border:1px solid #496e80;background:linear-gradient(155deg,#132c3b,#0b2030);border-radius:14px;color:#e7f1f6;overflow:hidden}
+#rsafFormation .rsc-lab>summary{padding:14px 12px;min-height:48px;cursor:pointer;font-size:13px;font-weight:850;line-height:1.5;list-style-position:inside}
+#rsafFormation .rsc-lab>section{padding:0 12px 14px;display:grid;gap:11px}
+#rsafFormation .rsc-lab p{font-size:11px;line-height:1.75;margin:0;color:#bacdd9}
+#rsafFormation .rsc-lab .rsc-warning{color:#efddb8;border:1px solid #82704f;background:#322a1d;border-radius:10px;padding:10px}
+#rsafFormation .rsc-add{display:grid;gap:8px;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);align-items:end}
+#rsafFormation .rsc-add label{display:grid;gap:5px;min-width:0;color:#c4d7e1;font-size:11px}
+#rsafFormation .rsc-add select{box-sizing:border-box;width:100%;min-width:0;min-height:44px;background:#102d3d!important;color:#ebf5fb!important;border:1px solid #51758a!important;border-radius:9px;padding:9px 5px!important;font-size:13px!important}
+#rsafFormation .rsc-add button{grid-column:1/-1;min-height:44px!important;font-size:12px!important;font-weight:800!important;background:#1a493e!important;color:#eaffee!important;border:1px solid #598d79!important;border-radius:10px!important}
+#rsafFormation #rscRows{display:grid;gap:9px}
+#rsafFormation .rsc-line{display:grid;gap:9px;background:#0c2434;border:1px solid #3a6073;border-radius:12px;padding:11px}
+#rsafFormation .rsc-line>div:first-child{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#rsafFormation .rsc-line strong{font-size:12px;color:#effaff}
+#rsafFormation .rsc-line>div:first-child button{min-height:36px!important;font-size:11px!important;color:#e8c4bf!important;border:1px solid #7d5c60!important;background:#302126!important;border-radius:8px!important;padding:5px 9px!important}
+#rsafFormation .rsc-inputs{display:grid;gap:7px;grid-template-columns:repeat(3,minmax(0,1fr))}
+#rsafFormation .rsc-inputs label{font-size:10px;color:#a9c5d3;display:grid;gap:5px;min-width:0;line-height:1.4}
+#rsafFormation .rsc-inputs input{width:100%!important;box-sizing:border-box!important;min-width:0!important;min-height:43px!important;font-size:16px!important;background:#0b1d29!important;color:#fff!important;border:1px solid #416377!important;border-radius:7px!important;padding:7px!important}
+#rsafFormation .rsc-line small{font-size:10px;color:#c4e4d5;line-height:1.7}
+#rsafFormation #rscTotal{display:grid;gap:5px;border-top:1px solid #3e5f73;padding-top:11px;font-size:12px;line-height:1.7}
+#rsafFormation #rscTotal strong{font-size:13px;color:#f0fbf6}
+#rsafFormation #rscTotal small{font-size:10px;color:#96b9c7;line-height:1.6}
+#rsafFormation .rsc-lab .rsc-foot{font-size:10px;color:#97b8c6}
+@media(max-width:390px){#rsafFormation .rsc-inputs{grid-template-columns:repeat(2,minmax(0,1fr))}#rsafFormation .rsc-inputs label:last-child{grid-column:1/-1}}
