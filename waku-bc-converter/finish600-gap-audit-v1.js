@@ -6,7 +6,7 @@ const html=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'
 const number=v=>v==null||String(v).trim()===''?NaN:Number(v);
 const validGap=v=>Number.isFinite(number(v))&&number(v)>=0&&number(v)<=15;
 function keyOf(m,hs){return JSON.stringify([m.date,m.venue,m.race,m.grade,m.surface,m.dist,hs.map(h=>[String(h.no),h.name])]);}
-function hash(str){let n=2166136261;for(let i=0;i<str.length;i++)n=Math.imul(n^str.charCodeAt(i),16777619);return(n>>>0).toString(36);}
+function hash(str){let n=2166136261;for(const s of str)n=Math.imul(n^s.charCodeAt(0),16777619);return(n>>>0).toString(36);}
 function checkForecast(roster,records){
  const errors=[],values={};
  for(const h of roster){const raw=records?.[String(h.no)]?.gap;
@@ -122,7 +122,7 @@ function isLocked(key){
  return s?.raceKey===key&&s.version===V&&Boolean(s.frozen);}catch(_){return false;}
  }
 root.RSAFinish600GapAuditV1={version:V,isLocked};
-function dateTimeValue(d){const pad=x=>String(x).padStart(2,'0');return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());}
+function updateDraftCount(){if(!current||record?.frozen)return;const el=$('f6gaCount');if(el){const a=checkForecast(current.roster,draft());el.textContent='全頭予想 '+a.count+'/'+current.roster.length+'頭';}}
 function showMessage(s,bad){const n=$('f6gaMessage');if(n){n.textContent=s;n.style.color=bad?'#ffc7b7':'#b4efd9';}}
 const fmt=(x,n=2)=>x===null||!Number.isFinite(x)?'—':x.toFixed(n);
 function hist(){const all=[];
@@ -214,7 +214,7 @@ function render(){
  if(!current||c.key!==current.key){current=c;record=load(c);open=false;}
  let node=$('f6gaPanel');
  if(node&&node.dataset.race!==current.key){node.remove();node=null;}
- if(node&&node.parentElement===host)return;
+ if(node&&node.parentElement===host){updateDraftCount();return;}
  node=root.document.createElement('details');node.id='f6gaPanel';node.className='f6ga-panel';node.dataset.race=current.key;node.open=open;
  const frozen=record?.frozen,completed=Boolean(record?.outcome);
  let content='<summary>600m先頭差｜発走前予測と実測の照合</summary><div class="f6ga-body">'+
@@ -223,7 +223,7 @@ function render(){
  '<p id="f6gaMessage" class="f6ga-status"></p>';
  if(!frozen){
   const d=draft(),a=checkForecast(current.roster,d);
-  content+='<div class="f6ga-summary"><strong>全頭予想 '+a.count+'/'+current.roster.length+'頭</strong>'+
+  content+='<div class="f6ga-summary"><strong id="f6gaCount">全頭予想 '+a.count+'/'+current.roster.length+'頭</strong>'+
    '<small>全頭の想定先頭差を入力すると、発走前に記録を固定できます。</small></div>'+
    '<label>発走予定日時（JSTで確認）<input id="f6gaStart" type="datetime-local" value="" /></label>'+
    '<label class="f6ga-check"><input id="f6gaNumbers" type="checkbox"/> CSV表示番号を公式馬番と照合しました</label>'+
@@ -255,7 +255,8 @@ function render(){
  });
  node.addEventListener('change',e=>{if(e.target.id==='f6gaFile'){const file=e.target.files?.[0];e.target.value='';if(file)restore(file);}});
 }
-let renderTimer=0;function schedule(){clearTimeout(renderTimer);renderTimer=setTimeout(render,110);}
+let renderTimer=0,draftTimer=0;function schedule(){clearTimeout(renderTimer);renderTimer=setTimeout(render,110);}
 ['rsa-focused-partner-ready','finish600-ready','rsa-analysis-complete','rsa-finish600-audit-frozen'].forEach(e=>root.addEventListener(e,schedule));
+root.document.addEventListener('input',e=>{if(e.target?.id==='f6gGap'){clearTimeout(draftTimer);draftTimer=setTimeout(updateDraftCount,690);}},true);
 if(root.document.readyState==='loading')root.addEventListener('DOMContentLoaded',schedule,{once:true});else schedule();
 })(typeof window!=='undefined'?window:globalThis);
