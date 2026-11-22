@@ -7,6 +7,7 @@ vm.runInNewContext(source,sandbox,{timeout:1000});
 const c=sandbox.RSAOpponentEvidenceCoreV1;
 test('historical evidence types keep Ability and M3 disagreement separate',()=>{
  assert.equal(c.typeOf({abilityRank:2,m3Rank:5}),'agreement');
+ assert.equal(c.typeOf({abilityRank:1,m3Rank:4}),'agreement'); // Grade Pair may select rank-2 axis
  assert.equal(c.typeOf({abilityRank:2,m3Rank:10}),'ability_only');
  assert.equal(c.typeOf({abilityRank:5,m3Rank:4}),'m3_challenger');
  assert.equal(c.typeOf({abilityRank:2,m3Rank:null}),'missing');
