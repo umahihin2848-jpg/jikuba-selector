@@ -40,7 +40,7 @@ function stats(predicted,actual,roster){
  for(const h of roster){
   const id=String(h.no),p=number(predicted?.[id]?.gap),a=number(actual?.[id]?.gap);
   if(!Number.isFinite(p)||!Number.isFinite(a))continue;
-  const err=a-p,rank=actual[id]?.rank??null,upper=Number(h.ability)<=3||Number(h.m3)<=3;
+  const err=a-p,rank=actual[id]?.rank??null,upper=(Number.isFinite(number(h.ability))&&number(h.ability)>0&&number(h.ability)<=3)||(Number.isFinite(number(h.m3))&&number(h.m3)>0&&number(h.m3)<=3);
   const r={no:id,name:h.name,pred:p,actual:a,error:err,absError:Math.abs(err),
    unexpectedBack:p<=1&&a>1,anticipatedBack:p>1&&a>1,
    overRisk:p>1&&a<=1,positionUnder:err>.3+1e-9,abilityOrM3Top3:upper,rank};
@@ -77,7 +77,8 @@ function validateImport(a,k){
  if(!a||a.version!==V||a.raceKey!==k||!a.meta||!a.frozen||!Array.isArray(a.frozen.roster)||!a.frozen.predicted||!a.frozen.startAt||!a.frozen.lockedAt)return false;
  const r=a.frozen.roster;if(r.length<12||r.length>18||new Set(r.map(x=>String(x.no))).size!==r.length)return false;
  if(!checkForecast(r,a.frozen.predicted).ok)return false;
- if(!Number.isFinite(Date.parse(a.frozen.startAt))||!Number.isFinite(Date.parse(a.frozen.lockedAt)))return false;
+ if(!Number.isFinite(Date.parse(a.frozen.startAt))||!Number.isFinite(Date.parse(a.frozen.lockedAt))||Date.parse(a.frozen.lockedAt)>=Date.parse(a.frozen.startAt))return false;
+ if(a.outcome?.recordedAt&&Date.parse(a.outcome.recordedAt)<Date.parse(a.frozen.startAt))return false;
  if(a.outcome){if(!a.outcome.actual||typeof a.outcome.actual!=='object')return false;
   for(const h of r)if(!validGap(a.outcome.actual[String(h.no)]?.gap))return false;
  }
