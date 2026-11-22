@@ -4,11 +4,11 @@ const {test}=require('node:test'),assert=require('node:assert/strict'),fs=requir
 const source=fs.readFileSync(path.join(__dirname,'..','cross-ticket-research-v1.js'),'utf8');
 const scope={};vm.runInNewContext(source,scope,{timeout:2000});
 const c=scope.RSACrossTicketResearchCoreV1;
-test('seven bet types, 23 distinct official candidates from fixed axis and three partners',()=>{
+test('seven bet types, 60 possible tickets from four horses',()=>{
  const ts=c.makeTickets(7,[3,10,14]);
  const count=Object.fromEntries(c.types.map(type=>[type,ts.filter(t=>t.type===type).length]));
- assert.deepEqual(JSON.parse(JSON.stringify(count)),{'単勝':1,'複勝':1,'馬連':3,'ワイド':3,'馬単':6,'3連複':3,'3連単':6});
- assert.equal(new Set(ts.map(x=>x.key)).size,23);
+ assert.deepEqual(JSON.parse(JSON.stringify(count)),{'単勝':4,'複勝':4,'馬連':6,'ワイド':6,'馬単':12,'3連複':4,'3連単':24});
+ assert.equal(new Set(ts.map(x=>x.key)).size,60);
 });
 test('exact ticket logic distinguishes unordered and ordered races',()=>{
  const f=['7','3','10'];
