@@ -48,15 +48,16 @@ function save(){
 }
 function flush(){if(changed){clearTimeout(writeTimer);save();}}
 function later(){changed=true;status('入力中');clearTimeout(writeTimer);writeTimer=setTimeout(save,500);}
+root.RSAFinish600GapReviewV1=Object.freeze({version:VERSION,flush});
 function renderItem(){
  const p=$('f6gItem');if(!state||!p)return;
- const r=state.ctx.rows.find(r=>r.no===chosen)||state.ctx.rows[0],d=state.db.records[r.no]||{},a=assess(d.gap);
+ const r=state.ctx.rows.find(r=>r.no===chosen)||state.ctx.rows[0],d=state.db.records[r.no]||{},a=assess(d.gap),locked=Boolean(root.RSAFinish600GapAuditV1?.isLocked?.(state.ctx.key));
  p.innerHTML='<div class="f6g-name"><strong>'+E(r.no)+'番 '+E(r.name)+'</strong>'+
  '<small>Ability '+(r.ability??'—')+'位 ／ M3 '+(r.m3??'—')+'位 ／ 初角予測 '+(r.initial===null?'—':r.initial.toFixed(1)+'番手')+
  ' ／ P10 '+(r.p10===null?'—':(100*r.p10).toFixed(1)+'%')+'</small></div>'+
  '<div class="f6g-fields"><label>ゴール前600m時点の先頭差を予想（秒）'+
- '<input id="f6gGap" type="number" min="0" max="15" step=".1" inputmode="decimal" value="'+E(d.gap??'')+'" placeholder="例 0.8"></label>'+
- '<label>判断根拠・展開条件<textarea id="f6gReason" rows="3" maxlength="1200" placeholder="直近の-3F差、前半ペース、想定ポジション、コースなど">'+E(d.reason||'')+'</textarea></label></div>'+
+ '<input id="f6gGap" type="number" min="0" max="15" step=".1" inputmode="decimal" value="'+E(d.gap??'')+'" placeholder="例 0.8"'+(locked?' disabled':'')+'></label>'+
+ '<label>判断根拠・展開条件<textarea id="f6gReason" rows="3" maxlength="1200" placeholder="直近の-3F差、前半ペース、想定ポジション、コースなど"'+(locked?' disabled':'')+'>'+E(d.reason||'')+'</textarea></label></div>'+
  '<p id="f6gFlag" class="f6g-flag '+a.band+'">'+E(a.flag)+(a.valid?'（仮の見立て）':'')+'</p>';
 }
 function renderSelect(){
@@ -74,6 +75,7 @@ function exportJSON(){
 }
 async function importBackup(file){
  if(!file||!state)return;
+ if(root.RSAFinish600GapAuditV1?.isLocked?.(state.ctx.key)){status('監査予測を固定済みのため上書きできません');return;}
  try{
   if(file.size>2000000)throw new Error('ファイルサイズが大きすぎます');
   const obj=JSON.parse(await file.text());
@@ -111,6 +113,7 @@ function paint(){
  node.addEventListener('change',e=>{if(e.target.id==='f6gImportFile'){const file=e.target.files?.[0];e.target.value='';if(file)importBackup(file);}});
  node.addEventListener('input',e=>{
   if(!['f6gGap','f6gReason'].includes(e.target.id))return;
+  if(root.RSAFinish600GapAuditV1?.isLocked?.(state.ctx.key)){status('監査予測の固定後は編集できません');renderItem();return;}
   const db=state.db.records;if(!db[chosen])db[chosen]={gap:'',reason:''};
   const v=String(e.target.value||'');
   if(e.target.id==='f6gGap')db[chosen].gap=v;else db[chosen].reason=v.slice(0,1200);
@@ -125,6 +128,7 @@ function paint(){
  });
  renderSelect();renderItem();status();
 }
+root.addEventListener('rsa-finish600-audit-frozen',()=>{if(state)renderItem();status('発走前予想を監査用に固定済み');});
 function schedule(){clearTimeout(timer);timer=setTimeout(paint,90);}
 ['rsa-focused-partner-ready','rsa-analysis-complete','finish600-ready','validated-queue-ready','position-risk-ready'].forEach(e=>root.addEventListener(e,schedule));
 root.document.addEventListener('visibilitychange',()=>{if(root.document.visibilityState==='hidden')flush();});
