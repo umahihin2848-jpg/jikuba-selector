@@ -1,0 +1,21 @@
+/* Research-only after-600m position deficit review, mobile tab3 */
+#rsafFormation .f6g-panel{border:1px solid #597787;background:linear-gradient(150deg,#142d3b,#0b2130);border-radius:13px;overflow:hidden;color:#e7f3f7}
+#rsafFormation .f6g-panel>summary{padding:14px 12px;min-height:48px;font-size:13px;font-weight:850;cursor:pointer;line-height:1.5;list-style-position:inside}
+#rsafFormation .f6g-body{padding:0 12px 14px;display:grid;gap:10px}
+#rsafFormation .f6g-body>p{font-size:11px;line-height:1.65;margin:0;color:#bcd1dc}
+#rsafFormation .f6g-body .f6g-caution{border:1px solid #8a7650;background:#322b1e;color:#f1ddb8;border-radius:10px;padding:10px}
+#rsafFormation .f6g-body .f6g-status{font-size:12px;color:#a9e8cf;font-weight:800}
+#rsafFormation .f6g-choice,#rsafFormation .f6g-fields label{display:grid;gap:6px;font-size:11px;color:#c2d8e0;line-height:1.6}
+#rsafFormation .f6g-choice select,#rsafFormation .f6g-fields input,#rsafFormation .f6g-fields textarea{box-sizing:border-box;width:100%;min-width:0;min-height:44px;border-radius:9px!important;border:1px solid #52758a!important;background:#0b2534!important;color:#f1faff!important;padding:9px!important;font-size:16px!important;line-height:1.5}
+#rsafFormation #f6gItem{border:1px solid #426777;background:#0e2937;border-radius:10px;padding:11px;display:grid;gap:11px}
+#rsafFormation .f6g-name{display:grid;gap:4px}
+#rsafFormation .f6g-name strong{font-size:14px}
+#rsafFormation .f6g-name small{font-size:10px;color:#a9c8d3;line-height:1.6}
+#rsafFormation .f6g-fields{display:grid;gap:10px}
+#rsafFormation .f6g-flag{font-size:11px;border-radius:8px;padding:9px;border:1px solid #446273;background:#152e3b;color:#b7d4dd;line-height:1.5;margin:0}
+#rsafFormation .f6g-flag.inspect-high{border-color:#bd765c;color:#ffe7d8;background:#442b26}
+#rsafFormation .f6g-flag.inspect-middle{border-color:#947c57;color:#f7e4c1;background:#353024}
+#rsafFormation .f6g-flag.inspect-low{border-color:#487e75;color:#c1e6d7;background:#1b3837}
+#rsafFormation .f6g-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#rsafFormation .f6g-actions button{min-height:44px!important;min-width:0!important;font-size:11px!important;background:#184839!important;border:1px solid #5a8879!important;color:#e5f8ee!important;border-radius:9px!important;padding:7px!important}
+#rsafFormation .f6g-body .f6g-foot{font-size:10px;color:#a0bbc7}
