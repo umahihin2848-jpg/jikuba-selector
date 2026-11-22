@@ -1,0 +1,24 @@
+/* Research-only opponent reasoning, scoped to existing three-tab partner cards. */
+#rsafPartners .rsao-intro{border:1px solid #456e7c;background:linear-gradient(155deg,#113342,#0b2232);border-radius:14px;padding:14px;display:grid;gap:8px;line-height:1.55;min-width:0}
+#rsafPartners .rsao-kicker{color:#90c7cb;font-size:10px;font-weight:800;letter-spacing:.05em}
+#rsafPartners .rsao-intro h3{font-size:16px;color:#e9fafb;line-height:1.4;margin:0}
+#rsafPartners .rsao-intro p{margin:0;font-size:12px;line-height:1.65;overflow-wrap:anywhere}
+#rsafPartners .rsao-lead{color:#e3f7ef;font-weight:750}
+#rsafPartners .rsao-muted{color:#b1c7d1}
+#rsafPartners .rsao-rule{font-size:11px;color:#bed5dc;border-top:1px solid #385e69;padding-top:8px;line-height:1.8}
+#rsafPartners .rsao-rule b{color:#eaf9f4;margin-right:6px}
+#rsafPartners .rsao-disclaimer{font-size:11px!important;color:#e3cda4;border:1px solid #736a4a;background:#2a281f;border-radius:9px;padding:10px}
+#rsafPartners .rsao-compare{border:1px solid #3f6677;background:#102c3e;border-radius:9px;overflow:hidden}
+#rsafPartners .rsao-compare summary{cursor:pointer;padding:11px 10px;font-size:12px;font-weight:800;color:#d0edf5;min-height:44px;display:list-item;list-style-position:inside}
+#rsafPartners .rsao-alt-list{display:grid;gap:5px;padding:5px 9px 10px}
+#rsafPartners .rsao-alt-list>div{display:grid;gap:3px;background:#0c2030;border:1px solid #325264;padding:9px;border-radius:8px;font-size:11px}
+#rsafPartners .rsao-alt-list>div b{font-size:12px;color:#f2f9fc}
+#rsafPartners .rsao-alt-list>div span{color:#d0dce2}
+#rsafPartners .rsao-alt-list>div small{color:#a1bcca;font-size:10px}
+#rsafPartners .rsao-card-evidence{margin-top:12px;border-top:1px solid #36576c;padding-top:10px;display:grid;gap:6px}
+#rsafPartners .rsao-evidence-title{display:flex;align-items:center;justify-content:space-between;gap:5px;flex-wrap:wrap}
+#rsafPartners .rsao-evidence-title span{font-size:11px;color:#9fbacb;font-weight:800}
+#rsafPartners .rsao-evidence-title strong{font-size:11px;color:#d6eaf2}
+#rsafPartners .rsao-evidence-title .rsao-strong{color:#a8f0ce}
+#rsafPartners .rsao-card-evidence p{margin:0;font-size:11px;color:#bfd3da;line-height:1.65;overflow-wrap:anywhere}
+#rsafPartners .rsao-card-evidence p b{color:#a5d9ce;display:inline-block;min-width:27px}
