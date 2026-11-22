@@ -29,12 +29,26 @@ if(!Array.isArray(focus.partnerNos)||!focus.partnerNos.length&&s.axis?.no)return
 if(['G1','G2','G3'].includes(m.grade)&&ability.activeModel!=='C')return msg('重賞のAbility Cが未成立です。',true);
 if($('panNumbersConfirmed')?.checked!==true)return msg('表示馬番はCSVの仮番号の場合があります。公式結果と各馬を照合できることを確認してください。',true);
 const pair=s.kind==='pair_v1'?(s.sourcePairCandidates||[]):s.kind==='double'?(s.candidates||[]):[];
+const horseSnapshot=makeHorses();
 const z=C.freeze({meta:m,startTime:val('panStart'),confirmed:$('panConfirm')?.checked===true,now:Date.now(),
 axisNo:s.axis?.no||null,axisKind:s.kind,axisCode:s.code,pairNos:pair.map(x=>x.no),
 partners:String(focus.axisNo||'')===String(s.axis?.no||'')?focus.partnerNos||[]:[],partnerMethod:focus.partnerRule,
-pace:root.MobileAnalysisCoreState?.analysis?.pred?.p||[],horses:makeHorses(),
+pace:root.MobileAnalysisCoreState?.analysis?.pred?.p||[],horses:horseSnapshot,
 sourceVersions:{ability:ability.version,m3:root.Finish600State?.version,queue:root.ValidatedQueueState?.version,focused:focus.version,numbering:'csv_display_numbers_user_confirmed'}});
-if(!z.ok)return msg(z.reason,true);const a=list();
+if(!z.ok)return msg(z.reason,true);
+// Forward-only research receipt: freeze the rank-agreement candidate before the race.
+const ec=root.RSAOpponentEvidenceCoreV1;
+if(ec&&String(focus.axisNo||'')===String(s.axis?.no||'')&&Array.isArray(focus.partnerNos)&&focus.partnerNos.length===3){
+ const chosen=focus.partnerNos.map(no=>horseSnapshot.find(h=>String(h.no)===String(no))).filter(Boolean);
+ if(chosen.length===3){
+  const pick=ec.mainChoice(chosen),hasTie=chosen.some(h=>horseSnapshot.filter(v=>Number(v.abilityRank)===Number(h.abilityRank)).length>1);
+  const kind=hasTie?'tie':pick.kind;
+  z.record.frozen.opponentEvidenceV1={version:ec.version,kind,mainNo:kind==='single'?pick.no:null,
+   referenceOnly:true,method:'unique_ability_2_3_m3_1_5',comparedPartnerNos:focus.partnerNos.map(String),
+   note:'Only agreement rank evidence; not calibrated joint top3 probability or betting guidance'};
+ }
+}
+const a=list();
 if(a.some(r=>r.key===z.record.key))return msg('同じレースの予測は固定済みです。上書きできません。',true);
 if(a.length>=600)return msg('保存上限です。JSONバックアップを作成してください。',true);
 try{a.push(z.record);write(a);$('panConfirm').checked=false;$('panNumbersConfirmed').checked=false;refresh();msg('軸・相手・初角の予測を発走前に固定しました。')}catch{msg('ブラウザの保存領域に書き込めません。',true)}
@@ -80,6 +94,13 @@ if(audit){
   '<small>市場データが揃う軸 '+audit.marketComplete+'/'+audit.completed+'R。比較不能 '+(audit.marketMissing+audit.ignored.peerUnavailable)+'R（市場欠損 '+audit.marketMissing+'、近いオッズの他馬が2頭未満 '+audit.ignored.peerUnavailable+'）。'+safe(audit.disclosure)+' 95%区間は標本不確実性の目安で、過学習や選択バイアスを除去するものではありません。</small>';
 }
 
+const evRecords=a.filter(rec=>rec?.outcome?.top3?.length===3&&rec?.frozen?.opponentEvidenceV1?.kind==='single'&&rec?.frozen?.opponentEvidenceV1?.mainNo&&rec?.frozen?.axisNo);
+const evWide=evRecords.filter(rec=>rec.outcome.top3.map(String).includes(String(rec.frozen.axisNo))&&rec.outcome.top3.map(String).includes(String(rec.frozen.opponentEvidenceV1.mainNo))).length;
+const evAxis=evRecords.filter(rec=>rec.outcome.top3.map(String).includes(String(rec.frozen.axisNo))).length;
+box.innerHTML+='<hr><p><b>相手本線候補の発走前検証（研究）</b></p>'+
+ '<div>順位一致の比較優先1頭と軸のワイド成立：'+evWide+'/'+evRecords.length+'R（'+pct(evWide,evRecords.length)+'）</div>'+
+ '<div>うち軸3着以内：'+evAxis+'/'+evRecords.length+'R。順位一致候補が複数・不在・同点のレースは本線未確定として扱い、上記の分母に含めません。</div>'+
+ '<small>2026-11-22版以降に発走前固定した記録のみが対象です。小標本・未較正であり、購入オッズの判断に使える精度ではありません。</small>';
 const diagnosis=C.summarizeDiagnosis(a),counts=diagnosis.counts;
 box.innerHTML+='<hr><p><b>外れ方の分類（重複あり）</b></p>'+
  '<div>軸馬が圏外：'+counts.axisMiss+'/'+diagnosis.n+'R。このうちAbility上位3頭が全滅：'+counts.abilityShortlistMiss+'R／Ability上位に好走馬がいた：'+counts.axisChoiceMiss+'R。</div>'+
