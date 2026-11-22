@@ -54,7 +54,7 @@ function update(){
  for(const e of entries){const z=evaluate(e),out=el.querySelector('[data-vtl-out="'+e.no+'"]');if(!out)continue;
   if(!z.ready){out.textContent=z.reason;continue;}
   active++;
-  out.innerHTML='損益分岐 <b>'+z.breakEven?.toFixed(2)+'倍</b> ／ 仮の期待回収率 <b>'+displayPct(z.roi)+'</b>'+
+  out.innerHTML='損益分岐 <b>'+(z.breakEven!==null?z.breakEven.toFixed(2)+'倍':'算出不可')+'</b> ／ 仮の期待回収率 <b>'+displayPct(z.roi)+'</b>'+
    (z.lowerRoi!==null?' ／ 慎重試算 <b>'+displayPct(z.lowerRoi)+'</b>':' ／ 慎重試算：未入力');
  }
  const p=$('vtlPlans');if(!p)return;
