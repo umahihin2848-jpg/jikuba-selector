@@ -16,7 +16,7 @@ function checkForecast(roster,records){
 }
 function parseActual(raw,roster){
  const lines=String(raw||'').normalize('NFKC').trim().split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
- const names=new Set(roster.map(h=>String(h.no))),n=roster.length,result={},usedRanks=new Set(),errors=[];
+ const names=new Set(roster.map(h=>String(h.no))),n=roster.length,result={},errors=[];
  if(lines.length!==n)errors.push('全'+n+'頭を1行ずつ入力（現在'+lines.length+'行）');
  for(const [i,line] of lines.entries()){
   const cells=line.split(/[\t ,，、]+/).filter(Boolean);
@@ -26,10 +26,9 @@ function parseActual(raw,roster){
   const id=String(Number(no));
   if(Object.prototype.hasOwnProperty.call(result,id)){errors.push(id+'番が重複');continue;}
   if(!validGap(gap)){errors.push(id+'番の実測差が不正（0〜15秒）');continue;}
-  if(rank!==undefined&&(!/^\d+$/.test(rank)||Number(rank)<1||Number(rank)>n||usedRanks.has(Number(rank)))){
+  if(rank!==undefined&&(!/^\d+$/.test(rank)||Number(rank)<1||Number(rank)>n)){
    errors.push(id+'番の着順が不正・重複');continue;
   }
-  if(rank!==undefined)usedRanks.add(Number(rank));
   result[id]={gap:Number(gap),rank:rank===undefined?null:Number(rank)};
  }
  if(Object.keys(result).length!==n)errors.push('馬番が全頭分揃っていません');
@@ -117,8 +116,11 @@ function draft(){
  try{const key='rsa-600m-gap-v1:'+hash(current.key),d=JSON.parse(root.localStorage.getItem(key)||'null');
   return d?.raceKey===current.key&&d?.records&&typeof d.records==='object'?d.records:{};}catch(_){return{};}
 }
-function isLocked(key){if(!current||current.key!==key)return false;
- return Boolean(record?.frozen);}
+function isLocked(key){
+ if(current?.key===key&&record?.frozen)return true;
+ try{const s=JSON.parse(root.localStorage.getItem(storageKey(key))||'null');
+ return s?.raceKey===key&&s.version===V&&Boolean(s.frozen);}catch(_){return false;}
+ }
 root.RSAFinish600GapAuditV1={version:V,isLocked};
 function dateTimeValue(d){const pad=x=>String(x).padStart(2,'0');return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());}
 function showMessage(s,bad){const n=$('f6gaMessage');if(n){n.textContent=s;n.style.color=bad?'#ffc7b7':'#b4efd9';}}
@@ -203,6 +205,7 @@ function resultHtml(){
  (history.races<3?'<small>レース数が少ないため傾向判定は保留</small>':
  '<p>能力/M3上位：'+history.topAbility.n+'頭・平均差 '+fmt(history.topAbility.bias)+'秒 ／ 想定0.6秒以内：'+history.front.n+'頭・平均差 '+fmt(history.front.bias)+'秒</p>'+
  '<p>芝：'+history.turf.n+'頭・平均差 '+fmt(history.turf.bias)+'秒 ／ ダート：'+history.dirt.n+'頭・平均差 '+fmt(history.dirt.bias)+'秒</p>'+
+ '<p>1600m以下：'+history.short.n+'頭・平均差 '+fmt(history.short.bias)+'秒 ／ 1600m超：'+history.long.n+'頭・平均差 '+fmt(history.long.bias)+'秒</p>'+
  '<small>参考集計。レース・年度・ペース条件の違いは調整していません。</small>')+'</div>';}
  return s;
 }
@@ -213,7 +216,7 @@ function render(){
  if(node&&node.dataset.race!==current.key){node.remove();node=null;}
  if(node&&node.parentElement===host)return;
  node=root.document.createElement('details');node.id='f6gaPanel';node.className='f6ga-panel';node.dataset.race=current.key;node.open=open;
- const frozen=record?.frozen,completed=Boolean(record?.outcome),snap=frozen?stats(frozen.predicted,{},frozen.roster):null;
+ const frozen=record?.frozen,completed=Boolean(record?.outcome);
  let content='<summary>600m先頭差｜発走前予測と実測の照合</summary><div class="f6ga-body">'+
  '<p>「600m先頭差チェック」で全頭の予想（秒）を書いたら、こちらで発走前に固定。レース後にTARGETの「上3F地点差」を馬番ごとに登録し、予想との差を調べます。</p>'+
  '<p class="f6ga-caution">研究専用。時間・馬番・観測データは利用者が確認する必要があります。端末時刻は真正な発走前記録の外部証明にはなりません。購入・能力・軸馬評価に自動反映しません。</p>'+
