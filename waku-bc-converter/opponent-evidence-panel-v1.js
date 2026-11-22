@@ -47,6 +47,7 @@ function notes(h,axis,field){
   else if(where==='後方'&&valid(h.m3Rank)&&N(h.m3Rank)<=5)positional+='末脚評価は高いが、差し届く馬場・ペースかは未確認。';
   else positional+='位置取りが好走に適するかはペース・馬場次第。';
   if(axisZone!=='未確定') positional+=' 軸は'+axisZone+'想定'+(axisZone===where?'（同じ位置取り帯）':'（位置取り帯が異なる）')+'。';
+  if(axisZone==='前方'&&where==='前方')positional+=' 軸・相手とも前方で、先行争いによる消耗リスクを確認（好走率への影響は未確定）。';
  }
  return {type,label:labels[type],support,caution,positional,zone:where,axisZone};
 }
