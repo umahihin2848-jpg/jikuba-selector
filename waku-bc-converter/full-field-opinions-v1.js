@@ -117,7 +117,7 @@ async function importBackup(file){
   record={version:VERSION,key:cur.key,meta:cur.meta,notes,createdAt:parsed.record.createdAt||new Date().toISOString(),
    lockedAt:typeof parsed.record.lockedAt==='string'?parsed.record.lockedAt:null};
   if(!save())return;
-  paint(true);status('JSONから復元しました');
+  $('ffoNotebook')?.remove();paint(true);status('JSONから復元しました');
  }catch(e){status('復元エラー：'+String(e.message||e));}
 }
 function move(offset){
@@ -133,7 +133,7 @@ function seal(){
  if(!root.confirm('発走前見解として固定しますか？ 固定後はこの端末では編集できません。'))return;
  record.lockedAt=new Date().toISOString();
  if(!save()){record.lockedAt=null;return;}
- paint(true);status('固定しました（発走前かは自己申告）');
+ $('ffoNotebook')?.remove();paint(true);status('固定しました（発走前かは自己申告）');
 }
 function paint(force){
  const host=$('rsaFocusedView'),c=context();if(!host)return;
