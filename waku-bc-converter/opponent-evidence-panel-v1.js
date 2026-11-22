@@ -9,8 +9,8 @@ const $=id=>root.document?.getElementById(id);
 function typeOf(h){
  const a=N(h?.abilityRank),m=N(h?.m3Rank);
  if(!valid(a)||!valid(m))return 'missing';
- if(a>=2&&a<=3&&m<=5)return 'agreement';
- if(a>=2&&a<=3&&m>=10)return 'ability_only';
+ if(a>=1&&a<=3&&m<=5)return 'agreement';
+ if(a>=1&&a<=3&&m>=10)return 'ability_only';
  if(a>=4&&a<=6&&m<=5)return 'm3_challenger';
  return 'mixed';
 }
@@ -25,10 +25,10 @@ function notes(h,axis,field){
  const labels={agreement:'Ability・M3両上位',ability_only:'能力上位・M3に不安',m3_challenger:'M3上位の比較候補',mixed:'能力とM3を個別確認',missing:'順位データ待ち'};
  let support='',caution='';
  if(type==='agreement'){
-  support='Ability2〜3位・M3 1〜5位。非重賞の長期集計で比較的好走率が高い型。';
+  support='Ability'+N(h.abilityRank)+'位・M3 1〜5位。両評価が一致。非重賞の長期集計はAbility2〜3位を対象としている。';
   caution='順位の一致はワイドの同時好走確率ではない。';
  }else if(type==='ability_only'){
-  support='Ability2〜3位。今回の相手関係で能力は上位評価。';
+  support='Ability'+N(h.abilityRank)+'位。今回の相手関係で能力は上位評価。';
   caution='M3が10位以下。直線の評価が低いが、自動的に消す根拠はない。';
  }else if(type==='m3_challenger'){
   support='M3 1〜5位。残り600mの評価は上位。';
