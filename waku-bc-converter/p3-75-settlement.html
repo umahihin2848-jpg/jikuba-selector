@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#071320">
+<title>P3-75｜予想→結果→回収率</title>
+<link rel="stylesheet" href="p3-75-settlement.css?v=20261123a">
+<script src="p3-75-settlement-core-v1.js?v=20261123a" defer></script>
+<script src="p3-75-settlement-ui-v1.js?v=20261123a" defer></script>
+</head>
+<body>
+<div class="layout">
+<header class="header">
+ <div><span class="eyebrow">RACE SCENARIO ANALYZER / P3-75</span><h1>予想 <span>→</span> 結果 <span>→</span> 回収率</h1><p>発走前の研究JSONと、実際の着順・払戻を同じレースに結び付けるオフライン検証。</p></div>
+ <a class="toplink" href="v3.html">予想アプリへ戻る <span aria-hidden="true">↗</span></a>
+</header>
+<div class="notice"><strong>研究用・仮想収支です。</strong> P3-74のJSONは実購入履歴を記録していません。金額は「仮に購入していたら」という再現計算で、過去収益や期待値を保証しません。ファイルはこの端末のブラウザ内で読み取り、サーバーに送信しません。</div>
+<main>
+<section class="panel" aria-labelledby="inputHeading">
+ <div class="sectionhead"><h2 id="inputHeading"><span class="index">01</span> データを読み込む</h2><span class="sub">3種類のファイル</span></div>
+ <div class="inputgrid">
+  <div class="filecard"><label for="p375Json"><strong>予想JSON</strong><small>P3-74で保存したもの（複数選択可）</small></label><input type="file" id="p375Json" accept=".json,application/json" multiple><output id="p375JsonCount">未選択</output></div>
+  <div class="filecard"><label for="p375Csv"><strong>TARGET成績CSV</strong><small>2016〜2025年・2026年などの成績ファイル（CP932）</small></label><input type="file" id="p375Csv" accept=".csv,text/csv" multiple><output id="p375CsvCount">未選択</output></div>
+  <div class="filecard"><label for="p375Hr"><strong>HR2払戻TXT</strong><small>haitou.txt / 2026_haitou.txt（複数選択可）</small></label><input type="file" id="p375Hr" accept=".txt,text/plain" multiple><output id="p375HrCount">未選択</output></div>
+ </div>
+ <div class="actions"><button type="button" class="primary" id="p375Load">ファイルを照合する</button><span id="p375Status" role="status" aria-live="polite">読込前</span></div>
+ <p class="help">JSONにレース番号がない場合は、<b>開催日＋競馬場＋レース名の一意一致</b>で照合します。名前が異なるレースを勝手に選びません。欠番・出走取消は確定馬番と返還情報を検証します。</p>
+</section>
+<section class="panel" id="p375ManualSection" hidden>
+ <div class="sectionhead"><h2><span class="index">02</span> 照合保留の確認</h2><span class="sub">結果を推測しない</span></div>
+ <div id="p375ManualList"></div>
+</section>
+<section class="panel" id="p375SummarySection" hidden>
+ <div class="sectionhead"><h2><span class="index">03</span> 同じ母集団で比較</h2><span class="sub">見送りも分母に含める</span></div>
+ <div class="filters">
+  <div><label for="p375Ticket">券種</label><select id="p375Ticket"><option value="wide">ワイド</option><option value="quinella">馬連</option></select></div>
+  <div><label for="p375Group">構造</label><select id="p375Group"><option value="all">全体</option><option value="single">単独軸</option><option value="pair">Pair型</option><option value="none">軸なし・判定外</option></select></div>
+  <div><label for="p375Year">年度</label><select id="p375Year"><option value="all">全期間</option></select></div>
+  <div><label for="p375Unit">1レース予算</label><select id="p375Unit"><option value="100">100円</option><option value="500">500円</option><option value="1000">1,000円</option></select></div>
+ </div>
+ <label class="check"><input id="p375Common" type="checkbox"> P10とレース質の両方で候補があるレースだけを比較（参考：共通比較集合）</label>
+ <div class="stats" id="p375Stats"></div>
+ <div class="tablewrap"><table><thead><tr><th>比較方式</th><th>購入</th><th>的中</th><th>投資額</th><th>払戻</th><th>損益</th><th>回収率</th><th>予算比損益</th><th>最大DD</th></tr></thead><tbody id="p375SummaryBody"></tbody></table></div>
+ <p class="help">全方式で<strong>照合済みの同一レース集合</strong>と<strong>1レース当たり同一予算</strong>を使用します。見送りは投資0円・払戻0円で残し、未使用予算は損失に数えません。「回収率」は購入した金額を分母にし、「予算比損益」は全対象レースへの割当予算を分母にします。</p>
+ <div class="actions"><button type="button" id="p375ExportJson" class="secondary">照合結果JSONを保存</button><button type="button" id="p375ExportCsv" class="secondary">検証明細CSVを保存</button></div>
+</section>
+<section class="panel" id="p375LedgerSection" hidden>
+ <div class="sectionhead"><h2><span class="index">04</span> レース別照合台帳</h2><span class="sub">データの不足も見える化</span></div>
+ <div class="tablewrap"><table><thead><tr><th>対象レース</th><th>予想構造</th><th>事前判断</th><th>照合</th><th>ワイド / 馬連の仮想結果</th></tr></thead><tbody id="p375LedgerBody"></tbody></table></div>
+ <p class="help">端末時刻・出走表の手動確認は発走前の独立証明ではありません。過去の結果を見てから作った予想は実運用の検証に算入しないでください。成績年が研究・モデル選択に既使用の場合は「探索済み」として扱ってください。</p>
+</section>
+</main>
+<footer>Research-only · P3-75 · <a href="v3.html">Race Scenario Analyzer</a> · 自動馬券購入・本番BUY/PASSの変更なし</footer>
+</div>
+</body>
+</html>
