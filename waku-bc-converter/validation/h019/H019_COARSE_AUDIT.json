@@ -1,0 +1,58 @@
+{
+  "前→前": {
+    "n": 29,
+    "top3": 0,
+    "market_exp": 2.129263158550178,
+    "avg_late3_gap": 1.5275862068965507,
+    "top3_mean_late3_gap": null
+  },
+  "前→後": {
+    "n": 7,
+    "top3": 0,
+    "market_exp": 0.43858216664541577,
+    "avg_late3_gap": 1.5428571428571425,
+    "top3_mean_late3_gap": null
+  },
+  "後→前": {
+    "n": 8,
+    "top3": 4,
+    "market_exp": 1.0230958949746278,
+    "avg_late3_gap": 0.5375000000000005,
+    "top3_mean_late3_gap": 0.40000000000000036
+  },
+  "後→後": {
+    "n": 159,
+    "top3": 6,
+    "market_exp": 9.928590900767578,
+    "avg_late3_gap": 0.8069182389937107,
+    "top3_mean_late3_gap": 0.13333333333333286
+  },
+  "H018_flag_market_gap": {
+    "actual": 10,
+    "expected": 13.519532120937797,
+    "actual_minus_expected": -3.5195321209377965,
+    "bootstrap_race95": [
+      -8.922353730767664,
+      2.6107281489074268
+    ],
+    "races": 140
+  },
+  "actual_3c_to_4c_push2": {
+    "n": 20,
+    "top3": 3,
+    "market_expected": 1.4936718463308243,
+    "late3f_to_racefastest_sec": 0.8499999999999985
+  },
+  "actual_c4_rear": {
+    "n": 166,
+    "top3": 6,
+    "market_expected": 10.367173067412992,
+    "late3f_to_racefastest_sec": 0.8379518072289155
+  },
+  "observed_3c_rear_c4_front": {
+    "n": 8,
+    "top3": 4,
+    "market_expected": 1.0230958949746278,
+    "late3f_to_racefastest_sec": 0.5375000000000005
+  }
+}
