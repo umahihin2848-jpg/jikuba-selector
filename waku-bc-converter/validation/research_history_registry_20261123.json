@@ -1,7 +1,7 @@
 {
   "schema": "rsa-research-history-registry-v1",
   "created_on": "2026-11-23",
-  "entry_count": 53,
+  "entry_count": 54,
   "scope": "review of available GitHub docs, PR descriptions, archived conversation and supplied source files",
   "not_exhaustive_of_private_unretrieved_attachments": true,
   "source_text_sha256": "9521c4061a015341e658d434fdb70768800091499fc96d3b853a708e6c76fb16",
@@ -633,6 +633,22 @@
       ],
       "aggregate": "validation/h015/H015_results.json",
       "dedupKey": "H015|two-stage P(4c front) + P(top3|front)/P(top3|nonfront)|prior resilience vs direct generic|asof|2022-23 train 2024-26 990R"
+    },
+    {
+      "id": "H016",
+      "title": "Nationwide venue × turf/dirt × exact course distance × 4C quarter-band danger audit, reusing H013 frozen risk boundary",
+      "population": "2016-2026/10/04 3win/OP/L/grade 12-18 full-field complete stage+lap results 3566R/54383 runners, 87 course profiles. 2016-23 past train vs 2024-26 prior-explored 990R/15089 test.",
+      "new_vs_prior": "H012 pooled all venues 4C front/back, H013 per-course frozen back/last quarter risk with little surface comparison; H016 explicitly decomposes 10 venues × turf/dirt 20 strata×4 position bands, exact matched track-distance turf vs dirt comparisons, and pre-race H013 risk flag split by surface.",
+      "findings": "2024-26 actual 4C last quarter overall turf 150/2114 7.10%, dirt 88/1280 6.88%, ratios to retrospective closing-market PL proxy 0.509/0.526. Tokyo pooled turf 45/399=11.28%, dirt23/262=8.78; Nakayama turf15/386=3.89,dirt19/217=8.76. Same Tokyo 1400: turf11/91=12.09 vs dirt5/86=5.81; Tokyo1600 reverses turf5/100=5 vs dirt13/111=11.71. Same-distance 15 matched pairs generally small CI. 15 H013 train-only danger profiles later actual4C risk 147/1706=8.62 vs ~251.6 market expected; 12/15 less than 0.8 of market, 3 not; 72 uncertain not safe. As-of H013 risk candidates 598 and 61 actual top3, Nakayama turf 188/12 (6.4%, market expected20.8) vs Nakayama dirt81/16 (19.8%, market expected10.1), surface/race-distance mixed.",
+      "method": "Four 4C position bands normalized actual c4 rank/n: (0,.25],(.25,.50],(.50,.75],(.75,1]. Train-only H013 danger thresholds not refit on test; track-surface and exact-course stratification, 2400-3000 cluster bootstrap rate CI, external check 348 H013 base zone rows.",
+      "status": "RESEARCH_DESCRIPTIVE_AND_RISK_AUDIT_COMPLETE_NO_AUTOMATIC_EXCLUSION",
+      "limitations": "Actual current race 4C for descriptive outcomes is POST-RACE not prediction input; prior H013 as-of p(back) is only back-half binary, not last-quarter risk. Final market odds only retrospective, historical test years extensively mined. Strong-horse confounding and course inner/outer/field/going/pace differences. No full official M4/P10/C/M3 production parity, no empirical betting ROI gain.",
+      "modelImpact": "none; no live Ability C M3 P10 M4 axis risk lock or BUY/PASS changes.",
+      "testCoverage": "9 synthetic/invariant checks PASS; 87 courses, 348 zone rows, 20 surface×venue and 15 matched distances; HTML JSON parsed and JS syntax checked",
+      "public_report": "validation/h016/H016_REPORT_20261123.md",
+      "viewer": "h016-course-position-danger-atlas.html",
+      "code": "validation/h016/h016_surface_zone_audit.py",
+      "dedupKey": "H016|national 10x2x87 4C quarters turf-dirt separate|2016-23 H013 frozen threshold 2024-26 checked|asof screen 598 by surface without names"
     }
   ],
   "new_protocols": [
@@ -756,6 +772,14 @@
       "claim_limit": "Pre-race forecast rather than current lap or current 4C as input; no automatic rear runner exclusion unless 3rd-place calibrated vs prices and error confirmed",
       "findings": "Only small stable retrospective Brier gain for direct prior front endurance, no robust two-stage superiority, ranks flat, market benchmark much better; exact browser M4/P10/M3 parity still missing.",
       "report": "validation/h015/H015_REPORT_20261123.md"
+    },
+    {
+      "id": "H017",
+      "title": "Strict as-of four-band 4C position distribution × conditional last600m chance, with predicted pace/horse ability and track-specific surface/distance",
+      "state": "proposed_research_not_started",
+      "new_vs_prior": "H013 prior model gives only P(4C back-half), H016 determines actual fixed course-quarter danger zones, H015 direct vs two-stage front25; H017 models P(4C quarter) as pre-race horse distribution and separately P(top3 | each 4C band, pace condition, Ability/M3), benchmark to current official pipeline and market.",
+      "needed": "H016 static summary+raw race examples, unique prior horse race IDs, historic C3/C4/finish, actual past race final3f, as-of full field M4/P10 front pressure and C/M3 parity",
+      "claim_limit": "Never use current 4C or race lap as predictor; pre-race risk may overflag strong candidates; no automatic exclusion absent calibration and signal above final-market and current browser model. Use previously known historical data to do mechanism now, but declare re-used evaluation years."
     }
   ]
 }
