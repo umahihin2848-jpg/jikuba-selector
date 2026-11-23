@@ -1,0 +1,173 @@
+{
+  "research_id": "H009",
+  "audit": {
+    "rows_seen": 74007,
+    "invalid": 1676,
+    "total_filtered": 7885,
+    "clean_horse_rows": 7261,
+    "clean_races": 479,
+    "bad_races": 44
+  },
+  "coverage": {
+    "matched1": 1012,
+    "matched2": 242
+  },
+  "within_horse_same_exact_distance": {
+    "both2_horse_distance_pairs": 183,
+    "counts": {
+      "2000": 31,
+      "1600": 105,
+      "1800": 47
+    },
+    "mean_diff_tokyo_minus_nakayama": -0.0022517078006384387,
+    "median_absolute_difference": 0.1747242953125306,
+    "ci95_mean_diff": [
+      -0.04013583452518633,
+      0.03641467017039151
+    ],
+    "share_large_absolute_0.2": 0.4262295081967213
+  },
+  "market_interpretation": "PL three-place surrogate from post-race final win odds, not actual betting price",
+  "train_years": "2019-2023, all same-course 2016 onward strictly prior",
+  "test_years": "2024-2026/10/04 (previously explored)",
+  "coef_form": [
+    0.2081227,
+    0.0
+  ],
+  "coef_with_venue": [
+    0.2081227,
+    3.7e-06
+  ],
+  "results": {
+    "train_2019_23": {
+      "market": {
+        "brier": 0.13304289935575866,
+        "hits": 303,
+        "winners": 124
+      },
+      "form": {
+        "brier": 0.1330378929727831,
+        "hits": 301,
+        "winners": 123
+      },
+      "venue": {
+        "brier": 0.13303789342279815,
+        "hits": 301,
+        "winners": 123
+      },
+      "races": 220,
+      "horses": 3342,
+      "matched_horses": 517,
+      "matched_2each": 138
+    },
+    "test_2024_26": {
+      "market": {
+        "brier": 0.1332770689476585,
+        "hits": 167,
+        "winners": 71
+      },
+      "form": {
+        "brier": 0.13327705419158992,
+        "hits": 167,
+        "winners": 71
+      },
+      "venue": {
+        "brier": 0.13327705417224314,
+        "hits": 167,
+        "winners": 71
+      },
+      "races": 131,
+      "horses": 1994,
+      "matched_horses": 324,
+      "matched_2each": 64
+    },
+    "test_2024": {
+      "market": {
+        "brier": 0.13478401626357578,
+        "hits": 52,
+        "winners": 24
+      },
+      "form": {
+        "brier": 0.13476433622231415,
+        "hits": 52,
+        "winners": 24
+      },
+      "venue": {
+        "brier": 0.13476433635118046,
+        "hits": 52,
+        "winners": 24
+      },
+      "races": 45,
+      "horses": 672,
+      "matched_horses": 117,
+      "matched_2each": 18
+    },
+    "test_2025": {
+      "market": {
+        "brier": 0.13624350156515144,
+        "hits": 70,
+        "winners": 30
+      },
+      "form": {
+        "brier": 0.13616254465961272,
+        "hits": 70,
+        "winners": 30
+      },
+      "venue": {
+        "brier": 0.13616254507322997,
+        "hits": 70,
+        "winners": 30
+      },
+      "races": 53,
+      "horses": 806,
+      "matched_horses": 130,
+      "matched_2each": 26
+    },
+    "test_2026": {
+      "market": {
+        "brier": 0.12645787022210075,
+        "hits": 45,
+        "winners": 17
+      },
+      "form": {
+        "brier": 0.12661466976165656,
+        "hits": 45,
+        "winners": 17
+      },
+      "venue": {
+        "brier": 0.12661466884483466,
+        "hits": 45,
+        "winners": 17
+      },
+      "races": 33,
+      "horses": 516,
+      "matched_horses": 77,
+      "matched_2each": 20
+    }
+  },
+  "paired_gain_ci": {
+    "gain": 1.934675850397149e-11,
+    "ci95": [
+      -6.728524186462317e-10,
+      7.038823593655561e-10
+    ],
+    "n": 131
+  },
+  "matched_races": 93,
+  "matched_races_ci": {
+    "gain": 2.7251885634626507e-11,
+    "ci95": [
+      -8.870809877821596e-10,
+      1.002931595555499e-09
+    ],
+    "n": 93
+  },
+  "limitations": [
+    "historical final odds, not T-15",
+    "previously explored test years",
+    "course/surface/distance official record only, no exact geometry/going matching",
+    "only higher class race histories in source, below-class histories not available from this extraction",
+    "many historical horses without both venue observations",
+    "model is market-only+simple form, not exact official Ability C or M3 browser parity"
+  ]
+}
