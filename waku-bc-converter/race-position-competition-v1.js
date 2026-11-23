@@ -101,11 +101,23 @@ function render(){const c=context();if(!c)return;css();const signature=c.sig+'|'
    '<td>'+r.expectedRank.toFixed(1)+'番手</td><td>'+(100*r.frontShare).toFixed(0)+'%<div class="rsarpcBar"><i style="width:'+(100*r.frontShare).toFixed(1)+'%"></i></div><div class="rsarpcQuiet">中団 '+(100*r.middleShare).toFixed(0)+'%・後方 '+(100*r.rearShare).toFixed(0)+'%</div></td>'+
    '<td>'+r.rank10+'〜'+r.rank90+'位'+(r.fallbackCount?'<div class="rsarpcQuiet">前方に入れない試行：平均'+r.fallbackMeanRank.toFixed(1)+'番手／'+r.fallbackRank10+'〜'+r.fallbackRank90+'位</div>':'')+'</td></tr>';
   body+='</tbody></table><p class="rsarpcQuiet">全馬で前方'+result.totalFrontShare.toFixed(0)+'枠／中団'+result.totalMiddleShare.toFixed(0)+'枠／後方'+result.totalRearShare.toFixed(0)+'枠（整合性チェック）。これは実測で較正した確率ではありません。</p>'+
-   '<button id="rsarpcExport" type="button" class="rsarpcExport">この全頭順位分布をJSONで保存（研究用）</button>'+
+   '<button id="rsarpcExport" type="button" class="rsarpcExport">全頭順位・M3計算入力をJSONで保存（研究用）</button>'+
    '<p class="rsarpcQuiet">発走前に保存すると、次走の実際の通過順位との事後比較に使えます。作成時刻は端末上の時刻で、発走前であることを公式に保証する記録ではありません。</p>';
  }
  body+='<p class="rsarpcMini">研究のみ：Ability、M3、P10、公式軸・相手、オッズ、BUY/PASSを変更しません。枠の確定馬番とTARGET仮番号の照合が必要です。</p></div>';
  el.innerHTML='<summary>全頭の位置争奪シミュレーション｜研究用・未較正</summary>'+body;
+}
+function liveReference(no,name){
+ const id=String(no),eq=(x)=>String(x?.no)===id&&String(x?.name||'')===String(name||'');
+ const q=root.ValidatedQueueState?.byNo?.[id]||null;
+ const rem=root.Remaining600ValidatedState?.rows?.find(eq)||null;
+ const m3=root.Finish600State?.rows?.find(eq)||null;
+ const safe=v=>Number.isFinite(Number(v))&&v!==null&&v!==''?Number(v):null;
+ const validQueue=q&&String(q.name||'')===String(name||'')?q:null;
+ const x=m3?.x&&typeof m3.x==='object'?Object.fromEntries(Object.entries(m3.x).filter(([k])=>/^[a-z0-9_]+$/i.test(k)).map(([k,v])=>[k,safe(v)])):null;
+ return{aligned:Boolean(validQueue&&rem&&m3),queue:{frontness5:safe(validQueue?.frontness5),expectedRank:safe(validQueue?.expectedRank),hist_n:safe(validQueue?.hist_n)},
+  remaining600:{predictedGapSeconds:safe(rem?.pred),historyGapSeconds:safe(rem?.historyGap),frontness:safe(rem?.frontness)},
+  m3:{predictedGapSeconds:safe(m3?.predGap),closingEstimateSeconds:safe(m3?.close),score:safe(m3?.score),rank:safe(m3?.finishRank),coreFeatures:x}};
 }
 function exportSnapshot(){
  const c=context();
@@ -114,9 +126,9 @@ function exportSnapshot(){
  const meta={date:$('raceDate')?.value||'',raceName:$('raceName')?.value||'',venue:$('venue')?.value||'',surface:$('surface')?.value||'',distance:Number($('distance')?.value),grade:$('grade')?.value||'',field:result.n};
  const snapshot={schema:'rsa-rank-distribution-snapshot-v1',capturedAt:new Date().toISOString(),modelVersion:VERSION,
   modelInput:'ValidatedQueueState.expectedRank',calibrated:false,usage:'研究用仮想分布。馬券期待値・本番M3へ転用不可',
-  metadata:meta,simulation:{method:'Gumbel whole-field rank permutation',iterations:result.count,dispersion:result.dispersion,
+  metadata:meta,sourceVersions:{queue:root.ValidatedQueueState?.version||null,remaining600:root.Remaining600ValidatedState?.version||null,m3:root.Finish600State?.version||null,analysisGeneration:root.Finish600State?.generation??null},simulation:{method:'Gumbel whole-field rank permutation',iterations:result.count,dispersion:result.dispersion,
    frontSeats:result.k,middleEnd:result.kMiddle,seed:hash(c.seedSig)},
-  runners:result.rows.map(r=>({no:r.no,name:r.name,inputExpectedRank:r.expectedRank,simulatedExpectedRank:r.meanRank,historyGapSdSeconds:r.histGapSd,historyGapRaceCount:r.histGapN,historyDistinctRacesLast5:r.histUnique5,historyDuplicateRowsLast5:r.histDupRows5,
+  runners:result.rows.map(r=>({no:r.no,name:r.name,inputExpectedRank:r.expectedRank,simulatedExpectedRank:r.meanRank,historyGapSdSeconds:r.histGapSd,historyGapRaceCount:r.histGapN,historyDistinctRacesLast5:r.histUnique5,historyDuplicateRowsLast5:r.histDupRows5,liveModelReference:liveReference(r.no,r.name),
    rankProbabilities:r.rankProbabilities,frontShare:r.frontShare,middleShare:r.middleShare,rearShare:r.rearShare,
    interval10to90:[r.rank10,r.rank90],ifNotFront:{meanRank:r.fallbackMeanRank,interval10to90:[r.fallbackRank10,r.fallbackRank90]}}))};
  const data=JSON.stringify(snapshot,null,2), blob=new root.Blob([data],{type:'application/json'});
