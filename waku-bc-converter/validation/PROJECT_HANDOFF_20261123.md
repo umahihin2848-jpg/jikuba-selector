@@ -204,3 +204,15 @@
 - **実装は別の研究ブランチのみ（本番main無変更）：** [Draft PR #8](https://github.com/umahihin2848-jpg/jikuba-selector/pull/8) は [未マージDraft PR #7](https://github.com/umahihin2848-jpg/jikuba-selector/pull/7) の研究ブランチをベースにした積み上げPR。追加物：`corner-group-shadow-v1.js`、`data/corner_group_research_model_v1.json`、12〜18頭のテスト、研究DocとCI。重複除去済みCSVパーサー版・確定馬番照合・全頭・各馬過去3異レースを確認しないと推論を停止。`v3.html`には読み込ませない。モデル`productionImpact:false`。独立[GitHub Actions 45119359350](https://github.com/umahihin2848-jpg/jikuba-selector/actions/runs/45119359350) SUCCESS。
 - 公開研究報告：[p3_70_c3c4_live_feature_parity_and_group_shadow_20261123.md](https://github.com/umahihin2848-jpg/jikuba-selector/blob/research/p3-70-corner-stage-groups-20261123/waku-bc-converter/validation/p3_70_c3c4_live_feature_parity_and_group_shadow_20261123.md)。ユーザーZIP：`P3-70_3角4角4馬群_実アプリ入力一致_検証一式_20261123.zip`（非公開の馬別特徴/予測、2023学習入力、Python/JavaScript再現コード、係数、比較テストなど21ファイル）。元巨大TARGETは非同梱、公開GitHubへ実馬の履歴は置かない。
 - **次：** ①今走の確定馬番とTARGET仮番号の全頭照合を実装、②PR #7の正規化を本番とシャドーで厳密評価、③3角/4角の4群確率を研究用UIで初位置と並べ、④未来の未使用レース発走前JSONを保存し較正、⑤遷移や内外レーンは教師データと独立検証後に追加。3角と4角の予測は現状別モデルで、同じ馬がどこを通って進出したかの経路確率ではない。
+
+
+## 20. 2026-11-23追記：P3-71 3地点の馬群図と確定馬番の照合
+- **目的：** 依頼者が提示したような「初位置（参考）→3コーナー→4コーナー」の位置取りを表示し、初位置の仮番号と出走表の確定馬番の食い違いを防ぐ。内外レーン／GPS進路は未学習。
+- **研究版のみ：** Draft [PR #8](https://github.com/umahihin2848-jpg/jikuba-selector/pull/8)（Draft PR #7の履歴重複除去研究ブランチをベース）の `v3.html` に、`corner-stage-roster-audit-v1.js`、`corner-stage-three-preview-v1.js`/CSSを読み込む機能追加。**mainの通常アプリは無変更**、M3/Ability/P10/既存順位/買い目への影響なし。モデルはP3-70で学習した独立の3角/4角4群確率を使用。
+- **出走表照合：** ユーザー入力の`実馬番,馬名`全頭とアプリの`ValidatedQueueState.rows`の馬名をNFKC正規化して一対一照合。出典入力・ユーザー確認チェック・頭数12～18・レース日/場/芝ダ/距離・重複名/馬番/欠測・PR #7 CSVパーサー版を確認。取消で12番が欠け、実13番が最終馬のケースでも**元の仮12番を研究モデル内で実13番に対応**させる。旧公式モデルの仮馬番は書き換えない。**JRA公式APIなどで照合したわけではなく、本人が出走表を確認したという申告**であることを明記。
+- **3地点の実装：** 初位置は`frontness5`を並べた**過去先行度の参考グループ**（事前較正確率・発走直後のGPSではない）。3角/4角は2023年学習P3-70多項モデルを独立に実行し、前方25%、好位25～50%、中団50～80%、後方20%の代表席数を固定し、全頭の確率を表示。所属仮割合50%未満は「入替注意」。3角と4角で代表群が変わる頭数も計算するが**進出・後退の確率や実経路ではない**。
+- **安全：** 入力／解析状態が変わると承認を取り消し、非同期モデル読込後に再照合、パネル作り直しで古い研究結果を破棄、合わなければ全体停止。明示保存の研究JSONは出走表の出典、実/仮番号対応、3地点の所属と各モデル版を保存。ユーザーデータを自動的にGitHubへアップロードしない。
+- **実ブラウザの検証：** 合成12頭・履歴重複含むCSV、仮12番→実13番の欠番入力、馬名誤りでの停止、正しいリストでの切替・JSON保存をiPhone幅390pxの**Chromium**で再生。Queue/Remaining600/M3の予測状態が保存前後で完全同一、コーナー各群の確率合計1・固定席数を確認。[GitHub Actions run 45120566992](https://github.com/umahihin2848-jpg/jikuba-selector/actions/runs/45120566992) **SUCCESS**、合成スクショ＋要約は同run成果物に格納。端末Safari実機試験ではない。
+- 補助の合成Nodeテスト（実馬番/仮番号・全頭整合・変更検知・利用不可条件）はP3-70研究CIでSUCCESS。変更ファイルと既知の既存全体回帰CI失敗を区別する。
+- 研究Docs：`https://github.com/umahihin2848-jpg/jikuba-selector/blob/research/p3-70-corner-stage-groups-20261123/waku-bc-converter/validation/p3_71_three_stage_roster_verified_preview_20261123.md`。
+- **残課題：** 本番mainにはPR #7パーサーと確定馬番の信頼できるデータパス未採用。欠番の`gate_frac=(馬番−1)/(頭数−1)`が1超になるケースの較正不足。2024～26年は既探索。3角/4角独立4群モデルの実レース・Safari運用検証と、レーン/物理的進路の教師データが必要。**この段階で本番アプリへ自動適用しない。**
