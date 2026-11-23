@@ -1,0 +1,263 @@
+{
+  "study": "H018 simultaneous 4C four-band occupancy and bijective rank assignment, strictly predicted past history",
+  "status": "RETROSPECTIVE_RESEARCH_ONLY / predictions from H017 as-of scores; no test-time refit",
+  "inputs": [
+    "H017_horse_diag_PRIVATE.csv predictions from 2022-23 fits",
+    "H013 2016-23 fixed 4C band finishing rates ONLY"
+  ],
+  "train_time": "All fitted H017 horse models 2022-23, fixed H013 course marginal success rates 2016-23; NOT refit with 2024+ outcomes",
+  "test": {
+    "races": 977,
+    "horses": 14876,
+    "years": "2024–2026-10-04",
+    "profiles": 83,
+    "stages": 4
+  },
+  "constraints": {
+    "independent_races_exceed_one_slot_in_any_zone": 398,
+    "exceed_two_slots": 15,
+    "mean_abs_expected_slot_deviation_per_race_per_zone": 0.5252847784723977,
+    "max_expected_slot_deviation": 2.5232488787999285,
+    "joint_races_violate_zone_capacity": 0,
+    "joint_races_with_duplicate_MAP_rank": 0,
+    "recorded_4c_band_occupancy_inconsistent_with_permutation": 827,
+    "note": "Official corner passing order may contain same ranks for parallel runners. Strict 1–N is a latent ordered finish-at-corner approximation; do not equate exactly with recorded corner ranks."
+  },
+  "overall": {
+    "independent": {
+      "multi_brier": 0.1659789303333355,
+      "log_loss": 1.215183752882463,
+      "zone_argmax_accuracy": 0.4315004033342296,
+      "backhalf_auc": 0.7700974884895017
+    },
+    "joint_capacity": {
+      "multi_brier": 0.165832934557151,
+      "log_loss": 1.2147876073523751,
+      "zone_argmax_accuracy": 0.434323742941651,
+      "backhalf_auc": 0.7728018869538222
+    },
+    "joint_map_band_accuracy": 0.42531594514654475,
+    "top3_baseline_brier": 0.14420984445771554,
+    "top3_course_fixed_sensitivity_brier": 0.1440947382725797,
+    "top3_baseline_hits": 1117,
+    "top3_course_fixed_sensitivity_hits": 1122,
+    "top3_original_fourzone_brier": 0.14420984445771554,
+    "top3_original_fourzone_hits": 1117
+  },
+  "paired_race_bootstrap_95ci": {
+    "stage_multi_brier": {
+      "race_mean_gain": 0.00017276886959554557,
+      "ci95": [
+        -9.579765211080254e-05,
+        0.0004574019899747872
+      ],
+      "positive_races": 478,
+      "negative_races": 499,
+      "races": 977
+    },
+    "stage_logloss": {
+      "race_mean_gain": 0.0005368919732590889,
+      "ci95": [
+        -0.0010519799971428702,
+        0.002204142266030475
+      ],
+      "positive_races": 503,
+      "negative_races": 474,
+      "races": 977
+    },
+    "downstream_top3_brier": {
+      "race_mean_gain": 0.00012427999523248175,
+      "ci95": [
+        4.7066950160993043e-05,
+        0.00020400765741978324
+      ],
+      "positive_races": 563,
+      "negative_races": 414,
+      "races": 977
+    }
+  },
+  "by_year": {
+    "2024": {
+      "independent": {
+        "multi_brier": 0.1645883725435031,
+        "log_loss": 1.2042487048423376,
+        "zone_argmax_accuracy": 0.4410569105691057,
+        "backhalf_auc": 0.7793646518173223
+      },
+      "joint_capacity": {
+        "multi_brier": 0.1643177746916191,
+        "log_loss": 1.2023968208090539,
+        "zone_argmax_accuracy": 0.442350332594235,
+        "backhalf_auc": 0.7828118472261922
+      },
+      "joint_map_band_accuracy": 0.43680709534368073,
+      "top3_baseline_brier": 0.14273650094270537,
+      "top3_course_fixed_sensitivity_brier": 0.14261714381367546,
+      "top3_baseline_hits": 429,
+      "top3_course_fixed_sensitivity_hits": 429,
+      "top3_original_fourzone_brier": 0.14273650094270537,
+      "top3_original_fourzone_hits": 429
+    },
+    "2025": {
+      "independent": {
+        "multi_brier": 0.16718086988362602,
+        "log_loss": 1.224640511368093,
+        "zone_argmax_accuracy": 0.4291520413818585,
+        "backhalf_auc": 0.7600546134776494
+      },
+      "joint_capacity": {
+        "multi_brier": 0.1671575465747917,
+        "log_loss": 1.226178667990565,
+        "zone_argmax_accuracy": 0.42822833918344727,
+        "backhalf_auc": 0.762104268843506
+      },
+      "joint_map_band_accuracy": 0.41917605763901716,
+      "top3_baseline_brier": 0.14484682301435745,
+      "top3_course_fixed_sensitivity_brier": 0.14470177901119086,
+      "top3_baseline_hits": 410,
+      "top3_course_fixed_sensitivity_hits": 412,
+      "top3_original_fourzone_brier": 0.14484682301435745,
+      "top3_original_fourzone_hits": 410
+    },
+    "2026": {
+      "independent": {
+        "multi_brier": 0.16623062126714205,
+        "log_loss": 1.2171563636725007,
+        "zone_argmax_accuracy": 0.4218711429276722,
+        "backhalf_auc": 0.770912039968002
+      },
+      "joint_capacity": {
+        "multi_brier": 0.16608717310091056,
+        "log_loss": 1.2161203956856086,
+        "zone_argmax_accuracy": 0.43174524808689213,
+        "backhalf_auc": 0.7735000956994155
+      },
+      "joint_map_band_accuracy": 0.4181683534929647,
+      "top3_baseline_brier": 0.14532704272385527,
+      "top3_course_fixed_sensitivity_brier": 0.14525761896709655,
+      "top3_baseline_hits": 278,
+      "top3_course_fixed_sensitivity_hits": 281,
+      "top3_original_fourzone_brier": 0.14532704272385527,
+      "top3_original_fourzone_hits": 278
+    }
+  },
+  "by_surface": {
+    "ダ": {
+      "independent": {
+        "multi_brier": 0.16460444519362885,
+        "log_loss": 1.2023134058534928,
+        "zone_argmax_accuracy": 0.4363948497854077,
+        "backhalf_auc": 0.7793070962558907
+      },
+      "joint_capacity": {
+        "multi_brier": 0.1648646132904882,
+        "log_loss": 1.203284707963215,
+        "zone_argmax_accuracy": 0.4382832618025751,
+        "backhalf_auc": 0.7819640485075776
+      },
+      "joint_map_band_accuracy": 0.43416309012875537,
+      "top3_baseline_brier": 0.14402344248175827,
+      "top3_course_fixed_sensitivity_brier": 0.1439384574841386,
+      "top3_baseline_hits": 445,
+      "top3_course_fixed_sensitivity_hits": 447,
+      "top3_original_fourzone_brier": 0.14402344248175827,
+      "top3_original_fourzone_hits": 445
+    },
+    "芝": {
+      "independent": {
+        "multi_brier": 0.16686351501334776,
+        "log_loss": 1.2234667902754306,
+        "zone_argmax_accuracy": 0.4283504585128715,
+        "backhalf_auc": 0.7638482700121569
+      },
+      "joint_capacity": {
+        "multi_brier": 0.16645612220252842,
+        "log_loss": 1.2221905892264062,
+        "zone_argmax_accuracy": 0.431775494420506,
+        "backhalf_auc": 0.7666403597029655
+      },
+      "joint_map_band_accuracy": 0.4196221411998674,
+      "top3_baseline_brier": 0.14432980816448285,
+      "top3_course_fixed_sensitivity_brier": 0.14419531672718905,
+      "top3_baseline_hits": 672,
+      "top3_course_fixed_sensitivity_hits": 675,
+      "top3_original_fourzone_brier": 0.14432980816448285,
+      "top3_original_fourzone_hits": 672
+    }
+  },
+  "clean_no_tie_race_subset": {
+    "races": 150,
+    "horses": 2229,
+    "metrics": {
+      "independent": {
+        "multi_brier": 0.16737379708182368,
+        "log_loss": 1.2206012962826618,
+        "zone_argmax_accuracy": 0.42485419470614627,
+        "backhalf_auc": 0.7858785893086684
+      },
+      "joint_capacity": {
+        "multi_brier": 0.1649103634720169,
+        "log_loss": 1.2009512972951788,
+        "zone_argmax_accuracy": 0.4253028263795424,
+        "backhalf_auc": 0.7873782623122993
+      },
+      "joint_map_band_accuracy": 0.420816509645581,
+      "top3_baseline_brier": 0.1466309091699239,
+      "top3_course_fixed_sensitivity_brier": 0.14660305436579307,
+      "top3_baseline_hits": 171,
+      "top3_course_fixed_sensitivity_hits": 172,
+      "top3_original_fourzone_brier": 0.1466309091699239,
+      "top3_original_fourzone_hits": 171
+    }
+  },
+  "H013_danger": {
+    "all": {
+      "horses": 598,
+      "races": 213,
+      "actual_top3": 61,
+      "actual_3rd_rate": 0.1020066889632107,
+      "closing_market_expected": 72.71033358986645,
+      "mean_pred_3rd_sensitivity": 0.1214519273508108,
+      "actual_last25": 293
+    },
+    "H017_last25_p_ge50_and_model_top3_le10": {
+      "horses": 137,
+      "races": 104,
+      "actual_top3": 7,
+      "actual_3rd_rate": 0.051094890510948905,
+      "closing_market_expected": 9.478226621399738,
+      "mean_pred_3rd_sensitivity": 0.050372939020644325,
+      "actual_last25": 79
+    },
+    "H018_joint_last25_p_ge50_and_model_top3_le10": {
+      "horses": 203,
+      "races": 140,
+      "actual_top3": 10,
+      "actual_3rd_rate": 0.04926108374384237,
+      "closing_market_expected": 13.519532120937797,
+      "mean_pred_3rd_sensitivity": 0.05406735986218866,
+      "actual_last25": 105
+    },
+    "joint_last25_p_ge50": {
+      "horses": 320,
+      "races": 193,
+      "actual_top3": 25,
+      "actual_3rd_rate": 0.078125,
+      "closing_market_expected": 29.52509118597306,
+      "mean_pred_3rd_sensitivity": 0.09355499586894409,
+      "actual_last25": 176
+    }
+  },
+  "constraints_method": "KL / iterative-proportional-fitting projection onto row sum 1, band-column sums exact available slots, expand equally within band to doubly stochastic individual rank matrix; unique-rank MAP by Hungarian assignment. No fitted parameters.",
+  "downstream_method": "Fixed 2016-23 course-zone smoothed marginal success rate (30 horses national shrink) to transfer change in predicted band probabilities to existing H017 four_zone_resilience; race-rebudget 3. SENSITIVITY ONLY, not exact H017 horse-specific conditional probabilities.",
+  "statistical_caveats": [
+    "2024-26 historical period heavily used in H004-H017; confidence intervals are conditional on extensive exploration and not independent validation",
+    "H017 probabilities use research proxies, not exact live M3/P10/M4/Ability C",
+    "Current race true 4C positions, actual pace, top3, final odds not used for projection; current labels used for evaluation only",
+    "Recorded 4C passing rank ties mean capacity forced model and historical bands are not always literally comparable",
+    "H013 prior rates and H017 predictions trained on overlapping history 2016-23, but no contemporary test fitting",
+    "No simulation of actual jockey actions, individual 200m sectional times or lane paths",
+    "No threshold optimization on 2024-26, no EV or betting exclusion proof"
+  ],
+  "label_mutation_no_leakage": "PASS: as-of joint projection identical after test labels/market changed; course priors are 2016–23 only"
+}
