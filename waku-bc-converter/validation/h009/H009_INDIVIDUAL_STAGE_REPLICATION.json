@@ -1,0 +1,66 @@
+{
+  "source": "umadete.csv CP932, 2026 active-horse history (selection bias), all historical classes, strict unique as-of race date sanity",
+  "valid_starts": 8400,
+  "results": {
+    "finish_response": {
+      "pairs": 369,
+      "dist_pairs": {
+        "2000": 96,
+        "1800": 104,
+        "1600": 169
+      },
+      "first_last_venue_diff_correlation": 0.05596824771843794,
+      "CI95": [
+        -0.04449230167995858,
+        0.15992229573179412
+      ],
+      "same_sign_nonzero": 0.49096385542168675,
+      "nonzero": 332
+    },
+    "market_residual": {
+      "pairs": 369,
+      "dist_pairs": {
+        "2000": 96,
+        "1800": 104,
+        "1600": 169
+      },
+      "first_last_venue_diff_correlation": -0.0019876030426113525,
+      "CI95": [
+        -0.09882354777786413,
+        0.09678744333790722
+      ],
+      "same_sign_nonzero": 0.45244956772334294,
+      "nonzero": 347
+    },
+    "late_relative": {
+      "pairs": 369,
+      "dist_pairs": {
+        "2000": 96,
+        "1800": 104,
+        "1600": 169
+      },
+      "first_last_venue_diff_correlation": 0.03212979948763401,
+      "CI95": [
+        -0.054464720490792436,
+        0.12263568509082634
+      ],
+      "same_sign_nonzero": 0.5063291139240507,
+      "nonzero": 316
+    },
+    "c4_to_fin": {
+      "pairs": 369,
+      "dist_pairs": {
+        "2000": 96,
+        "1800": 104,
+        "1600": 169
+      },
+      "first_last_venue_diff_correlation": 0.06760032399359464,
+      "CI95": [
+        -0.029879598385666527,
+        0.16040297448882326
+      ],
+      "same_sign_nonzero": 0.527536231884058,
+      "nonzero": 345
+    }
+  }
+}
