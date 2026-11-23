@@ -1,7 +1,7 @@
 {
   "schema": "rsa-research-history-registry-v1",
   "created_on": "2026-11-23",
-  "entry_count": 39,
+  "entry_count": 40,
   "scope": "review of available GitHub docs, PR descriptions, archived conversation and supplied source files",
   "not_exhaustive_of_private_unretrieved_attachments": true,
   "source_text_sha256": "9521c4061a015341e658d434fdb70768800091499fc96d3b853a708e6c76fb16",
@@ -404,6 +404,18 @@
       "caveat": "2025/26 reused historical years and multihypothesis depth; limited as-of same-surface population; gap MAE ~0.008 sec benefit not yet shown to improve M3 top3 or Brier",
       "source": "validation/H004_HISTORICAL_DEPTH_REPORT_20261123.md",
       "dedupKey": "H004|as-of distinct 5 8 10 12|2024-26|first c4 gap MAE|time decay"
+    },
+    {
+      "id": "H005",
+      "title": "5 vs 10 distinct history-gap observations in fixed M3 shadow",
+      "population": "2024-2026/10/04 JRA 3win/OP/L/G1-3 12-18 full card, with >=1 horse having >=10 valid prior gaps; 2025/26 569R/8676 horses",
+      "new_vs_prior": "H004 evaluated position-gap direct means. H005 fixes 18/19 M3 features and 19 coefficients, modifies only remaining600 pred_gap",
+      "results": "5decay->10decay 2024 342->334; 2025 307->305; 2026 212->214; 2025/26 519->519 (569R); 106 races have top3 candidate change, 95%CI delta per race [-.02285,.02109]",
+      "status": "HOLD_exploratory_no_gain",
+      "modelImpact": "none; offline shadow not browser parity",
+      "caveat": "2024-26 reused, fixed closing-model coefficients but not full live JS parity; no market-adjusted ticket/ROI proof",
+      "source": "validation/H005_HISTORY_DEPTH_TO_M3_20261123.md",
+      "dedupKey": "H005|fixed19M3 model|2024-26|5decay vs10decay|top3"
     }
   ],
   "new_protocols": [
@@ -440,10 +452,19 @@
     {
       "id": "H005",
       "title": "Shadow M3 exact-position-feature 5 vs 10 distinct starts sensitivity",
-      "state": "proposed_blocked_on_N001_runtime_parity",
+      "state": "completed_historical_shadow_HOLD",
       "new_vs_prior": "only change the 600m leader-gap history aggregate at equal data/axes, avoid retesting P3-63 history dedup itself; ensure M3 top3 Brier and axis picks",
       "needed": "live full-field JS ShapeCore/Queue/Remaining600/Finish600 and exact 16-char historical race ID parity; actual official saddlecloth mapping",
-      "claim_limit": "No effect on real betting can be asserted from H004 simple historical position mean alone"
+      "claim_limit": "No effect on real betting can be asserted from H004 simple historical position mean alone",
+      "findings": "2025/26 569R same weighting 5->10 M3 top3 success 519 vs 519; 2024 342->334; not adopted",
+      "implementation": "validation/H005_HISTORY_DEPTH_TO_M3_20261123.md"
+    },
+    {
+      "id": "H006",
+      "title": "Test prespecified situations where older 6-10 histories help without blanket expansion",
+      "state": "not_started",
+      "new_vs_prior": "No retuning thresholds on explored 2025/26 without independent evaluation",
+      "claim_limit": "Full M3 outcome must improve, not only direct gap MAE"
     }
   ]
 }
