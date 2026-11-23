@@ -1,7 +1,7 @@
 {
   "schema": "rsa-research-history-registry-v1",
   "created_on": "2026-11-23",
-  "entry_count": 52,
+  "entry_count": 53,
   "scope": "review of available GitHub docs, PR descriptions, archived conversation and supplied source files",
   "not_exhaustive_of_private_unretrieved_attachments": true,
   "source_text_sha256": "9521c4061a015341e658d434fdb70768800091499fc96d3b853a708e6c76fb16",
@@ -613,6 +613,26 @@
         "validation/h014/H014_AGGREGATE.json"
       ],
       "dedupKey": "H014|actual4c front rank dropout+last3f relative under actual early load|asof field pressure and prior individual front endurance|2019-23 fit 2024-26 tests nationwide87"
+    },
+    {
+      "id": "H015",
+      "title": "Strict-as-of 4C-front propensity and conditional finish survival two-stage; race-level direct historical resilience comparison",
+      "population": "JRA flat 3win+/OP/L/G1-3 12-18 full-field 3566 races/54383 horses. 2022-23 primary fit 724 races/11100 horses. 2024-26 Oct 4 historical evaluation 990 races/15089 horses; 2019-23 alternate training 1717R/26322.",
+      "new_vs_prior": "H014 tested actual post-race 4C-front fatigue and direct top3 from prior history. H015 estimates as-of P(4C front), separately fits P(top3|front) and P(top3|nonfront), merges, and compares DIRECT vs TWO-STAGE with identical extra prior-resilience features.",
+      "results": "Main 2022-23 train/2024-26 test direct generic Brier .144238/top3 hits1122, direct+prior-front-resilience .144036/1121 (horse-weight delta +.000202; race-paired cluster delta +.000225 CI95[+.000033,+.000413], but prior years already extensively inspected). Two-stage generic .144393/1133, two-stage+resilience .144214/1124. Prior-front-position AUC .794 Brier .153928 vs generic AUC .790 Brier .155639. Closing final-market Brier .131303 top3 1356.",
+      "temporal_robustness": "Per-year 2024/2025/2026 direct Brier improvement positive; changing fit to 2019-23 yields .144781->.144587. 2019-23 history >=2 coverage39.2%, 2022-23 70.6%, test96.0%, so strong history selection shift.",
+      "status": "RESEARCH_COMPLETE_REPEATED_HISTORIC_TEST_NO_PRODUCTION_ADOPTION",
+      "blockers": "No exact browser M4/P10/M3/Ability C reproduction. ValidatedQueueState hist date filters then slice5, per-race horse+rID dedup parity not certified. `RaceCorner34V1State` is separate display-only. MobileRaceMapPaceV1State shows actual analysis.pred.p four scenario probabilities but not reconstructed in H015. No untouched holdout; final-market q retrospectively after race, not purchased as-of odds.",
+      "safety": "Current race 4C/finish/pace and closing odds are labels/retrospective market only, never prediction features. Source TARGET horses may be censored. Cannot infer each runner's physiological fatigue or direct 200m sections. Do NOT automatically eliminate front weak-resilience group or H013 back-of-field flagged horses.",
+      "modelImpact": "None. Official M4/P10/M3/Ability C/Axis/BUY/PASS untouched.",
+      "tests": "7 synthetic unit tests pass, including changing test-set current 4C/finish leaves predicted values identical; every race has expected top3 sum3, all actual fullfield top3 labels3",
+      "source": "validation/h015/H015_REPORT_20261123.md",
+      "scripts": [
+        "validation/h015/h015_two_stage.py",
+        "validation/h015/test_h015_two_stage.py"
+      ],
+      "aggregate": "validation/h015/H015_results.json",
+      "dedupKey": "H015|two-stage P(4c front) + P(top3|front)/P(top3|nonfront)|prior resilience vs direct generic|asof|2022-23 train 2024-26 990R"
     }
   ],
   "new_protocols": [
@@ -730,10 +750,12 @@
     {
       "id": "H015",
       "title": "Pre-race two-stage joint early-position×actual individual fatigue resistance, official M4/P10 and M3 parity",
-      "state": "proposed_requires_N001_C_M3_M4_parity",
+      "state": "COMPLETED_RESEARCH_ONLY_HOLD",
       "new_vs_prior": "H014 attempted race collapse and historic top3 proxy but lacked M4/P10 exact, horse individual section times; H015 compares production first-corner/4C probability and 3F response vs current course market to understand error mechanisms",
       "needed": "N001 browser exact past5 dedup and all-horse official Ability C/M3/M4/P10 generation snapshots; asof full-field pressure; actual after-race lap+result labeled solely evaluation",
-      "claim_limit": "Pre-race forecast rather than current lap or current 4C as input; no automatic rear runner exclusion unless 3rd-place calibrated vs prices and error confirmed"
+      "claim_limit": "Pre-race forecast rather than current lap or current 4C as input; no automatic rear runner exclusion unless 3rd-place calibrated vs prices and error confirmed",
+      "findings": "Only small stable retrospective Brier gain for direct prior front endurance, no robust two-stage superiority, ranks flat, market benchmark much better; exact browser M4/P10/M3 parity still missing.",
+      "report": "validation/h015/H015_REPORT_20261123.md"
     }
   ]
 }
