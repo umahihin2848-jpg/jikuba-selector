@@ -1,0 +1,63 @@
+#!/usr/bin/env python3
+"""Build standalone (no network) 87-course 4C risk atlas from anonymized H016 aggregation."""
+import json, html
+from pathlib import Path
+ROOT=Path('/mnt/data/H016_4角危険度_芝ダ別全国分析_20261123')
+data=json.loads((ROOT/'H016_surface_zone_results.json').read_text())
+courses=[{'course':c['course'],'venue':c['venue'],'surface':c['surface'],'distance':c['distance'],
+          'trainR':c['races_train'],'testR':c['races_test'],'risk':c['risky_from_H013_train_only'],
+          'riskTest':c['risk_test'],'zones':c['zones']} for c in data['courses']]
+venues=[{'venue':v['venue'],'surface':v['surface'],'band':v['band'],'train':v['train'],'test':v['test'],'ci':v['test_ci95_pct']} for v in data['venues_surfaces']]
+dataset={'courses':sorted(courses,key=lambda x:(x['venue'],x['surface'],x['distance'])),
+         'venueZones':venues,'screens':data['h013_asof_screen_surface'],
+         'matched':data['matched_same_venue_distance_turf_dirt'],
+         'coverage':data['cohort']}
+blob=json.dumps(dataset,ensure_ascii=False,separators=(',',':')).replace('</','<\\/')
+page=r'''<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>H016 全国87コース 4角位置リスク図鑑</title>
+<style>
+:root{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Kaku Gothic ProN','Yu Gothic',system-ui,sans-serif;color:#e9f1f7;background:#08131d}
+*{box-sizing:border-box}body{margin:0;line-height:1.6}main{max-width:1020px;margin:auto;padding:24px 16px 60px}h1{font-size:clamp(23px,4vw,34px);margin:9px 0 12px;line-height:1.35}h2{font-size:19px;margin:12px 0}.eyebrow{color:#6dd6c1;font-size:12px;font-weight:800;letter-spacing:.12em}.muted,.sub{color:#9cadba}.sub{font-size:13px}.intro{font-size:14px;max-width:800px}.panel{background:#101f2b;border:1px solid #294252;border-radius:15px;padding:16px;margin:15px 0}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.stat{padding:15px;background:#182d3b;border-radius:10px}.stat strong{display:block;font-size:26px;color:#fff}.stat small{color:#9fb8c6;font-size:11px}label{display:block;color:#a5bfce;font-size:12px;font-weight:700;margin-bottom:5px}select{width:100%;padding:12px 13px;border:1px solid #426276;background:#10202e;color:#f2f8fc;border-radius:9px;font-size:15px}section.controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.pill{display:inline-flex;align-items:center;background:#23394a;border:1px solid #486073;color:#e5f3fa;padding:3px 9px;border-radius:100px;font-size:12px;font-weight:700}.pill.warn{border-color:#b98a52;color:#ffd18c;background:#382a1f}.pill.ok{border-color:#3e836f;background:#163830;color:#a6efcf}.alert{border-left:3px solid #dcbd76;padding:10px 12px;background:#2b2721;color:#f6dfa9;border-radius:3px;font-size:13px}.bars{margin-top:15px}.line{display:grid;grid-template-columns:120px 1fr 190px;align-items:center;gap:12px;padding:11px 0;border-top:1px solid #233748}.line:first-child{border-top:0}.bandlabel{font-size:13px;font-weight:700}.barbg{height:21px;background:#1b3445;border-radius:8px;overflow:hidden}.bar{height:100%;background:linear-gradient(90deg,#2dbfa8,#8fc8dd);border-radius:7px}.line[data-last=true] .bar{background:linear-gradient(90deg,#e0a567,#f0ce7f)}.line .measure{text-align:right;font-weight:800;font-size:16px;font-variant-numeric:tabular-nums}.line .measure small{display:block;color:#9fb7c4;font-size:11px;font-weight:500}.info{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.info div{background:#142837;border-radius:9px;padding:10px}.info strong{font-size:19px;display:block}.info small{color:#9fb7c4;font-size:11px}.scroll{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px solid #304656;padding:9px 8px;text-align:right;white-space:nowrap}td:first-child,th:first-child{text-align:left}th{color:#adc6d3;font-weight:700}.danger{color:#f3c27c}.caption{font-size:12px;color:#a7bbc8}.notes{font-size:12px;color:#aabfcb}a{color:#9dd6ec}button{border:1px solid #486073;background:#183245;color:#def5fa;padding:7px 10px;border-radius:8px;cursor:pointer}.courses-outer{max-height:410px;overflow:auto}.courses-outer td:first-child{text-align:left}.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:#adc6d3}.help{margin-top:12px;padding:12px;background:#102936;border:1px solid #2e5362;border-radius:10px;font-size:13px}footer{margin-top:30px;color:#99aeb9;font-size:12px}
+@media(max-width:630px){main{padding:16px 11px 50px}section.controls{grid-template-columns:repeat(2,1fr)}section.controls>div:last-child{grid-column:span 2}.grid{grid-template-columns:repeat(3,1fr)}.stat{padding:9px}.stat strong{font-size:21px}.line{grid-template-columns:93px 1fr 95px;gap:7px}.line .measure{font-size:14px}.line .measure small{font-size:10px}.panel{padding:13px}.info{grid-template-columns:1fr 1fr}.sub{font-size:12px}}
+</style></head><body><main>
+<div class="eyebrow">H016 / COURSE × SURFACE × DISTANCE</div><h1>全国87コース<br>4角「届きにくさ」図鑑</h1>
+<p class="intro">全国10競馬場の芝・ダートを分け、4角位置を4帯に分類。2016〜2023年で決めた危険ラインと、2024〜2026年10月4日までの実測を比較します。<b>発走前の自動除外ルールではありません。</b></p>
+<div class="grid"><div class="stat"><strong>87</strong><small>競馬場×芝ダ×距離</small></div><div class="stat"><strong>3,566</strong><small>全頭・ラップ照合済レース</small></div><div class="stat"><strong>15</strong><small>過去期間で警戒境界が成立</small></div></div>
+<div class="panel"><h2>比較するコースを選択</h2><section class="controls"><div><label for="venue">競馬場</label><select id="venue"></select></div><div><label for="surf">馬場</label><select id="surf"><option value="芝">芝</option><option value="ダ">ダート</option></select></div><div><label for="dist">距離</label><select id="dist"></select></div></section>
+<div id="overview" style="margin-top:14px"></div></div>
+<div class="panel"><h2 id="courseTitle">コース別の4角位置リスク</h2><p class="sub">実際の4角順位を元にした<strong>事後集計</strong>。棒はその位置帯からの3着内率（0〜50%目盛）。</p><div id="courseRisk" class="bars"></div><div id="courseNotes" class="help"></div></div>
+<div class="panel"><h2>競馬場×芝ダートの全距離合算</h2><p class="sub">距離が混ざった全体傾向。必ず上の距離別コースも見ること。</p><div id="venueRisk" class="bars"></div><div id="screen" class="help"></div></div>
+<div class="panel"><h2>同じ競馬場・同じ距離で芝ダートを比較</h2><div id="sameDist" class="scroll"></div><p class="caption">該当する芝・ダの組がない場合は表示されません。少数レースは参考値。差はレースを単位に再抽出した95%区間を併記しています。</p></div>
+<div class="panel"><h2>全国87コースの警戒位置一覧</h2><p class="sub">学習2016〜2023年で固定したH013の基準。未確定＝安全ではありません。距離別データが少ない場合は過信しないでください。</p><div class="courses-outer"><table><thead><tr><th>コース</th><th>警戒位置</th><th>評価R</th><th>該当馬</th><th>3着内率</th><th>市場比</th></tr></thead><tbody id="allCourses"></tbody></table></div></div>
+<div class="panel"><h2>どう解釈する？</h2><div class="legend"><span>前25%＝16頭なら1〜4番手</span><span>前中＝5〜8番手</span><span>後中＝9〜12番手</span><span>最後方25%＝13〜16番手</span></div>
+<p class="notes">16頭立て換算。12〜18頭では各位置帯を出走頭数に応じて決めています。並走順位の扱いも含め、実際の4角位置がこの範囲だった場合の条件付き成績です。市場比＝実際の3着内頭数 ÷ レース後の最終単勝オッズから算出した期待3着内頭数。1を下回るほど最終市場期待より不振ですが、出走馬の強さや位置が事後的に分かったことの影響を含みます。</p>
+<p class="notes">警戒ラインは2016〜2023年の学習条件（レース30以上、後方馬数と3着内率および市場比の閾値）で固定。2024〜2026年は評価用。ただし他の研究で既に参照済みの年度であり、独立した新規データ検証ではありません。現在の4角実測・現在の実ラップを発走前入力に使用することは禁止です。</p></div>
+<footer>Research only / H016 / Not a betting recommendation / Production Ability C・M3・P10・M4 are unchanged.</footer>
+</main><script id="dataset" type="application/json">__DATA__</script>
+<script>
+(function(){'use strict';const D=JSON.parse(document.getElementById('dataset').textContent);
+const venue=document.getElementById('venue'),surf=document.getElementById('surf'),dist=document.getElementById('dist');
+const venues=[...new Set(D.courses.map(x=>x.venue))];venues.sort((a,b)=>['札幌','函館','福島','新潟','東京','中山','中京','京都','阪神','小倉'].indexOf(a)-['札幌','函館','福島','新潟','東京','中山','中京','京都','阪神','小倉'].indexOf(b));
+venue.innerHTML=venues.map(v=>`<option>${v}</option>`).join('');venue.value='中山';surf.value='芝';
+const fmt=(v,unit='')=>v==null?'—':`${Number(v).toLocaleString('ja-JP',{maximumFractionDigits:2})}${unit}`;
+const rateTag=(z)=>z?.horses?`${fmt(z.rate_pct,'%')} <small>${fmt(z.top3)}/${fmt(z.horses)}頭｜市場比 ${fmt(z.actual_over_market)}</small>`:'—';
+function bands(zones){return zones.map(z=>{const p=z.test?.rate_pct||0;return `<div class="line" data-last="${z.band==='最後方25%'}"><div class="bandlabel">${z.band}</div><div class="barbg"><div class="bar" style="width:${Math.max(0,Math.min(100,p*2))}%"></div></div><div class="measure">${rateTag(z.test)}</div></div>`}).join('')}
+function populate(){let cs=D.courses.filter(x=>x.venue===venue.value&&x.surface===surf.value);if(!cs.length){surf.value=surf.value==='芝'?'ダ':'芝';cs=D.courses.filter(x=>x.venue===venue.value&&x.surface===surf.value)}const before=Number(dist.value),dists=cs.map(x=>x.distance).sort((a,b)=>a-b);dist.innerHTML=dists.map(d=>`<option value="${d}">${d}m</option>`).join('');dist.value=dists.includes(before)?String(before):(dists.includes(1600)?'1600':String(dists[0]));render()}
+function render(){const c=D.courses.find(x=>x.venue===venue.value&&x.surface===surf.value&&x.distance===Number(dist.value));if(!c)return;
+document.getElementById('courseTitle').textContent=`${c.course}｜4角位置別`;
+document.getElementById('courseRisk').innerHTML=bands(c.zones);
+let pill=c.risk==='未確定'?'<span class="pill">警戒位置 未確定</span>':`<span class="pill warn">学習時の警戒：${c.risk}</span>`;
+document.getElementById('overview').innerHTML=`<span class="pill ok">${c.course}</span>　${pill}<p class="sub">前半の学習 ${c.trainR}レース／後半の評価 ${c.testR}レース。危険ラインは後半の結果を使って選び直していません。</p>`;
+let riskTest=c.riskTest,part=c.risk==='未確定'?'このコースでは、2016〜2023年の固定基準に合う危険帯を特定できませんでした。安全を意味しません。':`後年の実測で危険帯に入った ${fmt(riskTest.horses)}頭のうち、${fmt(riskTest.top3)}頭が3着内（${fmt(riskTest.rate_pct,'%')}、市場比 ${fmt(riskTest.actual_over_market)}）。${riskTest.horses<50?'評価頭数が少ないため参考値です。':''}`;
+document.getElementById('courseNotes').innerHTML=`${part}<p class="notes">これはレース後に確定した4角位置の集計です。「今回その馬がその位置になる確率」とは異なります。</p>`;
+const vx=D.venueZones.filter(x=>x.venue===venue.value&&x.surface===surf.value);document.getElementById('venueRisk').innerHTML=bands(vx);
+const f=D.screens.find(x=>x.venue===venue.value&&x.surface===surf.value),sc=f?.summary;
+document.getElementById('screen').innerHTML=`<b>発走前の位置リスク判定（H013）</b>：この競馬場の${surf.value}で、過去5走から危険とされた馬は ${fmt(sc?.horses||0)}頭。うち実際に3着以内 ${fmt(sc?.top3||0)}頭${sc?.horses?`（${fmt(sc.rate_pct,'%')}）`:''}。<br><small class="sub">前後期別の危険コース固定＋予測4角後方確率70%以上を使用。自動的な消し馬ではありません。最終オッズは後付けの検証用。</small>`;
+const match=D.matched.find(x=>x.venue===venue.value&&x.distance===Number(dist.value));let html;if(!match){html='<p class="sub">同一距離で芝・ダ両方の対象レースが揃っていません。</p>'}else{html=`<table><thead><tr><th>馬場</th><th>レース数</th><th>最後方馬数</th><th>3着内</th><th>率</th></tr></thead><tbody><tr><td>芝</td><td>${match.turf.races}</td><td>${match.turf.horses}</td><td>${match.turf.top3}</td><td>${fmt(match.turf.rate_pct,'%')}</td></tr><tr><td>ダ</td><td>${match.dirt.races}</td><td>${match.dirt.horses}</td><td>${match.dirt.top3}</td><td>${fmt(match.dirt.rate_pct,'%')}</td></tr></tbody></table><p class="sub">芝−ダ：${fmt(match.turf_minus_dirt_rate_pp,'pp')}、95%区間 ${fmt(match.ci95_pp[0])}〜${fmt(match.ci95_pp[1])}pp ${match.usable_both_10plus_races?'':'／少数レースにつき参考'}</p>`}document.getElementById('sameDist').innerHTML=html;
+}
+function all(){const sorted=[...D.courses].sort((a,b)=>{const ai=a.risk==='未確定'?1:0,bi=b.risk==='未確定'?1:0;return ai-bi||a.venue.localeCompare(b.venue,'ja')||a.surface.localeCompare(b.surface,'ja')||a.distance-b.distance});document.getElementById('allCourses').innerHTML=sorted.map(c=>{const r=c.riskTest;return `<tr><td><button data-course="${c.course}">${c.course}</button></td><td class="${c.risk==='未確定'?'':'danger'}">${c.risk}</td><td>${c.testR}</td><td>${r.horses||'—'}</td><td>${r.rate_pct==null?'—':fmt(r.rate_pct,'%')}</td><td>${r.actual_over_market==null?'—':fmt(r.actual_over_market)}</td></tr>`}).join('');document.querySelectorAll('[data-course]').forEach(x=>x.addEventListener('click',()=>{const c=D.courses.find(a=>a.course===x.dataset.course);venue.value=c.venue;surf.value=c.surface;populate();dist.value=String(c.distance);render();window.scrollTo({top:190,behavior:'smooth'})}));}
+venue.addEventListener('change',populate);surf.addEventListener('change',populate);dist.addEventListener('change',render);populate();all();
+})();</script></body></html>'''
+page=page.replace('__DATA__',blob)
+path=ROOT/'全国87コース_芝ダ別_4角危険位置図鑑.html'
+path.write_text(page,encoding='utf8')
+print('created',str(path),'size',len(page))
