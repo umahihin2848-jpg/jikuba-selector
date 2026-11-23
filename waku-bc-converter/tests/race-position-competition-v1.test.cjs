@@ -35,6 +35,23 @@ test('actual horse numbers can be nonconsecutive after scratches',()=>{
  const v=core.simulate(rows,{count:256,seed:2});
  assert.equal(v.ready,true);assert.equal(v.n,15);assert.equal(v.rows[14].no,'16');
 });
+test('rank 10-90% range comes from cumulative probabilities, not final rank fallback',()=>{
+ const x=core.simulate(lineup(),{count:4096,seed:10});
+ assert.ok(x.rows[0].rank90<16,'front-running horse cannot always have upper quantile at final rank');
+ assert.ok(x.rows[15].rank10>1,'last-ranked horse should not have a first-position lower quantile');
+ assert.ok(x.rows[0].rank10<=x.rows[0].rank90);
+});
+test('conditional missed-front scenario contains only ranks outside top k',()=>{
+ const x=core.simulate(lineup(),{count:4096,seed:10});
+ for(const r of x.rows){
+  assert.equal(r.fallbackCount+r.frontCount,x.count);
+  assert.ok(Math.abs(r.fallbackShare+r.frontShare-1)<1e-9);
+  if(r.fallbackCount){
+   assert.ok(r.fallbackMeanRank>=x.k+1&&r.fallbackMeanRank<=x.n);
+   assert.ok(r.fallbackRank10>=x.k+1&&r.fallbackRank10<=r.fallbackRank90&&r.fallbackRank90<=x.n);
+  }
+ }
+});
 test('research code does not overwrite official M3, betting state, odds or selection',()=>{
  assert.doesNotMatch(code,/\.(finishRank|score|predGap|axisNo|partnerNos|betEligible|odds)\s*=/);
  assert.match(code,/productionImpact:false/);
