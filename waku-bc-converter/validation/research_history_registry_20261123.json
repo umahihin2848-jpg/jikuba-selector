@@ -1,7 +1,7 @@
 {
   "schema": "rsa-research-history-registry-v1",
   "created_on": "2026-11-23",
-  "entry_count": 46,
+  "entry_count": 47,
   "scope": "review of available GitHub docs, PR descriptions, archived conversation and supplied source files",
   "not_exhaustive_of_private_unretrieved_attachments": true,
   "source_text_sha256": "9521c4061a015341e658d434fdb70768800091499fc96d3b853a708e6c76fb16",
@@ -516,6 +516,19 @@
       ],
       "privacy": "Per-horse 8454 rows and viewer kept only in conversation-local ZIP, not public GitHub",
       "dedupKey": "H008-E|asof historical horse closing3F, gap600, C3C4 C4finish + full-lap matching|2024 fixed coefficients / 2025-26 553R Brier top3|conditional slope 0"
+    },
+    {
+      "id": "H009",
+      "title": "M3 existing information overlap, horse matched Tokyo vs Nakayama same-distance preference replication",
+      "population": "M3 feature corr: H008E/H005 2025-26 553R/8454 horses; raw results 2016-2026/10/04 turf1600/1800/2000 Tokyo/Nakayama 479 strict full races 7261 horses; 183 horse×exact-distance pairs >=2 venue starts each; as-of train2019-23 220R and test2024-26 131R",
+      "new_vs_prior": "H007 same-venue ±400m prior10 conditional mean; H008-D/E race-lap fit. H009 tests strict within-horse exact distance Tokyo-vs-Nakayama repeated residual contrast and paired held-out models, plus actual official M3 feature audit and own closing speed repeated split",
+      "code_audit": "M3 19 features include historical PCI/RPCI/3F/frontness/remaining600, but do not directly include venue/geometry/200m raw laps; 553R within-race M3 vs generic response corr -0.541, vs conditional lap response corr -0.0416; latter SD0.00612",
+      "results": "183 pairs first/last popularity adjusted venue difference Pearson .000846 CI95[-.1464,.1502], signed agreement 48.57% of nonzero 175; within-horse shuffle observed average abs difference .21178 vs null .21225 permutation p .514; 2019-23 training venue coefficient constrained positive =0; 2024-26 131R market+form Brier .133277054 -> +venue same, top3 hit 167 ->167. Unconstrained training coefficient -1.794, historical test Brier worsens to .133359688. Secondary umadete history 369 pairs own relative last3F corr .032, c4-to-finish corr .068, CI spans 0.",
+      "status": "COMPLETED_HOLD_NO_REPLICABLE_MARKET_RESIDUAL_VENUE_PREFERENCE",
+      "modelImpact": "No official Ability C, M3, P10, axis or BUY/PASS change",
+      "critical_caveats": "Historical target odds post-race, 2024-26 previously explored, as-of limited older 3win+ histories, venue/distance not exact course A/B inner-outer, courses vary physically, many horses sparse. No causal absence of horse-specific track aptitude proven.",
+      "source": "validation/h009/H009_REPORT_20261123.md",
+      "dedupKey": "H009|M3 static overlap audit|same-horse Tokyo Nakayama exact turf1600/1800/2000 early-late consistency|2016-26 and chrono train2019-23 test2024-26"
     }
   ],
   "new_protocols": [
@@ -591,6 +604,15 @@
       "findings": "2025-26 553R 8454 horses, +generic individual proxy Brier +.00002062 CI zero crosses and top3 hit -6; lap conditional incremental 2024 coefficient 0; no reliable gain",
       "report": "validation/h008e/H008E_REPORT_20261123.md",
       "next": "Prioritize N001 exact as-of input integrity and full official Ability C/M3 parity before any new horse-conditioned full-lap gate or production weight."
+    },
+    {
+      "id": "H010",
+      "title": "Frozen course geometry × horse pre-race position and section-demand response, with pairwise Tokyo–Nakayama contrasts",
+      "state": "hypothesis_not_implemented",
+      "new_vs_prior": "H009 venue average outcome/residual replication fails; H010 would factor course geometry and interactions not venue label or old win rate",
+      "needed": "N001 as-of race ID dedup and browser Ability C/M3 parity, official course geometry first turn/straight/slope/inner outer, distinct horse early-position/M4 as-of and past stagewise 3F/3C/4C observations",
+      "evaluation": "Prior years exploratory, future frozen pre-race full-field comparisons vs official M3+Ability, race-wise Brier and top3; no coefficient search on prior viewed test years",
+      "claim_limit": "Course physical different does not imply predictive horse preference; no production bonus without independent improvement"
     }
   ]
 }
