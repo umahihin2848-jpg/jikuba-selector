@@ -1,0 +1,240 @@
+{
+  "schema": "H007_asof_suitability_market_residual_exploratory_v1",
+  "source": {
+    "raw_rows": 439416,
+    "filtered_unique_valid": 70715,
+    "horses": 4269,
+    "pre2024_train_hist": 37801,
+    "market_expected_train_rmse": 0.26205433983861537
+  },
+  "target_rows": 13802,
+  "join_rows": 13802,
+  "train2024_races": 338,
+  "test2025_26_races": 569,
+  "train2024_horses": 5126,
+  "test2025_26_horses": 8676,
+  "conditions": {
+    "overall": {
+      "eligible_horses": {
+        "2024": 5026,
+        "2025": 4913,
+        "2026": 3635
+      },
+      "train_coefficient": 0.12037323653335792,
+      "train_baseline_brier": 0.1301986659139566,
+      "train_corrected_brier": 0.13015061909166487,
+      "test_baseline_race_mean_brier": 0.13250243208658352,
+      "test_corrected_race_mean_brier": 0.13243968677318793,
+      "test_delta_brier": 6.2745313395565e-05,
+      "test_delta_ci95": [
+        -3.8804040057924856e-05,
+        0.00016345423668919176
+      ],
+      "test_changed_races": 569,
+      "test_score_nonzero_horses": 8676,
+      "test_mean_score_eligible": 0.0009076871063797655
+    },
+    "distance": {
+      "eligible_horses": {
+        "2024": 1543,
+        "2025": 1433,
+        "2026": 1052
+      },
+      "train_coefficient": 0.05316614466279988,
+      "train_baseline_brier": 0.1301986659139566,
+      "train_corrected_brier": 0.13019556426401027,
+      "test_baseline_race_mean_brier": 0.13250243208658352,
+      "test_corrected_race_mean_brier": 0.1325076094497192,
+      "test_delta_brier": -5.177363135676313e-06,
+      "test_delta_ci95": [
+        -3.0359392672314964e-05,
+        2.0111159681789656e-05
+      ],
+      "test_changed_races": 537,
+      "test_score_nonzero_horses": 8192,
+      "test_mean_score_eligible": 0.022825165467665765
+    },
+    "venue": {
+      "eligible_horses": {
+        "2024": 2187,
+        "2025": 2187,
+        "2026": 1727
+      },
+      "train_coefficient": 0.0,
+      "train_baseline_brier": 0.1301986659139566,
+      "train_corrected_brier": 0.1301986659139566,
+      "test_baseline_race_mean_brier": 0.13250243208658352,
+      "test_corrected_race_mean_brier": 0.13250243208658352,
+      "test_delta_brier": 0.0,
+      "test_delta_ci95": [
+        0.0,
+        0.0
+      ],
+      "test_changed_races": 0,
+      "test_score_nonzero_horses": 8452,
+      "test_mean_score_eligible": 0.017810662455490085
+    },
+    "venue5": {
+      "eligible_horses": {
+        "2024": 1150,
+        "2025": 1045,
+        "2026": 887
+      },
+      "train_coefficient": 0.40064431620756485,
+      "train_baseline_brier": 0.1301986659139566,
+      "train_corrected_brier": 0.13012181907887752,
+      "test_baseline_race_mean_brier": 0.13250243208658352,
+      "test_corrected_race_mean_brier": 0.13261345929807078,
+      "test_delta_brier": -0.00011102721148726996,
+      "test_delta_ci95": [
+        -0.0002505709665556202,
+        2.9662758380828746e-05
+      ],
+      "test_changed_races": 479,
+      "test_score_nonzero_horses": 7355,
+      "test_mean_score_eligible": 0.012927182149156656
+    },
+    "surface": {
+      "eligible_horses": {
+        "2024": 567,
+        "2025": 515,
+        "2026": 393
+      },
+      "train_coefficient": 0.2890329644095135,
+      "train_baseline_brier": 0.1301986659139566,
+      "train_corrected_brier": 0.1301540223489947,
+      "test_baseline_race_mean_brier": 0.13250243208658352,
+      "test_corrected_race_mean_brier": 0.13254577617383076,
+      "test_delta_brier": -4.3344087247264986e-05,
+      "test_delta_ci95": [
+        -0.00015909783622640894,
+        7.378554852828562e-05
+      ],
+      "test_changed_races": 414,
+      "test_score_nonzero_horses": 6329,
+      "test_mean_score_eligible": 0.041957431172870194
+    }
+  },
+  "limit": "historical reused years, closing market, not real pre-race price; not exact Ability/M3",
+  "general_then_venue": {
+    "trained2024_coeff_overall": 0.12037323653335777,
+    "trained2024_coeff_venue_given_overall": 0.0,
+    "tests": {
+      "2025": {
+        "races": 330,
+        "baseline_brier": 0.1325376167830679,
+        "overall_brier": 0.1324311157654845,
+        "overall_plus_venue_brier": 0.1324311157654845,
+        "venue_incremental_delta": 0.0,
+        "venue_incremental_ci95": [
+          0.0,
+          0.0
+        ],
+        "overall_plus_venue5_brier": 0.13265205737930583,
+        "venue10_minus_venue5_brier_gain": 0.00022094161382130465,
+        "venue10_minus_venue5_ci95": [
+          3.9792413754275654e-05,
+          0.0003985635107686259
+        ]
+      },
+      "2026": {
+        "races": 239,
+        "baseline_brier": 0.13245385070650043,
+        "overall_brier": 0.13245152121897094,
+        "overall_plus_venue_brier": 0.13245152121897094,
+        "venue_incremental_delta": 0.0,
+        "venue_incremental_ci95": [
+          0.0,
+          0.0
+        ],
+        "overall_plus_venue5_brier": 0.1324101924115452,
+        "venue10_minus_venue5_brier_gain": -4.132880742575288e-05,
+        "venue10_minus_venue5_ci95": [
+          -0.0002791398504778926,
+          0.00018604678155048783
+        ]
+      },
+      "2025_26": {
+        "races": 569,
+        "baseline_brier": 0.13250243208658352,
+        "overall_brier": 0.13243968677318793,
+        "overall_plus_venue_brier": 0.13243968677318793,
+        "venue_incremental_delta": 0.0,
+        "venue_incremental_ci95": [
+          0.0,
+          0.0
+        ],
+        "overall_plus_venue5_brier": 0.1325504655914415,
+        "venue10_minus_venue5_brier_gain": 0.00011077881825355992,
+        "venue10_minus_venue5_ci95": [
+          -3.203958313954019e-05,
+          0.0002522557250721003
+        ]
+      }
+    },
+    "trained2024_coeff_venue5_given_overall": 0.4052317340624036
+  },
+  "general_distance_venue_ablation": {
+    "coeff_distance2024": 0.06454597840099174,
+    "coeff_venue2024_given_other": 0.0,
+    "results": {
+      "2025": {
+        "venue_incremental_vs_overall_plus_distance": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "2026": {
+        "venue_incremental_vs_overall_plus_distance": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "2025_26": {
+        "venue_incremental_vs_overall_plus_distance": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ]
+      }
+    }
+  },
+  "venue_by_surface": {
+    "芝": {
+      "races": 327,
+      "venue_incremental_vs_overall": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "ダ": {
+      "races": 242,
+      "venue_incremental_vs_overall": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "venue_by_year": {
+    "2025": {
+      "races": 330,
+      "delta": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "2026": {
+      "races": 239,
+      "delta": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    }
+  }
+}
