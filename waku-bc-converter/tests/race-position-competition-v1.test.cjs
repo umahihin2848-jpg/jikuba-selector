@@ -82,6 +82,17 @@ test('historical 600m gap SD is display metadata, never a simulated ranking inpu
  assert.match(code,/seed:hash\(c\.seedSig\)/);
  assert.doesNotMatch(code,/seed:hash\(c\.sig\)/);
 });
+
+test('duplicate history audit is metadata only and does not change any simulated rank probability',()=>{
+ const rows=lineup();const duplicate=rows.map((r,i)=>({...r,histDupRows5:4,histUnique5:1,histGapN:5}));
+ const a=core.simulate(rows,{seed:111,count:1024});
+ const b=core.simulate(duplicate,{seed:111,count:1024});
+ assert.deepEqual(a.rows.map(r=>r.rankProbabilities),b.rows.map(r=>r.rankProbabilities));
+ assert.ok(b.rows.every(r=>r.histDupRows5===4&&r.histUnique5===1));
+ assert.match(code,/historyDistinctRacesLast5/);
+ assert.match(code,/historyDuplicateRowsLast5/);
+ assert.match(code,/履歴の重複検出/);
+});
 test('research code does not overwrite official M3, betting state, odds or selection',()=>{
  assert.doesNotMatch(code,/\.(finishRank|score|predGap|axisNo|partnerNos|betEligible|odds)\s*=/);
  assert.match(code,/productionImpact:false/);
