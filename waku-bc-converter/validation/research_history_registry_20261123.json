@@ -1,7 +1,7 @@
 {
   "schema": "rsa-research-history-registry-v1",
   "created_on": "2026-11-23",
-  "entry_count": 48,
+  "entry_count": 49,
   "scope": "review of available GitHub docs, PR descriptions, archived conversation and supplied source files",
   "not_exhaustive_of_private_unretrieved_attachments": true,
   "source_text_sha256": "9521c4061a015341e658d434fdb70768800091499fc96d3b853a708e6c76fb16",
@@ -550,6 +550,22 @@
       "tests": "11 deterministic synthetic + aggregate tests passed, entire real-data run repeated; full-field target 26 course ambiguous/missing races excluded",
       "privacy": "The 553R detailed predictions and H005 horse-level M3 source packaged for user only, not public GitHub",
       "dedupKey": "H010|2024 fitted frozen 3 individual main+3 turnxgearxfade interactions|2025-26 553R existing M3 shadow incremental Brier and Top3"
+    },
+    {
+      "id": "H011",
+      "title": "Explain Tokyo/Nakayama course aptitude with 4C position opportunity, as-of 4C prediction and downstream finish model",
+      "population": "2016-2026/10/04 479 strict full races 7261 horses Tokyo/Nakayama turf1600,1800,2000; all 479 laps exact joined. 2021-23 trained pre-race 4C classifier, 2024-26 131R/1994 runners diagnosed; M3 shadow last comparison 2025-26 63R",
+      "new_vs_prior": "H009 tested horse venue-label residual repeatability, H010 static feature interactions; H011 factorizes actual 4C-position finish mechanism and pre-race 4C-location predictability and checks marginal value over closing market/M3, including current-race full lap only as after-race diagnostic.",
+      "findings": "Observed back-half C4 of top3 winners: Tokyo vs Nakayama turf1600 36.63 vs24.64%, 1800 34.23 vs20.63%, 2000 32.29 vs26.34%; early-late splits 2016-20 vs21-26 stable for 1600/1800. Non-mid-lull 1600 38.10 vs24.58% in 63 vs99 R. Final-odds PL expected in actual back4 group suggests Tokyo-vs-Nakayama residual 1600 +6.41pp CI[.08,12.56], conditional on after-race group NOT market EV proof.",
+      "asof_4c": "Train2021-23 138R, test2024-26 131R/1994 runners: prior5 distinct same-turf observed 4C+gate+venue+distance predicts back-half at 4C AUC .7411 race cluster CI[.7186,.7645], Brier .20643 vs gate/venue/distance .24876; historical cohort biased/previously explored",
+      "predictive_extension": "Market PL + stage 2024-26 131R Brier .133277->.132918, top3 167->172, CI gain[-.000185,.000919], Tokyo-specific slope 0. In H005 reconstructed M3 comparison 2025-26 63R: market-only .128324/88, market+M3 .128766/84, market+M3+stage .128325/87, M3 increment CI[-.000778,+.001609] crosses zero.",
+      "limitations": "Current race 4C positions and laps are strictly POSTRACE diagnostic and NEVER used in as-of feature construction. 2024-26 repeatedly mined previously, no true untouched holdout. Historical horse set umadete only 4269 names with 2021-23 >=2 prior coverage 56% vs 2024-26 96%, sample shift. 3 distance/surface hypotheses risk multiple tests. Closing odds not T-15, M3 Python shadow not full browser parity, no Ability C full field, no profitability claim.",
+      "status": "MECHANISM_FOUND_ON_AGGREGATE__PREDICTIVE_INCREMENT_HOLD",
+      "production_change": "NONE",
+      "tests": "Seven strict date/ID/dedup/horse surface/position guard synthetic tests pass; 479 of 479 race laps exact joined",
+      "source": "validation/h011/H011_REPORT_20261123.md",
+      "aggregate": "validation/h011/H011_PUBLIC_AGGREGATE.json",
+      "dedupKey": "H011|turf Tokyo Nakayama1600/1800/2000|observed4C finish mechanism and asof prev5 4C AUC|market/M3 shadow independent increment"
     }
   ],
   "new_protocols": [
@@ -644,6 +660,15 @@
       "new_vs_prior": "Research H004-H010 has 2024-26 repeated mining and null robust gains; correcting duplicated historical race rows and wrong temporary saddlecloth mapping is prerequisite to trust course interaction scores.",
       "needed": "Parser duplicate keys name+16-digit prior race ID; strict prior date; actual numbered runners, 3C/4C true labels, actual frozen pred export, browser vs offline exact matched features; new untouched race dates to confirm",
       "claim_limit": "Do not present proxy market+M3 historical improvement as a live increase in betting expected value."
+    },
+    {
+      "id": "H012",
+      "title": "History-only two-stage course suitability: 3C->4C position formation and 4C->finish conditional chance, evaluated before production",
+      "state": "concept_after_H011_no_production_work",
+      "new_vs_prior": "H011 measured stage mechanism and as-of 4C propensity, but finish transfer conditional on pre-race forecast pace and observed old 3F strength is not separately fitted; do not repeat venue label or H010 static correction",
+      "needed": "N001 corrected 5-unique prior inputs; existing course geometry DB, historical full-lap distributions; official P10/3C4C/M3 input parity; historical episodes with strict separate model split",
+      "claim_limit": "Race-current 4C and current full laps used as targets/diagnostics only; no pre-race leakage, no automatic betting recommendation or guaranteed improvement",
+      "time_requirement": "Can run on already provided past races; user explicitly prefers present retrospective mechanistic investigation rather than waiting for future races."
     }
   ]
 }
