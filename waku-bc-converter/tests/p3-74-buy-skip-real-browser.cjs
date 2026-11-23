@@ -57,6 +57,7 @@ const server=http.createServer((req,res)=>{const f=path.resolve(app,'.'+decodeUR
   await page.locator('#rpaOdds').fill('8.4');
   await page.locator('#rpaObserved').fill('2026-11-29T15:10');
   const unchanged=await page.evaluate(()=>JSON.stringify({A:window.M3PureAbilityState,F:window.Finish600State,P:window.PositionRiskState}));
+  console.log('P374 roster diagnostics',JSON.stringify(await page.evaluate(()=>{const text=document.getElementById('rpaRoster').value,source=document.getElementById('rpaRosterSource').value,checked=document.getElementById('rpaAttest').checked,parsed=window.RSAPurchaseAuditCoreV1.parseRoster(text),a=window.M3PureAbilityState.rows;return{rowCount:parsed.rows.length,issues:parsed.errors,source,checked,textStart:text.slice(0,100),nameMatches:parsed.rows.every(z=>a.some(h=>String(h.no)===z.no&&h.name===z.name)),actualFirst:a[0]}})));
   await page.locator('#rpaEvaluate').click();
   const result=await page.locator('#rpaResult').innerText();
   assert.match(result,/研究候補・記録完了/);assert.match(result,/本番の購入ゲート：skip/);
