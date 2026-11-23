@@ -1,0 +1,389 @@
+{
+  "schema": "rsa-research-history-registry-v1",
+  "created_on": "2026-11-23",
+  "entry_count": 36,
+  "scope": "review of available GitHub docs, PR descriptions, archived conversation and supplied source files",
+  "not_exhaustive_of_private_unretrieved_attachments": true,
+  "source_text_sha256": "9521c4061a015341e658d434fdb70768800091499fc96d3b853a708e6c76fb16",
+  "evaluation_rule": "same dataset+code+target+metric+selection rule is not a new independent validation",
+  "studies": [
+    {
+      "id": "D01",
+      "section": "A. 入力品質・再現性 — 既知の重大問題",
+      "study_and_cohort": "P3-22b / P3-40〜42：271R・4,250頭",
+      "evidence_and_findings": "proxy順位と凍結順位の完全一致290/4,250（6.8%）。2024年61RのM3保存式は自己整合確認しただけ。旧fixture原本に基づく全段再現は未達。",
+      "do_not_repeat_as_new": "「本番M3の的中率6.8%」と誤用しない。原本対照が必要。",
+      "status": "data_quality_audited",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "D02",
+      "section": "A. 入力品質・再現性 — 既知の重大問題",
+      "study_and_cohort": "P3-41・42 / PR #5、P3-63 / PR #7、P3-87 / PR #6",
+      "evidence_and_findings": "TARGET `umadete.csv` 439,416行→馬名×有効16桁過去レースIDで74,724ユニーク、重複364,692行。主要項目の重複値不一致0。直近5**行**は直近5**レース**と異なる。",
+      "do_not_repeat_as_new": "同じ重複件数を再調査しない。#5/#6/#7は**競合するDraft実装**、mainへ自動マージしない。",
+      "status": "data_quality_audited",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "D03",
+      "section": "A. 入力品質・再現性 — 既知の重大問題",
+      "study_and_cohort": "P3-63再集計：2025 158R、2026 120R",
+      "evidence_and_findings": "重複除去で600m差MAE 2025 .410944→.389961、2026 .382266→.365855。一方M3 **proxy**上位3頭の3着内数154→146、112→105で悪化。",
+      "do_not_repeat_as_new": "「重複除去＝馬券的中率改善」の結論は否定。別の予測対象におけるトレードオフが既知。",
+      "status": "data_quality_audited",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "D04",
+      "section": "A. 入力品質・再現性 — 既知の重大問題",
+      "study_and_cohort": "P3-64：合成12頭をChromiumで現行main対Draft #7比較",
+      "evidence_and_findings": "初位置・残600m差が12/12変化、M3順位7/12変化、上位3頭は同じ。これは**予測同士の差**であり実測に対するMAEではない。",
+      "do_not_repeat_as_new": "実レース・現行本番全段の一致と実測対照は未実施。合成の再実行は不要。",
+      "status": "data_quality_audited",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "D05",
+      "section": "A. 入力品質・再現性 — 既知の重大問題",
+      "study_and_cohort": "P3-54〜55：2024凍結P10 954頭",
+      "evidence_and_findings": "再計算P10との差MAE **10.46ポイント**、区分変更362/954（37.9%）、20%閾値跨ぎ168頭。元のP10生成版・過去走完全条件が未特定。",
+      "do_not_repeat_as_new": "「P10<20%」の閾値最適化禁止。本番P10との版・入力解決は未完。",
+      "status": "data_quality_audited",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "D06",
+      "section": "A. 入力品質・再現性 — 既知の重大問題",
+      "study_and_cohort": "P3-53：Ability Cの研究再計算 275R/4,317頭",
+      "evidence_and_findings": "2024年凍結910頭とのC順位一致902/910（99.1%）、ただしブラウザ完全再現ではない。",
+      "do_not_repeat_as_new": "C研究再構成を本番C実績と表記しない。",
+      "status": "data_quality_audited",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "D07",
+      "section": "A. 入力品質・再現性 — 既知の重大問題",
+      "study_and_cohort": "P3-87〜88 / PR #6：2023〜26 381R/5,973頭",
+      "evidence_and_findings": "直近5行と5異レースの入力が5,488頭（91.9%）で異なる。M3 19特徴量の合成入力一致・QA成功。旧5レースfixtureは16桁ID欠落で本番ブラウザ回帰不合格。",
+      "do_not_repeat_as_new": "入力検証は済み。正しいIDを備えた**実レースfixtureの本番JS全段比較**が残る。",
+      "status": "data_quality_audited",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "A01",
+      "section": "B. 能力・軸・市場 — 重複しているテーマ",
+      "study_and_cohort": "P1-A：研究CとHybrid、評価2025–26 163R",
+      "evidence_and_findings": "Hybrid構造切替で軸好走数増の探索値はあるが、C対HybridのTop3 LogLoss差ほぼゼロ、参考馬券ROI C70.4%→Hybrid93.9%でも100%未満。",
+      "do_not_repeat_as_new": "構造を変えたことで対象が変化。独立な新利益は未証明。ブラウザ完全再現が残る。",
+      "status": "investigated_hold",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "A02",
+      "section": "B. 能力・軸・市場 — 重複しているテーマ",
+      "study_and_cohort": "P3-49〜50：2024本番C凍結60R",
+      "evidence_and_findings": "C1位27/60が3着以内。修正M3一致＋C1選抜25Rで13/25、C能力差同数選抜12/25。差1頭。構造コード旧保存60/60一致。",
+      "do_not_repeat_as_new": "C×M3一致を高信頼軸と自動認定しない。",
+      "status": "investigated_hold",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "A03",
+      "section": "B. 能力・軸・市場 — 重複しているテーマ",
+      "study_and_cohort": "P3-51：研究v1×M3、2025–26 174R",
+      "evidence_and_findings": "A1×M3 Top3の同数74Rで34/74、能力差選抜27/74、CIはゼロ跨ぎ。A2一致61RではA2 17/61、同レースA1 29/61。",
+      "do_not_repeat_as_new": "v1とCは別。過去174Rで一致閾値を再探索しない。",
+      "status": "investigated_hold",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "A04",
+      "section": "B. 能力・軸・市場 — 重複しているテーマ",
+      "study_and_cohort": "P3-52〜53：Pairと単独、2025–26 C有効166R",
+      "evidence_and_findings": "再計算C1がPairで17/32、単独A1で11/32。年・最終人気補正後のPair独立価値は未確認。2026年で方向が逆転。",
+      "do_not_repeat_as_new": "「Pair=強い」は未実証。能力差・市場と同率比較は既実施。",
+      "status": "investigated_hold",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "A05",
+      "section": "B. 能力・軸・市場 — 重複しているテーマ",
+      "study_and_cohort": "P3-54：47R構造軸vs最終人気再選定",
+      "evidence_and_findings": "21/47→28/47（3着内）、最終1人気25/47。95%CIゼロ跨ぎ。再選定の大半は最終1人気。",
+      "do_not_repeat_as_new": "確定最終オッズ使用≠買えるT-15オッズ。再選定有利を自動採用しない。",
+      "status": "investigated_hold",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "A06",
+      "section": "B. 能力・軸・市場 — 重複しているテーマ",
+      "study_and_cohort": "P3-56：2025学習→2026評価73R",
+      "evidence_and_findings": "C+M3のTop3 Brier .147600→＋P10 .147088（不確実）、**最終市場+C+M3 .132720→＋P10 .133086（悪化）**。",
+      "do_not_repeat_as_new": "P10軸補正の独立改善を探索済み年で再試行しない。",
+      "status": "investigated_hold",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "A07",
+      "section": "B. 能力・軸・市場 — 重複しているテーマ",
+      "study_and_cohort": "P3-57〜59：C1と市場1番人気、2024–26 262R",
+      "evidence_and_findings": "2026年C1 Top3 24/73、最終1人気43/73。C1と人気1位が異なる190Rの2026年52Rで13/52対32/52。2025で選んだ市場切替が2026年に失速。",
+      "do_not_repeat_as_new": "Cを捨て市場軸固定、またはG1 C一律禁止の根拠にはならない。確定市場での比較は完了。",
+      "status": "investigated_hold",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "A08",
+      "section": "B. 能力・軸・市場 — 重複しているテーマ",
+      "study_and_cohort": "P3-60：C1−C2差0.30以上、C1≠人気1位の一部61R",
+      "evidence_and_findings": "C1勝利12、最終市場期待6.52。ただし探索10条件の多重比較とCIを考慮すると独立優位未証明。3着内はC1 24/61対人気30/61。",
+      "do_not_repeat_as_new": "勝利と3着内を混ぜない。閾値0.30の再最適化禁止。",
+      "status": "investigated_hold",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "A09",
+      "section": "B. 能力・軸・市場 — 重複しているテーマ",
+      "study_and_cohort": "P3-61〜62：市場1番人気×C3位内、162R",
+      "evidence_and_findings": "Top3 97/162、**市場低オッズから同数162Rを選ぶと104/162**。独立価値不明。",
+      "do_not_repeat_as_new": "「人気×C3位」条件を再検証と称して同じ年で探し直さない。",
+      "status": "investigated_hold",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "A10",
+      "section": "B. 能力・軸・市場 — 重複しているテーマ",
+      "study_and_cohort": "2024〜26の相手選定110R",
+      "evidence_and_findings": "Ability優先10/110・ROI33.2%、M3優先17/110・81.4%、P10最小18/110・86.4%。別年度で逆転した比較あり。",
+      "do_not_repeat_as_new": "相手順位の固定的優位は示されず。券種オッズ条件の不一致に注意。",
+      "status": "investigated_hold",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "A11",
+      "section": "B. 能力・軸・市場 — 重複しているテーマ",
+      "study_and_cohort": "研究M3の位置補正：P3-72など",
+      "evidence_and_findings": "2026非重賞72RのTop3 Brier .155229→.154375だがレース上位3頭の実際の好走件数70→68。P10×4角前方順位の相関約−.919。",
+      "do_not_repeat_as_new": "相関の高い位置変数を重ねて加点しない。Brier改善のみで軸を変えない。",
+      "status": "investigated_hold",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "P01",
+      "section": "C. 隊列・3角4角・ペース — 既実施の採否",
+      "study_and_cohort": "600m先頭差：重賞108R／1,705頭",
+      "evidence_and_findings": "過去差→次走差の相関r=.4069。Ability/M3基準のTop3 Brier改善は+0.000002（CIゼロ跨ぎ）。",
+      "do_not_repeat_as_new": "過去差だけをM3へ自動加点しない。",
+      "status": "investigated_hold",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "P02",
+      "section": "C. 隊列・3角4角・ペース — 既実施の採否",
+      "study_and_cohort": "初位置全頭順位分布：2025 158R調整・2026 120R/1,798頭",
+      "evidence_and_findings": "基準PLのRPS .119631・前方Brier .122472。内外/初角距離補正はRPS .120068/.120148へ悪化。Sinkhorn履歴追加 .118928は差CIゼロ跨ぎ、前方Brier悪化。",
+      "do_not_repeat_as_new": "同じRPS係数で内外を再調整しない。研究UIの未較正割合と混ぜない。",
+      "status": "investigated_hold",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "P03",
+      "section": "C. 隊列・3角4角・ペース — 既実施の採否",
+      "study_and_cohort": "前方確保失敗研究：2025 158R→2026 120R",
+      "evidence_and_findings": "分岐型は点MAE悪化。M3 proxyの失敗リスク増分Brier改善約.0002でCIゼロ跨ぎ。",
+      "do_not_repeat_as_new": "失敗リスクの自動軸VETO禁止。",
+      "status": "investigated_hold",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "P04",
+      "section": "C. 隊列・3角4角・ペース — 既実施の採否",
+      "study_and_cohort": "過去位置SD・安定性：2025/26",
+      "evidence_and_findings": "元CSV重複のためSD平均.1388→重複除去版.4087秒。SDに応じた温度補正は2025年選択で係数0最良、2026改善なし。",
+      "do_not_repeat_as_new": "「安定馬」の新閾値を同じ2026で探さない。",
+      "status": "investigated_hold",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "P05",
+      "section": "C. 隊列・3角4角・ペース — 既実施の採否",
+      "study_and_cohort": "残600m予測区間：2025調整→2026 111R／1,667頭",
+      "evidence_and_findings": "研究旧入力80%区間の被覆82.78%・平均幅1.220秒、重複除去研究版81.52%・1.155秒。点予測の残差補正は採用せず。",
+      "do_not_repeat_as_new": "被覆率を的中確率と混同しない。",
+      "status": "investigated_hold",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "P06",
+      "section": "C. 隊列・3角4角・ペース — 既実施の採否",
+      "study_and_cohort": "P3-67 全頭相対先行力：2023調整→2024 396R",
+      "evidence_and_findings": "初位置正規化MAE .197145→.192531、3角.202134→.198493、4角.208127→.204898。**全頭順位MAEは逆に悪化**。",
+      "do_not_repeat_as_new": "相対先行度が位置分数を少し改善しても着順・買い目を改善すると言わない。",
+      "status": "investigated_hold",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "P07",
+      "section": "C. 隊列・3角4角・ペース — 既実施の採否",
+      "study_and_cohort": "P3-68 ペア順序CatBoost：2024〜26",
+      "evidence_and_findings": "2024年3角前後正解率、既存Ridge74.50%→CatBoost74.16%、4角73.01→72.58%。複雑なペアモデルは不採用。",
+      "do_not_repeat_as_new": "CatBoostやペア回帰の同条件再訓練禁止。",
+      "status": "investigated_hold",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "P08",
+      "section": "C. 隊列・3角4角・ペース — 既実施の採否",
+      "study_and_cohort": "P3-69〜70 3角4角4馬群：2023学習、2024〜26参照済",
+      "evidence_and_findings": "4角Brier4（単独→全頭）2024 .538195→.532017、2025 .550720→.545050、2026 .541690→.533761。硬い4群分類正解率は約44〜46%。",
+      "do_not_repeat_as_new": "**研究版有望**だが未使用期間の改善未確認。初位置のUI仮分布とは別。",
+      "status": "investigated_hold",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "P09",
+      "section": "C. 隊列・3角4角・ペース — 既実施の採否",
+      "study_and_cohort": "P3-70〜71 Python/JSパリティと位置表示",
+      "evidence_and_findings": "PR #7相当の入力で14実R/204頭の9特徴量・3/4角モデル確率一致（浮動小数誤差）。実馬番対照つきUIは**Draft PR #8のみ**。",
+      "do_not_repeat_as_new": "14Rの再一致チェックで「新規精度検証」と主張しない。",
+      "status": "investigated_hold",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "P10",
+      "section": "C. 隊列・3角4角・ペース — 既実施の採否",
+      "study_and_cohort": "4象限レース質・内外横位置・PDI/RPCI",
+      "evidence_and_findings": "予想シート・コース質・隊列表示は存在するが、発走前の四象限を全対象レースで独立固定した教師データが不足。TARGET通過順位だけでGPSの内外レーンは測れない。",
+      "do_not_repeat_as_new": "4象限・枠・前方圧の自動加点／見送り効果は未証明。新しい発走前ラベルでのみ評価。",
+      "status": "investigated_hold",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "P11",
+      "section": "C. 隊列・3角4角・ペース — 既実施の採否",
+      "study_and_cohort": "末脚A救済・RPCI×逆展開・過去のCondition Edge研究",
+      "evidence_and_findings": "過去会話に複数の候補条件・年次比較が残るが、本リポジトリの原検証表を今回すべて突合できていない。",
+      "do_not_repeat_as_new": "「効果あり」と採用しない。原本・対象レースID・係数・期間の特定が先。",
+      "status": "investigated_hold",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "T01",
+      "section": "D. 馬券・オッズ・回収率 — 混ぜてはいけない数字",
+      "study_and_cohort": "P3-73 非重賞単独軸58R、2025/26",
+      "evidence_and_findings": "Ability上位相手3頭からP10最小をワイド1点：12/58、確定払戻ROI128.4%。馬連6/58、256.7%（配当集中）。",
+      "do_not_repeat_as_new": "研究済み条件付き母集団。未知期間の期待ROIではない。",
+      "status": "investigated_hold",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "T02",
+      "section": "D. 馬券・オッズ・回収率 — 混ぜてはいけない数字",
+      "study_and_cohort": "Pair 36R、2025/26",
+      "evidence_and_findings": "Ability軸とM3軸のTop3率各20/36、P10・4角前方軸各18/36。4象限で唯一適合を選ぶ方法は結果を伏せた発走前ラベル不足。",
+      "do_not_repeat_as_new": "Pair切替ルールの収益実証なし。",
+      "status": "investigated_hold",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "T03",
+      "section": "D. 馬券・オッズ・回収率 — 混ぜてはいけない数字",
+      "study_and_cohort": "216R券種横断、2023〜2026/10/04",
+      "evidence_and_findings": "17方式すべてROI<100%。単勝81.1%、ワイド軸→3点62.5%、馬連4頭BOX86.8%、3連複4頭BOX78.5%、3連単4頭BOX76.3%。",
+      "do_not_repeat_as_new": "券種だけ変えて再試行しない。高配当依存、同一母集団/配分の厳守が必要。",
+      "status": "investigated_hold",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "T04",
+      "section": "D. 馬券・オッズ・回収率 — 混ぜてはいけない数字",
+      "study_and_cohort": "180Rのワイド等高ROI、2024〜26（過去会話の報告のみ）",
+      "evidence_and_findings": "ワイド192.2%・馬連175.6%・3連複223.0%との旧報告あり。一方、別の条件・別期間216Rでは全方式赤字。",
+      "do_not_repeat_as_new": "**相互に統合・平均しない**。原本・買い目定義・選択条件を復元するまで実証ラベルを付けない。",
+      "status": "investigated_hold",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "T05",
+      "section": "D. 馬券・オッズ・回収率 — 混ぜてはいけない数字",
+      "study_and_cohort": "2024〜26、各年の市場/Ability/単勝ROI比較",
+      "evidence_and_findings": "最終単勝オッズ、最終人気を用いた事後参考回収率が多い。2025良好→2026逆転が複数。",
+      "do_not_repeat_as_new": "最終人気/最終オッズは「T-15の購入可能価格」ではない。",
+      "status": "investigated_hold",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "T06",
+      "section": "D. 馬券・オッズ・回収率 — 混ぜてはいけない数字",
+      "study_and_cohort": "P3-74/75/76：JSON台帳・HR2払戻",
+      "evidence_and_findings": "発走前予想と事後結果の分離・実購入申告と仮想100円を区別する仕組みを実装。払戻TXT 2016–25の4,974R+2026の394Rを解析。",
+      "do_not_repeat_as_new": "**予想性能アップなし**、実運用の保存済み予想JSONによるROIも未検証。",
+      "status": "investigated_hold",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "T07",
+      "section": "D. 馬券・オッズ・回収率 — 混ぜてはいけない数字",
+      "study_and_cohort": "QMD／市場構造・条件別EV（旧会話）",
+      "evidence_and_findings": "長期母集団で相関やオッズ構造を検討した報告あり。ただし元の定義とモデル版のフル対照資料がこの台帳作成時点では一部未回収。",
+      "do_not_repeat_as_new": "旧EV改善率・見送り閾値の再採用禁止。まず定義と原検証を見つける。",
+      "status": "investigated_hold",
+      "evidence_level": "historical_exploratory",
+      "source_index": "研究履歴マスター_重複防止_20261123.md"
+    }
+  ],
+  "new_protocols": [
+    {
+      "id": "N001",
+      "title": "real TARGET full pipeline main versus deduplicated shadow parity",
+      "state": "planned_not_executed",
+      "new_vs_prior": "real race browser/full pipeline with independently verified horse roster; prior P3-64 synthetic and P3-70 partial feature parity",
+      "claim_limit": "data contract audit only, not performance improvement",
+      "needed": "valid real-race frozen fixtures, production JS code and model versions"
+    },
+    {
+      "id": "N002",
+      "title": "unseen dates strictly after 2026-10-04 3C/4C+M3 prospective evaluation",
+      "state": "blocked_no_new_results_in_uploaded_csv",
+      "new_vs_prior": "untouched future race dates and immutable as-of forecasts",
+      "claim_limit": "performance only after features, odds and outcomes frozen before reviewing results",
+      "needed": "new 2026-10-05+ result files and trustworthy frozen pre-race prediction snapshots"
+    }
+  ]
+}
