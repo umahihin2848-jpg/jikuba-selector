@@ -1,0 +1,78 @@
+{
+  "results_unique_race_keys": 5368,
+  "lap_rows": 35857,
+  "exact_lap_result_join_rows": 4912,
+  "eligible_exact_join_races": 3925,
+  "clean_lap_races": 3925,
+  "all_observed_course_profiles": 87,
+  "profiles_30_plus": 52,
+  "profiles_20_plus": 65,
+  "profiles_10_plus": 76,
+  "venue_count": 10,
+  "turf_races": 2378,
+  "dirt_races": 1547,
+  "midlull_valid_races": 2415,
+  "date_min": 20160105,
+  "date_max": 20261004,
+  "reasons": {
+    "no_exact_result_name_match": 30945,
+    "out_of_12_18": 982,
+    "not_3win_open_graded_flat": 5
+  },
+  "start_length_by_profile": {
+    "札幌芝1500": 100,
+    "札幌ダ1700": 100,
+    "函館ダ1700": 100,
+    "福島ダ1150": 150,
+    "福島ダ1700": 100,
+    "東京芝2500": 100,
+    "東京ダ1300": 100,
+    "東京ダ2100": 100,
+    "中山芝2500": 100,
+    "中京ダ1900": 100,
+    "京都ダ1900": 100,
+    "小倉ダ1700": 100
+  },
+  "by_venue": {
+    "札幌": {
+      "races": 128,
+      "profiles": 6
+    },
+    "函館": {
+      "races": 93,
+      "profiles": 5
+    },
+    "福島": {
+      "races": 168,
+      "profiles": 5
+    },
+    "新潟": {
+      "races": 253,
+      "profiles": 9
+    },
+    "東京": {
+      "races": 796,
+      "profiles": 11
+    },
+    "中山": {
+      "races": 718,
+      "profiles": 9
+    },
+    "中京": {
+      "races": 349,
+      "profiles": 10
+    },
+    "京都": {
+      "races": 575,
+      "profiles": 13
+    },
+    "阪神": {
+      "races": 673,
+      "profiles": 14
+    },
+    "小倉": {
+      "races": 172,
+      "profiles": 5
+    }
+  }
+}
