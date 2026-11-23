@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#071320"><title>P3-76｜発走前台帳・実購入照合</title>
+<link rel="stylesheet" href="p3-75-settlement.css?v=p376">
+<link rel="stylesheet" href="p3-76-forward-ledger.css?v=p376">
+<script src="p3-75-settlement-core-v1.js?v=p375" defer></script>
+<script src="p3-76-forward-core-v1.js?v=p376" defer></script>
+<script src="p3-76-forward-ui-v1.js?v=p376" defer></script></head>
+<body><div class="layout"><header class="header"><div><span class="eyebrow">RACE SCENARIO ANALYZER / P3-76</span><h1>発走前台帳 <span>→</span> 購入申告 <span>→</span> 結果検証</h1><p>発走前の判断を一つのファイルに固定。結果が出た後の照合は元の予想を書き換えず、別ファイルとして保存します。</p></div><a href="p3-75-settlement.html" class="back">P3-75 へ戻る</a></header>
+<main>
+<section class="panel"><div class="sectionhead"><h2><span class="index">01</span> 発走前に保存</h2><span class="sub">結果を見る前の記録</span></div>
+<p class="help">P3-74で「見送りを含めJSON保存」したファイルを選択。レース番号と、その時点で実際に馬券を購入したかどうかを入力してください。購入がなくても必ず見送りとして記録します。</p>
+<div class="filecard"><label for="p376Forecast"><strong>P3-74 予想JSON</strong><small>1レースの保存ファイルを選択</small></label><input type="file" id="p376Forecast" accept=".json,application/json"><output id="p376ForecastStatus">未読込</output></div>
+<div id="p376ForecastDetails" class="notice" role="status">予想JSONを選択してください。</div>
+<div class="fgrid">
+ <div><label for="p376RaceNo">確定したR番号（必須）</label><input id="p376RaceNo" type="number" min="1" max="12" inputmode="numeric" placeholder="11"></div>
+ <div><label for="p376Declaration">実際の判断</label><select id="p376Declaration"><option value="">選択してください</option><option value="skipped">購入せず見送り</option><option value="bought">馬券を購入した（自己申告）</option></select></div>
+</div>
+<div id="p376BetForm" hidden><div class="sectionhead"><h3>購入馬券の明細</h3><span class="sub">最大10点・購入ごとの金額</span></div><div id="p376BetList"></div><button type="button" id="p376AddBet" class="secondary">+ 明細を追加</button></div>
+<div><label for="p376Reason">見送り理由・補足（任意）</label><textarea id="p376Reason" rows="2" placeholder="例：複数の相手候補で優劣がつかない"></textarea></div>
+<label class="check"><input id="p376Attest" type="checkbox"> 対象レースの発走前に保存する。予想・購入判断の後付け変更をしない</label>
+<div class="actions"><button type="button" class="primary" id="p376Capture">発走前台帳JSONを保存</button><span id="p376CaptureStatus" aria-live="polite"></span></div>
+<p class="help">SHA-256は保存した予想JSONの改変検知に使います。ただし端末時刻・自己申告・ハッシュだけでは、発走前の記録や実購入を第三者に証明できません。購入レシートは別途保管してください。</p>
+</section>
+<section class="panel"><div class="sectionhead"><h2><span class="index">02</span> 結果確定後の照合</h2><span class="sub">まとめて比較</span></div>
+<p class="help">発走前台帳をまとめて選択し、最新のTARGET成績CSVとHR2払戻を選びます。買ったレースも見送ったレースも、同じ集合で検証します。結果がまだないレースは保留します。</p>
+<div class="file-grid">
+<div class="filecard"><label for="p376Manifests"><strong>発走前台帳 JSON</strong><small>複数選択可</small></label><input type="file" id="p376Manifests" multiple accept=".json,application/json"></div>
+<div class="filecard"><label for="p376Csv"><strong>TARGET 成績CSV</strong><small>Shift-JIS／複数可</small></label><input type="file" id="p376Csv" multiple accept=".csv,text/csv"></div>
+<div class="filecard"><label for="p376Hr"><strong>HR2払戻 TXT</strong><small>複数選択可</small></label><input type="file" id="p376Hr" multiple accept=".txt,text/plain"></div>
+</div>
+<div class="actions"><button type="button" class="primary" id="p376Reconcile">台帳を照合する</button><span id="p376ReconcileStatus" role="status" aria-live="polite">未実行</span></div>
+</section>
+<section class="panel" id="p376Result" hidden><div class="sectionhead"><h2><span class="index">03</span> 同じレース集合で比較</h2><span class="sub">記録のあるものだけ</span></div>
+<div class="stats" id="p376Stats"></div>
+<h3>本人申告の購入結果（投資額は実入力）</h3><div id="p376ActualResult" class="notice"></div>
+<h3>仮想100円比較・ワイド</h3><div class="tablewrap"><table><thead><tr><th>方式</th><th>購入/R</th><th>的中</th><th>投資</th><th>払戻</th><th>損益</th><th>回収率</th></tr></thead><tbody id="p376WideTable"></tbody></table></div>
+<h3>仮想100円比較・馬連</h3><div class="tablewrap"><table><thead><tr><th>方式</th><th>購入/R</th><th>的中</th><th>投資</th><th>払戻</th><th>損益</th><th>回収率</th></tr></thead><tbody id="p376QuinellaTable"></tbody></table></div>
+<p class="help">仮想比較の1レース予算は100円固定。本人申告の購入馬券は金額・券種・点数が異なり得るため、回収率を横並びにしても同額検証ではありません。未照合は結果から除外せず「保留」に残します。</p>
+<div class="tablewrap"><table><thead><tr><th>日付・レース</th><th>実際の判断（本人申告）</th><th>照合</th><th>結果</th></tr></thead><tbody id="p376LedgerBody"></tbody></table></div>
+<div class="actions"><button type="button" class="secondary" id="p376Export">検証結果JSONを保存</button></div>
+</section>
+</main><footer>研究用・本人申告／独立証明なし · <a href="v3.html">競馬アプリに戻る</a> · 本番のBUY/PASSは不変更</footer></div></body></html>
