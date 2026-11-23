@@ -83,7 +83,8 @@ function context(){const s=root.RSAFocusedThreeTabsState||{},q=root.ValidatedQue
  const seedSig=[...raceInfo,rows.map(r=>r.no+':'+r.name+':'+r.expectedRank+':'+r.validated).join('|')].join('~');
  const rem=root.Remaining600ValidatedState?.rows||[];
  const csvVersion=root.RSATargetCsvCache?.version||'unknown';
- const sig=seedSig+'|history:'+rows.map(r=>r.histGapSd+':'+r.histGapN+':'+r.histUnique5+':'+r.histDupRows5).join('|')+'|600:'+rem.map(r=>r.no+':'+r.name+':'+Number(r.pred).toFixed(5)).join('|')+'|csv:'+csvVersion;
+ const peerSig=rows.map(r=>r.no+':'+Number(q.byNo?.[String(r.no)]?.frontness5).toFixed(5)).join('|');
+ const sig=seedSig+'|peer:'+peerSig+'|history:'+rows.map(r=>r.histGapSd+':'+r.histGapN+':'+r.histUnique5+':'+r.histDupRows5).join('|')+'|600:'+rem.map(r=>r.no+':'+r.name+':'+Number(r.pred).toFixed(5)).join('|')+'|csv:'+csvVersion;
  return{host,rows,sig,seedSig};
 }
 function render(){const c=context();if(!c)return;css();const signature=c.sig+'|'+analysisVersion;let el=$('rsarpcPanel');if(el&&el.parentElement===c.host&&signature===last)return;last=signature;
@@ -103,6 +104,18 @@ function render(){const c=context();if(!c)return;css();const signature=c.sig+'|'
   for(const r of [...result.rows].sort((a,b)=>b.frontShare-a.frontShare))body+='<tr><td>'+esc(r.no)+'番 '+esc(r.name)+(Number.isFinite(r.histGapSd)&&r.histGapN>=2?'<div class="rsarpcQuiet">過去位置SD '+r.histGapSd.toFixed(2)+'秒／'+r.histGapN+'行</div>':'<div class="rsarpcQuiet">過去位置SD —</div>')+(Number.isInteger(r.histUnique5)?'<div class="rsarpcQuiet">直近履歴：'+r.histUnique5+'レース／'+r.histGapN+'行'+(r.histDupRows5>0?'（重複あり）':'')+'</div>':'')+'</td>'+
    '<td>'+r.expectedRank.toFixed(1)+'番手</td><td>'+(100*r.frontShare).toFixed(0)+'%<div class="rsarpcBar"><i style="width:'+(100*r.frontShare).toFixed(1)+'%"></i></div><div class="rsarpcQuiet">中団 '+(100*r.middleShare).toFixed(0)+'%・後方 '+(100*r.rearShare).toFixed(0)+'%</div></td>'+
    '<td>'+r.rank10+'〜'+r.rank90+'位'+(r.fallbackCount?'<div class="rsarpcQuiet">前方に入れない試行：平均'+r.fallbackMeanRank.toFixed(1)+'番手／'+r.fallbackRank10+'〜'+r.fallbackRank90+'位</div>':'')+'</td></tr>';
+  body+='</tbody></table>';
+  const peer=peerDiagnostics(result.rows);
+  if(peer?.ready){
+   body+='<details class="rsarpcSub"><summary>同レースの先行競争｜内外・近傍の相手（研究用）</summary>'+
+    '<p class="rsarpcHint">同レースの各馬の過去先行度で比較。強い相手＝自分より先行度が高い馬。近傍＝馬番±3以内で先行度0.70以上。実際のゲート隣接・進路や騎手の選択ではありません。過去研究と使用特徴量が完全一致しないため、精度改善を保証しません。</p>'+
+    '<table class="rsarpcTable"><thead><tr><th>馬</th><th>過去先行度</th><th>自分より高い馬</th><th>内側／近傍</th></tr></thead><tbody>';
+   for(const r of [...peer.rows].sort((a,b)=>b.frontness-a.frontness||Number(a.no)-Number(b.no)))
+    body+='<tr><td>'+esc(r.no)+'番 '+esc(r.name)+'</td><td>'+r.frontness.toFixed(2)+'</td><td>'+r.strongerRivals+'頭</td><td>'+r.innerStrongerRivals+'頭／'+r.nearFrontRivals+'頭</td></tr>';
+   body+='</tbody></table><p class="rsarpcQuiet">前方候補を比較するための観察指標。既存の全頭仮順位の乱数・位置予測・M3には影響させません。</p></details>';
+  }else{
+   body+='<p class="rsarpcHint">先行競争の内外比較：全頭の先行度と馬名の照合ができないため非表示です。</p>';
+  }
   const gapEntries=result.rows.map(r=>({r,band:gapBand(r.no,r.name,result.n)}));
   if(gapEntries.length===result.n&&gapEntries.every(x=>x.band?.ready)){
    const mode=gapEntries[0].band.mode;
@@ -116,12 +129,32 @@ function render(){const c=context();if(!c)return;css();const signature=c.sig+'|'
   }else{
    body+='<p class="rsarpcHint">残600mの80%参考範囲：計算状態・馬番/馬名・履歴変換版の整合を確認できないため非表示です。</p>';
   }
-  body+='</tbody></table><p class="rsarpcQuiet">全馬で前方'+result.totalFrontShare.toFixed(0)+'枠／中団'+result.totalMiddleShare.toFixed(0)+'枠／後方'+result.totalRearShare.toFixed(0)+'枠（整合性チェック）。これは実測で較正した確率ではありません。</p>'+
+  body+='<p class="rsarpcQuiet">全馬で前方'+result.totalFrontShare.toFixed(0)+'枠／中団'+result.totalMiddleShare.toFixed(0)+'枠／後方'+result.totalRearShare.toFixed(0)+'枠（整合性チェック）。これは実測で較正した確率ではありません。</p>'+
    '<button id="rsarpcExport" type="button" class="rsarpcExport">全頭順位・M3計算入力をJSONで保存（研究用）</button>'+
    '<p class="rsarpcQuiet">発走前に保存すると、次走の実際の通過順位との事後比較に使えます。作成時刻は端末上の時刻で、発走前であることを公式に保証する記録ではありません。</p>';
  }
  body+='<p class="rsarpcMini">研究のみ：Ability、M3、P10、公式軸・相手、オッズ、BUY/PASSを変更しません。枠の確定馬番とTARGET仮番号の照合が必要です。</p></div>';
  el.innerHTML='<summary>全頭の位置争奪シミュレーション｜研究用・未較正</summary>'+body;
+}
+function peerDiagnostics(runners){
+ const q=root.ValidatedQueueState;
+ if(!q?.ready||!Array.isArray(runners)||runners.length<12||runners.length>18)return null;
+ const rows=runners.map(r=>{
+  const x=q.byNo?.[String(r.no)];
+  const front=N(x?.frontness5);
+  if(!x||String(x.name||'')!==String(r.name||'')||!x.validated||!Number.isFinite(front)||front<0||front>1)return null;
+  return{no:String(r.no),name:String(r.name),frontness:front,historyRuns:Number(x.hist_n)||0};
+ });
+ if(rows.some(r=>!r))return null;
+ const threshold=.70;
+ return{ready:true,version:'p367-readonly-peer-pressure-v1',source:'ValidatedQueueState.frontness5',
+  note:'競合の数は過去先行度の比較による代理指標。2023年学習モデルの入力特徴量と完全一致せず、較正済み確率・着順予測・馬券判断ではない。',
+  threshold,rows:rows.map(r=>{
+   const no=Number(r.no),other=rows.filter(x=>x.no!==r.no),strong=other.filter(x=>x.frontness>r.frontness+1e-9);
+   return{...r,strongerRivals:strong.length,innerStrongerRivals:strong.filter(x=>Number(x.no)<no).length,
+    nearFrontRivals:other.filter(x=>Math.abs(Number(x.no)-no)<=3&&x.frontness>=threshold).length,
+    higherFrontnessRank:1+strong.length};
+  })};
 }
 function gapBand(no,name,fieldSize){
  const model=root.RSAPosition600BandV1,rem=root.Remaining600ValidatedState,fin=root.Finish600State;
@@ -150,7 +183,7 @@ function exportSnapshot(){
  const meta={date:$('raceDate')?.value||'',raceName:$('raceName')?.value||'',venue:$('venue')?.value||'',surface:$('surface')?.value||'',distance:Number($('distance')?.value),grade:$('grade')?.value||'',field:result.n};
  const snapshot={schema:'rsa-rank-distribution-snapshot-v1',capturedAt:new Date().toISOString(),modelVersion:VERSION,
   modelInput:'ValidatedQueueState.expectedRank',calibrated:false,usage:'研究用仮想分布。馬券期待値・本番M3へ転用不可',
-  metadata:meta,sourceVersions:{queue:root.ValidatedQueueState?.version||null,remaining600:root.Remaining600ValidatedState?.version||null,m3:root.Finish600State?.version||null,csvParser:root.RSATargetCsvCache?.version||null,analysisGeneration:root.Finish600State?.generation??null},gap80ResearchCalibration:root.RSAPosition600BandV1?.meta||null,simulation:{method:'Gumbel whole-field rank permutation',iterations:result.count,dispersion:result.dispersion,
+  metadata:meta,sourceVersions:{queue:root.ValidatedQueueState?.version||null,remaining600:root.Remaining600ValidatedState?.version||null,m3:root.Finish600State?.version||null,csvParser:root.RSATargetCsvCache?.version||null,analysisGeneration:root.Finish600State?.generation??null},gap80ResearchCalibration:root.RSAPosition600BandV1?.meta||null,peerPressureResearch:peerDiagnostics(result.rows),simulation:{method:'Gumbel whole-field rank permutation',iterations:result.count,dispersion:result.dispersion,
    frontSeats:result.k,middleEnd:result.kMiddle,seed:hash(c.seedSig)},
   runners:result.rows.map(r=>({no:r.no,name:r.name,inputExpectedRank:r.expectedRank,simulatedExpectedRank:r.meanRank,historyGapSdSeconds:r.histGapSd,historyGapRaceCount:r.histGapN,historyDistinctRacesLast5:r.histUnique5,historyDuplicateRowsLast5:r.histDupRows5,liveModelReference:liveReference(r.no,r.name),gap80ResearchBand:gapBand(r.no,r.name,result.n),
    rankProbabilities:r.rankProbabilities,frontShare:r.frontShare,middleShare:r.middleShare,rearShare:r.rearShare,
