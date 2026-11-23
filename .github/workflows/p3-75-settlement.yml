@@ -1,0 +1,20 @@
+name: P3-75 offline settlement contract
+on:
+  push:
+    paths:
+      - 'waku-bc-converter/p3-75-settlement*'
+      - 'waku-bc-converter/tests/p3-75-settlement.test.cjs'
+      - '.github/workflows/p3-75-settlement.yml'
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Synthetic offline settlement tests
+        run: node --test waku-bc-converter/tests/p3-75-settlement.test.cjs
