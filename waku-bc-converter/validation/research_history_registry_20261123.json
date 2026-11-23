@@ -1,7 +1,7 @@
 {
   "schema": "rsa-research-history-registry-v1",
   "created_on": "2026-11-23",
-  "entry_count": 38,
+  "entry_count": 39,
   "scope": "review of available GitHub docs, PR descriptions, archived conversation and supplied source files",
   "not_exhaustive_of_private_unretrieved_attachments": true,
   "source_text_sha256": "9521c4061a015341e658d434fdb70768800091499fc96d3b853a708e6c76fb16",
@@ -391,6 +391,19 @@
       "source": "validation/H001_H002_HISTORICAL_MARKET_BASELINE_20261123.md",
       "dedupKey": "H002|train2016-22|test2023-26|closing odds PL top3 shrink|Brier",
       "caveat": "closing odds are post-race; previously inspected test years; not independent future or actual place market"
+    },
+    {
+      "id": "H004",
+      "title": "Distinct past 5 vs 8/10/12 runs; equal versus recency-weighted mean of same-surface first-corner, 4C, 600m leader gap",
+      "population": "JRA flat 3-win/OP/L/G1-G3, 12-18 runners, 2024-2026/10/04 strict full result card; paired 2025-26 571 races/6757 horses for positions, 557 races/6645 horses for gap",
+      "time_split": "2024 training alpha only, 2025-26 historical comparison; years previously used in earlier research",
+      "new_vs_prior": "isolates extra 6-10 unique prior races conditional on same surface and fixed decayed weights; not repeating P3-63 dedup MAE or P3-70 3C/4C model",
+      "results": "5mean->10mean normalized first .197233->.202712 and 4C .211428->.216282 worse; 5decay->10decay first .194895->.194607 and 4C .208945->.208702 CI both zero; gap .402624->.394357 seconds 95% cluster CI improvement +.005778..+.010778, 2026 +.001604..+.008068",
+      "status": "historical_exploratory_core_signal_only",
+      "modelImpact": "no production changes; not exact M3/full-pipeline and not ROI",
+      "caveat": "2025/26 reused historical years and multihypothesis depth; limited as-of same-surface population; gap MAE ~0.008 sec benefit not yet shown to improve M3 top3 or Brier",
+      "source": "validation/H004_HISTORICAL_DEPTH_REPORT_20261123.md",
+      "dedupKey": "H004|as-of distinct 5 8 10 12|2024-26|first c4 gap MAE|time decay"
     }
   ],
   "new_protocols": [
@@ -423,6 +436,14 @@
       "new_vs_prior": "Existing P3-56/57/62 market/Ability comparisons summarized, so only new frozen full-field stagewise error attribution or new independent labels qualifies",
       "claim_limit": "historical failure mechanism analysis, not independently validated performance or live EV",
       "needed": "actual as-of full-field Ability C/M3/Queue and timestamped closing odds; P3-55 parity and PR7 normalization; exact race matching"
+    },
+    {
+      "id": "H005",
+      "title": "Shadow M3 exact-position-feature 5 vs 10 distinct starts sensitivity",
+      "state": "proposed_blocked_on_N001_runtime_parity",
+      "new_vs_prior": "only change the 600m leader-gap history aggregate at equal data/axes, avoid retesting P3-63 history dedup itself; ensure M3 top3 Brier and axis picks",
+      "needed": "live full-field JS ShapeCore/Queue/Remaining600/Finish600 and exact 16-char historical race ID parity; actual official saddlecloth mapping",
+      "claim_limit": "No effect on real betting can be asserted from H004 simple historical position mean alone"
     }
   ]
 }
