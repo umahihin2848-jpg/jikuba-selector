@@ -1,0 +1,42 @@
+name: P3-70 corner group input parity (research only)
+on:
+  push:
+    branches: [ research/p3-70-corner-stage-groups-20261123 ]
+    paths:
+      - 'waku-bc-converter/corner-group-shadow-v1.js'
+      - 'waku-bc-converter/data/corner_group_research_model_v1.json'
+      - 'tests/p3-70-corner-groups-research.test.cjs'
+      - 'waku-bc-converter/v3.html'
+      - 'tests/p3-71-three-stage-roster-preview.test.cjs'
+      - 'waku-bc-converter/corner-stage-three-preview-v1.css'
+      - 'waku-bc-converter/corner-stage-three-preview-v1.js'
+      - 'waku-bc-converter/corner-stage-roster-audit-v1.js'
+      - '.github/workflows/p3-70-corner-stage-shadow.yml'
+  pull_request:
+    paths:
+      - 'waku-bc-converter/corner-group-shadow-v1.js'
+      - 'waku-bc-converter/data/corner_group_research_model_v1.json'
+      - 'tests/p3-70-corner-groups-research.test.cjs'
+      - 'waku-bc-converter/v3.html'
+      - 'tests/p3-71-three-stage-roster-preview.test.cjs'
+      - 'waku-bc-converter/corner-stage-three-preview-v1.css'
+      - 'waku-bc-converter/corner-stage-three-preview-v1.js'
+      - 'waku-bc-converter/corner-stage-roster-audit-v1.js'
+      - '.github/workflows/p3-70-corner-stage-shadow.yml'
+  workflow_dispatch:
+jobs:
+  safe-prototype:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Corner 3/4 group shadow and history integrity tests
+        run: |
+          node --test tests/p3-70-corner-groups-research.test.cjs
+          node --test tests/p3-71-three-stage-roster-preview.test.cjs
+          node --test tests/p3-63-current-main-history-integrity.cjs
