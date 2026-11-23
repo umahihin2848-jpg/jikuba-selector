@@ -1,0 +1,384 @@
+{
+  "schema": "rsa-h006-conditional-history-depth-v1",
+  "predeclared_thresholds": {
+    "return_distance": {
+      "distance_tolerance_m": 200,
+      "older_matching_min": 2,
+      "recent_matching_max": 1
+    },
+    "consistent_running_style": {
+      "same_surface_last10_min": 8,
+      "min_valid_front_each_half": 3,
+      "frontness_mean_change_max": 0.12
+    },
+    "recent_gap_volatility": {
+      "recent5_gap_pop_sd_min_s": 0.5
+    }
+  },
+  "method": "Only historical prior race records strictly before as-of race date, unique name+16-digit rid per H005; hold M3 18 inputs and coefficients constant; all5_decay vs conditional all10_decay with alpha .8.",
+  "source": "H005 private horse-level score CSV from frozen coefficients and umadete historical raw valid dates",
+  "selection_training_year": 2024,
+  "diagnostic_evaluation_years": [
+    2025,
+    2026
+  ],
+  "training_gate": "2024 >=10 changed races and >=3 additional captured top3 horses; otherwise select none, no fallback optimization",
+  "chosen_by_training": null,
+  "chosen_evaluation": {
+    "train2024": {
+      "races": 338,
+      "delta_hits": 0,
+      "changed_races": 0,
+      "base_hits": 342,
+      "policy_hits": 342
+    },
+    "eval2025": {
+      "races": 330,
+      "delta_hits": 0,
+      "changed_races": 0,
+      "base_hits": 307,
+      "policy_hits": 307
+    },
+    "eval2026": {
+      "races": 239,
+      "delta_hits": 0,
+      "changed_races": 0,
+      "base_hits": 212,
+      "policy_hits": 212
+    },
+    "eval2025_2026": {
+      "races": 569,
+      "delta_hits": 0,
+      "changed_races": 0,
+      "base_hits": 519,
+      "policy_hits": 519
+    },
+    "all": {
+      "races": 907,
+      "delta_hits": 0,
+      "changed_races": 0,
+      "base_hits": 861,
+      "policy_hits": 861
+    }
+  },
+  "policy_diagnostics": {
+    "return_distance": {
+      "train2024": {
+        "races": 338,
+        "eligible_horses": 119,
+        "eligible_races": 86,
+        "changed_races": 1,
+        "base_hits": 342,
+        "policy_hits": 342,
+        "delta_hits": 0,
+        "delta_per_race": 0.0,
+        "ci95_delta_per_race": [
+          0.0,
+          0.0
+        ],
+        "improved_races": 0,
+        "worse_races": 0,
+        "wins_base": 122,
+        "wins_policy": 122,
+        "change_only_base_hits": 2,
+        "change_only_policy_hits": 2
+      },
+      "eval2025": {
+        "races": 330,
+        "eligible_horses": 106,
+        "eligible_races": 86,
+        "changed_races": 1,
+        "base_hits": 307,
+        "policy_hits": 306,
+        "delta_hits": -1,
+        "delta_per_race": -0.0030303030303030303,
+        "ci95_delta_per_race": [
+          -0.00909090909090909,
+          0.0
+        ],
+        "improved_races": 0,
+        "worse_races": 1,
+        "wins_base": 111,
+        "wins_policy": 111,
+        "change_only_base_hits": 1,
+        "change_only_policy_hits": 0
+      },
+      "eval2026": {
+        "races": 239,
+        "eligible_horses": 83,
+        "eligible_races": 67,
+        "changed_races": 3,
+        "base_hits": 212,
+        "policy_hits": 214,
+        "delta_hits": 2,
+        "delta_per_race": 0.008368200836820083,
+        "ci95_delta_per_race": [
+          0.0,
+          0.02092050209205021
+        ],
+        "improved_races": 2,
+        "worse_races": 0,
+        "wins_base": 74,
+        "wins_policy": 74,
+        "change_only_base_hits": 1,
+        "change_only_policy_hits": 3
+      },
+      "eval2025_2026": {
+        "races": 569,
+        "eligible_horses": 189,
+        "eligible_races": 153,
+        "changed_races": 4,
+        "base_hits": 519,
+        "policy_hits": 520,
+        "delta_hits": 1,
+        "delta_per_race": 0.0017574692442882249,
+        "ci95_delta_per_race": [
+          -0.0035149384885764497,
+          0.008787346221441126
+        ],
+        "improved_races": 2,
+        "worse_races": 1,
+        "wins_base": 185,
+        "wins_policy": 185,
+        "change_only_base_hits": 2,
+        "change_only_policy_hits": 3
+      },
+      "all": {
+        "races": 907,
+        "eligible_horses": 308,
+        "eligible_races": 239,
+        "changed_races": 5,
+        "base_hits": 861,
+        "policy_hits": 862,
+        "delta_hits": 1,
+        "delta_per_race": 0.0011025358324145535,
+        "ci95_delta_per_race": [
+          -0.002205071664829107,
+          0.005512679162072767
+        ],
+        "improved_races": 2,
+        "worse_races": 1,
+        "wins_base": 307,
+        "wins_policy": 307,
+        "change_only_base_hits": 4,
+        "change_only_policy_hits": 5
+      }
+    },
+    "consistent_running_style": {
+      "train2024": {
+        "races": 338,
+        "eligible_horses": 2005,
+        "eligible_races": 334,
+        "changed_races": 26,
+        "base_hits": 342,
+        "policy_hits": 337,
+        "delta_hits": -5,
+        "delta_per_race": -0.014792899408284023,
+        "ci95_delta_per_race": [
+          -0.03550295857988166,
+          0.0029585798816568047
+        ],
+        "improved_races": 3,
+        "worse_races": 8,
+        "wins_base": 122,
+        "wins_policy": 119,
+        "change_only_base_hits": 27,
+        "change_only_policy_hits": 22
+      },
+      "eval2025": {
+        "races": 330,
+        "eligible_horses": 2075,
+        "eligible_races": 325,
+        "changed_races": 36,
+        "base_hits": 307,
+        "policy_hits": 310,
+        "delta_hits": 3,
+        "delta_per_race": 0.00909090909090909,
+        "ci95_delta_per_race": [
+          -0.012121212121212121,
+          0.030303030303030304
+        ],
+        "improved_races": 8,
+        "worse_races": 5,
+        "wins_base": 111,
+        "wins_policy": 113,
+        "change_only_base_hits": 30,
+        "change_only_policy_hits": 33
+      },
+      "eval2026": {
+        "races": 239,
+        "eligible_horses": 1547,
+        "eligible_races": 238,
+        "changed_races": 22,
+        "base_hits": 212,
+        "policy_hits": 213,
+        "delta_hits": 1,
+        "delta_per_race": 0.0041841004184100415,
+        "ci95_delta_per_race": [
+          -0.02092050209205021,
+          0.029288702928870293
+        ],
+        "improved_races": 5,
+        "worse_races": 4,
+        "wins_base": 74,
+        "wins_policy": 74,
+        "change_only_base_hits": 22,
+        "change_only_policy_hits": 23
+      },
+      "eval2025_2026": {
+        "races": 569,
+        "eligible_horses": 3622,
+        "eligible_races": 563,
+        "changed_races": 58,
+        "base_hits": 519,
+        "policy_hits": 523,
+        "delta_hits": 4,
+        "delta_per_race": 0.007029876977152899,
+        "ci95_delta_per_race": [
+          -0.008787346221441126,
+          0.022847100175746926
+        ],
+        "improved_races": 13,
+        "worse_races": 9,
+        "wins_base": 185,
+        "wins_policy": 187,
+        "change_only_base_hits": 52,
+        "change_only_policy_hits": 56
+      },
+      "all": {
+        "races": 907,
+        "eligible_horses": 5627,
+        "eligible_races": 897,
+        "changed_races": 84,
+        "base_hits": 861,
+        "policy_hits": 860,
+        "delta_hits": -1,
+        "delta_per_race": -0.0011025358324145535,
+        "ci95_delta_per_race": [
+          -0.013230429988974642,
+          0.011025358324145534
+        ],
+        "improved_races": 16,
+        "worse_races": 17,
+        "wins_base": 307,
+        "wins_policy": 306,
+        "change_only_base_hits": 79,
+        "change_only_policy_hits": 78
+      }
+    },
+    "recent_gap_volatility": {
+      "train2024": {
+        "races": 338,
+        "eligible_horses": 948,
+        "eligible_races": 309,
+        "changed_races": 31,
+        "base_hits": 342,
+        "policy_hits": 336,
+        "delta_hits": -6,
+        "delta_per_race": -0.01775147928994083,
+        "ci95_delta_per_race": [
+          -0.04437869822485207,
+          0.008875739644970414
+        ],
+        "improved_races": 7,
+        "worse_races": 13,
+        "wins_base": 122,
+        "wins_policy": 120,
+        "change_only_base_hits": 37,
+        "change_only_policy_hits": 31
+      },
+      "eval2025": {
+        "races": 330,
+        "eligible_horses": 910,
+        "eligible_races": 303,
+        "changed_races": 19,
+        "base_hits": 307,
+        "policy_hits": 304,
+        "delta_hits": -3,
+        "delta_per_race": -0.00909090909090909,
+        "ci95_delta_per_race": [
+          -0.024242424242424242,
+          0.006060606060606061
+        ],
+        "improved_races": 2,
+        "worse_races": 5,
+        "wins_base": 111,
+        "wins_policy": 111,
+        "change_only_base_hits": 19,
+        "change_only_policy_hits": 16
+      },
+      "eval2026": {
+        "races": 239,
+        "eligible_horses": 646,
+        "eligible_races": 219,
+        "changed_races": 13,
+        "base_hits": 212,
+        "policy_hits": 215,
+        "delta_hits": 3,
+        "delta_per_race": 0.012552301255230125,
+        "ci95_delta_per_race": [
+          0.0,
+          0.029288702928870293
+        ],
+        "improved_races": 3,
+        "worse_races": 0,
+        "wins_base": 74,
+        "wins_policy": 74,
+        "change_only_base_hits": 10,
+        "change_only_policy_hits": 13
+      },
+      "eval2025_2026": {
+        "races": 569,
+        "eligible_horses": 1556,
+        "eligible_races": 522,
+        "changed_races": 32,
+        "base_hits": 519,
+        "policy_hits": 519,
+        "delta_hits": 0,
+        "delta_per_race": 0.0,
+        "ci95_delta_per_race": [
+          -0.01054481546572935,
+          0.01054481546572935
+        ],
+        "improved_races": 5,
+        "worse_races": 5,
+        "wins_base": 185,
+        "wins_policy": 185,
+        "change_only_base_hits": 29,
+        "change_only_policy_hits": 29
+      },
+      "all": {
+        "races": 907,
+        "eligible_horses": 2504,
+        "eligible_races": 831,
+        "changed_races": 63,
+        "base_hits": 861,
+        "policy_hits": 855,
+        "delta_hits": -6,
+        "delta_per_race": -0.006615214994487321,
+        "ci95_delta_per_race": [
+          -0.018743109151047408,
+          0.005512679162072767
+        ],
+        "improved_races": 12,
+        "worse_races": 18,
+        "wins_base": 307,
+        "wins_policy": 305,
+        "change_only_base_hits": 66,
+        "change_only_policy_hits": 60
+      }
+    }
+  },
+  "source_history_stats": {
+    "raw_rows": 439416,
+    "bad_history": 425,
+    "duplicate_rows": 364692,
+    "unique_valid": 74299
+  },
+  "limitations": [
+    "2024-2026 already repeatedly explored, not untouched prospective holdout",
+    "shadow M3 reconstructed Python not complete browser runtime parity",
+    "not a horse independent model, selection evaluated clustered by race",
+    "no probability, payout, T-15 odds, or ROI claim"
+  ]
+}
