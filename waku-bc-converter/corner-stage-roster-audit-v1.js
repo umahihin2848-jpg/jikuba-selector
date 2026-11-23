@@ -54,7 +54,7 @@ function verifyRoster({text,queue,meta,confirmed=false,sourceLabel='' }){
  const gaps=Array.from({length:maxNo},(_,i)=>String(i+1)).filter(x=>!parsed.rows.some(r=>r.no===x));
  const snapshot={date:cleanString(m.date),venue:cleanString(m.venue),raceName:cleanString(m.raceName),surface:cleanString(m.surface),
   distance:Number(m.distance),fieldSize:nr,sourceLabel:cleanString(sourceLabel),roster:parsed.rows.map(x=>[x.no,x.key]),
-  liveQueue:q.rows.map(x=>[String(x.no),normName(x.name),Number(x.frontness5),Number(x.hist_n),Number(x.corner3Mean5),Number(x.corner4Mean5)])};
+  queueVersion:String(q.version||''),liveQueue:q.rows.map(x=>[String(x.no),normName(x.name),Boolean(x.validated),Number(x.frontness5),Number(x.hist_n),Number(x.earlyPosStd5),Number(x.leadRate5),Number(x.corner3Mean5),Number(x.corner4Mean5),Number(x.corner34DeltaMean5),Number(x.corner3N5),Number(x.corner4N5)])};
  return{ready:true,version:VERSION,userAttested:true,verifiedAgainst:'manual_roster_vs_current_csv_cohort_not_independent_official_api',
   snapshotSignature:JSON.stringify(snapshot),sourceLabel:cleanString(sourceLabel),roster:parsed.rows,
   rows,missingNumbers:gaps,fieldSize:nr,metadata:{...m,date:cleanString(m.date),distance:Number(m.distance),fieldSize:nr}};
