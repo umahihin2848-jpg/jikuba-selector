@@ -1,7 +1,7 @@
 {
   "schema": "rsa-research-history-registry-v1",
   "created_on": "2026-11-23",
-  "entry_count": 58,
+  "entry_count": 59,
   "scope": "review of available GitHub docs, PR descriptions, archived conversation and supplied source files",
   "not_exhaustive_of_private_unretrieved_attachments": true,
   "source_text_sha256": "9521c4061a015341e658d434fdb70768800091499fc96d3b853a708e6c76fb16",
@@ -737,6 +737,26 @@
       "public_aggregate": "validation/h020/H020_RESULTS.json",
       "privacy": "H020 14876 as-of feature rows, 9464 test rows, 123 flagged names/results, and standalone mobile HTML kept only in conversation ZIP, not committed to GitHub",
       "dedupKey": "H020|H019 203 dangerous cohort two rescue routes|asof previous rear finish vs LOO other-front stay|2024 train / 2025-26 621R repeated historic test|negative stage/rival increment"
+    },
+    {
+      "id": "H021",
+      "title": "One-point WIDE risk veto: 2025–26 exact TARGET wide quote/payout matching with frozen H018 danger flags",
+      "population": "2025–26 Oct4 621 R/9464 horses, the identical H020 frozen research subset H018; 123 H018 flags in 85 races, all research predicted top3 rank10+.",
+      "new_vs_prior": "H018–H020 report horse marginal top3 probability and danger for 203 flagged. H021 evaluates a one-axis one-opponent WIDE ticket, quote and actual 100JPY HR2 payoff with danger VETO/no-veto over identical opportunity set, instead of assuming excluding individual low top3 horses improves WIDE betting return.",
+      "settle_audit": "621/621 race official HR2 WIDE result matches three distinct top3 horse pairs, 1863 payout pairs; all 9464 horse row TARGET odds prices verified, 0 left-right min/max mismatches, 0 missing, 0 winners outside quote range, meeting days 10–12 encoded A/B/C recovered.",
+      "prediction_source": "H018 as-of 4C joint stage + fixed sensitivity 3rd-place race-normalized probability, from pre-current-race historical target data only; H018 flag p(last quarter)>=0.5 and p(top3)<=0.1 and original H013 danger.",
+      "key_findings": "All 123 flagged H018 horses rank10–18 by same model; rank1 axis + rank2 opponent 621 one-point tickets 69 hits, spent62100JPY returned39950 (64.33%); flags selected0, risk veto identical. Snapshot wide quote minimum 9–30x, select one highest horse_p_axis*horse_p_opp*odds_lower heuristic (not calibrated pair EV): 611 tickets 27 hits returned54040/61100=88.45%, flags selected0; veto identical. With min9–50x 617 tickets 19 hits returned60050/61700=97.33%, flags chosen2/0 hits, veto-PASS 615/19 returned60050/61500=97.64%, insignificant +0.32percentage points; 2025 min9–30 354/19 ROI102.46% vs 2026 257/8 ROI69.14%. No official user one-point strategy backtest.",
+      "warning_outlier": "Hypothetical anchor1 plus every flagged horse 123 pairs over 85 races (violates one-point) hits3/123, payouts17430/12300 ROI141.71%, one 12390yen return accounts71.1%. Exactly one highest-p flagged per those85 races hits2 returns15510/8500 ROI182.47%, one 12390yen hit79.9% of payouts. Cannot conclude risky horses good to buy; demonstrates outcome variance and rare tail payoffs.",
+      "market_comparison": "Within p(top3)<=0.10, flagged123 top3 9 (7.3%), nonflag1819 top3 112 (6.2%); close-market q expects7.87 flagged and144.4 nonflag. H018 danger is mostly restatement of underlying low predicted ability and odds; no statistically established incremental exclusion edge.",
+      "status": "COMPLETE_EXPLORATORY_1POINT_VETO_REDUNDANT_NO_PROFIT_CLAIM",
+      "limitations": "TARGET wide odds CSV quote timestamp unknown (not T-15 or proved available pre-race), `p_axis*p_opp*odds_lower` only heuristic not calibrated joint WIDE probability. H018/H020 Python research proxy not production Ability C M3 M4 P10 axis parity. H001-H020 already repeatedly searched 2024–26 data; multiple studied quote ranges, no pristine holdout, no live achievable ROI.",
+      "modelImpact": "NONE: Ability C, M3/M4/P10, Axis/BUY/PASS untouched; no automatic veto or buy.",
+      "tests": "11 synthetic & offline invariant tests PASS; HR2 three winning pairs per race and quote symmetry checks PASS, ZIP CRC verified.",
+      "source": "validation/h021/H021_REPORT_20261124.md",
+      "code": "validation/h021/h021_one_point_wide.py",
+      "aggregate": "validation/h021/H021_RESULTS.json",
+      "private": "21k ticket-by-research-strategy rows and 8843 anchor×opponent historical pairs plus horse names exist only in conversation ZIP, not in public GitHub.",
+      "dedupKey": "H021|one-point wide payoff HR2 exact 621R|H018 flags asof risk no purchase price snapshot|baseline price-bounded veto contrast|2025-26 exploratory"
     }
   ],
   "new_protocols": [
@@ -893,6 +913,14 @@
       "caveat": "Do not select arbitrary 3C movement and ROI thresholds on previously mined 2024-26 as if pristine validation",
       "report": "validation/h020/H020_REPORT_20261124.md",
       "findings": "Historical rear late-stage proxy modest Brier improvement but top3 ranking decreases; LOO opponent hold null. H018 risk flagged2025-26 123/9 vs market expected7.87; no safe rescue/scratch."
+    },
+    {
+      "id": "H022",
+      "title": "Calibrate P(axis AND opponent both top3) and edge vs actual WIDE quote with real T-minus15 timestamps; not restate low marginal probability",
+      "state": "PROPOSED_NOT_STARTED",
+      "new_vs_prior": "H021 shows risk flag redundant for highest ranked or 9-30x selection and selection weak; H022 fits proper pair correlation/joint top3 with pre-event lineup and validates pricing effect without retrospective quote lookahead",
+      "blockers": "Need same T-15 WIDE snapshot and real app axis/opp selector parity; optional historical snapshots if timestamped. Quote CSV lacks timestamp. N001 official M3+P10+Ability source parity outstanding.",
+      "caution": "Never multiply marginals as if independent without joint calibration; don't auto-veto or claim ROI from final payout/market period."
     }
   ]
 }
