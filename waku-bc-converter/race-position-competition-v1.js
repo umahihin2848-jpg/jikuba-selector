@@ -54,7 +54,20 @@ function simulate(input,options={}){
    totalMiddleShare:out.reduce((a,r)=>a+r.middleShare,0),totalRearShare:out.reduce((a,r)=>a+r.rearShare,0),
   notice:'過去の初通過位置予測から全頭の仮順位を同時抽選した研究上の割合。実測に較正した確率ではありません。'};
 }
-root.RSARacePositionCompetitionCoreV1=Object.freeze({version:VERSION,simulate,check,hash});
+function adjacentPairAudit(result){
+ if(!result?.ready||!Array.isArray(result.rows)||!(result.dispersion>0))return[];
+ const rows=[...result.rows].sort((a,b)=>a.expectedRank-b.expectedRank||Number(a.no)-Number(b.no));
+ return rows.slice(0,-1).map((a,i)=>{
+   const b=rows[i+1],gap=Math.max(0,b.expectedRank-a.expectedRank);
+   // Exact paired ordering probability under the existing independent Gumbel utilities.
+   // Not an empirical probability of who is ahead in a real race.
+   const p=1/(1+Math.exp(-gap/result.dispersion));
+   return{aNo:a.no,aName:a.name,bNo:b.no,bName:b.name,modelExpectedRankGap:gap,
+     hypotheticalAheadShare:p,hypotheticalReversalShare:1-p,
+     dataStatus:'研究用未較正：既存初位置Gumbelモデル内での仮定'};
+ }).sort((a,b)=>a.modelExpectedRankGap-b.modelExpectedRankGap||Number(a.aNo)-Number(b.aNo));
+}
+root.RSARacePositionCompetitionCoreV1=Object.freeze({version:VERSION,simulate,check,hash,adjacentPairAudit});
 const doc=root.document;if(!doc?.createElement||!root.addEventListener)return;
 if(root.RSARacePositionCompetitionV1)return;
 const $=id=>doc.getElementById(id);
@@ -115,6 +128,14 @@ function render(){const c=context();if(!c)return;css();const signature=c.sig+'|'
    body+='</tbody></table><p class="rsarpcQuiet">前方候補を比較するための観察指標。既存の全頭仮順位の乱数・位置予測・M3には影響させません。</p></details>';
   }else{
    body+='<p class="rsarpcHint">先行競争の内外比較：全頭の先行度と馬名の照合ができないため非表示です。</p>';
+  }
+  const adj=adjacentPairAudit(result);
+  if(adj.length){
+    body+='<details class="rsarpcSub"><summary>前後が入れ替わりやすい組｜初位置の仮想ペア</summary>'+
+     '<p class="rsarpcHint">予測初位置が隣り合う2頭のうち、位置差が小さい組を表示。割合は既存Gumbel仮想抽選の内部計算から求めた値で、実レースで検証・較正された勝負確率ではありません。3角・4角の前後関係や実際の内外レーンも表しません。</p>'+
+     '<table class="rsarpcTable"><thead><tr><th>予測で隣接する2頭</th><th>初位置の差</th><th>前後が逆転する仮割合</th></tr></thead><tbody>';
+    for(const pair of adj.slice(0,Math.min(6,adj.length)))body+='<tr><td>'+esc(pair.aNo)+'番 '+esc(pair.aName)+'／'+esc(pair.bNo)+'番 '+esc(pair.bName)+'</td><td>'+pair.modelExpectedRankGap.toFixed(2)+'番手</td><td>'+(100*pair.hypotheticalReversalShare).toFixed(0)+'%</td></tr>';
+    body+='</tbody></table><p class="rsarpcQuiet">過去の別研究では近い予測順位の実順序は特に不安定だったが、その実測正解率をこの仮割合に置き換えてはいません。本番予測や買い目の変更なし。</p></details>';
   }
   const gapEntries=result.rows.map(r=>({r,band:gapBand(r.no,r.name,result.n)}));
   if(gapEntries.length===result.n&&gapEntries.every(x=>x.band?.ready)){
@@ -183,7 +204,7 @@ function exportSnapshot(){
  const meta={date:$('raceDate')?.value||'',raceName:$('raceName')?.value||'',venue:$('venue')?.value||'',surface:$('surface')?.value||'',distance:Number($('distance')?.value),grade:$('grade')?.value||'',field:result.n};
  const snapshot={schema:'rsa-rank-distribution-snapshot-v1',capturedAt:new Date().toISOString(),modelVersion:VERSION,
   modelInput:'ValidatedQueueState.expectedRank',calibrated:false,usage:'研究用仮想分布。馬券期待値・本番M3へ転用不可',
-  metadata:meta,sourceVersions:{queue:root.ValidatedQueueState?.version||null,remaining600:root.Remaining600ValidatedState?.version||null,m3:root.Finish600State?.version||null,csvParser:root.RSATargetCsvCache?.version||null,analysisGeneration:root.Finish600State?.generation??null},gap80ResearchCalibration:root.RSAPosition600BandV1?.meta||null,peerPressureResearch:peerDiagnostics(result.rows),simulation:{method:'Gumbel whole-field rank permutation',iterations:result.count,dispersion:result.dispersion,
+  metadata:meta,sourceVersions:{queue:root.ValidatedQueueState?.version||null,remaining600:root.Remaining600ValidatedState?.version||null,m3:root.Finish600State?.version||null,csvParser:root.RSATargetCsvCache?.version||null,analysisGeneration:root.Finish600State?.generation??null},gap80ResearchCalibration:root.RSAPosition600BandV1?.meta||null,peerPressureResearch:peerDiagnostics(result.rows),adjacentPairResearch:adjacentPairAudit(result),simulation:{method:'Gumbel whole-field rank permutation',iterations:result.count,dispersion:result.dispersion,
    frontSeats:result.k,middleEnd:result.kMiddle,seed:hash(c.seedSig)},
   runners:result.rows.map(r=>({no:r.no,name:r.name,inputExpectedRank:r.expectedRank,simulatedExpectedRank:r.meanRank,historyGapSdSeconds:r.histGapSd,historyGapRaceCount:r.histGapN,historyDistinctRacesLast5:r.histUnique5,historyDuplicateRowsLast5:r.histDupRows5,liveModelReference:liveReference(r.no,r.name),gap80ResearchBand:gapBand(r.no,r.name,result.n),
    rankProbabilities:r.rankProbabilities,frontShare:r.frontShare,middleShare:r.middleShare,rearShare:r.rearShare,
