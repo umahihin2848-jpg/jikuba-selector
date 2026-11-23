@@ -1,0 +1,18 @@
+{
+  "paired_horse_distance_n": 183,
+  "pearson_first_vs_last": 0.0008460014471873262,
+  "pearson_bootstrap95": [
+    -0.14637453795645725,
+    0.15024464670467935
+  ],
+  "early_late_sign_same_nonzero_n": 175,
+  "early_late_sign_same_nonzero_rate": 0.4857142857142857,
+  "observed_average_abs_venue_residual_difference": 0.21177860947676866,
+  "within_horse_venue_shuffle_null_mean_abs_difference": 0.2122475037006328,
+  "null95": [
+    0.19203902371968676,
+    0.2321778692156821
+  ],
+  "permutation_p_ge_observed": 0.514,
+  "method": "For horse×exact turf distance >=2 each, earlier and later venue residual differences; exchangeability shuffle ignores sequence and course field covariates; descriptive only."
+}
