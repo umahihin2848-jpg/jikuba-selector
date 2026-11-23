@@ -129,7 +129,9 @@ function download(){
  a.hidden=true;doc.body.appendChild(a);a.click();a.remove();root.setTimeout(()=>root.URL.revokeObjectURL(url),25000);
 }
 function mount(){
- const next=createPanel();if(next)panel=next;
+ const next=createPanel();
+ if(next&&panel&&next!==panel){snapshot=null;stage='start';}
+ if(next)panel=next;
 }
 function invalidateRace(){if(panel)invalidate('レース条件または過去走データが変わりました。出走表を確認し直してください。');}
 ['rsa-focused-partner-ready','rsa-analysis-complete'].forEach(name=>root.addEventListener(name,()=>root.setTimeout(mount,50)));
