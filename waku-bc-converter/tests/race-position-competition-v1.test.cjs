@@ -93,6 +93,14 @@ test('duplicate history audit is metadata only and does not change any simulated
  assert.match(code,/historyDuplicateRowsLast5/);
  assert.match(code,/履歴の重複検出/);
 });
+test('JSON export captures live stage inputs read-only for future same-race replay',()=>{
+ assert.match(code,/function liveReference\(/);
+ assert.match(code,/sourceVersions:\{/);
+ assert.match(code,/liveModelReference:liveReference\(r.no,r.name\)/);
+ assert.match(code,/remaining600:\{predictedGapSeconds:/);
+ assert.match(code,/coreFeatures:x/);
+ assert.doesNotMatch(code,/root\.(?:Finish600State|Remaining600ValidatedState|ValidatedQueueState)\s*=/);
+});
 test('research code does not overwrite official M3, betting state, odds or selection',()=>{
  assert.doesNotMatch(code,/\.(finishRank|score|predGap|axisNo|partnerNos|betEligible|odds)\s*=/);
  assert.match(code,/productionImpact:false/);
