@@ -1,7 +1,7 @@
 {
   "schema": "rsa-research-history-registry-v1",
   "created_on": "2026-11-23",
-  "entry_count": 56,
+  "entry_count": 57,
   "scope": "review of available GitHub docs, PR descriptions, archived conversation and supplied source files",
   "not_exhaustive_of_private_unretrieved_attachments": true,
   "source_text_sha256": "9521c4061a015341e658d434fdb70768800091499fc96d3b853a708e6c76fb16",
@@ -692,6 +692,33 @@
       "code": "validation/h018/h018_joint_rank.py",
       "aggregation": "validation/h018/H018_AGGREGATE.json",
       "dedupKey": "H018|frozen H017 stage probabilities KL joint occupancy 977R|no duplicate MAP unique rank|H013 frozen course zone finish sensitivity|2024-26 exploratory"
+    },
+    {
+      "id": "H019",
+      "title": "Actual 3C->4C->Finish rescue routes among frozen H018 203 high-risk candidates and strictly prior 3C-4C movement forecast",
+      "population": "H018 fixed 2024-26/10/04 977R/14876 horses among 83 represented track surface-distance profiles (86 eligible), exact full horse-result joins all14876; source 439416 history rows -> 71780 valid unique prior horse races, 4266 horses; train2024 356R/5412, retrospective test2025-26 621R/9464",
+      "new_vs_prior": "H018's all-field only4C one-to-one rank risk flag 203/10. H019 connects exact actual prior 3C and 4C and finish to identify two rescue routes, but separately tests whether old horse 3C-to-4C push history has incremental pre-race prediction value; not reusing current result features as asof inputs.",
+      "observed_flag": "H018 203 flagged across140R, 10 top3 (4.93%) vs closing market PL q sum13.5195 (6.66%), race bootstrap observed-minus-expected CI[-8.92,+2.61] includes0. Current actual 3C front->C4 front 29/0 top3, front->rear7/0, rear->front8/4, rear->rear159/6. The six late rear horse winners had mean best-3F deficit .133 seconds; 'rear->front8/4' is hindsight-conditioned tiny sample, not a forecast probability. 2024 flags 80 top3 1, 2025 flags65 top3 4, 2026 flags58 top3 5.",
+      "pre_race_push": "Fit2024 only and compare fixed 2025-26: P(current C3-to-C4 move>=2 ranks) baseline AUC .62888/Brier .084990, plus preceding same-surface 5 distinct race movement mean/rate AUC .63652/Brier .085088 => no improvement in proper score.",
+      "pre_race_finish": "On 2025-26 621R/9464 H018 frozen Brier .144940/top3 hits693; calibrated 2024 baseline .144873/693 vs +historic push/fade transition .144896/676. race-cluster95CI gain stage relative calibrated [-.000398,+.000361], not meaningful, market closing-only proxy .132052/842.",
+      "risk_interpretation": "Observed low probability largely known to closing market (10 actual vs 13.52 expected nonsignificant), year-specific instability; not safe for automatic scratch. Do not label 4.9% as market-beating EV. Early C1 observed 5838/14876; remaining no true C1. Actual 3C and 4C observed all14876 and only used postrace diagnostic.",
+      "status": "COMPLETE_EXPLORATORY_STAGE_MECHANISM_FOUND__ASOF_INCREMENT_HOLD",
+      "modelImpact": "No production Ability C/M3/M4/P10/Axis/BUY-PASS changes",
+      "limits": "Historical test years 2024-26 extensively mined; proxy H018 not official JS browser; individual 200m speed/gps energy not observed; C3/C4 passing rank ties; q is final not purchase time; history cohort unequal across years. 10 unit tests and JS syntax passed.",
+      "source": "validation/h019/H019_REPORT_20261124.md",
+      "code": [
+        "validation/h019/prepare_h019_history.py",
+        "validation/h019/h019_stage_transition.py",
+        "validation/h019/h019_stage_audit.py",
+        "validation/h019/test_h019_stage_transition.py"
+      ],
+      "aggregate": [
+        "validation/h019/H019_RESULTS.json",
+        "validation/h019/H019_COARSE_AUDIT.json",
+        "validation/h019/H019_83COURSE_STAGE_AGGREGATE.csv"
+      ],
+      "privacy": "User-only standalone 203 horse viewer and per-horse 9464 predictor audit in ZIP; no horse-level names/records sent to GitHub",
+      "dedupKey": "H019|H018 fixed 203 risk asof|current actual 3C4Cfinish escape postrace audit|2024 train pre5 same-surface push 2025/26 test|negative incremental result"
     }
   ],
   "new_protocols": [
@@ -837,6 +864,15 @@
       "findings": "977R no capacity violations, slight zone Brier gain CI zero crosses, downstream sensitivity 1117->1122 but market unbeaten and 2024-26 already mined; 827/977 recorded C4 capacities not strict rank-unique",
       "report": "validation/h018/H018_REPORT_20261124.md",
       "next": "Audit c4 ties and proper simultaneous rank outcome targets; N001 JS pipeline parity, first-corner/3C->4C dynamic transitions before production."
+    },
+    {
+      "id": "H020",
+      "title": "As-of early-turn position × 3C position × C4 movement × individual remaining endgame conditional on rival front survival",
+      "state": "CONCEPT_RESEARCH_NOT_STARTED",
+      "new_vs_prior": "H019 current stage mechanism observed but prior 3C->4C movement summary does not improve predictions; H020 requires more detailed cause-aware first position and contemporaneous pacing without postrace leakage",
+      "needed": "N001 official browser P10/M4/3C4C/M3/Ability C parity; historical recorded first turn only where present; valid course geometry and front stamina conditional on asof field lineup",
+      "privacy": "No private horse-level exports on public GitHub",
+      "caveat": "Do not select arbitrary 3C movement and ROI thresholds on previously mined 2024-26 as if pristine validation"
     }
   ]
 }
