@@ -72,6 +72,14 @@ test('research panel includes explicit uncalibrated JSON export without producti
  assert.match(code,/rankProbabilities:/);
  assert.doesNotMatch(code,/\.(finishRank|score|predGap|axisNo|partnerNos|betEligible|odds)\s*=/);
 });
+test('historical 600m gap SD is display metadata, never a simulated ranking input',()=>{
+ const baseline=lineup();const withHistory=baseline.map((r,i)=>({...r,histGapSd:i*.08,histGapN:5}));
+ const a=core.simulate(baseline,{seed:123,count:512}),b=core.simulate(withHistory,{seed:123,count:512});
+ assert.deepEqual(a.rows.map(r=>r.rankProbabilities),b.rows.map(r=>r.rankProbabilities));
+ assert.deepEqual(b.rows.map(r=>r.histGapSd),Array.from({length:16},(_,i)=>i*.08));
+ assert.deepEqual(b.rows.map(r=>r.histGapN),Array(16).fill(5));
+ assert.match(code,/historyGapSdSeconds/);assert.match(code,/historyGapRaceCount/);
+});
 test('research code does not overwrite official M3, betting state, odds or selection',()=>{
  assert.doesNotMatch(code,/\.(finishRank|score|predGap|axisNo|partnerNos|betEligible|odds)\s*=/);
  assert.match(code,/productionImpact:false/);
