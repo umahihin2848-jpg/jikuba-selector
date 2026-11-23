@@ -1,0 +1,20 @@
+name: P3-76 offline prospective ledger contract
+on:
+  push:
+    paths:
+      - 'waku-bc-converter/p3-76-*'
+      - 'waku-bc-converter/tests/p3-76-forward.test.cjs'
+      - '.github/workflows/p3-76-forward-ledger.yml'
+  workflow_dispatch:
+jobs:
+  node-contract:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run P3-76 research-only settlement tests
+        run: node --test waku-bc-converter/tests/p3-76-forward.test.cjs
