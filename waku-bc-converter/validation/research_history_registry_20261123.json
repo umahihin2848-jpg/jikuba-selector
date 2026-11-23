@@ -1,7 +1,7 @@
 {
   "schema": "rsa-research-history-registry-v1",
   "created_on": "2026-11-23",
-  "entry_count": 41,
+  "entry_count": 42,
   "scope": "review of available GitHub docs, PR descriptions, archived conversation and supplied source files",
   "not_exhaustive_of_private_unretrieved_attachments": true,
   "source_text_sha256": "9521c4061a015341e658d434fdb70768800091499fc96d3b853a708e6c76fb16",
@@ -429,6 +429,20 @@
       "caveat": "2024-26 historical exploration; as-of prior 16-char ID dedup only; H005 full browser parity N001 unfinished. No T-15 odds, independent forward eval or ROI proof.",
       "source": "validation/H006_CONDITIONAL_HISTORY_DEPTH_20261123.md",
       "dedupKey": "H006|conditional per-horse 5->10 valid prior history|3 frozen rules|2024 selection/2025-26 diagnostics|M3 top3"
+    },
+    {
+      "id": "H007",
+      "title": "As-of 10-start horse-specific distance/venue/surface suitability residual compared with calibrated closing market",
+      "population": "2024 338 races/5126 horses fitted; 2025-26 569 races/8676 horses evaluated; previously explored period",
+      "new_vs_prior": "Different from H004-06; identifies conditional horse ability residual relative to earlier popularity expectations, not simply more position rows.",
+      "asof_inputs": "JRA TARGET umadete CP932, strictly prior distinct horse +16-digit race IDs, normalized date verified to ID first 8; each condition needs 2 matching and 2 contrast records",
+      "results": "After correcting date parser, 2025-26 Brier final PL .132502 -> overall past performance .132440 (CI crosses zero); adding venue remains .132440 (2024 coefficient zero); distance and surface add no verified improvement",
+      "status": "HOLD_no_reliable_incremental_effect",
+      "critical_correction": "Initial apparently large venue suitability improvement invalid because digit concatenation and whole string zero padding made 2026.10.4 into 02026104 and leaked future data; corrected all dates and discarded initial result",
+      "modelImpact": "research only, no changes to Ability C/M3/P10/BUY or ROI",
+      "caveat": "Repeatedly explored years, closing odds not purchasable snapshots, coarse venue != same exact course, N001 browser parity not complete",
+      "source": "validation/H007_CONDITION_SUITABILITY_AUDIT_20261123.md",
+      "dedupKey": "H007|10 prior unique horse starts|market relative score|surface distance venue|2024 train vs 2025/26 Brier"
     }
   ],
   "new_protocols": [
@@ -480,6 +494,14 @@
       "claim_limit": "Full M3 outcome must improve, not only direct gap MAE",
       "findings": "No 2024-qualified policy; return_distance 0/2024 +1/2025-26, style_stable -5/+4, volatile -6/0. None proved advantage; CI includes 0.",
       "report": "validation/H006_CONDITIONAL_HISTORY_DEPTH_20261123.md"
+    },
+    {
+      "id": "H008",
+      "title": "Exact course geometry × pre-race position and pace response interactions",
+      "state": "proposed_after_N001",
+      "new_vs_prior": "Not redoing H007 venue history or H006 5-to-10 selection; requires position/pace and verified course geometry",
+      "needed": "N001 live parser parity, verified course DB, as-of pace M4 and first-position predictions",
+      "claim_limit": "No lane/GPS or ROI inference from raw running-position data alone"
     }
   ]
 }
