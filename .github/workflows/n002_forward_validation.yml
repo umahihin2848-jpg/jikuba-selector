@@ -1,0 +1,21 @@
+name: N002 strictly-forward forecast scoring test
+on:
+  push:
+    paths:
+      - 'waku-bc-converter/validation/n002_*'
+      - 'waku-bc-converter/validation/N002_*'
+      - 'waku-bc-converter/tests/test_n002_forward_score.py'
+      - '.github/workflows/n002_forward_validation.yml'
+  workflow_dispatch:
+jobs:
+  synthetic_contract:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Synthetic prediction/result reconciliation tests only
+        run: python -m unittest discover -v -s waku-bc-converter/tests -p test_n002_forward_score.py
