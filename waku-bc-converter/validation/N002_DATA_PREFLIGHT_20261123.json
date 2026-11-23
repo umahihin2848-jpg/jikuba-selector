@@ -12,6 +12,8 @@
     "eligible_target_races_after_freeze": 0,
     "first_corner_mae": null,
     "first_corner_n": 0,
+    "first_corner_rps": null,
+    "first_corner_rps_n": 0,
     "m3_top3_hits": null,
     "m3_races": 0,
     "c3_brier4": null,
