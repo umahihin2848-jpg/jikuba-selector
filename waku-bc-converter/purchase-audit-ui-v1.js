@@ -31,7 +31,7 @@ function mount(){
  '<label for="rpaOdds">発走前に確認した組合せオッズ</label><input id="rpaOdds" inputmode="decimal" type="number" step="0.1" min="1.1" placeholder="例：8.4">'+
  '<label for="rpaObserved">観測日時</label><input id="rpaObserved" type="datetime-local">'+
  '<label for="rpaManualSkip">その他の見送り理由（任意）</label><textarea id="rpaManualSkip" rows="2" placeholder="例：軸馬の発汗が目立ったため手動で見送り"></textarea></section>'+
- '<div class="rpaActions"><button type="button" id="rpaEvaluate">判定内容を更新</button><button type="button" id="rpaDownload" class="rpaSub">見送りを含めJSON保存</button></div>'+
+ '<div class="rpaActions"><button type="button" id="rpaEvaluate">判定内容を更新</button><button type="button" id="rpaDownload" class="rpaSub">見送りを含めJSON保存</button><a href="p3-75-settlement.html" class="rpaSub" style="display:inline-flex;align-items:center;padding:8px 12px;min-height:42px;text-decoration:none;color:#aeeadc;border:1px solid #376673;border-radius:10px">保存JSONの結果・回収率を照合 ↗</a></div>'+
  '<section id="rpaResult" class="rpaResult" aria-live="polite"></section>'+
  '<p class="rpaFoot">P3-73の非重賞単独軸58Rで、相手P10最小ワイド1点の過去実現回収率は128.4%。探索済み年度の事後払戻であり、期待回収率や的中保証ではありません。Pairは別研究。</p></div>';
  anchor.insertAdjacentElement('afterend',el);
