@@ -6,6 +6,7 @@ on:
       - 'waku-bc-converter/purchase-audit-*'
       - 'waku-bc-converter/v3.html'
       - 'waku-bc-converter/tests/p3-74-buy-skip-research.test.cjs'
+      - 'waku-bc-converter/tests/p3-74-buy-skip-real-browser.cjs'
       - '.github/workflows/p3-74-buy-skip-research.yml'
   workflow_dispatch:
 jobs:
@@ -21,3 +22,29 @@ jobs:
           node-version: '22'
       - name: Prove no official writes and conservative selection gates
         run: node --test waku-bc-converter/tests/p3-74-buy-skip-research.test.cjs
+
+  mobile-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated Chromium
+        run: |
+          npm install --no-save --no-package-lock playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Real mobile-size browser, synthetic pre-race review and JSON
+        run: node waku-bc-converter/tests/p3-74-buy-skip-real-browser.cjs
+      - name: Store synthetic-only QA screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p3-74-synthetic-purchase-audit-qa
+          path: |
+            p3-74-synthetic-research-ui.png
+            p3-74-synthetic-ui-report.json
+          if-no-files-found: ignore
