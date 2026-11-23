@@ -1,7 +1,7 @@
 {
   "schema": "rsa-research-history-registry-v1",
   "created_on": "2026-11-23",
-  "entry_count": 40,
+  "entry_count": 41,
   "scope": "review of available GitHub docs, PR descriptions, archived conversation and supplied source files",
   "not_exhaustive_of_private_unretrieved_attachments": true,
   "source_text_sha256": "9521c4061a015341e658d434fdb70768800091499fc96d3b853a708e6c76fb16",
@@ -416,6 +416,19 @@
       "caveat": "2024-26 reused, fixed closing-model coefficients but not full live JS parity; no market-adjusted ticket/ROI proof",
       "source": "validation/H005_HISTORY_DEPTH_TO_M3_20261123.md",
       "dedupKey": "H005|fixed19M3 model|2024-26|5decay vs10decay|top3"
+    },
+    {
+      "id": "H006",
+      "title": "Pre-specified conditions to use 6–10 earlier starts in M3 only for selected horses",
+      "population": "2024 338R train and 2025-26/10/04 569R diagnostics; H005 paired full-field score cohort; 2024-26 already previously explored",
+      "intervention": "Retain alpha=0.8 decayed last5 gap input except per-horse gate: return same surface ±200m (old6-10>=2 recent5<=1); stable frontness (last10 same surface>=8, |front_new5-old5|<=.12); recent5 gap SD>=.5s; change only pred_gap",
+      "time_split": "2024 fixed training selection; 2025/26 historical diagnostic; not independent untouched period",
+      "results": "2024 Top3 captured baseline342 vs return342, stable337, volatile336; 2025/26 569R baseline519 vs return520 (+1,4 switchR), stable523 (+4,58 switchR), volatile519 (0,32 switchR), all CI include zero. 2024 training no candidate passes >=10 changed races and >=3 extra captured horses, so selected policy null and official baseline retained.",
+      "status": "HOLD_no_stable_gate_found",
+      "modelImpact": "none; fixed M3 Python shadow only; main Ability, P10, M3, BUY/PASS unchanged",
+      "caveat": "2024-26 historical exploration; as-of prior 16-char ID dedup only; H005 full browser parity N001 unfinished. No T-15 odds, independent forward eval or ROI proof.",
+      "source": "validation/H006_CONDITIONAL_HISTORY_DEPTH_20261123.md",
+      "dedupKey": "H006|conditional per-horse 5->10 valid prior history|3 frozen rules|2024 selection/2025-26 diagnostics|M3 top3"
     }
   ],
   "new_protocols": [
@@ -462,9 +475,11 @@
     {
       "id": "H006",
       "title": "Test prespecified situations where older 6-10 histories help without blanket expansion",
-      "state": "not_started",
+      "state": "COMPLETED_HOLD",
       "new_vs_prior": "No retuning thresholds on explored 2025/26 without independent evaluation",
-      "claim_limit": "Full M3 outcome must improve, not only direct gap MAE"
+      "claim_limit": "Full M3 outcome must improve, not only direct gap MAE",
+      "findings": "No 2024-qualified policy; return_distance 0/2024 +1/2025-26, style_stable -5/+4, volatile -6/0. None proved advantage; CI includes 0.",
+      "report": "validation/H006_CONDITIONAL_HISTORY_DEPTH_20261123.md"
     }
   ]
 }
