@@ -29,8 +29,8 @@ function simulate(input,options={}){
   for(let rank=0;rank<n;rank++){hist[order[rank].i][rank]++;}
  }
  const out=rows.map((r,i)=>{
-  let total=0;const probs=hist[i].map((v,j)=>(total+=v,j)),front=hist[i].slice(0,k).reduce((a,b)=>a+b,0);
-  const percentile=t=>hist[i].reduce((z,x,j)=>z===null&&probs[j]>=Math.ceil(count*t)?j+1:z,null)||n;
+  let total=0;const cdf=hist[i].map(v=>(total+=v)),front=hist[i].slice(0,k).reduce((a,b)=>a+b,0);
+  const percentile=t=>hist[i].reduce((z,x,j)=>z===null&&cdf[j]>=Math.ceil(count*t)?j+1:z,null)||n;
   // Conditional on missing a top-k place *inside this hypothetical contest*.
   // This is NOT learned from the 2025-26 fallback outcome model, which did not improve errors.
   const fallbackCount=count-front;
