@@ -1,7 +1,7 @@
 {
   "schema": "rsa-research-history-registry-v1",
   "created_on": "2026-11-23",
-  "entry_count": 36,
+  "entry_count": 38,
   "scope": "review of available GitHub docs, PR descriptions, archived conversation and supplied source files",
   "not_exhaustive_of_private_unretrieved_attachments": true,
   "source_text_sha256": "9521c4061a015341e658d434fdb70768800091499fc96d3b853a708e6c76fb16",
@@ -366,6 +366,31 @@
       "status": "investigated_hold",
       "evidence_level": "historical_exploratory",
       "source_index": "研究履歴マスター_重複防止_20261123.md"
+    },
+    {
+      "id": "H001",
+      "title": "Historical race universe and completeness preflight",
+      "population": "2016-2026/10/04 all 3-win/OP/L/G1-3 turf/dirt 12-18 entries",
+      "races": 4179,
+      "strictRaces": 3706,
+      "outcome": "4179 eligible; 3721 full-record; 458 record-count gaps; favorite top3 2082/3706 (56.18%).",
+      "status": "completed_descriptive_only",
+      "modelImpact": "none",
+      "novelty": "universe and nonrandom full-field gating distinct from earlier 216R/262R conditional cohorts",
+      "source": "validation/H001_H002_HISTORICAL_MARKET_BASELINE_20261123.md",
+      "dedupKey": "H001|2016-2026-10-04|4179|full field audit|closing favorite top3"
+    },
+    {
+      "id": "H002",
+      "title": "Closing-market PL top3 proxy shrink calibration",
+      "population": "strict full-field 3706 races; chronological 2016-22 train 2302 vs 2023-26/10/04 test 1404",
+      "outcome": "shrunk lambda 0.822646 using only training; test per-race Brier 0.133218->0.132209; paired race CI improvement [0.000636,0.001399]; favorite PL 66.96%, actual 57.12%, shrunk 58.63%",
+      "status": "completed_exploratory_temporally_split",
+      "modelImpact": "market proxy baseline only, no Ability/M3/P10 or ROI change",
+      "novelty": "single parameter time-split baseline calibration distinct from P3-56 C market comparison",
+      "source": "validation/H001_H002_HISTORICAL_MARKET_BASELINE_20261123.md",
+      "dedupKey": "H002|train2016-22|test2023-26|closing odds PL top3 shrink|Brier",
+      "caveat": "closing odds are post-race; previously inspected test years; not independent future or actual place market"
     }
   ],
   "new_protocols": [
@@ -390,6 +415,14 @@
         "waku-bc-converter/validation/N002_DATA_PREFLIGHT_20261123.json",
         "waku-bc-converter/validation/N002_FORWARD_EVALUATION_20261123.md"
       ]
+    },
+    {
+      "id": "H003",
+      "title": "Attribute causes of Ability/M3 disagreement with calibrated closing market baseline without new training",
+      "state": "proposed_not_executed",
+      "new_vs_prior": "Existing P3-56/57/62 market/Ability comparisons summarized, so only new frozen full-field stagewise error attribution or new independent labels qualifies",
+      "claim_limit": "historical failure mechanism analysis, not independently validated performance or live EV",
+      "needed": "actual as-of full-field Ability C/M3/Queue and timestamped closing odds; P3-55 parity and PR7 normalization; exact race matching"
     }
   ]
 }
