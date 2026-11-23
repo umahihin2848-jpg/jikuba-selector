@@ -1,7 +1,7 @@
 {
   "schema": "rsa-research-history-registry-v1",
   "created_on": "2026-11-23",
-  "entry_count": 54,
+  "entry_count": 55,
   "scope": "review of available GitHub docs, PR descriptions, archived conversation and supplied source files",
   "not_exhaustive_of_private_unretrieved_attachments": true,
   "source_text_sha256": "9521c4061a015341e658d434fdb70768800091499fc96d3b853a708e6c76fb16",
@@ -649,6 +649,29 @@
       "viewer": "h016-course-position-danger-atlas.html",
       "code": "validation/h016/h016_surface_zone_audit.py",
       "dedupKey": "H016|national 10x2x87 4C quarters turf-dirt separate|2016-23 H013 frozen threshold 2024-26 checked|asof screen 598 by surface without names"
+    },
+    {
+      "id": "H017",
+      "title": "Nationwide course-specific 4C four-position-band probability × horse historic closing/holding × leave-one-out other-front reserve with final finishability",
+      "population": "H015 historic 3566 full-field JRA races 54383 horses 87 track/surface/distance profiles -> exclude Niigata turf1000 straight49R/796 horses: 3517R/53587 runners 86 physical turn-track profiles; training 2022–23 714R/10930 and retrospective 2024–26/10/04 977R/14876",
+      "new_vs_prior": "H013/H016 detect dangerous back rank retrospectively using binary pre-race back position; H015 uses binary front state; H017 predicts 4 C4 quartiles and separate P(top3|predicted zone), compares against direct same-features, then tests as-of leave-one-out other field front-reserve/fade as context with fixed train/test",
+      "primary_result": "2024–26 977R: direct general Brier .1441976/top3 caught1100, direct+self prior front resilience .1439981/1104, 4-zone generic .1443348/1109, 4-zone+self endurance .1442098/1117, closing market proxy .1315891/1326. 4-zone classification accuracy .4315/back-half AUC .7701. Direct resilience race-paired gain .0002227 CI[.0000182,.0004335] vs general but years previously explored; 4-zone+self vs direct+self Brier worsens and CI crosses0.",
+      "rival_result": "Add other runners' historical front hold/fade as leave-one-out weighted by prior front intent: direct .1439981->.1439094 (caught1104->1113) race CI[-.0000105,.0001911]; 4-zone .1442098->.1440991 (caught1117->1113) CI[-.0000327,.0002563]; neither established reliable added predictive value.",
+      "historic_warning": "2024–26 repeatedly mined in 50+ studies, so paired bootstrap is within this explored sample, not fresh evidence. Direct historic chance model not official M3/Ability C/P10/M4; as-of availability vs 2022–23 has history2+ coverage70.7% vs test96.1%. Actual current C4 and pace excluded from predictors; closing market q postrace only.",
+      "risk_flag_diagnostic": "H013 pre-race flagged598, 61 actual top3 vs 72.71 closing market expected; H017 pre-specified illustration p(last quarter)>=.50 and 4-zone P(top3)<=.10 reduces to137, 7 top3 (5.1%) vs q expected9.48 (CI actual-minus-expected[-6.71,2.62]). Remaining461:54 top3 (11.7%) q expected63.23. Strong final-market q>=.15 still 6 in137 with2 actual top3, so not safe auto-dismiss or new EV proof.",
+      "special_course_correction": "Exclude Niigata turf1000 as no actual 4C; H016 originally included it as raw TARGET-position pseudo entry.",
+      "asof_quality": "8 unit tests pass; race expected top3 probabilities sum3; test current actual C4/top3/finish label edits leave predictions bitwise invariant; LOO opponents exclude horse own history.",
+      "data_product": "Nationwide 86 profile x four observed 4C zones anonymous CSV, aggregate JSON, code, tests, private horse-level local ZIP only. Public repository excludes names/race IDs.",
+      "status": "EXPLORATORY_COMPLETED_HOLD_NO_BETTING_AUTO_EXCLUSION_OR_OFFICIAL_M3_CHANGE",
+      "production_change": "NONE",
+      "source": "validation/h017/H017_REPORT_20261123.md",
+      "scripts": [
+        "validation/h017/h017_four_zone.py",
+        "validation/h017/h017_rival_reserve.py",
+        "validation/h017/test_h017.py"
+      ],
+      "aggregate": "validation/h017/H017_RESULT_AGGREGATE_20261123.json",
+      "dedupKey": "H017|national86 4corner 4-zone multi p versus conditional finish + LOO opponents front reserve|2022-23 fit 2024-26 historical 977R|H013 598 flagged sensitivity"
     }
   ],
   "new_protocols": [
@@ -776,10 +799,21 @@
     {
       "id": "H017",
       "title": "Strict as-of four-band 4C position distribution × conditional last600m chance, with predicted pace/horse ability and track-specific surface/distance",
-      "state": "proposed_research_not_started",
+      "state": "COMPLETED_EXPLORATORY_HOLD",
       "new_vs_prior": "H013 prior model gives only P(4C back-half), H016 determines actual fixed course-quarter danger zones, H015 direct vs two-stage front25; H017 models P(4C quarter) as pre-race horse distribution and separately P(top3 | each 4C band, pace condition, Ability/M3), benchmark to current official pipeline and market.",
       "needed": "H016 static summary+raw race examples, unique prior horse race IDs, historic C3/C4/finish, actual past race final3f, as-of full field M4/P10 front pressure and C/M3 parity",
-      "claim_limit": "Never use current 4C or race lap as predictor; pre-race risk may overflag strong candidates; no automatic exclusion absent calibration and signal above final-market and current browser model. Use previously known historical data to do mechanism now, but declare re-used evaluation years."
+      "claim_limit": "Never use current 4C or race lap as predictor; pre-race risk may overflag strong candidates; no automatic exclusion absent calibration and signal above final-market and current browser model. Use previously known historical data to do mechanism now, but declare re-used evaluation years.",
+      "findings": "4-zone distribution back-half AUC .770 but 4-stage does not improve Brier over direct; as-of other front reserve small CI-crossing gain; H013 137/7 low hit but closing market already prices much risk; no automatic exclusion",
+      "report": "validation/h017/H017_REPORT_20261123.md",
+      "next": "Course-specific 4-zone calibration with all-horse rank occupancy constraints and real JS M4/P10/M3 parity before app integration; do not refit threshold to explored years"
+    },
+    {
+      "id": "H018",
+      "title": "Course-conditional simultaneous 4C rank probability allocations with occupancy constraints and pairwise finishability residual",
+      "state": "proposed_not_executed",
+      "new_vs_prior": "H017 independent multinomial probabilities for each horse do not ensure 1–N ranks jointly; H018 would test constrained matching vs independent p and downstream finish probabilities",
+      "blockers": "Need N001 exact five-unique-history browser parity and M4/P10/3C4C official output; independently adjudicated course inside/outside; historical labels as train only",
+      "safety": "No automatic betting veto or T-15 EV claim from final odds, no current C4 outcome as pre-race feature"
     }
   ]
 }
