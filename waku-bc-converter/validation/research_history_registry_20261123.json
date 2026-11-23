@@ -1,7 +1,7 @@
 {
   "schema": "rsa-research-history-registry-v1",
   "created_on": "2026-11-23",
-  "entry_count": 43,
+  "entry_count": 44,
   "scope": "review of available GitHub docs, PR descriptions, archived conversation and supplied source files",
   "not_exhaustive_of_private_unretrieved_attachments": true,
   "source_text_sha256": "9521c4061a015341e658d434fdb70768800091499fc96d3b853a708e6c76fb16",
@@ -457,6 +457,21 @@
       "caveat": "Not causal effect of turn count alone: track grade, course layout, distance, field and race-day pace composition confounded; no before-start horse aptitude test",
       "source": "validation/H008A_COURSE_LAP_STRUCTURE_REPORT_20261123.md",
       "dedupKey": "H008-A|course-specific 200m lap segmentation|Tokyo Nakayama turf1600/1800/2000|2016-26|lull rate descriptive"
+    },
+    {
+      "id": "H008-C",
+      "title": "All ten JRA venues, turf and dirt course-distance lap structural atlas, continuing H008-A",
+      "population": "2016-01-05 to 2026-10-04 3win/OP/L/G1-G3 JRA flat 12-18; 35857 lap rows and 5368 result race keys, 4912 exact matched, 3925 eligible valid laps, 87 track/surface/distance profiles",
+      "results": "65/87 profiles >=20R; 2415 mid-lull evaluable races; Tokyo turf1800 41/80=51.25 vs Nakayama turf1800 4/65=6.15 replicated from H008-A; Hanshin turf1600 60/115=52.17 mid-lull and 87/115=75.65 last200 fade; 13 tests pass",
+      "new_vs_prior": "H008-A only Tokyo/Nakayama handful turf profiles. H008-C covers all observed track/surface/distance conditions including short-start (first 100/150m), sprint NA, venue/year splits, average 200m shape",
+      "status": "complete_descriptive_course_side_only_no_horse_prediction",
+      "modelImpact": "none, official Ability C/M3/P10/BUY-PASS untouched",
+      "caveat": "This is not all physical layouts; course grouping does not separately identify inner/outer or turn count. Actual after-race laps not as-of horse features; low N for 22 profiles. No horse suitability, odds EV or ROI.",
+      "source": "validation/h008c/H008C_NATIONAL_COURSE_LAP_STRUCTURE_20261123.md",
+      "code": "validation/h008c/analyze_all_courses.py",
+      "tests": "validation/h008c/test_all_courses.py",
+      "output": "h008c-national-lap-atlas.html",
+      "dedupKey": "H008-C|nationwide87 venue-surface-distance profiles|2016-26/10/04|mid-lull and post600 fade descriptive|H008-A parity"
     }
   ],
   "new_protocols": [
@@ -512,13 +527,14 @@
     {
       "id": "H008",
       "title": "Exact course geometry × pre-race position and pace response interactions",
-      "state": "phase_A_course_lap_shape_complete_phase_B_horse_aptitude_NOT_YET",
+      "state": "phase_A_national_course_lap_atlas_complete_phase_B_horse_aptitude_not_done",
       "new_vs_prior": "Not redoing H007 venue history or H006 5-to-10 selection; requires position/pace and verified course geometry",
       "needed": "N001 live parser parity, verified course DB, as-of pace M4 and first-position predictions",
       "claim_limit": "No lane/GPS or ROI inference from raw running-position data alone",
-      "findings": "Main: Tokyo turf1800 51.25% mid-lull vs Nakayama turf1800 6.15% on 145R, but Tokyo/Nakayama turf2000 40.3 vs39.4; race laps are post-race labels only",
+      "findings": "2016-2026/10/04 all venues87 profiles,3925 races, course/lap after-race descriptive. Horse abilities and course-turn geometry not yet attached; stage B still pending.",
       "phase_a_report": "validation/H008A_COURSE_LAP_STRUCTURE_REPORT_20261123.md",
-      "next": "True H008-B as-of horse-specific response conditional on course geometry and predicted pace, with no post-race race-lap leakage"
+      "next": "Verify official course DB inner/outer, first turn distance, turn count, grade and straight length. Develop strictly as-of course-lap distribution and horse-level ability interaction; evaluate against Ability/M3 and calibrated market without leaking current race laps.",
+      "phase_c_report": "validation/h008c/H008C_NATIONAL_COURSE_LAP_STRUCTURE_20261123.md"
     }
   ]
 }
