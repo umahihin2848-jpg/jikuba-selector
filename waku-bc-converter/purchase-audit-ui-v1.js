@@ -16,7 +16,7 @@ function mount(){
  '<div class="rpaBody"><p class="rpaIntro">Ability × M3による構造 → 相手3頭 → P10最小を参考 → レース質・隊列の手動審査 → 価格記録。<b>実績ある自動購入ルールではありません。</b> 失敗・見送りの理由も保存します。</p>'+
  '<section class="rpaField"><h4>1. 出走馬の確定馬番を照合</h4><p>CSVの馬番は仮番号の可能性があります。別の出走表で全頭確認してください。取消による欠番のあるレースでは、現行モデルを自動対応付けせず保留します。</p>'+
  '<button type="button" id="rpaFillRoster" class="rpaSub">仮番号と馬名を転記（照合前の下書き）</button>'+
- '<label for="rpaRoster">馬番,馬名（1行1頭・全頭分）</label><textarea id="rpaRoster" rows="5" placeholder="1,ホースA&#10;2,ホースB"></textarea>'+
+ '<label for="rpaRaceNo">参照した出走表のR番号（任意・1〜12）</label><input type="number" id="rpaRaceNo" min="1" max="12" inputmode="numeric" placeholder="例：11">'+'<label for="rpaRoster">馬番,馬名（1行1頭・全頭分）</label><textarea id="rpaRoster" rows="5" placeholder="1,ホースA&#10;2,ホースB"></textarea>'+
  '<label for="rpaRosterSource">参照した出走表の出典</label><input id="rpaRosterSource" type="text" placeholder="例：JRA公式出走表・日付">'+
  '<label class="rpaCheck"><input id="rpaAttest" type="checkbox"> 別資料で全馬の確定馬番・馬名を確認した</label></section>'+
  '<section class="rpaField"><h4>2. 発走前のレース質</h4><label for="rpaQuality">4象限の判断</label>'+
@@ -40,11 +40,11 @@ function mount(){
  el.style.setProperty('display','block','important');
  return el;
 }
-function meta(){return{date:$('raceDate')?.value||'',name:$('raceName')?.value||'',venue:$('venue')?.value||'',surface:$('surface')?.value||'',grade:$('grade')?.value||'',field:Number($('fieldSize')?.value),distance:Number($('distance')?.value)}}
+function meta(){return{date:$('raceDate')?.value||'',name:$('raceName')?.value||'',venue:$('venue')?.value||'',raceNumber:($('rpaRaceNo')?.value||''),surface:$('surface')?.value||'',grade:$('grade')?.value||'',field:Number($('fieldSize')?.value),distance:Number($('distance')?.value)}}
 function raceKey(){const m=meta(),f=$('csvFile')?.files?.[0];return JSON.stringify([m.date,m.name,m.venue,m.grade,m.surface,m.field,m.distance,f?.name,f?.size,f?.lastModified])}
 function clearReview(){
  review={};lastResult=null;lastInput=null;
- for(const id of ['rpaRoster','rpaRosterSource','rpaQualitySource','rpaEvidence','rpaOdds','rpaObserved','rpaManualSkip'])if($(id))$(id).value='';
+ for(const id of ['rpaRaceNo','rpaRoster','rpaRosterSource','rpaQualitySource','rpaEvidence','rpaOdds','rpaObserved','rpaManualSkip'])if($(id))$(id).value='';
  for(const id of ['rpaAttest','rpaBefore'])if($(id))$(id).checked=false;
  for(const id of ['rpaQuality','rpaTicket'])if($(id))$(id).value='';
  if($('rpaHorseReviews'))$('rpaHorseReviews').innerHTML='';
