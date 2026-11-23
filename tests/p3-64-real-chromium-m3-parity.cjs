@@ -54,6 +54,7 @@ async function capture(browser,name,port){
  });
  await page.locator('#csvFile').setInputFiles({name:'synthetic_race.csv',mimeType:'text/csv',buffer:csv});
  await page.waitForFunction(()=>/^\d+行$/.test(document.getElementById('csvState')?.textContent?.trim()||''),null,{timeout:30000});
+ const loadedCsvRows=await page.locator('#csvState').textContent();
  await page.evaluate(v=>{document.getElementById('parseCsvBtn').click();document.getElementById('oddsPaste').value=v;document.getElementById('applyOddsBtn').click();},odds);
  await page.waitForFunction(()=>document.getElementById('csvState')?.textContent?.includes('解析済 12頭'),null,{timeout:10000});
  await page.evaluate(()=>document.getElementById('analyzeBtn').click());
@@ -69,7 +70,7 @@ async function capture(browser,name,port){
   }).sort((a,b)=>Number(a.no)-Number(b.no));
   return{models:{q:q.version,r:r.version,m:m.version},csvCount:document.getElementById('csvState').textContent,loaded:window.RSAAddonHealth?.loaded?.length,addonFailures:window.RSAAddonHealth?.failures,horses};
  });
- state.name=name;state.pageErrors=errors;state.httpErrors=bad;
+ state.name=name;state.csvCount=loadedCsvRows.trim();state.pageErrors=errors;state.httpErrors=bad;
  await ctx.close();return state;
 }
 (async()=>{
