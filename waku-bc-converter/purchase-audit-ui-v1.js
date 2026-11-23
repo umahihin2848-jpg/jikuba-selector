@@ -35,6 +35,9 @@ function mount(){
  '<section id="rpaResult" class="rpaResult" aria-live="polite"></section>'+
  '<p class="rpaFoot">P3-73の非重賞単独軸58Rで、相手P10最小ワイド1点の過去実現回収率は128.4%。探索済み年度の事後払戻であり、期待回収率や的中保証ではありません。Pairは別研究。</p></div>';
  anchor.insertAdjacentElement('afterend',el);
+ // This informational panel must remain visible even while the official BUY/PASS gate is closed.
+ // An inline important display beats legacy selectors that hide direct main children.
+ el.style.setProperty('display','block','important');
  return el;
 }
 function meta(){return{date:$('raceDate')?.value||'',name:$('raceName')?.value||'',venue:$('venue')?.value||'',surface:$('surface')?.value||'',grade:$('grade')?.value||'',field:Number($('fieldSize')?.value),distance:Number($('distance')?.value)}}
