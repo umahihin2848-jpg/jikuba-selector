@@ -10,7 +10,7 @@ function random(seed){let s=seed>>>0;return()=>{s=(s+0x6D2B79F5)>>>0;let t=Math.
 function check(rows){if(!Array.isArray(rows)||rows.length<12||rows.length>18)return{ok:false,reason:'12〜18頭の全頭データが必要です'};
  const seen=new Set();
  for(const r of rows){const no=N(r.no),p=N(r.expectedRank);
-  if(!Number.isInteger(no)||no<1||no>rows.length||seen.has(no)||!r.validated||!Number.isFinite(p)||p<1||p>rows.length)return{ok:false,reason:'馬番未確認・位置予測が未成立の馬があります'};
+  if(!Number.isInteger(no)||no<1||no>18||seen.has(no)||!r.validated||!Number.isFinite(p)||p<1||p>rows.length)return{ok:false,reason:'馬番未確認・位置予測が未成立の馬があります'};
   seen.add(no);
  }return{ok:true};
 }
