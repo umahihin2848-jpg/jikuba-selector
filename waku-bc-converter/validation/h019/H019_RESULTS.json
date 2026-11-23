@@ -1,0 +1,209 @@
+{
+  "study": "H019 observed stage transition and strictly earlier horse-specific ability to push from 3C to 4C; retrospective H018 203 risk cohort",
+  "population": {
+    "historical_horses": 4266,
+    "historical_distinct_horse_runs": 71780,
+    "target_races": 977,
+    "target_horses": 14876,
+    "2024_train_races": 356,
+    "2025_26_test_races": 621
+  },
+  "join": {
+    "exact_rid_no_matches": 14876,
+    "horse_name_and_course_matched": true,
+    "c1_available": 7054,
+    "real_C1_available": 5838,
+    "C3_C4_available": 14876
+  },
+  "H018_flag": {
+    "horses": 203,
+    "races": 140,
+    "actual_top3": 10,
+    "closing_market_expected": 13.519532120937797,
+    "mean_closing_market_q": 0.06659868039870835,
+    "trajectories": {
+      "前→前": {
+        "n": 29,
+        "top3": 0,
+        "rate": 0.0,
+        "market_expected": 2.129263158550178,
+        "c3_to_c4_gain_mean": 0.10344827586206896
+      },
+      "前→後": {
+        "n": 7,
+        "top3": 0,
+        "rate": 0.0,
+        "market_expected": 0.43858216664541577,
+        "c3_to_c4_gain_mean": -2.0
+      },
+      "後→前": {
+        "n": 8,
+        "top3": 4,
+        "rate": 0.5,
+        "market_expected": 1.0230958949746278,
+        "c3_to_c4_gain_mean": 2.375
+      },
+      "後→後": {
+        "n": 159,
+        "top3": 6,
+        "rate": 0.03773584905660377,
+        "market_expected": 9.928590900767578,
+        "c3_to_c4_gain_mean": 0.1509433962264151
+      }
+    },
+    "by_year": {
+      "2024": {
+        "races": 356,
+        "horses": 5412,
+        "h018_flags": 80,
+        "flag_top3": 1,
+        "expected_by_final_market": 5.652744518191597,
+        "c3c4_push2_actual_rate": 0.10421286031042129
+      },
+      "2025": {
+        "races": 357,
+        "horses": 5413,
+        "h018_flags": 65,
+        "flag_top3": 4,
+        "expected_by_final_market": 4.079033571820515,
+        "c3c4_push2_actual_rate": 0.09606502863476815
+      },
+      "2026": {
+        "races": 264,
+        "horses": 4051,
+        "h018_flags": 58,
+        "flag_top3": 5,
+        "expected_by_final_market": 3.7877540309256843,
+        "c3c4_push2_actual_rate": 0.09479140952851148
+      }
+    }
+  },
+  "asof_history": {
+    "avg_available_history5": 4.621470825490723,
+    "fraction_history_ge3": 0.9237698305996236,
+    "mean_movement_prior": 0.014105107875513686,
+    "H018_flag_prior_stage_groups": {
+      "False": {
+        "n": 119,
+        "top3": 6,
+        "expected": 7.618603653765623,
+        "mean_move34": -0.033943014200058186,
+        "actually_c3_to_c4_rear_to_front": 3
+      },
+      "True": {
+        "n": 84,
+        "top3": 4,
+        "expected": 5.9009284671721725,
+        "mean_move34": 0.04350221868079011,
+        "actually_c3_to_c4_rear_to_front": 5
+      }
+    },
+    "group_split_threshold_2024_train_median": 0.013333333333333332
+  },
+  "models_2025_26_test": {
+    "baseline": {
+      "auc": 0.6288800812587875,
+      "brier": 0.08498981134481672,
+      "mean_pred": 0.10432724412210563,
+      "observed": 0.09551986475063398,
+      "coeff": {
+        "hist_n": 0.013626510041858478,
+        "p_zone1_joint": -0.25570393735119057,
+        "p_zone2_joint": 0.15019336704583114,
+        "p_zone3_joint": 0.2428463929780288,
+        "p_zone4_joint": 0.10239534242318306,
+        "front_pressure": 0.03841592005600169,
+        "prior_late": -0.19016290051944695,
+        "prior_hold": 0.04959168214685707
+      }
+    },
+    "plus_prior_stage": {
+      "auc": 0.6365198029526093,
+      "brier": 0.08508775199204165,
+      "mean_pred": 0.10315270248011249,
+      "observed": 0.09551986475063398,
+      "coeff": {
+        "hist_n": -0.006875359360241359,
+        "p_zone1_joint": -0.17300251106463835,
+        "p_zone2_joint": 0.1986639158076896,
+        "p_zone3_joint": 0.18108475977178937,
+        "p_zone4_joint": 0.01597570531286677,
+        "front_pressure": 0.1030628036561461,
+        "prior_late": -0.10959129380960882,
+        "prior_hold": 0.033676114708854614,
+        "hist_move34_mean": 0.041537154782199895,
+        "hist_push2_rate": 0.0862427512870929,
+        "hist_move34_sd": 0.019115655348133677,
+        "hist_c3c4_rescue_rate": -0.043038158873952743,
+        "hist_prev_move_last": 0.12364901203048911,
+        "hist_c3_mean": 0.2549432321060298,
+        "hist_prev3c_last": -0.005422515076110494
+      }
+    },
+    "refit_base": {
+      "horses": 9464,
+      "races": 621,
+      "brier": 0.1448731860403734,
+      "top3_hits": 693,
+      "coeff": {
+        "adjusted_finish_sensitivity": 1.000438559784681,
+        "hist_n": -0.009036759145156913
+      }
+    },
+    "add_stage": {
+      "horses": 9464,
+      "races": 621,
+      "brier": 0.1448963180580015,
+      "top3_hits": 676,
+      "coeff": {
+        "adjusted_finish_sensitivity": 0.9847713767744917,
+        "hist_n": 0.002320933698488024,
+        "hist_move34_mean": -0.010985148334357585,
+        "hist_push2_rate": -0.020048706446637397,
+        "hist_c3c4_rescue_rate": -0.09361056151258634,
+        "hist_c3_mean": -0.03806846105114797,
+        "hist_prev_move_last": 0.12885939040970779
+      }
+    },
+    "frozen_h018": {
+      "horses": 9464,
+      "races": 621,
+      "brier": 0.14493970247498775,
+      "top3_hits": 693
+    },
+    "final_market_retrospective": {
+      "horses": 9464,
+      "races": 621,
+      "brier": 0.13205229287494136,
+      "top3_hits": 842
+    },
+    "stage_v_refit_ci": {
+      "race_mean_gain": -2.3514218357829243e-05,
+      "ci95": [
+        -0.00039826904999977844,
+        0.00036099633116018834
+      ],
+      "races": 621
+    },
+    "stage_v_frozen_ci": {
+      "race_mean_gain": 7.936784247888964e-05,
+      "ci95": [
+        -0.0003385130004997403,
+        0.000494712194414901
+      ],
+      "races": 621
+    }
+  },
+  "data_limits": [
+    "C1 only 4corner race classes, C2 as earliest for some; these are PASSING ORDER not velocities",
+    "Individual horse 200m sectional pace/physiological reserve not observed",
+    "Older horse historic races are only those in provided umadete sample and incomplete in 2016–2023",
+    "H018 risk 203 chosen on prior explored 2024–26, so 203 subgroup results are descriptive, not new prospective test",
+    "Training 2024 & test 2025–26 are previously explored periods and do not furnish independent evidence",
+    "Closing odds used only retrospective benchmark, not predictive features",
+    "Actual current C3,C4,finish,3F excluded from all as-of predictor features",
+    "M3/P10/M4 exact runtime output parity not confirmed",
+    "No profit or betting EV conclusion"
+  ],
+  "production": "NO code or exclusion gate changes"
+}
