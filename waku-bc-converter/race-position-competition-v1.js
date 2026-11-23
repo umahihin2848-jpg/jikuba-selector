@@ -153,7 +153,7 @@ function render(){const c=context();if(!c)return;css();const signature=c.sig+'|'
   const grouped=groupPositionAudit(result);
   if(grouped?.ready){
    body+='<details class="rsarpcSub"><summary>4つの想定馬群｜前方・好位・中団・後方（研究用）</summary>'+
-    '<p class="rsarpcHint">スタート後の参考配置：既存の初位置仮想抽選を4グループに集計。各馬の数値は「その馬がこの馬群に入る仮想抽選割合」。実測で較正した確率ではなく、3角・4角の予測値でもありません。</p><div class="rsarpcGroupGrid">';
+    '<p class="rsarpcHint">初位置の参考配置：既存の初位置仮想抽選を4グループに集計。発走直後の実GPS位置ではなく、最初の通過地点に相当する位置の代理予測です。各馬の数値は「その馬がこの馬群に入る仮想抽選割合」。実測で較正した確率ではなく、3角・4角の予測値でもありません。</p><div class="rsarpcGroupGrid">';
    for(const group of grouped.groups){
     body+='<section class="rsarpcGroupCard"><div class="rsarpcGroupTitle">'+esc(group.label)+'｜'+group.seats+'頭</div>';
     for(const r of group.members){
