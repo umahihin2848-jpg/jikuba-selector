@@ -86,8 +86,8 @@ const lines = [
   const a=historical.find(x=>x.name==='A馬');
   assert.equal(a.nRecent,2,'five rows must mean distinct racing starts, not repeated copies');
   assert.equal(a.nAll,2,'history coverage also must exclude future starts');
-  const before=ctx.ShapeCore.summarize(horses,model,'2026-09-01').find(x=>x.name==='A馬');
-  assert.equal(before.nRecent,1,'same-day race is excluded');
+  const asOfPrior=ctx.ShapeCore.summarize(horses,model,'2026-09-01').find(x=>x.name==='A馬');
+  assert.equal(asOfPrior.nRecent,1,'same-day race is excluded');
   const absent=ctx.ShapeCore.summarize(horses,model,'');
   assert.equal(absent.every(x=>x.nRecent===0&&x.nAll===0),true,'no date must not silently use future history');
 
