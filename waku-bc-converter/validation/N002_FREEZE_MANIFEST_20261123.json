@@ -1,0 +1,50 @@
+{
+  "schema": "rsa-n002-model-freeze-manifest-v1",
+  "freeze_date_jst": "2026-11-23",
+  "strict_new_evaluation_earliest_date_jst": "2026-11-24",
+  "earlier_results_are_exploratory_not_independent": true,
+  "model_refitting_allowed_after_freeze": false,
+  "production_logic_changed": false,
+  "n001_real_data_full_pipeline_parity": "not_complete",
+  "models": {
+    "initial_position_rank_and_m3": {
+      "repo": "umahihin2848-jpg/jikuba-selector",
+      "ref": "main",
+      "path": "waku-bc-converter/race-position-competition-v1.js",
+      "git_blob_sha": "c62f07d3441d9e7f9e6c883ed58c2e2eb2a62b91",
+      "required_snapshot_schema": "rsa-rank-distribution-snapshot-v1",
+      "required_model_version": "race-position-competition-v1-20261123",
+      "source_versions": {
+        "queue": {"path": "waku-bc-converter/validated-queue-model-v1.js", "git_blob_sha": "fd1784b9a0332a82fdaddce3d96ebed3dbf53df2"},
+        "m3": {"path": "waku-bc-converter/finish600-simulator-v2.js", "git_blob_sha": "1f1178e3003b6162243ea7286a2d859325ff9d9a"}
+      },
+      "notes": "first recordable corner is not gate-exit GPS. saved M3 has rank, not calibrated Top3 probabilities"
+    },
+    "third_and_fourth_corner_groups": {
+      "repo": "umahihin2848-jpg/jikuba-selector",
+      "ref": "research/p3-70-corner-stage-groups-20261123",
+      "path": "waku-bc-converter/corner-group-shadow-v1.js",
+      "git_blob_sha": "9c1f8096b75de54d9233234a671eccd93577f517",
+      "coefficient_path": "waku-bc-converter/data/corner_group_research_model_v1.json",
+      "coefficient_git_blob_sha": "87dfe4f9ff31df69695650c97732178a679db101",
+      "snapshot_interface_path": "waku-bc-converter/corner-stage-three-preview-v1.js",
+      "snapshot_interface_git_blob_sha": "b1ef40a92085a488c14be4aab52bcee8dac5c1ac",
+      "required_snapshot_schema": "p3-71-three-stage-shadow-snapshot-v1",
+      "required_stage_model_version": "p3-70-20261123-a",
+      "required_parser_version": "target-csv-cache-p363-history-dedup-shadow",
+      "notes": "research PR #8 only; not in deployed main. Requires N001 data parity and manual actual saddlecloth numbers"
+    }
+  },
+  "evaluation": {
+    "target_classes": ["3win", "OP", "L", "G3", "G2", "G1"],
+    "field_size_min": 12,
+    "field_size_max": 18,
+    "real_outcome_import": "TARGET CP932 2026seiseki.csv format",
+    "race_identity": "date + venue + unique race_name if number missing; exact full field number+horse name",
+    "corner_labels": "TARGET columns 通過順3 and 通過順4; rank ties occupying adjacent seats soft-divided",
+    "metrics": ["first recorded corner rank MAE", "3C 4-category Brier", "4C 4-category Brier", "3C/4C same-race uniform-band baseline", "M3 top3 count of real Top3"],
+    "same_day_snapshot_requires_official_post_time": true,
+    "results_not_used_in_model_refit": true,
+    "reminder": "No signed external capture timestamp; reported time alone cannot prove pre-race status; N001 input parity is not yet passed."
+  }
+}
