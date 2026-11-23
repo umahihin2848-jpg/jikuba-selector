@@ -380,10 +380,16 @@
     {
       "id": "N002",
       "title": "unseen dates strictly after 2026-10-04 3C/4C+M3 prospective evaluation",
-      "state": "blocked_no_new_results_in_uploaded_csv",
-      "new_vs_prior": "untouched future race dates and immutable as-of forecasts",
-      "claim_limit": "performance only after features, odds and outcomes frozen before reviewing results",
-      "needed": "new 2026-10-05+ result files and trustworthy frozen pre-race prediction snapshots"
+      "state": "audit_code_ready_waiting_post_freeze_results_pre_race_json_and_N001",
+      "new_vs_prior": "Model frozen 2026-11-23; strict unknown period starts 2026-11-24. Prior historical 2026-10-05 to 2026-11-23 is not truly prospective.",
+      "claim_limit": "No new prediction accuracy result: supplied TARGET outcomes end 2026-10-04, no actual pre-race frozen snapshots. Research PR8 remains draft. Self-reported timestamps do not independently attest pre-race status.",
+      "needed": "New TARGET outcome CSV after 2026-11-23, immutable as-of position and PR8 research corner JSON, official scheduled start time for same-day captures, actual full-field number identity, N001 parity.",
+      "artifacts": [
+        "waku-bc-converter/validation/n002_forward_score.py",
+        "waku-bc-converter/validation/N002_FREEZE_MANIFEST_20261123.json",
+        "waku-bc-converter/validation/N002_DATA_PREFLIGHT_20261123.json",
+        "waku-bc-converter/validation/N002_FORWARD_EVALUATION_20261123.md"
+      ]
     }
   ]
 }
