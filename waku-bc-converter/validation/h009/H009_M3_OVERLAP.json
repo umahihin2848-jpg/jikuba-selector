@@ -1,0 +1,9 @@
+{
+  "races": 553,
+  "horses": 8454,
+  "generic_own_response_vs_m3_within_race_pearson": -0.5409970528884145,
+  "lap_conditioned_increment_vs_m3_within_race_pearson": -0.0416316908974162,
+  "generic_signal_SD": 0.10495552950551751,
+  "conditional_signal_SD": 0.006121706386013087,
+  "note": "M3 lower is better, own response higher better. Correlation is redundancy evidence, not causal attribution of M3 features or incremental performance proof."
+}
