@@ -83,7 +83,7 @@ function context(){const s=root.RSAFocusedThreeTabsState||{},q=root.ValidatedQue
  const seedSig=[...raceInfo,rows.map(r=>r.no+':'+r.name+':'+r.expectedRank+':'+r.validated).join('|')].join('~');
  const rem=root.Remaining600ValidatedState?.rows||[];
  const csvVersion=root.RSATargetCsvCache?.version||'unknown';
- const peerSig=rows.map(r=>r.no+':'+Number(q.byNo?.[String(r.no)]?.frontness5).toFixed(5)).join('|');
+ const peerSig=rows.map(r=>{const x=q.byNo?.[String(r.no)]||{};return r.no+':'+String(x.name||'')+':'+String(x.validated)+':'+String(x.hist_n)+':'+Number(x.frontness5).toFixed(5);}).join('|');
  const sig=seedSig+'|peer:'+peerSig+'|history:'+rows.map(r=>r.histGapSd+':'+r.histGapN+':'+r.histUnique5+':'+r.histDupRows5).join('|')+'|600:'+rem.map(r=>r.no+':'+r.name+':'+Number(r.pred).toFixed(5)).join('|')+'|csv:'+csvVersion;
  return{host,rows,sig,seedSig};
 }
