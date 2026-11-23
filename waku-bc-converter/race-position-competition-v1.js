@@ -67,7 +67,34 @@ function adjacentPairAudit(result){
      dataStatus:'研究用未較正：既存初位置Gumbelモデル内での仮定'};
  }).sort((a,b)=>a.modelExpectedRankGap-b.modelExpectedRankGap||Number(a.aNo)-Number(b.aNo));
 }
-root.RSARacePositionCompetitionCoreV1=Object.freeze({version:VERSION,simulate,check,hash,adjacentPairAudit});
+function groupPositionAudit(result){
+ if(!result?.ready||!Array.isArray(result.rows)||result.rows.length!==result.n||result.n<12||result.n>18)return null;
+ const n=result.n,cuts=[0,Math.ceil(n*.25),Math.ceil(n*.50),Math.ceil(n*.80),n];
+ const defs=[{id:'front',label:'前方'},{id:'good',label:'好位'},{id:'middle',label:'中団'},{id:'rear',label:'後方'}];
+ const ordered=[...result.rows].sort((a,b)=>a.meanRank-b.meanRank||Number(a.no)-Number(b.no));
+ const membership=new Map();
+ for(let j=0;j<4;j++)for(let i=cuts[j];i<cuts[j+1];i++)membership.set(String(ordered[i].no),j);
+ const rows=result.rows.map(r=>{
+  if(!Array.isArray(r.rankProbabilities)||r.rankProbabilities.length!==n)return null;
+  const probabilities=defs.map((d,j)=>r.rankProbabilities.slice(cuts[j],cuts[j+1]).reduce((s,x)=>s+x,0));
+  const slot=membership.get(String(r.no));
+  if(slot===undefined||!probabilities.every(x=>Number.isFinite(x)&&x>=0&&x<=1))return null;
+  return{no:r.no,name:r.name,expectedRank:r.expectedRank,simulatedMeanRank:r.meanRank,
+    representativeGroup:defs[slot].id,representativeGroupLabel:defs[slot].label,
+    representativeGroupShare:probabilities[slot],maxGroupShare:Math.max(...probabilities),
+    probabilities:Object.fromEntries(defs.map((d,i)=>[d.id,probabilities[i]]))};
+ });
+ if(rows.some(x=>!x))return null;
+ const groups=defs.map((d,i)=>({id:d.id,label:d.label,seats:cuts[i+1]-cuts[i],
+   expectedSeats:rows.reduce((s,r)=>s+r.probabilities[d.id],0),
+   members:rows.filter(r=>r.representativeGroup===d.id).sort((a,b)=>a.simulatedMeanRank-b.simulatedMeanRank)}));
+ if(groups.some(g=>g.members.length!==g.seats||Math.abs(g.expectedSeats-g.seats)>.015))return null;
+ return{ready:true,version:'p369-group-position-from-gumbel-v1',stage:'start_first_recorded_position',
+  calibrated:false,method:'Sum of existing 4096-trial uncalibrated rank marginals; representative groups from sorted simulated mean rank',
+  warning:'初位置の既存仮想順位から集計した研究用4区分。2023学習の新4分類器は使用していない。3角/4角の実測較正確率・横レーン・馬券予測ではない。',
+  cuts,groups,rows};
+}
+root.RSARacePositionCompetitionCoreV1=Object.freeze({version:VERSION,simulate,check,hash,adjacentPairAudit,groupPositionAudit});
 const doc=root.document;if(!doc?.createElement||!root.addEventListener)return;
 if(root.RSARacePositionCompetitionV1)return;
 const $=id=>doc.getElementById(id);
@@ -86,7 +113,12 @@ function css(){if($('rsarpcStyle'))return;const st=doc.createElement('style');st
  '.rsarpcBar>i{display:block;height:100%;background:#5ab59e;border-radius:8px}'+
  '.rsarpcQuiet{font-size:10px;color:#91aabb}'+
  '.rsarpcExport{margin:10px 0;padding:9px 12px;border:1px solid #5aa8a5;border-radius:9px;background:#0e3b48;color:#e1fffc;font-size:12px;font-weight:750;cursor:pointer;width:100%}'+
- '.rsarpcSub{margin:10px 0;border:1px solid #31576b;border-radius:9px;padding:8px}.rsarpcSub>summary{cursor:pointer;font-size:11px;font-weight:850}';doc.head.appendChild(st);}
+ '.rsarpcSub{margin:10px 0;border:1px solid #31576b;border-radius:9px;padding:8px}.rsarpcSub>summary{cursor:pointer;font-size:11px;font-weight:850}'+
+ '.rsarpcGroupGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:7px;margin:8px 0}'+
+ '.rsarpcGroupCard{background:#0b2936;border:1px solid #365c71;border-radius:9px;padding:8px;min-width:0}'+
+ '.rsarpcGroupTitle{color:#d5edf2;font-size:12px;font-weight:900;margin-bottom:5px}'+
+ '.rsarpcGroupHorse{padding:5px 0;border-top:1px solid #294353;font-size:11px;line-height:1.4}'+
+ '.rsarpcGroupHorse small{display:block;font-size:10px;color:#a6bfcb}';doc.head.appendChild(st);}
 function context(){const s=root.RSAFocusedThreeTabsState||{},q=root.ValidatedQueueState||{},f=root.Finish600State||{};
  if(s.active!=='formation'||!s.analysisReady||!q.ready||!f.ready||root.RSAFocusedThreeTabsV1?.dirty)return null;
  if(!/^(3勝|L|OP|G1|G2|G3)$/.test(String($('grade')?.value||'')))return null;
@@ -118,6 +150,21 @@ function render(){const c=context();if(!c)return;css();const signature=c.sig+'|'
    '<td>'+r.expectedRank.toFixed(1)+'番手</td><td>'+(100*r.frontShare).toFixed(0)+'%<div class="rsarpcBar"><i style="width:'+(100*r.frontShare).toFixed(1)+'%"></i></div><div class="rsarpcQuiet">中団 '+(100*r.middleShare).toFixed(0)+'%・後方 '+(100*r.rearShare).toFixed(0)+'%</div></td>'+
    '<td>'+r.rank10+'〜'+r.rank90+'位'+(r.fallbackCount?'<div class="rsarpcQuiet">前方に入れない試行：平均'+r.fallbackMeanRank.toFixed(1)+'番手／'+r.fallbackRank10+'〜'+r.fallbackRank90+'位</div>':'')+'</td></tr>';
   body+='</tbody></table>';
+  const grouped=groupPositionAudit(result);
+  if(grouped?.ready){
+   body+='<details class="rsarpcSub"><summary>4つの想定馬群｜前方・好位・中団・後方（研究用）</summary>'+
+    '<p class="rsarpcHint">スタート後の参考配置：既存の初位置仮想抽選を4グループに集計。各馬の数値は「その馬がこの馬群に入る仮想抽選割合」。実測で較正した確率ではなく、3角・4角の予測値でもありません。</p><div class="rsarpcGroupGrid">';
+   for(const group of grouped.groups){
+    body+='<section class="rsarpcGroupCard"><div class="rsarpcGroupTitle">'+esc(group.label)+'｜'+group.seats+'頭</div>';
+    for(const r of group.members){
+      const share=100*r.representativeGroupShare;
+      body+='<div class="rsarpcGroupHorse">'+esc(r.no)+'番 '+esc(r.name)+
+       '<small>所属仮割合 '+share.toFixed(0)+'%'+(share<50?'／近接・入替注意':'')+'</small></div>';
+    }
+    body+='</section>';
+   }
+   body+='</div><p class="rsarpcQuiet">4群の人数は頭数に応じ固定。仮想抽選の群別期待頭数も各席数に一致します。馬群内の前後順・内外レーンや騎手の進路判断は未確定です。</p></details>';
+  }else body+='<p class="rsarpcHint">4つの想定馬群：全頭の順位分布と人数の整合性が取れず表示を保留しました。</p>';
   const peer=peerDiagnostics(result.rows);
   if(peer?.ready){
    body+='<details class="rsarpcSub"><summary>同レースの先行競争｜内外・近傍の相手（研究用）</summary>'+
@@ -204,7 +251,7 @@ function exportSnapshot(){
  const meta={date:$('raceDate')?.value||'',raceName:$('raceName')?.value||'',venue:$('venue')?.value||'',surface:$('surface')?.value||'',distance:Number($('distance')?.value),grade:$('grade')?.value||'',field:result.n};
  const snapshot={schema:'rsa-rank-distribution-snapshot-v1',capturedAt:new Date().toISOString(),modelVersion:VERSION,
   modelInput:'ValidatedQueueState.expectedRank',calibrated:false,usage:'研究用仮想分布。馬券期待値・本番M3へ転用不可',
-  metadata:meta,sourceVersions:{queue:root.ValidatedQueueState?.version||null,remaining600:root.Remaining600ValidatedState?.version||null,m3:root.Finish600State?.version||null,csvParser:root.RSATargetCsvCache?.version||null,analysisGeneration:root.Finish600State?.generation??null},gap80ResearchCalibration:root.RSAPosition600BandV1?.meta||null,peerPressureResearch:peerDiagnostics(result.rows),adjacentPairResearch:adjacentPairAudit(result),simulation:{method:'Gumbel whole-field rank permutation',iterations:result.count,dispersion:result.dispersion,
+  metadata:meta,sourceVersions:{queue:root.ValidatedQueueState?.version||null,remaining600:root.Remaining600ValidatedState?.version||null,m3:root.Finish600State?.version||null,csvParser:root.RSATargetCsvCache?.version||null,analysisGeneration:root.Finish600State?.generation??null},gap80ResearchCalibration:root.RSAPosition600BandV1?.meta||null,peerPressureResearch:peerDiagnostics(result.rows),adjacentPairResearch:adjacentPairAudit(result),fourGroupPositionResearch:groupPositionAudit(result),simulation:{method:'Gumbel whole-field rank permutation',iterations:result.count,dispersion:result.dispersion,
    frontSeats:result.k,middleEnd:result.kMiddle,seed:hash(c.seedSig)},
   runners:result.rows.map(r=>({no:r.no,name:r.name,inputExpectedRank:r.expectedRank,simulatedExpectedRank:r.meanRank,historyGapSdSeconds:r.histGapSd,historyGapRaceCount:r.histGapN,historyDistinctRacesLast5:r.histUnique5,historyDuplicateRowsLast5:r.histDupRows5,liveModelReference:liveReference(r.no,r.name),gap80ResearchBand:gapBand(r.no,r.name,result.n),
    rankProbabilities:r.rankProbabilities,frontShare:r.frontShare,middleShare:r.middleShare,rearShare:r.rearShare,
