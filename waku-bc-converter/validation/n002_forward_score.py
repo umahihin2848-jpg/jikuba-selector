@@ -119,39 +119,66 @@ def validate_race(rows, meta):
     return rows, None
 
 
-def tie_soft_labels(rows, column):
-    """Convert equal printed corner positions to fractional seat-occupation.
+def corner_rank_shares(rows, column):
+    """N-entry distributions over ranked seats, tolerating competition-rank ties.
 
-    For a tie at raw rank r spanning t horses, each gets 1/t of seats r..r+t-1.
-    Fail closed when the printed ranks cannot be reconciled with N ranked seats.
+    e.g. 1,1,3 gives both horses equal mass on seats 1 and 2.
+    A missing corner or inconsistent printed ranking holds the whole stage.
     """
-    n = len(rows)
-    counts = defaultdict(list)
+    n=len(rows)
+    counts=defaultdict(list)
     for row in rows:
-        k = nint(row.get(column))
+        k=nint(row.get(column))
         if k is None or k < 1 or k > n:
             return None
         counts[k].append(str(nint(row['馬番'])))
-    occupied = []
-    for k, names in sorted(counts.items()):
-        occupied.append((k,len(names)))
-    expected = 1
-    for rank, size in occupied:
+    expected=1
+    out={}
+    for rank,nos in sorted(counts.items()):
         if rank != expected:
             return None
-        expected += size
-    if expected != n+1:
-        return None
-    cuts = [0, math.ceil(n*.25), math.ceil(n*.5), math.ceil(n*.8), n]
-    out={}
-    for rank, nos in counts.items():
-        v = [0.0]*4
-        for seat in range(rank,rank+len(nos)):
-            idx = next(i for i in range(4) if cuts[i] < seat <= cuts[i+1])
-            v[idx] += 1/len(nos)
         for no in nos:
+            v=[0.0]*n
+            for seat in range(rank,rank+len(nos)):
+                v[seat-1]=1/len(nos)
             out[no]=v
+        expected+=len(nos)
+    return out if len(out)==n and expected==n+1 else None
+
+
+def tie_soft_labels(rows, column):
+    shares=corner_rank_shares(rows,column)
+    if shares is None:return None
+    n=len(rows)
+    cuts=[0, math.ceil(n*.25), math.ceil(n*.5), math.ceil(n*.8), n]
+    out={}
+    for no,v in shares.items():
+        out[no]=[sum(v[cuts[i]:cuts[i+1]]) for i in range(4)]
     return out
+
+
+def first_common_corner(rows):
+    # Avoid silently scoring horse A at its 2C against horse B at 3C.
+    for k in range(1,5):
+        col=f'通過順{k}'
+        shares=corner_rank_shares(rows,col)
+        if shares is not None:
+            return col,shares
+    return None,None
+
+
+def rank_rps(p,truth):
+    n=len(truth)
+    if not isinstance(p,list) or len(p)!=n:return None
+    try:
+        z=[float(v) for v in p]
+    except (TypeError,ValueError):return None
+    if any(not math.isfinite(v) or v<0 or v>1 for v in z) or abs(sum(z)-1)>1e-5:return None
+    cum_p=0;cum_t=0;ss=0
+    for k in range(n-1):
+        cum_p+=z[k];cum_t+=truth[k]
+        ss+=(cum_p-cum_t)**2
+    return ss/(n-1)
 
 
 def match_roster(pred_rows, actual_rows, no_field='no'):
@@ -247,18 +274,29 @@ def decode_rank(snap, rows):
     error=match_roster(horses,rows)
     if error:return error
     truths={str(nint(r['馬番'])):r for r in rows}
-    report={'status':'evaluated','horses':len(horses),'first_corner_mae_sum':0.0,'first_corner_mae_n':0,'m3_top3_correct':0,'m3_expected_count':3,'m3_available':False,'m3_top3_n':0,'notes':['最初に記録されたコーナーは発馬直後の実測ではありません']}
+    stage,actual_dist=first_common_corner(rows)
+    report={'status':'evaluated','horses':len(horses),'first_common_corner':stage,
+        'first_corner_mae_sum':0.0,'first_corner_mae_n':0,
+        'first_corner_rps_sum':0.0,'first_corner_rps_n':0,
+        'm3_top3_correct':0,'m3_expected_count':3,'m3_available':False,'m3_top3_n':0,
+        'notes':['初角とは全頭共通の最初の有効通過角。発馬直後GPSではありません']}
     ranks=[]
     for p in horses:
-        no=str(nint(p['no']));truth=truths[no];observed=next((i for k in range(1,5) if (i:=nint(truth.get(f'通過順{k}'))) is not None and i>0),None)
-        pred=p.get('simulatedExpectedRank')
-        if observed and pred is not None:
-            try:
-                pred=float(pred)
-                if math.isfinite(pred) and 1<=pred<=len(horses):
-                    report['first_corner_mae_sum']+=abs(pred-observed)
-                    report['first_corner_mae_n']+=1
-            except (ValueError,TypeError):pass
+        no=str(nint(p['no']));truth=truths[no]
+        if actual_dist is not None:
+            observed=sum((i+1)*v for i,v in enumerate(actual_dist[no]))
+            pred=p.get('simulatedExpectedRank')
+            if pred is not None:
+                try:
+                    pred=float(pred)
+                    if math.isfinite(pred) and 1<=pred<=len(horses):
+                        report['first_corner_mae_sum']+=abs(pred-observed)
+                        report['first_corner_mae_n']+=1
+                except (ValueError,TypeError):pass
+            rps=rank_rps(p.get('rankProbabilities'),actual_dist[no])
+            if rps is not None:
+                report['first_corner_rps_sum']+=rps
+                report['first_corner_rps_n']+=1
         m3=((p.get('liveModelReference') or {}).get('m3') or {}).get('rank')
         if m3 is not None:
             try:
@@ -275,7 +313,9 @@ def decode_rank(snap, rows):
             report['notes'].append('M3同順位があり上位3頭を厳密選定できない')
     else:
         report['notes'].append('M3全頭順位欠損')
-    if report['first_corner_mae_n'] == 0 and not report['m3_available']:
+    if actual_dist is None:
+        report['notes'].append('全頭共通の有効コーナー順位なし。MAE/RPS計算を保留')
+    if report['first_corner_mae_n']==0 and not report['m3_available']:
         return fail('rank_targets_unavailable','初位置の数値とM3順位がありません')
     return report
 
@@ -347,8 +387,8 @@ def score(results, snapshot_paths, min_date=MIN_DATE, official_schedule=None):
             held.append({'file':Path(file).name,'key':k,**fail('duplicate_prediction','同一レースに同形式の予測が複数。どちらも保留')})
             continue
         accepted[k][kind]={'snapshot':obj,'sha256':hashlib.sha256(raw).hexdigest(),'file':Path(file).name}
-    summary={'n_races':0,'n_snapshots':found,'n_results_races':len(index),'eligible_target_races_after_freeze':0,'first_corner_mae':None,'first_corner_n':0,'m3_top3_hits':None,'m3_races':0,'c3_brier4':None,'c4_brier4':None,'c3_uniform_baseline_brier4':None,'c4_uniform_baseline_brier4':None,'c3_races':0,'c4_races':0,'held_items':0,'historical_eligible_races_before_freeze':0,'result_earliest_date':min((k[0] for k in index),default=None),'result_latest_date':max((k[0] for k in index),default=None)}
-    total={'init_sum':0.0,'init_n':0,'m3_hits':0,'m3_n':0,'c3_sum':0,'c3_n':0,'c3_base_sum':0,'c4_sum':0,'c4_n':0,'c4_base_sum':0}
+    summary={'n_races':0,'n_snapshots':found,'n_results_races':len(index),'eligible_target_races_after_freeze':0,'first_corner_mae':None,'first_corner_n':0,'first_corner_rps':None,'first_corner_rps_n':0,'m3_top3_hits':None,'m3_races':0,'c3_brier4':None,'c4_brier4':None,'c3_uniform_baseline_brier4':None,'c4_uniform_baseline_brier4':None,'c3_races':0,'c4_races':0,'held_items':0,'historical_eligible_races_before_freeze':0,'result_earliest_date':min((k[0] for k in index),default=None),'result_latest_date':max((k[0] for k in index),default=None)}
+    total={'init_sum':0.0,'init_n':0,'init_rps_sum':0.0,'init_rps_n':0,'m3_hits':0,'m3_n':0,'c3_sum':0,'c3_n':0,'c3_base_sum':0,'c4_sum':0,'c4_n':0,'c4_base_sum':0}
     for k,rr in index.items():
         try:d=date_string(k[0])
         except ValueError:continue
@@ -372,7 +412,7 @@ def score(results, snapshot_paths, min_date=MIN_DATE, official_schedule=None):
                 held.append({'file':item['file'],'key':key,**x});continue
             present[kind]={'file':item['file'],'sha256':item['sha256'],'metrics':x}
             if kind=='initial_and_m3':
-                total['init_sum']+=x['first_corner_mae_sum'];total['init_n']+=x['first_corner_mae_n']
+                total['init_sum']+=x['first_corner_mae_sum'];total['init_n']+=x['first_corner_mae_n'];total['init_rps_sum']+=x['first_corner_rps_sum'];total['init_rps_n']+=x['first_corner_rps_n']
                 if x['m3_available']:
                     total['m3_hits']+=x['m3_top3_correct'];total['m3_n']+=1
             else:
@@ -385,6 +425,7 @@ def score(results, snapshot_paths, min_date=MIN_DATE, official_schedule=None):
         if present:race_rows.append({'race':key,'snapshots':present})
     summary['n_races']=len(race_rows)
     summary['first_corner_n']=total['init_n'];summary['first_corner_mae']=total['init_sum']/total['init_n'] if total['init_n'] else None
+    summary['first_corner_rps_n']=total['init_rps_n'];summary['first_corner_rps']=total['init_rps_sum']/total['init_rps_n'] if total['init_rps_n'] else None
     summary['m3_races']=total['m3_n'];summary['m3_top3_hits']=total['m3_hits'] if total['m3_n'] else None
     summary['c3_brier4']=total['c3_sum']/total['c3_n'] if total['c3_n'] else None
     summary['c4_brier4']=total['c4_sum']/total['c4_n'] if total['c4_n'] else None
