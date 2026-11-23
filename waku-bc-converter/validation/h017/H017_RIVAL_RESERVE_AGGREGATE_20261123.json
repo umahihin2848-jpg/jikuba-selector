@@ -1,0 +1,64 @@
+{
+  "study": "H017B rival front hypothetical staying power, strictly as-of",
+  "features": [
+    "rival_front_hold",
+    "rival_front_fade"
+  ],
+  "comparison": {
+    "direct_resilience_vs_direct_with_rival_reserve": {
+      "races": 977,
+      "horses": 14876,
+      "before_brier": 0.14399811310455915,
+      "after_brier": 0.14390942718090732,
+      "race_mean_gain": 9.058031210927101e-05,
+      "ci95": [
+        -1.0458190031467833e-05,
+        0.0001910607380647675
+      ],
+      "direct_resilience_hits": 1104,
+      "direct_with_rival_reserve_hits": 1113
+    },
+    "four_zone_resilience_vs_four_zone_with_rival_reserve": {
+      "races": 977,
+      "horses": 14876,
+      "before_brier": 0.14420984445771554,
+      "after_brier": 0.1440991088790996,
+      "race_mean_gain": 0.0001119182350156806,
+      "ci95": [
+        -3.270277036113361e-05,
+        0.00025626923533977853
+      ],
+      "four_zone_resilience_hits": 1117,
+      "four_zone_with_rival_reserve_hits": 1113
+    }
+  },
+  "year": {
+    "2024": {
+      "direct_resilience": 0.1422978138429062,
+      "direct_with_rival_reserve": 0.14214429005767157,
+      "four_zone_resilience": 0.14273650094270537,
+      "four_zone_with_rival_reserve": 0.14256022399407559
+    },
+    "2025": {
+      "direct_resilience": 0.1448875157734368,
+      "direct_with_rival_reserve": 0.14481304765230388,
+      "four_zone_resilience": 0.14484682301435745,
+      "four_zone_with_rival_reserve": 0.1448343562950008
+    },
+    "2026": {
+      "direct_resilience": 0.145081224177734,
+      "direct_with_rival_reserve": 0.14506016144387512,
+      "four_zone_resilience": 0.14532704272385527,
+      "four_zone_with_rival_reserve": 0.14517256006040719
+    }
+  },
+  "zone_stage_prediction_change_mean_abs": 0.005070071403890916,
+  "limitations": [
+    "historical exploration only; no live M4 input",
+    "front_intent from past4C, not direct first-turn sprint",
+    "past front hold/fade may proxy class/abilities rather than physiological stamina",
+    "as-of rival features exclude horse own contribution and target actual pace/finish",
+    "No proof of live betting EV"
+  ],
+  "lookahead_test": "PASS outcome swap under frozen model"
+}
