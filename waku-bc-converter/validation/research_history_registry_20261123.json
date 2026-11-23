@@ -1,7 +1,7 @@
 {
   "schema": "rsa-research-history-registry-v1",
   "created_on": "2026-11-23",
-  "entry_count": 49,
+  "entry_count": 51,
   "scope": "review of available GitHub docs, PR descriptions, archived conversation and supplied source files",
   "not_exhaustive_of_private_unretrieved_attachments": true,
   "source_text_sha256": "9521c4061a015341e658d434fdb70768800091499fc96d3b853a708e6c76fb16",
@@ -566,6 +566,29 @@
       "source": "validation/h011/H011_REPORT_20261123.md",
       "aggregate": "validation/h011/H011_PUBLIC_AGGREGATE.json",
       "dedupKey": "H011|turf Tokyo Nakayama1600/1800/2000|observed4C finish mechanism and asof prev5 4C AUC|market/M3 shadow independent increment"
+    },
+    {
+      "id": "H012",
+      "title": "Nationwide 87 course × actual 4C stage finishability and as-of 4C back-half classifier",
+      "population": "2016-2026/10/04 JRA flat 3win+ 12-18 horses, 3566 strict lap&4C full-field races/54383 horses, 87 venue+surface+distance profiles; 2019-23 fit1717R/26322, 2024-26 test990R/15089",
+      "new_vs_prior": "H011 covered Tokyo/Nakayama 479R; H012 extends all observed 87 conditions, 200m pace shape and nationwide pre-race 4C classifier",
+      "results": "2019-23 training and 2024-26 historical split: course+gate 4C rear prediction AUC .507/Brier .24843 vs +past5 distinct same-surface 4C AUC .756/Brier .19974. 2016-20 versus21-26 course rear finish pattern correlation .525, 54 sufficiently represented conditions; actual rear 4C is after-race target only",
+      "status": "HISTORIC_DIAGNOSTIC_COMPLETE_NO_BUY_ADOPTION",
+      "caveats": "Test 2024-26 previously mined, history coverage train40% vs test98%; course rate descriptive not individual ticket profitability",
+      "source": "validation/h012/H012_REPORT_20261123.md",
+      "dedupKey": "H012|nationwide 87 course actual 4C finishability + asof past5 rear forecast|2016-26 split"
+    },
+    {
+      "id": "H013",
+      "title": "Per-course 4C danger rank bands and extraction of horses with high strictly as-of probability of entering danger zone",
+      "population": "H012 3566R/54383 full field; course zones trained on 2016-23 2576R; pre-race 4C Logistic trained 2019-23; test 2024-26/10/04 990R/15089 horses",
+      "new_vs_prior": "H012 did not build course-specific last25/last50% risk zones or audit practical risk flags against actual market success; H013 builds 87*4 observed bands and predetermined 70% predicted late position classifier",
+      "results": "Using 2016-23 for zone thresholds, 11 courses rear-half and 4 courses last-quartile dangers, remaining 72 no qualified threshold. In 2024-26 actual danger positions 1706 horses 147 top3 vs 251.6 expected from final-market proxy, but actual 4C is postrace. As-of predicted pback>=.7 and severe-course market ratio<=.8 flags 598 horses, 61 top3 vs 72.71 market expected, 95% race bootstrap residual [-24.63,+2.29]. Strong market subset q>=.15 144 horses, 40 top3 vs expected41.02, making automatic exclusion unjustified.",
+      "status": "RESEARCH_ONLY_POSITION_RISK_FLAG_NO_AUTOMATIC_EXCLUSION",
+      "safety_guard": "Odds/final ranking/current true4C are retrospective evaluation only; no live horse list for upcoming race unless today's entrants provided; H013 private horse list in local ZIP only, not public GitHub",
+      "caveats": "Coefficients not official Ability C/M3 model, historical years reused, win market final odds cannot be bought as T-15, rear result is association not causal proof, pre-race full 4C rank distribution not modeled",
+      "source": "validation/h013/H013_REPORT_20261123.md",
+      "dedupKey": "H013|historical 4C 4bands and percourse danger line last50/25%|2016-23 train 2024-26 test|past5 pback>=.7 risk-screen market-relative audit"
     }
   ],
   "new_protocols": [
@@ -664,11 +687,21 @@
     {
       "id": "H012",
       "title": "History-only two-stage course suitability: 3C->4C position formation and 4C->finish conditional chance, evaluated before production",
-      "state": "concept_after_H011_no_production_work",
+      "state": "H012_complete_H013_risk_screener_tested_HOLD",
       "new_vs_prior": "H011 measured stage mechanism and as-of 4C propensity, but finish transfer conditional on pre-race forecast pace and observed old 3F strength is not separately fitted; do not repeat venue label or H010 static correction",
       "needed": "N001 corrected 5-unique prior inputs; existing course geometry DB, historical full-lap distributions; official P10/3C4C/M3 input parity; historical episodes with strict separate model split",
       "claim_limit": "Race-current 4C and current full laps used as targets/diagnostics only; no pre-race leakage, no automatic betting recommendation or guaranteed improvement",
-      "time_requirement": "Can run on already provided past races; user explicitly prefers present retrospective mechanistic investigation rather than waiting for future races."
+      "time_requirement": "Can run on already provided past races; user explicitly prefers present retrospective mechanistic investigation rather than waiting for future races.",
+      "findings": "H012 all 87 course mechanisms and 4C location, H013 15 course danger zones; 598 past-only screen flags still 61 top3 and strong group 40/144 vs market expected41.02",
+      "report": "validation/h013/H013_REPORT_20261123.md"
+    },
+    {
+      "id": "H014",
+      "title": "Four-bin/full-field as-of 4C rank distribution with conditional ability-to-reach, exact stagewise calibration",
+      "state": "PROPOSED_NOT_STARTED",
+      "new_vs_prior": "H013 only predicts rear half and maps to observed 4C zone, not actual 4-band pre-race probability; high-q flags not value-relevant",
+      "needed": "N001 strict history de-dup & official stage model parity, 3C4C transitions, current race as-of pace scenarios only, no postrace 4C as feature",
+      "claim_limit": "No auto-delete of win or top3 prospective candidates without showing risk differential beyond existing Ability/M3 and market baseline."
     }
   ]
 }
