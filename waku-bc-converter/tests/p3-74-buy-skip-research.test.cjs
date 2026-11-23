@@ -1,6 +1,6 @@
 'use strict';
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
-const c={},source=fs.readFileSync(path.join(__dirname,'../waku-bc-converter/purchase-audit-core-v1.js'),'utf8');vm.runInNewContext(source,c);const engine=c.RSAPurchaseAuditCoreV1;
+const c={},source=fs.readFileSync(path.join(__dirname,'../purchase-audit-core-v1.js'),'utf8');vm.runInNewContext(source,c);const engine=c.RSAPurchaseAuditCoreV1;
 const order=q=>q.map((no,i)=>({no:String(no),name:'Synthetic'+no,finishRank:i+1}));
 const ability=Array.from({length:12},(_,i)=>({no:String(i+1),name:'Synthetic'+(i+1),abilityRank:i+1,abilityTieEnd:i+1,histN:5}));
 const position=ability.map((x,i)=>({no:x.no,name:x.name,p10:i===2?.05:.2+i*.02}));
