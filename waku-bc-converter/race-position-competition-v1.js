@@ -72,7 +72,8 @@ function css(){if($('rsarpcStyle'))return;const st=doc.createElement('style');st
  '.rsarpcTable th{font-size:10px;color:#aac2d0}.rsarpcBar{height:6px;border-radius:8px;background:#254459;margin-top:3px;overflow:hidden}'+
  '.rsarpcBar>i{display:block;height:100%;background:#5ab59e;border-radius:8px}'+
  '.rsarpcQuiet{font-size:10px;color:#91aabb}'+
- '.rsarpcExport{margin:10px 0;padding:9px 12px;border:1px solid #5aa8a5;border-radius:9px;background:#0e3b48;color:#e1fffc;font-size:12px;font-weight:750;cursor:pointer;width:100%}';doc.head.appendChild(st);}
+ '.rsarpcExport{margin:10px 0;padding:9px 12px;border:1px solid #5aa8a5;border-radius:9px;background:#0e3b48;color:#e1fffc;font-size:12px;font-weight:750;cursor:pointer;width:100%}'+
+ '.rsarpcSub{margin:10px 0;border:1px solid #31576b;border-radius:9px;padding:8px}.rsarpcSub>summary{cursor:pointer;font-size:11px;font-weight:850}';doc.head.appendChild(st);}
 function context(){const s=root.RSAFocusedThreeTabsState||{},q=root.ValidatedQueueState||{},f=root.Finish600State||{};
  if(s.active!=='formation'||!s.analysisReady||!q.ready||!f.ready||root.RSAFocusedThreeTabsV1?.dirty)return null;
  if(!/^(3勝|L|OP|G1|G2|G3)$/.test(String($('grade')?.value||'')))return null;
@@ -80,7 +81,9 @@ function context(){const s=root.RSAFocusedThreeTabsState||{},q=root.ValidatedQue
  const rows=fr.map(r=>{const x=q.byNo?.[String(r.no)]||{};return{no:r.no,name:r.name,expectedRank:x.expectedRank,validated:Boolean(x.validated),histGapSd:r.x?.hist_gap_sd,histGapN:r.x?.hist_gap_n,histUnique5:r.x?.hist_unique_races5,histDupRows5:r.x?.hist_duplicate_rows5};});
  const raceInfo=[$('raceDate')?.value,$('venue')?.value,$('raceName')?.value,$('surface')?.value,$('distance')?.value,$('grade')?.value];
  const seedSig=[...raceInfo,rows.map(r=>r.no+':'+r.name+':'+r.expectedRank+':'+r.validated).join('|')].join('~');
- const sig=seedSig+'|history:'+rows.map(r=>r.histGapSd+':'+r.histGapN+':'+r.histUnique5+':'+r.histDupRows5).join('|');
+ const rem=root.Remaining600ValidatedState?.rows||[];
+ const csvVersion=root.RSATargetCsvCache?.version||'unknown';
+ const sig=seedSig+'|history:'+rows.map(r=>r.histGapSd+':'+r.histGapN+':'+r.histUnique5+':'+r.histDupRows5).join('|')+'|600:'+rem.map(r=>r.no+':'+r.name+':'+Number(r.pred).toFixed(5)).join('|')+'|csv:'+csvVersion;
  return{host,rows,sig,seedSig};
 }
 function render(){const c=context();if(!c)return;css();const signature=c.sig+'|'+analysisVersion;let el=$('rsarpcPanel');if(el&&el.parentElement===c.host&&signature===last)return;last=signature;
@@ -100,12 +103,33 @@ function render(){const c=context();if(!c)return;css();const signature=c.sig+'|'
   for(const r of [...result.rows].sort((a,b)=>b.frontShare-a.frontShare))body+='<tr><td>'+esc(r.no)+'番 '+esc(r.name)+(Number.isFinite(r.histGapSd)&&r.histGapN>=2?'<div class="rsarpcQuiet">過去位置SD '+r.histGapSd.toFixed(2)+'秒／'+r.histGapN+'行</div>':'<div class="rsarpcQuiet">過去位置SD —</div>')+(Number.isInteger(r.histUnique5)?'<div class="rsarpcQuiet">直近履歴：'+r.histUnique5+'レース／'+r.histGapN+'行'+(r.histDupRows5>0?'（重複あり）':'')+'</div>':'')+'</td>'+
    '<td>'+r.expectedRank.toFixed(1)+'番手</td><td>'+(100*r.frontShare).toFixed(0)+'%<div class="rsarpcBar"><i style="width:'+(100*r.frontShare).toFixed(1)+'%"></i></div><div class="rsarpcQuiet">中団 '+(100*r.middleShare).toFixed(0)+'%・後方 '+(100*r.rearShare).toFixed(0)+'%</div></td>'+
    '<td>'+r.rank10+'〜'+r.rank90+'位'+(r.fallbackCount?'<div class="rsarpcQuiet">前方に入れない試行：平均'+r.fallbackMeanRank.toFixed(1)+'番手／'+r.fallbackRank10+'〜'+r.fallbackRank90+'位</div>':'')+'</td></tr>';
+  const gapEntries=result.rows.map(r=>({r,band:gapBand(r.no,r.name,result.n)}));
+  if(gapEntries.length===result.n&&gapEntries.every(x=>x.band?.ready)){
+   const mode=gapEntries[0].band.mode;
+   const cov=100*gapEntries[0].band.validationCoverage;
+   body+='<details class="rsarpcSub"><summary>残り600mの予測位置と80%参考範囲（全頭）</summary>'+
+     '<p class="rsarpcHint">2025年の実測誤差から設定。2026年の'+(mode==='legacy'?'現行':'重複除去')+'方式の検証集団で捕捉率'+cov.toFixed(1)+'%（111レース・1667頭）。発走前の確率保証ではありません。後方ほど幅が大きくなります。</p>'+
+     '<table class="rsarpcTable"><thead><tr><th>馬</th><th>残600m予測</th><th>80%参考範囲</th></tr></thead><tbody>';
+   for(const {r,band:b} of gapEntries.sort((a,b)=>a.band.point-b.band.point))
+    body+='<tr><td>'+esc(r.no)+'番 '+esc(r.name)+'</td><td>'+b.point.toFixed(2)+'秒差</td><td>'+b.low.toFixed(2)+'〜'+b.high.toFixed(2)+'秒</td></tr>';
+   body+='</tbody></table><p class="rsarpcQuiet">先頭からの遅れ秒数の研究用範囲。初位置の順位幅とは異なり、M3・軸/相手・馬券評価には使いません。</p></details>';
+  }else{
+   body+='<p class="rsarpcHint">残600mの80%参考範囲：計算状態・馬番/馬名・履歴変換版の整合を確認できないため非表示です。</p>';
+  }
   body+='</tbody></table><p class="rsarpcQuiet">全馬で前方'+result.totalFrontShare.toFixed(0)+'枠／中団'+result.totalMiddleShare.toFixed(0)+'枠／後方'+result.totalRearShare.toFixed(0)+'枠（整合性チェック）。これは実測で較正した確率ではありません。</p>'+
    '<button id="rsarpcExport" type="button" class="rsarpcExport">全頭順位・M3計算入力をJSONで保存（研究用）</button>'+
    '<p class="rsarpcQuiet">発走前に保存すると、次走の実際の通過順位との事後比較に使えます。作成時刻は端末上の時刻で、発走前であることを公式に保証する記録ではありません。</p>';
  }
  body+='<p class="rsarpcMini">研究のみ：Ability、M3、P10、公式軸・相手、オッズ、BUY/PASSを変更しません。枠の確定馬番とTARGET仮番号の照合が必要です。</p></div>';
  el.innerHTML='<summary>全頭の位置争奪シミュレーション｜研究用・未較正</summary>'+body;
+}
+function gapBand(no,name,fieldSize){
+ const model=root.RSAPosition600BandV1,rem=root.Remaining600ValidatedState,fin=root.Finish600State;
+ if(!model?.compute||!rem?.ready||!fin?.ready)return null;
+ const same=r=>String(r?.no)===String(no)&&String(r?.name||'')===String(name||'');
+ const a=rem.rows?.find(same),b=fin.rows?.find(same);
+ if(!a||!b)return null;
+ return model.compute(a.pred,root.RSATargetCsvCache?.version,rem.version,fieldSize);
 }
 function liveReference(no,name){
  const id=String(no),eq=(x)=>String(x?.no)===id&&String(x?.name||'')===String(name||'');
@@ -126,9 +150,9 @@ function exportSnapshot(){
  const meta={date:$('raceDate')?.value||'',raceName:$('raceName')?.value||'',venue:$('venue')?.value||'',surface:$('surface')?.value||'',distance:Number($('distance')?.value),grade:$('grade')?.value||'',field:result.n};
  const snapshot={schema:'rsa-rank-distribution-snapshot-v1',capturedAt:new Date().toISOString(),modelVersion:VERSION,
   modelInput:'ValidatedQueueState.expectedRank',calibrated:false,usage:'研究用仮想分布。馬券期待値・本番M3へ転用不可',
-  metadata:meta,sourceVersions:{queue:root.ValidatedQueueState?.version||null,remaining600:root.Remaining600ValidatedState?.version||null,m3:root.Finish600State?.version||null,analysisGeneration:root.Finish600State?.generation??null},simulation:{method:'Gumbel whole-field rank permutation',iterations:result.count,dispersion:result.dispersion,
+  metadata:meta,sourceVersions:{queue:root.ValidatedQueueState?.version||null,remaining600:root.Remaining600ValidatedState?.version||null,m3:root.Finish600State?.version||null,csvParser:root.RSATargetCsvCache?.version||null,analysisGeneration:root.Finish600State?.generation??null},gap80ResearchCalibration:root.RSAPosition600BandV1?.meta||null,simulation:{method:'Gumbel whole-field rank permutation',iterations:result.count,dispersion:result.dispersion,
    frontSeats:result.k,middleEnd:result.kMiddle,seed:hash(c.seedSig)},
-  runners:result.rows.map(r=>({no:r.no,name:r.name,inputExpectedRank:r.expectedRank,simulatedExpectedRank:r.meanRank,historyGapSdSeconds:r.histGapSd,historyGapRaceCount:r.histGapN,historyDistinctRacesLast5:r.histUnique5,historyDuplicateRowsLast5:r.histDupRows5,liveModelReference:liveReference(r.no,r.name),
+  runners:result.rows.map(r=>({no:r.no,name:r.name,inputExpectedRank:r.expectedRank,simulatedExpectedRank:r.meanRank,historyGapSdSeconds:r.histGapSd,historyGapRaceCount:r.histGapN,historyDistinctRacesLast5:r.histUnique5,historyDuplicateRowsLast5:r.histDupRows5,liveModelReference:liveReference(r.no,r.name),gap80ResearchBand:gapBand(r.no,r.name,result.n),
    rankProbabilities:r.rankProbabilities,frontShare:r.frontShare,middleShare:r.middleShare,rearShare:r.rearShare,
    interval10to90:[r.rank10,r.rank90],ifNotFront:{meanRank:r.fallbackMeanRank,interval10to90:[r.fallbackRank10,r.fallbackRank90]}}))};
  const data=JSON.stringify(snapshot,null,2), blob=new root.Blob([data],{type:'application/json'});
