@@ -1,0 +1,31 @@
+{
+  "schema": "rsa-n002-forward-score-v1",
+  "analysis_cutoff_after": "2026-11-23",
+  "frozen_model_date": "2026-11-23",
+  "evidence_level": "self-reported snapshot timestamps only, not externally attested",
+  "schedule_entries": 0,
+  "primary_claim": "Only dates after model freeze; prior explored years are not validation",
+  "summary": {
+    "n_races": 0,
+    "n_snapshots": 0,
+    "n_results_races": 394,
+    "eligible_target_races_after_freeze": 0,
+    "first_corner_mae": null,
+    "first_corner_n": 0,
+    "m3_top3_hits": null,
+    "m3_races": 0,
+    "c3_brier4": null,
+    "c4_brier4": null,
+    "c3_uniform_baseline_brier4": null,
+    "c4_uniform_baseline_brier4": null,
+    "c3_races": 0,
+    "c4_races": 0,
+    "held_items": 0,
+    "historical_eligible_races_before_freeze": 307,
+    "result_earliest_date": "2026-01-04",
+    "result_latest_date": "2026-10-04"
+  },
+  "races": [],
+  "held": [],
+  "result_file_errors": []
+}
