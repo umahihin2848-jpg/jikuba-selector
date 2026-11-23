@@ -1,7 +1,7 @@
 {
   "schema": "rsa-research-history-registry-v1",
   "created_on": "2026-11-23",
-  "entry_count": 42,
+  "entry_count": 43,
   "scope": "review of available GitHub docs, PR descriptions, archived conversation and supplied source files",
   "not_exhaustive_of_private_unretrieved_attachments": true,
   "source_text_sha256": "9521c4061a015341e658d434fdb70768800091499fc96d3b853a708e6c76fb16",
@@ -443,6 +443,20 @@
       "caveat": "Repeatedly explored years, closing odds not purchasable snapshots, coarse venue != same exact course, N001 browser parity not complete",
       "source": "validation/H007_CONDITION_SUITABILITY_AUDIT_20261123.md",
       "dedupKey": "H007|10 prior unique horse starts|market relative score|surface distance venue|2024 train vs 2025/26 Brier"
+    },
+    {
+      "id": "H008-A",
+      "title": "Observed course-specific middle-pace lull mechanics from 200m race laps",
+      "population": "35,857 CP932 JRA lap rows; 5,368 result race keys; 4,912 exact date+venue+race name matches; 1,670 turf 3win+ 12-18 1200/1600/1800/2000 clean laps; 631 Tokyo/Nakayama major profiles, 2016-2026/10/04",
+      "question": "Do course structure and race distance materially alter mid-race pace lull, rather than using venue-average performance as horse ability?",
+      "definition": "For >=1600m, mid segment fourth 200m fraction to before final600m >= early2 nonstarting 200m and final600m mean each by >=0.3 sec/200m; 1200m is NA, not a negative class",
+      "findings": "Tokyo turf1800 41/80=51.25% vs Nakayama turf1800 4/65=6.15%, difference 45.10pp bootstrap95%CI 32.69..57.21pp; Tokyo/Nakayama 1600 37.6%/15.1%; 2000 40.3%/39.4%; threshold 0.2/.5 and graded/good-going checks same direction",
+      "status": "completed_race_level_descriptive_ONLY_not_horse_aptitude_or_bet_gain",
+      "modelImpact": "none; target race laps known after race, do not insert as forward predictors",
+      "next": "H008-B: frozen as-of course profile probability vs ability/M3-conditioned horse response, proper holdout, no lane/gps inference",
+      "caveat": "Not causal effect of turn count alone: track grade, course layout, distance, field and race-day pace composition confounded; no before-start horse aptitude test",
+      "source": "validation/H008A_COURSE_LAP_STRUCTURE_REPORT_20261123.md",
+      "dedupKey": "H008-A|course-specific 200m lap segmentation|Tokyo Nakayama turf1600/1800/2000|2016-26|lull rate descriptive"
     }
   ],
   "new_protocols": [
@@ -498,10 +512,13 @@
     {
       "id": "H008",
       "title": "Exact course geometry × pre-race position and pace response interactions",
-      "state": "proposed_after_N001",
+      "state": "phase_A_course_lap_shape_complete_phase_B_horse_aptitude_NOT_YET",
       "new_vs_prior": "Not redoing H007 venue history or H006 5-to-10 selection; requires position/pace and verified course geometry",
       "needed": "N001 live parser parity, verified course DB, as-of pace M4 and first-position predictions",
-      "claim_limit": "No lane/GPS or ROI inference from raw running-position data alone"
+      "claim_limit": "No lane/GPS or ROI inference from raw running-position data alone",
+      "findings": "Main: Tokyo turf1800 51.25% mid-lull vs Nakayama turf1800 6.15% on 145R, but Tokyo/Nakayama turf2000 40.3 vs39.4; race laps are post-race labels only",
+      "phase_a_report": "validation/H008A_COURSE_LAP_STRUCTURE_REPORT_20261123.md",
+      "next": "True H008-B as-of horse-specific response conditional on course geometry and predicted pace, with no post-race race-lap leakage"
     }
   ]
 }
