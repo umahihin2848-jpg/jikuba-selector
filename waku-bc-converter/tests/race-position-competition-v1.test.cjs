@@ -79,6 +79,8 @@ test('historical 600m gap SD is display metadata, never a simulated ranking inpu
  assert.deepEqual(b.rows.map(r=>r.histGapSd),Array.from({length:16},(_,i)=>i*.08));
  assert.deepEqual(b.rows.map(r=>r.histGapN),Array(16).fill(5));
  assert.match(code,/historyGapSdSeconds/);assert.match(code,/historyGapRaceCount/);
+ assert.match(code,/seed:hash\(c\.seedSig\)/);
+ assert.doesNotMatch(code,/seed:hash\(c\.sig\)/);
 });
 test('research code does not overwrite official M3, betting state, odds or selection',()=>{
  assert.doesNotMatch(code,/\.(finishRank|score|predGap|axisNo|partnerNos|betEligible|odds)\s*=/);
