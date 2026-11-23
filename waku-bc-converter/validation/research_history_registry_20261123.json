@@ -1,7 +1,7 @@
 {
   "schema": "rsa-research-history-registry-v1",
   "created_on": "2026-11-23",
-  "entry_count": 51,
+  "entry_count": 52,
   "scope": "review of available GitHub docs, PR descriptions, archived conversation and supplied source files",
   "not_exhaustive_of_private_unretrieved_attachments": true,
   "source_text_sha256": "9521c4061a015341e658d434fdb70768800091499fc96d3b853a708e6c76fb16",
@@ -589,6 +589,30 @@
       "caveats": "Coefficients not official Ability C/M3 model, historical years reused, win market final odds cannot be bought as T-15, rear result is association not causal proof, pre-race full 4C rank distribution not modeled",
       "source": "validation/h013/H013_REPORT_20261123.md",
       "dedupKey": "H013|historical 4C 4bands and percourse danger line last50/25%|2016-23 train 2024-26 test|past5 pback>=.7 risk-screen market-relative audit"
+    },
+    {
+      "id": "H014",
+      "title": "Observed leading-pack endgame fatigue × race-front load × horse-specific historic ability/resilience; separation from prior back-half horse danger H013",
+      "population": "Nationwide 87 venue/surface/distance profiles, 3566 strict lap/result full-field races and 54383 horses 2016-2026/10/04. Stage observation 2024-26 990R/15089 horses; unique past horse history 73619 runs from umadete 439416 rows.",
+      "new_vs_prior": "H012/H013 posterior 4C-danger mainly back-of-pack; H014 dissects actual 3C/4C leader rank loss and trailing3F, and evaluates as-of field front pressure vs actual pace and pre-race all-horse individual resilience incremental to generic ability; not a rerun of M3 LapFit.",
+      "observed": "2024-26 actual 4C-front25 horses: high first2F-relative stress 1305 horses top3 25.67%, 4+ rank drop59.77%, 3F behind fastest1.887s; low stress 2809 horses top3 33.64%, drop50.30%, fastest gap1.448. Race-cluster 95CI top3 high-low [-10.52,-5.24]pp; 4+ rank drop +[6.30,12.67]pp. 3C front: high-stress 22.18% vs low30.25% top3.",
+      "ability_interaction": "Within actual4C front horses high-pace & retrospective closing-market q>=25% 201/471 top3=42.7%, less market-rated 134/834=16.1%; strong horses not unaffected, and groups market-defined after betting period. This is OBSERVATIONAL, not physiological stamina causation.",
+      "asof_pace": "2019-23 fit and 2024-26 990 race eval actual high relative first2F: course-only AUC.592/Brier.21008, as-of field previous 4C pressure AUC.620/Brier.20640; race CI Brier gain[-.00041,+.00822], 0 included.",
+      "asof_collapse": "Actual current4C front group >=50% dropping >=4 ranks: course-only AUC.587/Brier.22504, plus pre-race field front congestion AUC.575/Brier.22705, worse. Course and as-of past front ability/resilience AUC.576/Brier.22667, also worse than course-only.",
+      "asof_horse": "All horses with >=2 prior runs 2024-26 990R/14487: predicting front4 AND top3 Brier previous general .072683 -> +previous front survival .072600 CI gain[-.000140,+.000243]; predicting any top3 .148916->.148717 CI[-.000021,+.000436]. Both zero-crossing. No official Ability C/M3 full browser parity comparison.",
+      "H013_safety": "H013 flagged 598 predicted rear horses, only 29 actually at front 4C: front endurance score applies to different cohort, cannot exclude back horse using this.",
+      "status": "HOLD_research_observed_stress_fatigue_but_asof_resilience_not_robust",
+      "production_change": "NONE",
+      "asof": "Strictly prior horse+16char race ID dedup verified date to RID first8, same surface previous starts, current race early lap/C3/C4/3F/result as observation labels only. Final odds q only retrospective market control, never as-of quote.",
+      "caveat": "Individual energy reserves and 200m horse section times not observed, rank loss is proxy; actual4C-front subgroup hindsight-selection, course geometry same names may differ, 2019-23 historical coverage sparse, 2024-26 already mined, outcome market end prices not T-15, no ROI proof.",
+      "tests": "8 synthetic guard tests pass, race cluster bootstrap and year breakdown performed",
+      "source": "validation/h014/H014_REPORT_20261123.md",
+      "artifacts": [
+        "validation/h014/h014_front_stamina.py",
+        "validation/h014/test_h014_front_stamina.py",
+        "validation/h014/H014_AGGREGATE.json"
+      ],
+      "dedupKey": "H014|actual4c front rank dropout+last3f relative under actual early load|asof field pressure and prior individual front endurance|2019-23 fit 2024-26 tests nationwide87"
     }
   ],
   "new_protocols": [
@@ -702,6 +726,14 @@
       "new_vs_prior": "H013 only predicts rear half and maps to observed 4C zone, not actual 4-band pre-race probability; high-q flags not value-relevant",
       "needed": "N001 strict history de-dup & official stage model parity, 3C4C transitions, current race as-of pace scenarios only, no postrace 4C as feature",
       "claim_limit": "No auto-delete of win or top3 prospective candidates without showing risk differential beyond existing Ability/M3 and market baseline."
+    },
+    {
+      "id": "H015",
+      "title": "Pre-race two-stage joint early-position×actual individual fatigue resistance, official M4/P10 and M3 parity",
+      "state": "proposed_requires_N001_C_M3_M4_parity",
+      "new_vs_prior": "H014 attempted race collapse and historic top3 proxy but lacked M4/P10 exact, horse individual section times; H015 compares production first-corner/4C probability and 3F response vs current course market to understand error mechanisms",
+      "needed": "N001 browser exact past5 dedup and all-horse official Ability C/M3/M4/P10 generation snapshots; asof full-field pressure; actual after-race lap+result labeled solely evaluation",
+      "claim_limit": "Pre-race forecast rather than current lap or current 4C as input; no automatic rear runner exclusion unless 3rd-place calibrated vs prices and error confirmed"
     }
   ]
 }
