@@ -18,6 +18,8 @@ const server=http.createServer((req,res)=>{const f=path.resolve(app,'.'+decodeUR
   const page=await cx.newPage(),errors=[];
   page.on('pageerror',ex=>errors.push(String(ex)));
   await page.goto('http://127.0.0.1:'+server.address().port+'/v3.html',{waitUntil:'domcontentloaded',timeout:45000});
+  await page.waitForFunction(()=>window.RSAAddonHealth?.ready===true,null,{timeout:60000});
+  await page.waitForFunction(()=>!document.documentElement.classList.contains('rsaMobileBootCritical'),null,{timeout:60000});
   await page.locator('#rsaPurchaseAudit').waitFor({state:'attached',timeout:12000});
   await page.evaluate(()=>{
    const info={raceDate:'2026-11-29',raceName:'Synthetic OP study',venue:'東京',fieldSize:'12',surface:'芝',grade:'OP',distance:'1600'};
