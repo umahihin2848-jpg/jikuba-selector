@@ -26,6 +26,20 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Run same-race main/shadow Chromium E2E
         run: node tests/p3-64-real-chromium-m3-parity.cjs
+      - name: Package public application sources for local private-data E2E
+        if: always()
+        run: |
+          mkdir -p p3-64-baseline
+          git show origin/main:waku-bc-converter/shape-core-v2.js > p3-64-baseline/shape-core-v2.js
+          git show origin/main:waku-bc-converter/target-csv-compat-v1.js > p3-64-baseline/target-csv-compat-v1.js
+          tar -czf p3-64-browser-sources.tar.gz waku-bc-converter p3-64-baseline
+      - name: Upload public app sources only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p3-64-browser-sources
+          path: p3-64-browser-sources.tar.gz
+          if-no-files-found: error
       - name: Preserve synthetic comparisons
         if: always()
         uses: actions/upload-artifact@v4
