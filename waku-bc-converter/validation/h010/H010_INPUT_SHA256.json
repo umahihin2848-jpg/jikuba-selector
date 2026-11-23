@@ -1,0 +1,36 @@
+{
+  "source_inputs": [
+    {
+      "input_name": "umadete.csv",
+      "size_bytes": 293266176,
+      "sha256": "b669793b5af29c230c665bbbc0277e362c4a753b59fa0c0938d2cd17f5d0c651"
+    },
+    {
+      "input_name": "2026_2025_seiseki.csv",
+      "size_bytes": 14519694,
+      "sha256": "137a6adc0bc5290d69358e02231dd0dbf04081eae04fd46c356fdbbfaf94faa3"
+    },
+    {
+      "input_name": "2026seiseki.csv",
+      "size_bytes": 1174980,
+      "sha256": "19da624a224911ba9ea74fb9cd8a1182a4b6354d495f0cee077dbcbc17ea1a22"
+    },
+    {
+      "input_name": "h005_horse_comparison_PRIVATE.csv",
+      "size_bytes": 3783006,
+      "sha256": "73d661eb1cf35c3658aba0ed833495a421229586af79897224789dbfdbb39a10"
+    },
+    {
+      "input_name": "H008D_results.json",
+      "size_bytes": 11392,
+      "sha256": "df669fb30cca509e3147872c77dc228d0037366860a42bbe47c968720e76ff2b"
+    },
+    {
+      "input_name": "h008e_individual_response.py",
+      "size_bytes": 16709,
+      "sha256": "f855fd343ef6c316098fab18af58879bbd63d3b713ff924d13c41a92cf2ed328"
+    }
+  ],
+  "frozen_production_m3_js_blob_sha": "1f1178e3003b6162243ea7286a2d859325ff9d9a",
+  "frozen_model_source_version": "finish600_model_v1"
+}
