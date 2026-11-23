@@ -1,0 +1,550 @@
+{
+  "coverage": {
+    "courses": 87,
+    "races": 3566,
+    "horses": 54383,
+    "old_data": {
+      "read_rows": 439416,
+      "valid_unique_horse_runs": 73619,
+      "names": 4269,
+      "date_rid_strict": true,
+      "contradictory_keys_removed": 0
+    },
+    "history_2plus": 24906,
+    "front4_horses": 15052,
+    "front3_horses": 14748,
+    "elapsed_seconds": 26.04693841934204
+  },
+  "descriptive_2024_26": {
+    "all_front4": {
+      "horses": 4114,
+      "races": 990,
+      "top3": 1280,
+      "top3_rate": 0.31113271754982985,
+      "fade_ge4_rate": 0.5330578512396694,
+      "late3f_gap_mean": 1.587311618862421,
+      "market_top3_expected": 973.6114291935774
+    },
+    "high_actual_early_stress": {
+      "horses": 1305,
+      "races": 310,
+      "top3": 335,
+      "top3_rate": 0.2567049808429119,
+      "fade_ge4_rate": 0.5977011494252874,
+      "late3f_gap_mean": 1.8872030651340999,
+      "market_top3_expected": 295.8852089895453
+    },
+    "low_actual_early_stress": {
+      "horses": 2809,
+      "races": 680,
+      "top3": 945,
+      "top3_rate": 0.3364186543253827,
+      "fade_ge4_rate": 0.5030259878960485,
+      "late3f_gap_mean": 1.447988608045568,
+      "market_top3_expected": 677.726220204032
+    },
+    "all_c3front": {
+      "horses": 4094,
+      "races": 977,
+      "top3_rate": 0.27699071812408405,
+      "drop3to4_at_least_2_places_pct": 6.130923302393747,
+      "drop3tofinish_at_least_4_places_pct": 57.2056668295066
+    },
+    "high_stress_c3front": {
+      "horses": 1294,
+      "races": 305,
+      "top3_rate": 0.22179289026275115,
+      "drop3to4_at_least_2_places_pct": 6.182380216383308,
+      "drop3tofinish_at_least_4_places_pct": 63.91035548686245
+    },
+    "low_stress_c3front": {
+      "horses": 2800,
+      "races": 672,
+      "top3_rate": 0.3025,
+      "drop3to4_at_least_2_places_pct": 6.107142857142857,
+      "drop3tofinish_at_least_4_places_pct": 54.107142857142854
+    },
+    "stress0_market_strong0": {
+      "horses": 1759,
+      "top3": 371,
+      "top3_rate": 0.21091529277998863,
+      "fade_ge4_rate": 0.6304718590108016,
+      "market_top3_expected": 220.70629452301677,
+      "market_top3_ratio": 1.6809670100338239
+    },
+    "stress0_market_strong1": {
+      "horses": 1050,
+      "top3": 574,
+      "top3_rate": 0.5466666666666666,
+      "fade_ge4_rate": 0.2895238095238095,
+      "market_top3_expected": 457.01992568101525,
+      "market_top3_ratio": 1.2559627441728503
+    },
+    "stress1_market_strong0": {
+      "horses": 834,
+      "top3": 134,
+      "top3_rate": 0.1606714628297362,
+      "fade_ge4_rate": 0.7206235011990407,
+      "market_top3_expected": 98.89961530237983,
+      "market_top3_ratio": 1.354909213653691
+    },
+    "stress1_market_strong1": {
+      "horses": 471,
+      "top3": 201,
+      "top3_rate": 0.4267515923566879,
+      "fade_ge4_rate": 0.38004246284501064,
+      "market_top3_expected": 196.9855936871655,
+      "market_top3_ratio": 1.020379187318692
+    }
+  },
+  "predict_front4_top3_given_actual_front4": {
+    "all": {
+      "horses": 3980,
+      "races": 985,
+      "top3": 1241,
+      "brier_stage": 0.21448236787313785,
+      "brier_general_ability": 0.20137121518231096,
+      "brier_front_resilience": 0.20107662697017956,
+      "brier_market_general": 0.18387012869061384,
+      "brier_market_front_resilience": 0.18370310015158264,
+      "gain_front_over_general": 0.00029458821213140807,
+      "gain_front_over_market_general": 0.0001670285390311943
+    },
+    "2024": {
+      "horses": 1434,
+      "races": 360,
+      "top3": 453,
+      "brier_stage": 0.2164637477793788,
+      "brier_general_ability": 0.2019341303521643,
+      "brier_front_resilience": 0.20158217725611127,
+      "brier_market_general": 0.18636791462117416,
+      "brier_market_front_resilience": 0.18608900542256246,
+      "gain_front_over_general": 0.00035195309605301484,
+      "gain_front_over_market_general": 0.00027890919861170427
+    },
+    "2025": {
+      "horses": 1469,
+      "races": 360,
+      "top3": 452,
+      "brier_stage": 0.21259396309670456,
+      "brier_general_ability": 0.2003504283747472,
+      "brier_front_resilience": 0.19992673979337208,
+      "brier_market_general": 0.1787146187509059,
+      "brier_market_front_resilience": 0.17846724867526267,
+      "gain_front_over_general": 0.0004236885813751201,
+      "gain_front_over_market_general": 0.00024737007564323843
+    },
+    "2026": {
+      "horses": 1077,
+      "races": 265,
+      "top3": 336,
+      "brier_stage": 0.2144199424609103,
+      "brier_general_ability": 0.20201403362868187,
+      "brier_front_resilience": 0.20197191494854916,
+      "brier_market_general": 0.18757636738792813,
+      "brier_market_front_resilience": 0.18766788906535145,
+      "gain_front_over_general": 4.211868013270781e-05,
+      "gain_front_over_market_general": -9.152167742332296e-05
+    },
+    "increment_over_generic": {
+      "race_mean_gain": 0.0002575824412873727,
+      "ci95": [
+        -0.00012697184978019286,
+        0.000665900139515909
+      ]
+    },
+    "increment_over_market_diagnostic": {
+      "race_mean_gain": 9.45970155473176e-05,
+      "ci95": [
+        -0.00038778860575232685,
+        0.0005648144678144924
+      ]
+    }
+  },
+  "prior_sustain_group_diagnostics": [
+    {
+      "stress_high": false,
+      "prior_strength_high": false,
+      "n": 334,
+      "top3": 62,
+      "fade": 0.6736526946107785,
+      "actual_q": 35.99848252872009,
+      "late": 1.7269461077844313
+    },
+    {
+      "stress_high": false,
+      "prior_strength_high": true,
+      "n": 2382,
+      "top3": 851,
+      "fade": 0.4802686817800168,
+      "actual_q": 619.0247429861599,
+      "late": 1.4049538203190595
+    },
+    {
+      "stress_high": true,
+      "prior_strength_high": false,
+      "n": 160,
+      "top3": 27,
+      "fade": 0.74375,
+      "actual_q": 16.4405558966398,
+      "late": 2.2281249999999995
+    },
+    {
+      "stress_high": true,
+      "prior_strength_high": true,
+      "n": 1104,
+      "top3": 301,
+      "fade": 0.5715579710144928,
+      "actual_q": 272.00373573643,
+      "late": 1.8141304347826086
+    }
+  ],
+  "h013_flag_diagnostics": {
+    "flagged_horses": 598,
+    "flagged_actual4c_front": 29,
+    "reason": "H013 flags are primarily predicted rear horses; evaluating a forward-holder risk score on them is a category mismatch."
+  },
+  "predict_actual_high_early_stress": {
+    "all": {
+      "races": 990,
+      "early_stress_pct": 0.31313131313131315,
+      "course_only": {
+        "brier": 0.2100828974371314,
+        "auc": 0.5917765654648957
+      },
+      "course_plus_history_coverage": {
+        "brier": 0.21014377345902563,
+        "auc": 0.5916579696394687
+      },
+      "course_plus_front_pressure": {
+        "brier": 0.20639708467726253,
+        "auc": 0.6203984819734345
+      },
+      "course_plus_pressure_and_coverage": {
+        "brier": 0.2064738136868161,
+        "auc": 0.6209108159392789
+      }
+    },
+    "2024": {
+      "races": 361,
+      "early_stress_pct": 0.3407202216066482,
+      "course_only": {
+        "brier": 0.21904710609157227,
+        "auc": 0.6147263783562205
+      },
+      "course_plus_history_coverage": {
+        "brier": 0.2160708987817411,
+        "auc": 0.614589738334358
+      },
+      "course_plus_front_pressure": {
+        "brier": 0.21087310475659904,
+        "auc": 0.6543007446881192
+      },
+      "course_plus_pressure_and_coverage": {
+        "brier": 0.21077767665956568,
+        "auc": 0.6550522648083622
+      }
+    },
+    "2025": {
+      "races": 361,
+      "early_stress_pct": 0.29362880886426596,
+      "course_only": {
+        "brier": 0.20498638963512214,
+        "auc": 0.564835368109508
+      },
+      "course_plus_history_coverage": {
+        "brier": 0.2074254305931942,
+        "auc": 0.5650203477617461
+      },
+      "course_plus_front_pressure": {
+        "brier": 0.20475417680287855,
+        "auc": 0.5796892341842397
+      },
+      "course_plus_pressure_and_coverage": {
+        "brier": 0.20498842827930108,
+        "auc": 0.5796522382537921
+      }
+    },
+    "2026": {
+      "races": 268,
+      "early_stress_pct": 0.30223880597014924,
+      "course_only": {
+        "brier": 0.20487304666202774,
+        "auc": 0.5966197926982241
+      },
+      "course_plus_history_coverage": {
+        "brier": 0.20582149559732738,
+        "auc": 0.5942430844391628
+      },
+      "course_plus_front_pressure": {
+        "brier": 0.20258084025193465,
+        "auc": 0.6245461147421931
+      },
+      "course_plus_pressure_and_coverage": {
+        "brier": 0.20267728233961568,
+        "auc": 0.6261966065887634
+      }
+    },
+    "ci_front_pressure_increment": [
+      -0.0004100446277966258,
+      0.008222680599463536
+    ]
+  },
+  "full_field_prior_only_prediction": {
+    "front_and_top3": {
+      "performance": {
+        "all": {
+          "n": 14487,
+          "races": 990,
+          "positives": 1241,
+          "historical_generic": 0.07268293396772782,
+          "plus_front_endurance": 0.07260036011351471,
+          "market_generic_diagnostic": 0.06927385828698505,
+          "market_plus_front_diagnostic": 0.06909735573271833,
+          "gain_front_endurance": 8.257385421310548e-05,
+          "gain_front_over_market": 0.0001765025542667248
+        },
+        "2024": {
+          "n": 5298,
+          "races": 361,
+          "positives": 453,
+          "historical_generic": 0.0723009209697055,
+          "plus_front_endurance": 0.0720597951881478,
+          "market_generic_diagnostic": 0.06941063428500872,
+          "market_plus_front_diagnostic": 0.06896216837022923,
+          "gain_front_endurance": 0.00024112578155770226,
+          "gain_front_over_market": 0.00044846591477949727
+        },
+        "2025": {
+          "n": 5242,
+          "races": 361,
+          "positives": 452,
+          "historical_generic": 0.07282926224242815,
+          "plus_front_endurance": 0.07291651160533993,
+          "market_generic_diagnostic": 0.06857184113117115,
+          "market_plus_front_diagnostic": 0.06860130955896253,
+          "gain_front_endurance": -8.724936291178154e-05,
+          "gain_front_over_market": -2.9468427791376484e-05
+        },
+        "2026": {
+          "n": 3947,
+          "races": 268,
+          "positives": 336,
+          "historical_generic": 0.07300136620678103,
+          "plus_front_endurance": 0.0729060725164653,
+          "market_generic_diagnostic": 0.07002261295971045,
+          "market_plus_front_diagnostic": 0.06993761331804775,
+          "gain_front_endurance": 9.529369031573143e-05,
+          "gain_front_over_market": 8.499964166269747e-05
+        }
+      },
+      "interval": {
+        "increment_history": {
+          "gain_per_race": 5.1016398223540183e-05,
+          "ci95": [
+            -0.00013971422427497062,
+            0.00024253097520659776
+          ]
+        },
+        "increment_market": {
+          "gain_per_race": 0.00014905347807082407,
+          "ci95": [
+            -0.0001026024133662148,
+            0.00037987796133646256
+          ]
+        }
+      }
+    },
+    "all_top3": {
+      "performance": {
+        "all": {
+          "n": 14487,
+          "races": 990,
+          "positives": 2884,
+          "historical_generic": 0.14891601863192322,
+          "plus_front_endurance": 0.14871707268279677,
+          "market_generic_diagnostic": 0.13442417825043657,
+          "market_plus_front_diagnostic": 0.13427740646105074,
+          "gain_front_endurance": 0.00019894594912645003,
+          "gain_front_over_market": 0.00014677178938582447
+        },
+        "2024": {
+          "n": 5298,
+          "races": 361,
+          "positives": 1054,
+          "historical_generic": 0.1469420276473885,
+          "plus_front_endurance": 0.1467348849040331,
+          "market_generic_diagnostic": 0.13334663028417268,
+          "market_plus_front_diagnostic": 0.13309125180072176,
+          "gain_front_endurance": 0.0002071427433553985,
+          "gain_front_over_market": 0.00025537848345091874
+        },
+        "2025": {
+          "n": 5242,
+          "races": 361,
+          "positives": 1052,
+          "historical_generic": 0.15061534192795434,
+          "plus_front_endurance": 0.1503191288030053,
+          "market_generic_diagnostic": 0.1357122356731018,
+          "market_plus_front_diagnostic": 0.13553566161603606,
+          "gain_front_endurance": 0.00029621312494904073,
+          "gain_front_over_market": 0.0001765740570657537
+        },
+        "2026": {
+          "n": 3947,
+          "races": 268,
+          "positives": 778,
+          "historical_generic": 0.14930881101050697,
+          "plus_front_endurance": 0.14925004777014333,
+          "market_generic_diagnostic": 0.13415988945278126,
+          "market_plus_front_diagnostic": 0.13419847914105834,
+          "gain_front_endurance": 5.8763240363635116e-05,
+          "gain_front_over_market": -3.858968827707976e-05
+        }
+      },
+      "interval": {
+        "increment_history": {
+          "gain_per_race": 0.00020176110279472877,
+          "ci95": [
+            -2.0734129081399197e-05,
+            0.0004356654446359714
+          ]
+        },
+        "increment_market": {
+          "gain_per_race": 0.00015809041169749597,
+          "ci95": [
+            -1.515205071727579e-05,
+            0.0003256415031016813
+          ]
+        }
+      }
+    }
+  },
+  "race_level_front_fade_prediction": {
+    "all": {
+      "races": 990,
+      "event_rate": 0.6454545454545455,
+      "mean_front_collapse_fraction": 0.5299086099086099,
+      "course_only": {
+        "auc": 0.5872802500345535,
+        "brier": 0.22504104971725236
+      },
+      "course_plus_front_congestion": {
+        "auc": 0.574709415085002,
+        "brier": 0.22704772395169837
+      },
+      "course_plus_predicted_front_strength": {
+        "auc": 0.5751196001587238,
+        "brier": 0.22694672657262666
+      },
+      "course_plus_prior_front_endurance": {
+        "auc": 0.5762832773787391,
+        "brier": 0.2266738382829034
+      }
+    },
+    "2024": {
+      "races": 361,
+      "event_rate": 0.6398891966759003,
+      "mean_front_collapse_fraction": 0.5226421316449017,
+      "course_only": {
+        "auc": 0.5947219447219448,
+        "brier": 0.22563258652652174
+      },
+      "course_plus_front_congestion": {
+        "auc": 0.5775890775890776,
+        "brier": 0.22863491938237576
+      },
+      "course_plus_predicted_front_strength": {
+        "auc": 0.577922077922078,
+        "brier": 0.22855269579230575
+      },
+      "course_plus_prior_front_endurance": {
+        "auc": 0.5802197802197802,
+        "brier": 0.22826739806130064
+      }
+    },
+    "2025": {
+      "races": 361,
+      "event_rate": 0.6648199445983379,
+      "mean_front_collapse_fraction": 0.542652684342435,
+      "course_only": {
+        "auc": 0.5980544077134986,
+        "brier": 0.21787788832220034
+      },
+      "course_plus_front_congestion": {
+        "auc": 0.5858815426997246,
+        "brier": 0.21976612324405786
+      },
+      "course_plus_predicted_front_strength": {
+        "auc": 0.5846763085399449,
+        "brier": 0.2197204692095506
+      },
+      "course_plus_prior_front_endurance": {
+        "auc": 0.587293388429752,
+        "brier": 0.21940409677717154
+      }
+    },
+    "2026": {
+      "races": 268,
+      "event_rate": 0.6268656716417911,
+      "mean_front_collapse_fraction": 0.5225302061122957,
+      "course_only": {
+        "auc": 0.5615773809523811,
+        "brier": 0.23389312611825053
+      },
+      "course_plus_front_congestion": {
+        "auc": 0.559047619047619,
+        "brier": 0.23471817285089136
+      },
+      "course_plus_predicted_front_strength": {
+        "auc": 0.5575,
+        "brier": 0.23451733858668003
+      },
+      "course_plus_prior_front_endurance": {
+        "auc": 0.5573214285714285,
+        "brier": 0.23431973978875345
+      }
+    },
+    "paired_cis": {
+      "congestion_gain": {
+        "mean": -0.0020066742344460402,
+        "ci95": [
+          -0.003355267207803368,
+          -0.0007770037699925626
+        ]
+      },
+      "strength_gain": {
+        "mean": 0.00010099737907173672,
+        "ci95": [
+          -0.0003478619081009101,
+          0.000559924635985749
+        ]
+      },
+      "endurance_gain": {
+        "mean": 0.0002728882897232471,
+        "ci95": [
+          -0.0004305886919669698,
+          0.0009949175397411742
+        ]
+      }
+    }
+  },
+  "course_descriptive_summary": {
+    "profiles": 84,
+    "profiles_ge15r": 27,
+    "actual_front_top3_high_minus_low_ci95": [
+      -0.10515459277670006,
+      -0.052444256677883855
+    ],
+    "actual_front_drop4_high_minus_low_ci95": [
+      0.06296014935331919,
+      0.12670710996333387
+    ]
+  },
+  "warnings": [
+    "Current lap stress and current 3C/4C used ONLY for descriptive labels; actual front4 membership conditions the front-retention test; cannot infer pre-race front4 membership from these metrics",
+    "Past 4C survival proxy from previous 8 starts is sparse in 2019-23 training; 2024-26 previously explored; not unseen evidence",
+    "Final closing market q used only for retrospective calibration comparison, not truly available before start",
+    "No horse-level complete section times / physiological energy reserves observable, so no direct proof of loss of stamina."
+  ]
+}
