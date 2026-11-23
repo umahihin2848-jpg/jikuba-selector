@@ -1,7 +1,7 @@
 {
   "schema": "rsa-research-history-registry-v1",
   "created_on": "2026-11-23",
-  "entry_count": 44,
+  "entry_count": 45,
   "scope": "review of available GitHub docs, PR descriptions, archived conversation and supplied source files",
   "not_exhaustive_of_private_unretrieved_attachments": true,
   "source_text_sha256": "9521c4061a015341e658d434fdb70768800091499fc96d3b853a708e6c76fb16",
@@ -472,6 +472,30 @@
       "tests": "validation/h008c/test_all_courses.py",
       "output": "h008c-national-lap-atlas.html",
       "dedupKey": "H008-C|nationwide87 venue-surface-distance profiles|2016-26/10/04|mid-lull and post600 fade descriptive|H008-A parity"
+    },
+    {
+      "id": "H008-D",
+      "title": "Complete 200m lap profiles linked to horse prior-race performance: LapFit and five race-demand adaptability proxies",
+      "population": "439,416 historic TARGET rows -> 67,167 valid distinct horse runs and 18,756 unique prior-lap races; pre-race course templates; 2024 328R/4,992 train, 2025-26/10/04 553R/8,454 horses test",
+      "question": "Can race-wide full lap morphology and previous horses' popularity-relative performance provide independent extra information when added to closing-odds market and frozen M3 reconstructed shadow?",
+      "new_vs_prior": "H008-A/C only course-level lap shape; H007 historical venue/distance performance contrast; H008-D uses every moving fraction plus comparable start section, past race-specific lap shape vs horse response and five demand-axis contrasts",
+      "asof": "16char race-ID date must match normalized year-month-day; distinct horse+rID; strictly past horse and course histories, all start segment 100/150/200m compared only by compatible start length; inferred corner-count from prior race course keys only",
+      "primary_result": "Test 2025/26 553R (8454 horses): market+past form+M3 shadow top3 Brier .132588733/753 top3 successes -> +full lap-fit .132576599/749 successes; delta .00001213 CI95[-.0000110,.0000348]. NOT a verified improvement.",
+      "secondary_result": "Five separate demand proxies (speed, ultra-speed, acceleration, sustainability, attrition): Brier .132589543, 753 top3 successes; vs baseline delta -0.00000081 CI95[-.00000424,.00000268]. No additional predictive value established.",
+      "market_control": "Closing-odds PL shrunk to 3/n with H002 frozen alpha=.822646; market only Brier .132501917 and 755 top3 successes, so full lap + M3 remained worse than closing market alone.",
+      "status": "RESEARCH_ONLY_HOLD_no_significant_incremental_accuracy",
+      "modelImpact": "NO official Ability C, M3, P10, Axis, BUY/PASS or pricing changes",
+      "caveats": "Race-wide leader laps are not horse-specific 200m sectionals, M3 Python reconstructed proxy not browser C/M3, final odds post-race not T-15, 2025-26 previously mined and no pristine holdout. Course first turn physical geometry/gradients/lane not independently verified.",
+      "artifacts": [
+        "validation/h008d/H008D_FULL_LAP_HORSE_FIT_20261123.md",
+        "validation/h008d/h008d_full_lap_fit.py",
+        "validation/h008d/test_h008d_full_lap_fit.py",
+        "validation/h008d/H008D_AGGREGATE_RESULT_20261123.json",
+        "validation/h008d/H008D_87_COURSE_FULL_LAP_REQUIREMENTS.csv"
+      ],
+      "private_artifacts": "Local ZIP contains horse-level 8454-row historic research index and offline HTML viewer; intentionally not published to GitHub.",
+      "tests": "15 synthetic date/course/lap/PL/projector tests all passed; 87 course chart row count and 8454 horse rows checked",
+      "dedupKey": "H008-D|2014-2026 asof 15 distinct history laps|eight-moving-section plus first split|5 conditional pace-demand proxies|2024 fit 2025-26 test|market plus m3 shadow top3"
     }
   ],
   "new_protocols": [
@@ -527,14 +551,23 @@
     {
       "id": "H008",
       "title": "Exact course geometry × pre-race position and pace response interactions",
-      "state": "phase_A_national_course_lap_atlas_complete_phase_B_horse_aptitude_not_done",
+      "state": "phase_A_C_done_phase_D_lap_to_horse_fit_HOLD",
       "new_vs_prior": "Not redoing H007 venue history or H006 5-to-10 selection; requires position/pace and verified course geometry",
       "needed": "N001 live parser parity, verified course DB, as-of pace M4 and first-position predictions",
       "claim_limit": "No lane/GPS or ROI inference from raw running-position data alone",
-      "findings": "2016-2026/10/04 all venues87 profiles,3925 races, course/lap after-race descriptive. Horse abilities and course-turn geometry not yet attached; stage B still pending.",
+      "findings": "2025/26 553R; +full lap affinity Brier .132588733->.132576599 but CI spans zero and top3 hits 753->749. Five demand facets no gain. Race-wide pace alone not individual ability.",
       "phase_a_report": "validation/H008A_COURSE_LAP_STRUCTURE_REPORT_20261123.md",
-      "next": "Verify official course DB inner/outer, first turn distance, turn count, grade and straight length. Develop strictly as-of course-lap distribution and horse-level ability interaction; evaluate against Ability/M3 and calibrated market without leaking current race laps.",
-      "phase_c_report": "validation/h008c/H008C_NATIONAL_COURSE_LAP_STRUCTURE_20261123.md"
+      "next": "H008-E: use each horse's actual previous finishing3F, -600m gap, first/3C/4C relative position as measures of individual behavior conditional on prior full lap and verified geometry; strict as-of, exact Ability C/M3 parity and future holdout.",
+      "phase_c_report": "validation/h008c/H008C_NATIONAL_COURSE_LAP_STRUCTURE_20261123.md",
+      "phase_d_report": "validation/h008d/H008D_FULL_LAP_HORSE_FIT_20261123.md"
+    },
+    {
+      "id": "H008-E",
+      "title": "Horse individual finishing 3F × race lap phase demands × corner position, with as-of course geometry and official C/M3 parity",
+      "state": "proposed_not_started",
+      "new_vs_prior": "H008-D modeled race-wide lap similarity only and found no robust gain; E uses horse-specific own 3F and relative gap and stage positioning, avoiding inferred 200m individual times",
+      "needed": "N001 exact parser/production M3+Ability C parity, as-of prior 3F, -600m lead gap, 3C/4C, verified course physical map",
+      "claim_limit": "No current race actual lap or horse current pace result as pre-race input; 2024-26 already mined, require forward test to adopt"
     }
   ]
 }
