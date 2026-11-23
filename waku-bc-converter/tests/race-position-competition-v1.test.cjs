@@ -30,6 +30,11 @@ test('results deterministic for same race, seed and input',()=>{
  const y=core.simulate(lineup(),{count:512,seed:99});
  assert.deepEqual(x.rows.map(r=>r.frontCount),y.rows.map(r=>r.frontCount));
 });
+test('actual horse numbers can be nonconsecutive after scratches',()=>{
+ const rows=lineup(15);rows[14].no='16';
+ const v=core.simulate(rows,{count:256,seed:2});
+ assert.equal(v.ready,true);assert.equal(v.n,15);assert.equal(v.rows[14].no,'16');
+});
 test('research code does not overwrite official M3, betting state, odds or selection',()=>{
  assert.doesNotMatch(code,/\.(finishRank|score|predGap|axisNo|partnerNos|betEligible|odds)\s*=/);
  assert.match(code,/productionImpact:false/);
