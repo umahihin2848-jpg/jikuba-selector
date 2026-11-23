@@ -28,7 +28,7 @@ def create_csv(path,date='2026-11-29',tie=False,with_missing=False):
 
 def rank(date='2026-11-29',ts='2026-11-28T13:00:00+09:00'):
     return {'schema':'rsa-rank-distribution-snapshot-v1','capturedAt':ts,'modelVersion':'race-position-competition-v1-20261123','metadata':{'date':date,'venue':'東京','raceName':'合成OP','field':12,'distance':1600,'surface':'芝'},
-            'runners':[{'no':str(i),'name':'Synthetic'+str(i),'simulatedExpectedRank':i,'liveModelReference':{'m3':{'rank':i}}} for i in range(1,13)]}
+            'runners':[{'no':str(i),'name':'Synthetic'+str(i),'simulatedExpectedRank':i,'rankProbabilities':[1 if k==i else 0 for k in range(1,13)],'liveModelReference':{'m3':{'rank':i}}} for i in range(1,13)]}
 
 def corner(date='2026-11-29',ts='2026-11-28T13:00:00+09:00'):
     rows=[]
@@ -52,6 +52,7 @@ class N002Tests(unittest.TestCase):
         self.assertEqual(z['summary']['n_races'],1)
         self.assertEqual(z['summary']['m3_top3_hits'],3)
         self.assertEqual(z['summary']['first_corner_mae'],0.)
+        self.assertEqual(z['summary']['first_corner_rps'],0.)
         self.assertEqual(z['summary']['c3_races'],1)
         self.assertLess(z['summary']['c3_brier4'],z['summary']['c3_uniform_baseline_brier4'])
         self.assertLess(z['summary']['c4_brier4'],z['summary']['c4_uniform_baseline_brier4'])
@@ -91,6 +92,16 @@ class N002Tests(unittest.TestCase):
         self.assertIsNotNone(labels)
         self.assertAlmostEqual(labels['1'][0],1)
         self.assertAlmostEqual(labels['2'][0],1)
+    def test_score_uses_one_common_corner_for_every_horse(self):
+        create_csv(self.csv)
+        # One runner has C3 missing: all horse ranks must use full-field C4.
+        text=self.csv.read_text(encoding='cp932')
+        lines=text.splitlines(); cols=lines[12].split(',');cols[-2]='0';lines[12]=','.join(cols)
+        self.csv.write_text('\n'.join(lines)+'\n',encoding='cp932')
+        z=n.score([self.csv],[self.save('rank.json',rank())])
+        r=z['races'][0]['snapshots']['initial_and_m3']['metrics']
+        self.assertEqual(r['first_common_corner'],'通過順4')
+        self.assertEqual(z['summary']['first_corner_mae'],0.)
     def test_missing_corner_stage_not_scored_as_loss(self):
         create_csv(self.csv,with_missing=True)
         z=n.score([self.csv],[self.save('corner.json',corner())])
