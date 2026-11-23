@@ -1,0 +1,248 @@
+{
+  "all_result_eligible": {
+    "eligible_races": 4179,
+    "strict_before_lap": 3700,
+    "not_complete_card": 458,
+    "not_exact_3_top3_fav": 15,
+    "winner_missing": 6
+  },
+  "lap_matched_strict": {
+    "matched_lap_rows": 3566,
+    "valid_lap_strict_races": 3566
+  },
+  "strict_lap_races": 3566,
+  "strict_lap_horses": 54383,
+  "profiles": 87,
+  "profiles_with_30_plus_races": 50,
+  "races_turf": 2168,
+  "races_dirt": 1398,
+  "laps_with_mid": 2195,
+  "pairs_tested": 90,
+  "pace_tests": 82,
+  "lowest_back_share_n30": [
+    {
+      "profile": "新潟ダ1800m",
+      "n_races": 37,
+      "back_top3_share_pct": 13.514,
+      "back_horse_fraction_pct": 47.378,
+      "back_actual_minus_market_pp": -23.652
+    },
+    {
+      "profile": "小倉ダ1700m",
+      "n_races": 43,
+      "back_top3_share_pct": 13.953,
+      "back_horse_fraction_pct": 44.242,
+      "back_actual_minus_market_pp": -19.43
+    },
+    {
+      "profile": "中山芝2500m",
+      "n_races": 32,
+      "back_top3_share_pct": 14.583,
+      "back_horse_fraction_pct": 45.396,
+      "back_actual_minus_market_pp": -18.698
+    },
+    {
+      "profile": "福島芝2000m",
+      "n_races": 34,
+      "back_top3_share_pct": 16.667,
+      "back_horse_fraction_pct": 46.463,
+      "back_actual_minus_market_pp": -21.159
+    },
+    {
+      "profile": "京都ダ1800m",
+      "n_races": 61,
+      "back_top3_share_pct": 17.486,
+      "back_horse_fraction_pct": 46.389,
+      "back_actual_minus_market_pp": -17.805
+    },
+    {
+      "profile": "阪神ダ1200m",
+      "n_races": 54,
+      "back_top3_share_pct": 18.519,
+      "back_horse_fraction_pct": 46.228,
+      "back_actual_minus_market_pp": -12.912
+    },
+    {
+      "profile": "中山芝2200m",
+      "n_races": 41,
+      "back_top3_share_pct": 18.699,
+      "back_horse_fraction_pct": 46.801,
+      "back_actual_minus_market_pp": -15.812
+    },
+    {
+      "profile": "中山芝1200m",
+      "n_races": 98,
+      "back_top3_share_pct": 19.388,
+      "back_horse_fraction_pct": 45.527,
+      "back_actual_minus_market_pp": -15.86
+    }
+  ],
+  "highest_back_share_n30": [
+    {
+      "profile": "東京ダ2100m",
+      "n_races": 68,
+      "back_top3_share_pct": 33.333,
+      "back_horse_fraction_pct": 46.5,
+      "back_actual_minus_market_pp": -6.199
+    },
+    {
+      "profile": "東京芝1800m",
+      "n_races": 74,
+      "back_top3_share_pct": 34.234,
+      "back_horse_fraction_pct": 46.223,
+      "back_actual_minus_market_pp": -9.922
+    },
+    {
+      "profile": "阪神芝1600m",
+      "n_races": 105,
+      "back_top3_share_pct": 34.921,
+      "back_horse_fraction_pct": 46.211,
+      "back_actual_minus_market_pp": -5.697
+    },
+    {
+      "profile": "東京芝1600m",
+      "n_races": 102,
+      "back_top3_share_pct": 36.928,
+      "back_horse_fraction_pct": 46.025,
+      "back_actual_minus_market_pp": -5.414
+    },
+    {
+      "profile": "京都芝1400m",
+      "n_races": 58,
+      "back_top3_share_pct": 37.931,
+      "back_horse_fraction_pct": 46.476,
+      "back_actual_minus_market_pp": -6.013
+    },
+    {
+      "profile": "阪神芝1800m",
+      "n_races": 37,
+      "back_top3_share_pct": 38.739,
+      "back_horse_fraction_pct": 44.424,
+      "back_actual_minus_market_pp": -2.902
+    },
+    {
+      "profile": "阪神芝1400m",
+      "n_races": 56,
+      "back_top3_share_pct": 39.286,
+      "back_horse_fraction_pct": 47.013,
+      "back_actual_minus_market_pp": -2.498
+    },
+    {
+      "profile": "東京芝2400m",
+      "n_races": 59,
+      "back_top3_share_pct": 39.548,
+      "back_horse_fraction_pct": 46.064,
+      "back_actual_minus_market_pp": -3.007
+    }
+  ],
+  "strong_pairs_fdr_5pct": [
+    {
+      "surface": "ダ",
+      "distance": 1200,
+      "course_a": "中山ダ1200m",
+      "course_b": "阪神ダ1200m",
+      "n_a": 111,
+      "n_b": 54,
+      "back_share_a_pct": 29.4294,
+      "back_share_b_pct": 18.5185,
+      "difference_pp_a_minus_b": 10.9109,
+      "ci95_low_pp": 4.7794,
+      "ci95_high_pp": 17.3015,
+      "p_welch_approx": 0.0011,
+      "fdr_bh_q": 0.0319
+    },
+    {
+      "surface": "ダ",
+      "distance": 1800,
+      "course_a": "中山ダ1800m",
+      "course_b": "新潟ダ1800m",
+      "n_a": 123,
+      "n_b": 37,
+      "back_share_a_pct": 24.9322,
+      "back_share_b_pct": 13.5135,
+      "difference_pp_a_minus_b": 11.4187,
+      "ci95_low_pp": 4.5704,
+      "ci95_high_pp": 18.8091,
+      "p_welch_approx": 0.0018,
+      "fdr_bh_q": 0.0319
+    },
+    {
+      "surface": "芝",
+      "distance": 1800,
+      "course_a": "中山芝1800m",
+      "course_b": "阪神芝1800m",
+      "n_a": 63,
+      "n_b": 37,
+      "back_share_a_pct": 20.6349,
+      "back_share_b_pct": 38.7387,
+      "difference_pp_a_minus_b": -18.1038,
+      "ci95_low_pp": -28.9876,
+      "ci95_high_pp": -7.1357,
+      "p_welch_approx": 0.0013,
+      "fdr_bh_q": 0.0319
+    },
+    {
+      "surface": "芝",
+      "distance": 1600,
+      "course_a": "中山芝1600m",
+      "course_b": "東京芝1600m",
+      "n_a": 115,
+      "n_b": 102,
+      "back_share_a_pct": 24.6377,
+      "back_share_b_pct": 36.9281,
+      "difference_pp_a_minus_b": -12.2904,
+      "ci95_low_pp": -19.2556,
+      "ci95_high_pp": -5.772,
+      "p_welch_approx": 0.0004,
+      "fdr_bh_q": 0.0319
+    },
+    {
+      "surface": "芝",
+      "distance": 2000,
+      "course_a": "東京芝2000m",
+      "course_b": "福島芝2000m",
+      "n_a": 64,
+      "n_b": 34,
+      "back_share_a_pct": 32.2917,
+      "back_share_b_pct": 16.6667,
+      "difference_pp_a_minus_b": 15.625,
+      "ci95_low_pp": 6.0355,
+      "ci95_high_pp": 25.1241,
+      "p_welch_approx": 0.0016,
+      "fdr_bh_q": 0.0319
+    },
+    {
+      "surface": "芝",
+      "distance": 1600,
+      "course_a": "中山芝1600m",
+      "course_b": "阪神芝1600m",
+      "n_a": 115,
+      "n_b": 105,
+      "back_share_a_pct": 24.6377,
+      "back_share_b_pct": 34.9206,
+      "difference_pp_a_minus_b": -10.283,
+      "ci95_low_pp": -16.9293,
+      "ci95_high_pp": -4.0086,
+      "p_welch_approx": 0.0021,
+      "fdr_bh_q": 0.032
+    }
+  ],
+  "strong_pace_fdr_5pct": [
+    {
+      "profile": "京都ダ1900m",
+      "venue": "京都",
+      "surface": "ダ",
+      "distance": 1900,
+      "feature": "lull",
+      "positive_races": 21,
+      "negative_races": 23,
+      "back_top3_pct_feature_yes": 6.3492,
+      "back_top3_pct_feature_no": 31.8841,
+      "yes_minus_no_pp": -25.5349,
+      "ci95_low_pp": -37.2671,
+      "ci95_high_pp": -13.6646,
+      "exploratory_p_welch": 0.0004,
+      "fdr_bh_q": 0.0307
+    }
+  ]
+}
