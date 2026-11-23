@@ -1,0 +1,23 @@
+name: P3-74 buy skip research contract
+on:
+  push:
+    branches: [research/p3-74-buy-skip-audit-20261123]
+    paths:
+      - 'waku-bc-converter/purchase-audit-*'
+      - 'waku-bc-converter/v3.html'
+      - 'waku-bc-converter/tests/p3-74-buy-skip-research.test.cjs'
+      - '.github/workflows/p3-74-buy-skip-research.yml'
+  workflow_dispatch:
+jobs:
+  pure-rules:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prove no official writes and conservative selection gates
+        run: node --test waku-bc-converter/tests/p3-74-buy-skip-research.test.cjs
