@@ -1,0 +1,14 @@
+{
+  "2019_23_free_signed_beta": -1.7942617390244384,
+  "2024_26_form_brier": 0.13327705419158992,
+  "2024_26_free_venue_brier": 0.13335968825718408,
+  "gain_ci": {
+    "gain": -8.263406559418817e-05,
+    "ci95": [
+      -0.0004047675403326973,
+      0.0002426889516694814
+    ],
+    "n": 131
+  },
+  "explanation": "Unconstrained signed coefficient is only a sensitivity check. A negative alpha would mean reversal of historical venue preference, not positive repeatable track preference; it worsened later years."
+}
