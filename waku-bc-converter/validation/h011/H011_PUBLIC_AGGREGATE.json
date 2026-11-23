@@ -1,0 +1,333 @@
+{
+  "study": "H011",
+  "cohort": {
+    "races": 479,
+    "horses": 7261,
+    "tokyo_nakayama_turf_distance": [
+      1600,
+      1800,
+      2000
+    ],
+    "top3_exactly3": true
+  },
+  "raw_stage_by_course": {
+    "1600": {
+      "tokyo_races": 101,
+      "nakayama_races": 115,
+      "tokyo_back4_top3_share": 0.3663366336633663,
+      "nakayama_back4_top3_share": 0.24637681159420288,
+      "diff": 0.11995982206916339,
+      "ci95": [
+        0.05096857511838143,
+        0.18766178791792223
+      ]
+    },
+    "1800": {
+      "tokyo_races": 74,
+      "nakayama_races": 63,
+      "tokyo_back4_top3_share": 0.34234234234234234,
+      "nakayama_back4_top3_share": 0.2063492063492063,
+      "diff": 0.13599313599313603,
+      "ci95": [
+        0.042966180466180434,
+        0.23101673101673098
+      ]
+    },
+    "2000": {
+      "tokyo_races": 64,
+      "nakayama_races": 62,
+      "tokyo_back4_top3_share": 0.32291666666666663,
+      "nakayama_back4_top3_share": 0.26344086021505375,
+      "diff": 0.05947580645161288,
+      "ci95": [
+        -0.03595850134408606,
+        0.15474210349462358
+      ]
+    }
+  },
+  "market_adjusted_stage": {
+    "1600": {
+      "tokyo_observed_back_pct": 36.634,
+      "nakayama_observed_back_pct": 24.638,
+      "tokyo_market_expected_back_pct": 42.513,
+      "nakayama_market_expected_back_pct": 36.925,
+      "venue_excess_diff_pp": 6.408,
+      "venue_excess_ci95_pp": [
+        0.083,
+        12.559
+      ],
+      "n_tokyo": 101,
+      "n_nakayama": 115
+    },
+    "1800": {
+      "tokyo_observed_back_pct": 34.234,
+      "nakayama_observed_back_pct": 20.635,
+      "tokyo_market_expected_back_pct": 44.157,
+      "nakayama_market_expected_back_pct": 38.074,
+      "venue_excess_diff_pp": 7.516,
+      "venue_excess_ci95_pp": [
+        -0.716,
+        15.565
+      ],
+      "n_tokyo": 74,
+      "n_nakayama": 63
+    },
+    "2000": {
+      "tokyo_observed_back_pct": 32.292,
+      "nakayama_observed_back_pct": 26.344,
+      "tokyo_market_expected_back_pct": 42.769,
+      "nakayama_market_expected_back_pct": 36.69,
+      "venue_excess_diff_pp": -0.131,
+      "venue_excess_ci95_pp": [
+        -9.085,
+        9.037
+      ],
+      "n_tokyo": 64,
+      "n_nakayama": 62
+    }
+  },
+  "lap_observation": {
+    "match": 479,
+    "same_race_lap_and_4c_both_postrace": true,
+    "robustness": [
+      {
+        "distance": 1600,
+        "subgroup": "no_mid_lull",
+        "tokyo_races": 63,
+        "nakayama_races": 99,
+        "tokyo_backshare": 0.3809523809523809,
+        "nakayama_backshare": 0.24579124579124578,
+        "difference": 0.1351611351611351,
+        "ci95": [
+          0.05964405964405961,
+          0.21260221260221257
+        ]
+      },
+      {
+        "distance": 1600,
+        "subgroup": "mid_lull",
+        "tokyo_races": 38,
+        "nakayama_races": 16,
+        "tokyo_backshare": 0.3421052631578947,
+        "nakayama_backshare": 0.25,
+        "difference": 0.09210526315789469,
+        "ci95": [
+          -0.05265899122807022,
+          0.24015899122806983
+        ]
+      },
+      {
+        "distance": 1600,
+        "subgroup": "good_going",
+        "tokyo_races": 88,
+        "nakayama_races": 95,
+        "tokyo_backshare": 0.36363636363636365,
+        "nakayama_backshare": 0.24561403508771928,
+        "difference": 0.11802232854864436,
+        "ci95": [
+          0.04350079744816593,
+          0.19210526315789475
+        ]
+      },
+      {
+        "distance": 1800,
+        "subgroup": "no_mid_lull",
+        "tokyo_races": 35,
+        "nakayama_races": 59,
+        "tokyo_backshare": 0.27619047619047615,
+        "nakayama_backshare": 0.1864406779661017,
+        "difference": 0.08974979822437446,
+        "ci95": [
+          -0.022473769168684456,
+          0.20193704600484264
+        ]
+      },
+      {
+        "distance": 1800,
+        "subgroup": "good_going",
+        "tokyo_races": 61,
+        "nakayama_races": 45,
+        "tokyo_backshare": 0.3442622950819672,
+        "nakayama_backshare": 0.2148148148148148,
+        "difference": 0.12944748026715241,
+        "ci95": [
+          0.0225561627200972,
+          0.23801457194899805
+        ]
+      },
+      {
+        "distance": 2000,
+        "subgroup": "no_mid_lull",
+        "tokyo_races": 39,
+        "nakayama_races": 36,
+        "tokyo_backshare": 0.3418803418803419,
+        "nakayama_backshare": 0.29629629629629634,
+        "difference": 0.04558404558404555,
+        "ci95": [
+          -0.08190883190883186,
+          0.17521367521367515
+        ]
+      },
+      {
+        "distance": 2000,
+        "subgroup": "mid_lull",
+        "tokyo_races": 25,
+        "nakayama_races": 26,
+        "tokyo_backshare": 0.29333333333333333,
+        "nakayama_backshare": 0.21794871794871792,
+        "difference": 0.07538461538461541,
+        "ci95": [
+          -0.06820512820512822,
+          0.22051282051282056
+        ]
+      },
+      {
+        "distance": 2000,
+        "subgroup": "good_going",
+        "tokyo_races": 57,
+        "nakayama_races": 50,
+        "tokyo_backshare": 0.3391812865497076,
+        "nakayama_backshare": 0.27999999999999997,
+        "difference": 0.05918128654970761,
+        "ci95": [
+          -0.04596783625730995,
+          0.16760233918128656
+        ]
+      }
+    ]
+  },
+  "asof_4c_model": {
+    "training": "2021-2023",
+    "test": "2024-2026/10/4 historical period previously explored",
+    "history_audit": {
+      "invalid_c4": 364,
+      "abnormal": 48
+    },
+    "history_distinct_horses": 4269,
+    "coverage": {
+      "horses_with_past": 3374,
+      "target_horse_rows": 7261
+    },
+    "coefficients": [
+      2.640964063832239,
+      1.9647226993149325,
+      0.6937382570597671,
+      0.1904826490488728,
+      -0.09183267669992683,
+      0.0671612016830977
+    ],
+    "intercept": -0.020334246905960585,
+    "train_auc": 0.6805373414920171,
+    "test_auc": 0.7411265931293265,
+    "test_brier": 0.20643489034188964,
+    "course_only_test_brier": 0.24910912589509823,
+    "gate_course_test_auc": 0.5296497945914472,
+    "gate_course_test_brier": 0.24875506228946687
+  },
+  "asof_4c_uncertainty": {
+    "test_races": 131,
+    "test_horses": 1994,
+    "paired_brier_gain": 0.042237794831544447,
+    "paired_race_bootstrap_ci95": [
+      0.03394979927035295,
+      0.05031893206023444
+    ],
+    "auc": 0.7411265931293265,
+    "race_cluster_auc_ci95": [
+      0.7185934043253679,
+      0.7644566450132328
+    ]
+  },
+  "stage_to_market_historical": {
+    "train": {
+      "brier_market": 0.13081170722622754,
+      "brier_inter": 0.13046523781085012,
+      "hits_market": 192.0,
+      "hits_inter": 193.0,
+      "changed": 14.0
+    },
+    "test": {
+      "brier_market": 0.1332770689508954,
+      "brier_inter": 0.13291781492204102,
+      "hits_market": 167.0,
+      "hits_inter": 172.0,
+      "changed": 16.0
+    },
+    "beta": [
+      -0.5315608006020901,
+      0.0
+    ],
+    "paired_brier_gain_ci95": [
+      -0.00018526766895923704,
+      0.0009190400788764133
+    ],
+    "stage_only_model_caveat": "Pre-race predicted 4C made from old horse starts+gate+venue, but stage model fitted on same 2021-23 train as second-stage target; training stage in-sample not cross-fitted; test 2024-26 as-of and unmined claim prohibited",
+    "method": "Logit of H002 closing odds-based PL shrunk 3-place proxy, adding centered predicted rear-half risk and Tokyo1600/1800 interaction, projected per race to total=3. Ridge penalty and signed constraints. All stage predictions use previous starts only."
+  },
+  "m3_shadow_incremental_small_sample": {
+    "train_races": 35,
+    "test_races": 63,
+    "coefficients": {
+      "market": [
+        0,
+        0
+      ],
+      "market_M3": [
+        -0.4023446104037577,
+        0
+      ],
+      "market_M3_position": [
+        -0.4023446104037577,
+        -0.839939684405975
+      ]
+    },
+    "training_results": {
+      "market": {
+        "brier": 0.13599827634576725,
+        "hits": 39,
+        "races": 35
+      },
+      "market_M3": {
+        "brier": 0.13563797628430738,
+        "hits": 40,
+        "races": 35
+      },
+      "market_M3_position": {
+        "brier": 0.13493510556018223,
+        "hits": 41,
+        "races": 35
+      }
+    },
+    "test_results": {
+      "market": {
+        "brier": 0.12832414514085463,
+        "hits": 88,
+        "races": 63
+      },
+      "market_M3": {
+        "brier": 0.12876575057295284,
+        "hits": 84,
+        "races": 63
+      },
+      "market_M3_position": {
+        "brier": 0.12832501193590823,
+        "hits": 87,
+        "races": 63
+      }
+    },
+    "paired_gain_ci95": [
+      -0.0007775755608230045,
+      0.0016090204741088696
+    ],
+    "paired_gain_mean": 0.00044073863704463225,
+    "switch_races": 25,
+    "caveats": [
+      "H005 M3 Python shadow, no official browser parity",
+      "All final odds are final postrace price",
+      "Earlier 2024–26 viewed repeatedly",
+      "N131 Tokyo/Nakayama 1600/1800/2000m only, low precision",
+      "Derived 4C model frozen 2021-23, additional coefficient only trained 2024"
+    ]
+  },
+  "warning": "Actual 4C and current race lap used for after-the-race mechanistic diagnostics only; they NEVER enter the pre-race 4C model or probability comparison. 2024-26 previously mined; closing odds not purchasable snapshot; browser parity not verified."
+}
