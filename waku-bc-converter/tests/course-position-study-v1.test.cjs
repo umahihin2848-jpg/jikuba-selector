@@ -11,7 +11,7 @@ test('research module syntax and no production decision writes',()=>{
  assert.match(js,/productionImpact:false/);
 });
 test('the panel is registered without requiring a real browser',()=>{
- const ctx={document:{readyState:'loading'},addEventListener(){}};
+ const ctx={document:{readyState:'loading',addEventListener(){}},addEventListener(){}};
  vm.runInNewContext(js,ctx,{timeout:1000});
  assert.equal(ctx.RSACoursePositionStudyV1.productionImpact,false);
  assert.equal(typeof ctx.RSACoursePositionStudyV1.refresh,'function');
