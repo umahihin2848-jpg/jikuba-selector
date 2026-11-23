@@ -1,7 +1,7 @@
 {
   "schema": "rsa-research-history-registry-v1",
   "created_on": "2026-11-23",
-  "entry_count": 47,
+  "entry_count": 48,
   "scope": "review of available GitHub docs, PR descriptions, archived conversation and supplied source files",
   "not_exhaustive_of_private_unretrieved_attachments": true,
   "source_text_sha256": "9521c4061a015341e658d434fdb70768800091499fc96d3b853a708e6c76fb16",
@@ -529,6 +529,27 @@
       "critical_caveats": "Historical target odds post-race, 2024-26 previously explored, as-of limited older 3win+ histories, venue/distance not exact course A/B inner-outer, courses vary physically, many horses sparse. No causal absence of horse-specific track aptitude proven.",
       "source": "validation/h009/H009_REPORT_20261123.md",
       "dedupKey": "H009|M3 static overlap audit|same-horse Tokyo Nakayama exact turf1600/1800/2000 early-late consistency|2016-26 and chrono train2019-23 test2024-26"
+    },
+    {
+      "id": "H010",
+      "title": "Course turn count and historic phase demands interact with horse's strictly earlier stage performance beyond M3 shadow",
+      "population": "2016-2026 prior 67167 unique historical horse starts; 2024 fitting 328R/4992 horses; 2025-26/10/04 historical validation 553R/8454 horses across all 10 venues 82 venue-surface-distance conditions",
+      "new_vs_prior": "H009 was same-horse Tokyo/Nakayama relative past outcomes and M3 feature audit. H010 pre-specifies three interactions: turn count×past 3C frontness, prior course 200m gear shift×past 3F vs race-fastest, prior course attrition×past 4C-finish gain; fits horse main effects separately and freezes course normalization in 2024.",
+      "feature_provenance": "Past TARGET umadete horse records: strictly prior validated distinct name+16digit date ID, max10 prior. As-of historic course lap template and turn count. Does not include actual target lap or target corner results. Exact straight/slope/first-turn layout not injected.",
+      "metrics": "2025-26 553R market PL Brier .132501917 top3 755; market+M3 shadow .132588733 top3 753; +horse stage main .132538583 top3 754; +turn/course lap interactions .132495672 top3 754. Main->interaction 95%CI Brier gain [-.00013014,+.00021341], no top3 gain, 91 top3 swaps; 2025 worsens .133013891->.133045823, 2026 improves .131885798->.131740101. Tokyo/Nakayama turf1600/1800/2000 subset 63R top3 88->87.",
+      "status": "COMPLETED_EXPLORATORY_HOLD_NO_REPRODUCIBLE_INCREMENT",
+      "modelImpact": "NO production Ability C, M3, P10, axis, BUY/PASS or betting changes",
+      "critical_caveats": "Previously mined 2025/26 test years; closing post-race odds used, not T-15; M3 Python research shadow NOT full browser parity (N001 incomplete); turn count not exact course radius, first corner, straight, inner/outer; individual 200m/GPS missing; 3C stage can mean different geometry for 2 vs 4 corners",
+      "artifacts": [
+        "validation/h010/H010_REPORT_20261123.md",
+        "validation/h010/h010_course_horse_interactions.py",
+        "validation/h010/test_h010_course_horse_interactions.py",
+        "validation/h010/H010_RESULT_AGGREGATE.json",
+        "validation/h010/H010_INPUT_SHA256.json"
+      ],
+      "tests": "11 deterministic synthetic + aggregate tests passed, entire real-data run repeated; full-field target 26 course ambiguous/missing races excluded",
+      "privacy": "The 553R detailed predictions and H005 horse-level M3 source packaged for user only, not public GitHub",
+      "dedupKey": "H010|2024 fitted frozen 3 individual main+3 turnxgearxfade interactions|2025-26 553R existing M3 shadow incremental Brier and Top3"
     }
   ],
   "new_protocols": [
@@ -608,11 +629,21 @@
     {
       "id": "H010",
       "title": "Frozen course geometry × horse pre-race position and section-demand response, with pairwise Tokyo–Nakayama contrasts",
-      "state": "hypothesis_not_implemented",
+      "state": "COMPLETED_EXPLORATORY_HOLD",
       "new_vs_prior": "H009 venue average outcome/residual replication fails; H010 would factor course geometry and interactions not venue label or old win rate",
       "needed": "N001 as-of race ID dedup and browser Ability C/M3 parity, official course geometry first turn/straight/slope/inner outer, distinct horse early-position/M4 as-of and past stagewise 3F/3C/4C observations",
       "evaluation": "Prior years exploratory, future frozen pre-race full-field comparisons vs official M3+Ability, race-wise Brier and top3; no coefficient search on prior viewed test years",
-      "claim_limit": "Course physical different does not imply predictive horse preference; no production bonus without independent improvement"
+      "claim_limit": "Course physical different does not imply predictive horse preference; no production bonus without independent improvement",
+      "findings": "2025-26 553R 8454 horses: +3 course interactions beyond horse main Brier small +.0000429 CI includes zero, top3 total same 754, 2025 worsened; research only",
+      "report": "validation/h010/H010_REPORT_20261123.md"
+    },
+    {
+      "id": "N001-next",
+      "title": "Integrity work before more course suitability models: exact main-browser dedup and frozen Ability C/M3 parity",
+      "state": "OPEN_priority",
+      "new_vs_prior": "Research H004-H010 has 2024-26 repeated mining and null robust gains; correcting duplicated historical race rows and wrong temporary saddlecloth mapping is prerequisite to trust course interaction scores.",
+      "needed": "Parser duplicate keys name+16-digit prior race ID; strict prior date; actual numbered runners, 3C/4C true labels, actual frozen pred export, browser vs offline exact matched features; new untouched race dates to confirm",
+      "claim_limit": "Do not present proxy market+M3 historical improvement as a live increase in betting expected value."
     }
   ]
 }
