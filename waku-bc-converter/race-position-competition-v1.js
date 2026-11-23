@@ -78,11 +78,13 @@ function context(){const s=root.RSAFocusedThreeTabsState||{},q=root.ValidatedQue
  if(!/^(3勝|L|OP|G1|G2|G3)$/.test(String($('grade')?.value||'')))return null;
  const host=$('rsafFormation'),fr=f.rows||[];if(!host||fr.length<12||fr.length>18)return null;
  const rows=fr.map(r=>{const x=q.byNo?.[String(r.no)]||{};return{no:r.no,name:r.name,expectedRank:x.expectedRank,validated:Boolean(x.validated),histGapSd:r.x?.hist_gap_sd,histGapN:r.x?.hist_gap_n};});
- const sig=[$('raceDate')?.value,$('venue')?.value,$('raceName')?.value,$('surface')?.value,$('distance')?.value,$('grade')?.value,rows.map(r=>r.no+':'+r.name+':'+r.expectedRank+':'+r.validated+':'+r.histGapSd+':'+r.histGapN).join('|')].join('~');
- return{host,rows,sig};
+ const raceInfo=[$('raceDate')?.value,$('venue')?.value,$('raceName')?.value,$('surface')?.value,$('distance')?.value,$('grade')?.value];
+ const seedSig=[...raceInfo,rows.map(r=>r.no+':'+r.name+':'+r.expectedRank+':'+r.validated).join('|')].join('~');
+ const sig=seedSig+'|history:'+rows.map(r=>r.histGapSd+':'+r.histGapN).join('|');
+ return{host,rows,sig,seedSig};
 }
 function render(){const c=context();if(!c)return;css();const signature=c.sig+'|'+analysisVersion;let el=$('rsarpcPanel');if(el&&el.parentElement===c.host&&signature===last)return;last=signature;
- const result=simulate(c.rows,{seed:hash(c.sig),count:4096,dispersion:2.8});
+ const result=simulate(c.rows,{seed:hash(c.seedSig),count:4096,dispersion:2.8});
  lastSnapshot=result.ready?{sig:c.sig,result}:null;
  if(!el||el.parentElement!==c.host){el=doc.createElement('details');el.id='rsarpcPanel';el.addEventListener('toggle',()=>{expanded=el.open;});c.host.appendChild(el);}
  el.open=expanded;
@@ -109,7 +111,7 @@ function exportSnapshot(){
  const snapshot={schema:'rsa-rank-distribution-snapshot-v1',capturedAt:new Date().toISOString(),modelVersion:VERSION,
   modelInput:'ValidatedQueueState.expectedRank',calibrated:false,usage:'研究用仮想分布。馬券期待値・本番M3へ転用不可',
   metadata:meta,simulation:{method:'Gumbel whole-field rank permutation',iterations:result.count,dispersion:result.dispersion,
-   frontSeats:result.k,middleEnd:result.kMiddle,seed:hash(c.sig)},
+   frontSeats:result.k,middleEnd:result.kMiddle,seed:hash(c.seedSig)},
   runners:result.rows.map(r=>({no:r.no,name:r.name,inputExpectedRank:r.expectedRank,simulatedExpectedRank:r.meanRank,historyGapSdSeconds:r.histGapSd,historyGapRaceCount:r.histGapN,
    rankProbabilities:r.rankProbabilities,frontShare:r.frontShare,middleShare:r.middleShare,rearShare:r.rearShare,
    interval10to90:[r.rank10,r.rank90],ifNotFront:{meanRank:r.fallbackMeanRank,interval10to90:[r.fallbackRank10,r.fallbackRank90]}}))};
