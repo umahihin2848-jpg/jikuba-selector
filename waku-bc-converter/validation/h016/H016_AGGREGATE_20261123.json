@@ -1,0 +1,2644 @@
+{
+  "cohort": {
+    "all_races": 3566,
+    "all_horses": 54383,
+    "evaluation_races": 990,
+    "evaluation_horses": 15089,
+    "train_ends": 2023,
+    "eval_period": "2024-01 to 2026-10-04",
+    "4c_normalized_bins": [
+      "前25%",
+      "前中25-50%",
+      "後中50-75%",
+      "最後方25%"
+    ]
+  },
+  "source_H013_risk_course_count": 15,
+  "source_H013_risk_evaluation_aggregate": {
+    "n": 1706,
+    "k": 147,
+    "q_approx": 251.6
+  },
+  "venue_surface_last25": [
+    {
+      "venue": "新潟",
+      "surface": "芝",
+      "train": {
+        "races": 116,
+        "horses": 430,
+        "top3": 46,
+        "rate_pct": 10.7,
+        "market_expected": 63.623,
+        "actual_over_market": 0.723
+      },
+      "test": {
+        "races": 44,
+        "horses": 165,
+        "top3": 11,
+        "rate_pct": 6.67,
+        "market_expected": 22.811,
+        "actual_over_market": 0.482
+      },
+      "ci": [
+        3.57,
+        10.12
+      ]
+    },
+    {
+      "venue": "中京",
+      "surface": "芝",
+      "train": {
+        "races": 131,
+        "horses": 475,
+        "top3": 33,
+        "rate_pct": 6.95,
+        "market_expected": 72.388,
+        "actual_over_market": 0.456
+      },
+      "test": {
+        "races": 42,
+        "horses": 153,
+        "top3": 6,
+        "rate_pct": 3.92,
+        "market_expected": 21.34,
+        "actual_over_market": 0.281
+      },
+      "ci": [
+        1.27,
+        7.24
+      ]
+    },
+    {
+      "venue": "京都",
+      "surface": "芝",
+      "train": {
+        "races": 176,
+        "horses": 615,
+        "top3": 44,
+        "rate_pct": 7.15,
+        "market_expected": 85.319,
+        "actual_over_market": 0.516
+      },
+      "test": {
+        "races": 115,
+        "horses": 400,
+        "top3": 28,
+        "rate_pct": 7.0,
+        "market_expected": 56.496,
+        "actual_over_market": 0.496
+      },
+      "ci": [
+        4.52,
+        9.76
+      ]
+    },
+    {
+      "venue": "阪神",
+      "surface": "芝",
+      "train": {
+        "races": 277,
+        "horses": 963,
+        "top3": 94,
+        "rate_pct": 9.76,
+        "market_expected": 145.616,
+        "actual_over_market": 0.646
+      },
+      "test": {
+        "races": 67,
+        "horses": 226,
+        "top3": 19,
+        "rate_pct": 8.41,
+        "market_expected": 28.194,
+        "actual_over_market": 0.674
+      },
+      "ci": [
+        5.12,
+        11.79
+      ]
+    },
+    {
+      "venue": "函館",
+      "surface": "芝",
+      "train": {
+        "races": 45,
+        "horses": 146,
+        "top3": 14,
+        "rate_pct": 9.59,
+        "market_expected": 20.596,
+        "actual_over_market": 0.68
+      },
+      "test": {
+        "races": 22,
+        "horses": 69,
+        "top3": 2,
+        "rate_pct": 2.9,
+        "market_expected": 8.926,
+        "actual_over_market": 0.224
+      },
+      "ci": [
+        0.0,
+        6.94
+      ]
+    },
+    {
+      "venue": "福島",
+      "surface": "芝",
+      "train": {
+        "races": 69,
+        "horses": 222,
+        "top3": 13,
+        "rate_pct": 5.86,
+        "market_expected": 32.396,
+        "actual_over_market": 0.401
+      },
+      "test": {
+        "races": 27,
+        "horses": 88,
+        "top3": 5,
+        "rate_pct": 5.68,
+        "market_expected": 10.974,
+        "actual_over_market": 0.456
+      },
+      "ci": [
+        1.19,
+        10.47
+      ]
+    },
+    {
+      "venue": "札幌",
+      "surface": "芝",
+      "train": {
+        "races": 69,
+        "horses": 230,
+        "top3": 10,
+        "rate_pct": 4.35,
+        "market_expected": 32.141,
+        "actual_over_market": 0.311
+      },
+      "test": {
+        "races": 31,
+        "horses": 101,
+        "top3": 12,
+        "rate_pct": 11.88,
+        "market_expected": 15.569,
+        "actual_over_market": 0.771
+      },
+      "ci": [
+        6.32,
+        17.53
+      ]
+    },
+    {
+      "venue": "小倉",
+      "surface": "芝",
+      "train": {
+        "races": 72,
+        "horses": 249,
+        "top3": 22,
+        "rate_pct": 8.84,
+        "market_expected": 34.003,
+        "actual_over_market": 0.647
+      },
+      "test": {
+        "races": 34,
+        "horses": 127,
+        "top3": 7,
+        "rate_pct": 5.51,
+        "market_expected": 16.05,
+        "actual_over_market": 0.436
+      },
+      "ci": [
+        2.09,
+        9.23
+      ]
+    },
+    {
+      "venue": "中山",
+      "surface": "芝",
+      "train": {
+        "races": 305,
+        "horses": 1007,
+        "top3": 57,
+        "rate_pct": 5.66,
+        "market_expected": 129.521,
+        "actual_over_market": 0.44
+      },
+      "test": {
+        "races": 115,
+        "horses": 386,
+        "top3": 15,
+        "rate_pct": 3.89,
+        "market_expected": 52.204,
+        "actual_over_market": 0.287
+      },
+      "ci": [
+        2.12,
+        5.71
+      ]
+    },
+    {
+      "venue": "東京",
+      "surface": "芝",
+      "train": {
+        "races": 300,
+        "horses": 1106,
+        "top3": 113,
+        "rate_pct": 10.22,
+        "market_expected": 165.5,
+        "actual_over_market": 0.683
+      },
+      "test": {
+        "races": 109,
+        "horses": 399,
+        "top3": 45,
+        "rate_pct": 11.28,
+        "market_expected": 62.138,
+        "actual_over_market": 0.724
+      },
+      "ci": [
+        8.41,
+        14.15
+      ]
+    },
+    {
+      "venue": "小倉",
+      "surface": "ダ",
+      "train": {
+        "races": 34,
+        "horses": 114,
+        "top3": 7,
+        "rate_pct": 6.14,
+        "market_expected": 16.007,
+        "actual_over_market": 0.437
+      },
+      "test": {
+        "races": 14,
+        "horses": 44,
+        "top3": 2,
+        "rate_pct": 4.55,
+        "market_expected": 5.349,
+        "actual_over_market": 0.374
+      },
+      "ci": [
+        0.0,
+        10.64
+      ]
+    },
+    {
+      "venue": "福島",
+      "surface": "ダ",
+      "train": {
+        "races": 36,
+        "horses": 118,
+        "top3": 3,
+        "rate_pct": 2.54,
+        "market_expected": 15.79,
+        "actual_over_market": 0.19
+      },
+      "test": {
+        "races": 20,
+        "horses": 68,
+        "top3": 0,
+        "rate_pct": 0.0,
+        "market_expected": 7.894,
+        "actual_over_market": 0.0
+      },
+      "ci": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "venue": "中山",
+      "surface": "ダ",
+      "train": {
+        "races": 171,
+        "horses": 562,
+        "top3": 34,
+        "rate_pct": 6.05,
+        "market_expected": 72.388,
+        "actual_over_market": 0.47
+      },
+      "test": {
+        "races": 62,
+        "horses": 217,
+        "top3": 19,
+        "rate_pct": 8.76,
+        "market_expected": 25.465,
+        "actual_over_market": 0.746
+      },
+      "ci": [
+        5.09,
+        12.83
+      ]
+    },
+    {
+      "venue": "京都",
+      "surface": "ダ",
+      "train": {
+        "races": 142,
+        "horses": 476,
+        "top3": 56,
+        "rate_pct": 11.76,
+        "market_expected": 64.731,
+        "actual_over_market": 0.865
+      },
+      "test": {
+        "races": 90,
+        "horses": 291,
+        "top3": 21,
+        "rate_pct": 7.22,
+        "market_expected": 36.698,
+        "actual_over_market": 0.572
+      },
+      "ci": [
+        4.47,
+        10.18
+      ]
+    },
+    {
+      "venue": "阪神",
+      "surface": "ダ",
+      "train": {
+        "races": 206,
+        "horses": 676,
+        "top3": 48,
+        "rate_pct": 7.1,
+        "market_expected": 81.969,
+        "actual_over_market": 0.586
+      },
+      "test": {
+        "races": 59,
+        "horses": 190,
+        "top3": 13,
+        "rate_pct": 6.84,
+        "market_expected": 25.656,
+        "actual_over_market": 0.507
+      },
+      "ci": [
+        3.35,
+        10.44
+      ]
+    },
+    {
+      "venue": "新潟",
+      "surface": "ダ",
+      "train": {
+        "races": 51,
+        "horses": 177,
+        "top3": 11,
+        "rate_pct": 6.21,
+        "market_expected": 25.665,
+        "actual_over_market": 0.429
+      },
+      "test": {
+        "races": 20,
+        "horses": 66,
+        "top3": 5,
+        "rate_pct": 7.58,
+        "market_expected": 10.543,
+        "actual_over_market": 0.474
+      },
+      "ci": [
+        2.74,
+        14.29
+      ]
+    },
+    {
+      "venue": "中京",
+      "surface": "ダ",
+      "train": {
+        "races": 111,
+        "horses": 360,
+        "top3": 32,
+        "rate_pct": 8.89,
+        "market_expected": 44.937,
+        "actual_over_market": 0.712
+      },
+      "test": {
+        "races": 34,
+        "horses": 114,
+        "top3": 4,
+        "rate_pct": 3.51,
+        "market_expected": 14.98,
+        "actual_over_market": 0.267
+      },
+      "ci": [
+        0.85,
+        7.02
+      ]
+    },
+    {
+      "venue": "東京",
+      "surface": "ダ",
+      "train": {
+        "races": 236,
+        "horses": 816,
+        "top3": 77,
+        "rate_pct": 9.44,
+        "market_expected": 114.373,
+        "actual_over_market": 0.673
+      },
+      "test": {
+        "races": 78,
+        "horses": 262,
+        "top3": 23,
+        "rate_pct": 8.78,
+        "market_expected": 37.325,
+        "actual_over_market": 0.616
+      },
+      "ci": [
+        5.51,
+        12.17
+      ]
+    },
+    {
+      "venue": "函館",
+      "surface": "ダ",
+      "train": {
+        "races": 15,
+        "horses": 42,
+        "top3": 0,
+        "rate_pct": 0.0,
+        "market_expected": 7.146,
+        "actual_over_market": 0.0
+      },
+      "test": {
+        "races": 3,
+        "horses": 12,
+        "top3": 0,
+        "rate_pct": 0.0,
+        "market_expected": 1.273,
+        "actual_over_market": 0.0
+      },
+      "ci": [
+        null,
+        null
+      ]
+    },
+    {
+      "venue": "札幌",
+      "surface": "ダ",
+      "train": {
+        "races": 10,
+        "horses": 36,
+        "top3": 0,
+        "rate_pct": 0.0,
+        "market_expected": 4.594,
+        "actual_over_market": 0.0
+      },
+      "test": {
+        "races": 4,
+        "horses": 16,
+        "top3": 1,
+        "rate_pct": 6.25,
+        "market_expected": 2.099,
+        "actual_over_market": 0.476
+      },
+      "ci": [
+        null,
+        null
+      ]
+    }
+  ],
+  "h013_asof_screen_surface": [
+    {
+      "venue": "中京",
+      "surface": "芝",
+      "summary": {
+        "races": 15,
+        "horses": 53,
+        "top3": 2,
+        "rate_pct": 3.77,
+        "market_expected": 5.573,
+        "actual_over_market": 0.359
+      },
+      "n_courses": 2
+    },
+    {
+      "venue": "中京",
+      "surface": "ダ",
+      "summary": {
+        "races": 9,
+        "horses": 21,
+        "top3": 2,
+        "rate_pct": 9.52,
+        "market_expected": 3.282,
+        "actual_over_market": 0.609
+      },
+      "n_courses": 1
+    },
+    {
+      "venue": "中山",
+      "surface": "芝",
+      "summary": {
+        "races": 65,
+        "horses": 188,
+        "top3": 12,
+        "rate_pct": 6.38,
+        "market_expected": 20.762,
+        "actual_over_market": 0.578
+      },
+      "n_courses": 3
+    },
+    {
+      "venue": "中山",
+      "surface": "ダ",
+      "summary": {
+        "races": 32,
+        "horses": 81,
+        "top3": 16,
+        "rate_pct": 19.75,
+        "market_expected": 10.102,
+        "actual_over_market": 1.584
+      },
+      "n_courses": 1
+    },
+    {
+      "venue": "京都",
+      "surface": "芝",
+      "summary": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      },
+      "n_courses": 0
+    },
+    {
+      "venue": "京都",
+      "surface": "ダ",
+      "summary": {
+        "races": 25,
+        "horses": 71,
+        "top3": 7,
+        "rate_pct": 9.86,
+        "market_expected": 8.687,
+        "actual_over_market": 0.806
+      },
+      "n_courses": 1
+    },
+    {
+      "venue": "函館",
+      "surface": "芝",
+      "summary": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      },
+      "n_courses": 0
+    },
+    {
+      "venue": "函館",
+      "surface": "ダ",
+      "summary": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      },
+      "n_courses": 0
+    },
+    {
+      "venue": "小倉",
+      "surface": "芝",
+      "summary": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      },
+      "n_courses": 0
+    },
+    {
+      "venue": "小倉",
+      "surface": "ダ",
+      "summary": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      },
+      "n_courses": 0
+    },
+    {
+      "venue": "新潟",
+      "surface": "芝",
+      "summary": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      },
+      "n_courses": 0
+    },
+    {
+      "venue": "新潟",
+      "surface": "ダ",
+      "summary": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      },
+      "n_courses": 0
+    },
+    {
+      "venue": "札幌",
+      "surface": "芝",
+      "summary": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      },
+      "n_courses": 0
+    },
+    {
+      "venue": "札幌",
+      "surface": "ダ",
+      "summary": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      },
+      "n_courses": 0
+    },
+    {
+      "venue": "東京",
+      "surface": "芝",
+      "summary": {
+        "races": 15,
+        "horses": 33,
+        "top3": 4,
+        "rate_pct": 12.12,
+        "market_expected": 4.844,
+        "actual_over_market": 0.826
+      },
+      "n_courses": 1
+    },
+    {
+      "venue": "東京",
+      "surface": "ダ",
+      "summary": {
+        "races": 25,
+        "horses": 75,
+        "top3": 9,
+        "rate_pct": 12.0,
+        "market_expected": 9.845,
+        "actual_over_market": 0.914
+      },
+      "n_courses": 1
+    },
+    {
+      "venue": "福島",
+      "surface": "芝",
+      "summary": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      },
+      "n_courses": 0
+    },
+    {
+      "venue": "福島",
+      "surface": "ダ",
+      "summary": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      },
+      "n_courses": 0
+    },
+    {
+      "venue": "阪神",
+      "surface": "芝",
+      "summary": {
+        "races": 14,
+        "horses": 31,
+        "top3": 4,
+        "rate_pct": 12.9,
+        "market_expected": 3.962,
+        "actual_over_market": 1.01
+      },
+      "n_courses": 2
+    },
+    {
+      "venue": "阪神",
+      "surface": "ダ",
+      "summary": {
+        "races": 13,
+        "horses": 45,
+        "top3": 5,
+        "rate_pct": 11.11,
+        "market_expected": 5.654,
+        "actual_over_market": 0.884
+      },
+      "n_courses": 1
+    }
+  ],
+  "course_h013_risks": [
+    {
+      "course": "新潟芝1000m",
+      "venue": "新潟",
+      "surface": "芝",
+      "distance": 1000,
+      "trainR": 36,
+      "testR": 13,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "中京芝1200m",
+      "venue": "中京",
+      "surface": "芝",
+      "distance": 1200,
+      "trainR": 40,
+      "testR": 11,
+      "risk": "後方50%",
+      "test": {
+        "races": 11,
+        "horses": 90,
+        "top3": 5,
+        "rate_pct": 5.56,
+        "market_expected": 10.945,
+        "actual_over_market": 0.457
+      }
+    },
+    {
+      "course": "京都芝1200m",
+      "venue": "京都",
+      "surface": "芝",
+      "distance": 1200,
+      "trainR": 38,
+      "testR": 18,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "阪神芝1200m",
+      "venue": "阪神",
+      "surface": "芝",
+      "distance": 1200,
+      "trainR": 40,
+      "testR": 7,
+      "risk": "後方50%",
+      "test": {
+        "races": 7,
+        "horses": 50,
+        "top3": 7,
+        "rate_pct": 14.0,
+        "market_expected": 7.532,
+        "actual_over_market": 0.929
+      }
+    },
+    {
+      "course": "函館芝1200m",
+      "venue": "函館",
+      "surface": "芝",
+      "distance": 1200,
+      "trainR": 28,
+      "testR": 13,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "福島芝1200m",
+      "venue": "福島",
+      "surface": "芝",
+      "distance": 1200,
+      "trainR": 27,
+      "testR": 12,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "札幌芝1200m",
+      "venue": "札幌",
+      "surface": "芝",
+      "distance": 1200,
+      "trainR": 24,
+      "testR": 11,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "小倉芝1200m",
+      "venue": "小倉",
+      "surface": "芝",
+      "distance": 1200,
+      "trainR": 41,
+      "testR": 19,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "新潟芝1200m",
+      "venue": "新潟",
+      "surface": "芝",
+      "distance": 1200,
+      "trainR": 5,
+      "testR": 1,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "中山芝1200m",
+      "venue": "中山",
+      "surface": "芝",
+      "distance": 1200,
+      "trainR": 74,
+      "testR": 24,
+      "risk": "後方50%",
+      "test": {
+        "races": 24,
+        "horses": 167,
+        "top3": 15,
+        "rate_pct": 8.98,
+        "market_expected": 26.278,
+        "actual_over_market": 0.571
+      }
+    },
+    {
+      "course": "東京芝1400m",
+      "venue": "東京",
+      "surface": "芝",
+      "distance": 1400,
+      "trainR": 59,
+      "testR": 25,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "阪神芝1400m",
+      "venue": "阪神",
+      "surface": "芝",
+      "distance": 1400,
+      "trainR": 46,
+      "testR": 10,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "中京芝1400m",
+      "venue": "中京",
+      "surface": "芝",
+      "distance": 1400,
+      "trainR": 24,
+      "testR": 12,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "新潟芝1400m",
+      "venue": "新潟",
+      "surface": "芝",
+      "distance": 1400,
+      "trainR": 19,
+      "testR": 7,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "京都芝1400m",
+      "venue": "京都",
+      "surface": "芝",
+      "distance": 1400,
+      "trainR": 37,
+      "testR": 21,
+      "risk": "最後方25%",
+      "test": {
+        "races": 21,
+        "horses": 80,
+        "top3": 7,
+        "rate_pct": 8.75,
+        "market_expected": 11.091,
+        "actual_over_market": 0.631
+      }
+    },
+    {
+      "course": "札幌芝1500m",
+      "venue": "札幌",
+      "surface": "芝",
+      "distance": 1500,
+      "trainR": 4,
+      "testR": 4,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "東京芝1600m",
+      "venue": "東京",
+      "surface": "芝",
+      "distance": 1600,
+      "trainR": 75,
+      "testR": 27,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "中京芝1600m",
+      "venue": "中京",
+      "surface": "芝",
+      "distance": 1600,
+      "trainR": 22,
+      "testR": 9,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "京都芝1600m",
+      "venue": "京都",
+      "surface": "芝",
+      "distance": 1600,
+      "trainR": 29,
+      "testR": 27,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "中山芝1600m",
+      "venue": "中山",
+      "surface": "芝",
+      "distance": 1600,
+      "trainR": 82,
+      "testR": 33,
+      "risk": "後方50%",
+      "test": {
+        "races": 33,
+        "horses": 228,
+        "top3": 18,
+        "rate_pct": 7.89,
+        "market_expected": 36.194,
+        "actual_over_market": 0.497
+      }
+    },
+    {
+      "course": "阪神芝1600m",
+      "venue": "阪神",
+      "surface": "芝",
+      "distance": 1600,
+      "trainR": 82,
+      "testR": 23,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "新潟芝1600m",
+      "venue": "新潟",
+      "surface": "芝",
+      "distance": 1600,
+      "trainR": 23,
+      "testR": 7,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "中山芝1800m",
+      "venue": "中山",
+      "surface": "芝",
+      "distance": 1800,
+      "trainR": 45,
+      "testR": 18,
+      "risk": "後方50%",
+      "test": {
+        "races": 18,
+        "horses": 126,
+        "top3": 11,
+        "rate_pct": 8.73,
+        "market_expected": 21.52,
+        "actual_over_market": 0.511
+      }
+    },
+    {
+      "course": "東京芝1800m",
+      "venue": "東京",
+      "surface": "芝",
+      "distance": 1800,
+      "trainR": 54,
+      "testR": 20,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "小倉芝1800m",
+      "venue": "小倉",
+      "surface": "芝",
+      "distance": 1800,
+      "trainR": 20,
+      "testR": 7,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "福島芝1800m",
+      "venue": "福島",
+      "surface": "芝",
+      "distance": 1800,
+      "trainR": 18,
+      "testR": 5,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "札幌芝1800m",
+      "venue": "札幌",
+      "surface": "芝",
+      "distance": 1800,
+      "trainR": 16,
+      "testR": 5,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "函館芝1800m",
+      "venue": "函館",
+      "surface": "芝",
+      "distance": 1800,
+      "trainR": 6,
+      "testR": 6,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "京都芝1800m",
+      "venue": "京都",
+      "surface": "芝",
+      "distance": 1800,
+      "trainR": 13,
+      "testR": 8,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "阪神芝1800m",
+      "venue": "阪神",
+      "surface": "芝",
+      "distance": 1800,
+      "trainR": 30,
+      "testR": 7,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "新潟芝1800m",
+      "venue": "新潟",
+      "surface": "芝",
+      "distance": 1800,
+      "trainR": 8,
+      "testR": 8,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "中京芝2000m",
+      "venue": "中京",
+      "surface": "芝",
+      "distance": 2000,
+      "trainR": 33,
+      "testR": 7,
+      "risk": "最後方25%",
+      "test": {
+        "races": 7,
+        "horses": 25,
+        "top3": 0,
+        "rate_pct": 0.0,
+        "market_expected": 3.945,
+        "actual_over_market": 0.0
+      }
+    },
+    {
+      "course": "中山芝2000m",
+      "venue": "中山",
+      "surface": "芝",
+      "distance": 2000,
+      "trainR": 46,
+      "testR": 17,
+      "risk": "最後方25%",
+      "test": {
+        "races": 17,
+        "horses": 62,
+        "top3": 3,
+        "rate_pct": 4.84,
+        "market_expected": 8.106,
+        "actual_over_market": 0.37
+      }
+    },
+    {
+      "course": "東京芝2000m",
+      "venue": "東京",
+      "surface": "芝",
+      "distance": 2000,
+      "trainR": 48,
+      "testR": 16,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "福島芝2000m",
+      "venue": "福島",
+      "surface": "芝",
+      "distance": 2000,
+      "trainR": 24,
+      "testR": 10,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "京都芝2000m",
+      "venue": "京都",
+      "surface": "芝",
+      "distance": 2000,
+      "trainR": 17,
+      "testR": 16,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "阪神芝2000m",
+      "venue": "阪神",
+      "surface": "芝",
+      "distance": 2000,
+      "trainR": 43,
+      "testR": 10,
+      "risk": "後方50%",
+      "test": {
+        "races": 10,
+        "horses": 66,
+        "top3": 8,
+        "rate_pct": 12.12,
+        "market_expected": 9.995,
+        "actual_over_market": 0.8
+      }
+    },
+    {
+      "course": "函館芝2000m",
+      "venue": "函館",
+      "surface": "芝",
+      "distance": 2000,
+      "trainR": 10,
+      "testR": 3,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "小倉芝2000m",
+      "venue": "小倉",
+      "surface": "芝",
+      "distance": 2000,
+      "trainR": 11,
+      "testR": 8,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "札幌芝2000m",
+      "venue": "札幌",
+      "surface": "芝",
+      "distance": 2000,
+      "trainR": 15,
+      "testR": 7,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "新潟芝2000m",
+      "venue": "新潟",
+      "surface": "芝",
+      "distance": 2000,
+      "trainR": 19,
+      "testR": 4,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "阪神芝2200m",
+      "venue": "阪神",
+      "surface": "芝",
+      "distance": 2200,
+      "trainR": 14,
+      "testR": 5,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "新潟芝2200m",
+      "venue": "新潟",
+      "surface": "芝",
+      "distance": 2200,
+      "trainR": 6,
+      "testR": 4,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "中京芝2200m",
+      "venue": "中京",
+      "surface": "芝",
+      "distance": 2200,
+      "trainR": 9,
+      "testR": 2,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "中山芝2200m",
+      "venue": "中山",
+      "surface": "芝",
+      "distance": 2200,
+      "trainR": 28,
+      "testR": 13,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "京都芝2200m",
+      "venue": "京都",
+      "surface": "芝",
+      "distance": 2200,
+      "trainR": 15,
+      "testR": 11,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "東京芝2400m",
+      "venue": "東京",
+      "surface": "芝",
+      "distance": 2400,
+      "trainR": 44,
+      "testR": 15,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "京都芝2400m",
+      "venue": "京都",
+      "surface": "芝",
+      "distance": 2400,
+      "trainR": 14,
+      "testR": 8,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "阪神芝2400m",
+      "venue": "阪神",
+      "surface": "芝",
+      "distance": 2400,
+      "trainR": 14,
+      "testR": 1,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "中山芝2500m",
+      "venue": "中山",
+      "surface": "芝",
+      "distance": 2500,
+      "trainR": 24,
+      "testR": 8,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "東京芝2500m",
+      "venue": "東京",
+      "surface": "芝",
+      "distance": 2500,
+      "trainR": 14,
+      "testR": 4,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "札幌芝2600m",
+      "venue": "札幌",
+      "surface": "芝",
+      "distance": 2600,
+      "trainR": 10,
+      "testR": 4,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "函館芝2600m",
+      "venue": "函館",
+      "surface": "芝",
+      "distance": 2600,
+      "trainR": 1,
+      "testR": 0,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "阪神芝2600m",
+      "venue": "阪神",
+      "surface": "芝",
+      "distance": 2600,
+      "trainR": 2,
+      "testR": 2,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "中京芝3000m",
+      "venue": "中京",
+      "surface": "芝",
+      "distance": 3000,
+      "trainR": 3,
+      "testR": 1,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "阪神芝3000m",
+      "venue": "阪神",
+      "surface": "芝",
+      "distance": 3000,
+      "trainR": 6,
+      "testR": 2,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "京都芝3000m",
+      "venue": "京都",
+      "surface": "芝",
+      "distance": 3000,
+      "trainR": 9,
+      "testR": 4,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "阪神芝3200m",
+      "venue": "阪神",
+      "surface": "芝",
+      "distance": 3200,
+      "trainR": 2,
+      "testR": 0,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "京都芝3200m",
+      "venue": "京都",
+      "surface": "芝",
+      "distance": 3200,
+      "trainR": 4,
+      "testR": 2,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "東京芝3400m",
+      "venue": "東京",
+      "surface": "芝",
+      "distance": 3400,
+      "trainR": 6,
+      "testR": 2,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "中山芝3600m",
+      "venue": "中山",
+      "surface": "芝",
+      "distance": 3600,
+      "trainR": 6,
+      "testR": 2,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "小倉ダ1000m",
+      "venue": "小倉",
+      "surface": "ダ",
+      "distance": 1000,
+      "trainR": 5,
+      "testR": 0,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "福島ダ1150m",
+      "venue": "福島",
+      "surface": "ダ",
+      "distance": 1150,
+      "trainR": 9,
+      "testR": 9,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "中山ダ1200m",
+      "venue": "中山",
+      "surface": "ダ",
+      "distance": 1200,
+      "trainR": 82,
+      "testR": 29,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "京都ダ1200m",
+      "venue": "京都",
+      "surface": "ダ",
+      "distance": 1200,
+      "trainR": 44,
+      "testR": 26,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "阪神ダ1200m",
+      "venue": "阪神",
+      "surface": "ダ",
+      "distance": 1200,
+      "trainR": 41,
+      "testR": 13,
+      "risk": "後方50%",
+      "test": {
+        "races": 13,
+        "horses": 91,
+        "top3": 5,
+        "rate_pct": 5.49,
+        "market_expected": 12.045,
+        "actual_over_market": 0.415
+      }
+    },
+    {
+      "course": "新潟ダ1200m",
+      "venue": "新潟",
+      "surface": "ダ",
+      "distance": 1200,
+      "trainR": 26,
+      "testR": 8,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "中京ダ1200m",
+      "venue": "中京",
+      "surface": "ダ",
+      "distance": 1200,
+      "trainR": 8,
+      "testR": 2,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "東京ダ1300m",
+      "venue": "東京",
+      "surface": "ダ",
+      "distance": 1300,
+      "trainR": 4,
+      "testR": 2,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "京都ダ1400m",
+      "venue": "京都",
+      "surface": "ダ",
+      "distance": 1400,
+      "trainR": 37,
+      "testR": 20,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "東京ダ1400m",
+      "venue": "東京",
+      "surface": "ダ",
+      "distance": 1400,
+      "trainR": 87,
+      "testR": 25,
+      "risk": "後方50%",
+      "test": {
+        "races": 25,
+        "horses": 174,
+        "top3": 15,
+        "rate_pct": 8.62,
+        "market_expected": 24.988,
+        "actual_over_market": 0.6
+      }
+    },
+    {
+      "course": "阪神ダ1400m",
+      "venue": "阪神",
+      "surface": "ダ",
+      "distance": 1400,
+      "trainR": 71,
+      "testR": 19,
+      "risk": "最後方25%",
+      "test": {
+        "races": 19,
+        "horses": 55,
+        "top3": 6,
+        "rate_pct": 10.91,
+        "market_expected": 7.582,
+        "actual_over_market": 0.791
+      }
+    },
+    {
+      "course": "中京ダ1400m",
+      "venue": "中京",
+      "surface": "ダ",
+      "distance": 1400,
+      "trainR": 47,
+      "testR": 15,
+      "risk": "未確定",
+      "test": {
+        "races": 0,        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "東京ダ1600m",
+      "venue": "東京",
+      "surface": "ダ",
+      "distance": 1600,
+      "trainR": 95,
+      "testR": 33,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "小倉ダ1700m",
+      "venue": "小倉",
+      "surface": "ダ",
+      "distance": 1700,
+      "trainR": 29,
+      "testR": 14,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "函館ダ1700m",
+      "venue": "函館",
+      "surface": "ダ",
+      "distance": 1700,
+      "trainR": 15,
+      "testR": 3,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "福島ダ1700m",
+      "venue": "福島",
+      "surface": "ダ",
+      "distance": 1700,
+      "trainR": 27,
+      "testR": 11,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "札幌ダ1700m",
+      "venue": "札幌",
+      "surface": "ダ",
+      "distance": 1700,
+      "trainR": 10,
+      "testR": 4,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "中山ダ1800m",
+      "venue": "中山",
+      "surface": "ダ",
+      "distance": 1800,
+      "trainR": 90,
+      "testR": 33,
+      "risk": "後方50%",
+      "test": {
+        "races": 33,
+        "horses": 233,
+        "top3": 29,
+        "rate_pct": 12.45,
+        "market_expected": 32.392,
+        "actual_over_market": 0.895
+      }
+    },
+    {
+      "course": "中京ダ1800m",
+      "venue": "中京",
+      "surface": "ダ",
+      "distance": 1800,
+      "trainR": 40,
+      "testR": 11,
+      "risk": "後方50%",
+      "test": {
+        "races": 11,
+        "horses": 76,
+        "top3": 9,
+        "rate_pct": 11.84,
+        "market_expected": 11.573,
+        "actual_over_market": 0.778
+      }
+    },
+    {
+      "course": "京都ダ1800m",
+      "venue": "京都",
+      "surface": "ダ",
+      "distance": 1800,
+      "trainR": 35,
+      "testR": 26,
+      "risk": "後方50%",
+      "test": {
+        "races": 26,
+        "horses": 183,
+        "top3": 9,
+        "rate_pct": 4.92,
+        "market_expected": 27.397,
+        "actual_over_market": 0.329
+      }
+    },
+    {
+      "course": "阪神ダ1800m",
+      "venue": "阪神",
+      "surface": "ダ",
+      "distance": 1800,
+      "trainR": 70,
+      "testR": 18,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "新潟ダ1800m",
+      "venue": "新潟",
+      "surface": "ダ",
+      "distance": 1800,
+      "trainR": 25,
+      "testR": 12,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "京都ダ1900m",
+      "venue": "京都",
+      "surface": "ダ",
+      "distance": 1900,
+      "trainR": 26,
+      "testR": 18,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "中京ダ1900m",
+      "venue": "中京",
+      "surface": "ダ",
+      "distance": 1900,
+      "trainR": 16,
+      "testR": 6,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "阪神ダ2000m",
+      "venue": "阪神",
+      "surface": "ダ",
+      "distance": 2000,
+      "trainR": 25,
+      "testR": 9,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    },
+    {
+      "course": "東京ダ2100m",
+      "venue": "東京",
+      "surface": "ダ",
+      "distance": 2100,
+      "trainR": 50,
+      "testR": 18,
+      "risk": "未確定",
+      "test": {
+        "races": 0,
+        "horses": 0,
+        "top3": 0,
+        "rate_pct": null,
+        "market_expected": 0.0,
+        "actual_over_market": null
+      }
+    }
+  ],
+  "matched_same_venue_distance_turf_dirt": [
+    {
+      "venue": "中京",
+      "distance": 1200,
+      "turf": {
+        "races": 11,
+        "horses": 45,
+        "top3": 0,
+        "rate_pct": 0.0,
+        "market_expected": 4.551,
+        "actual_over_market": 0.0
+      },
+      "dirt": {
+        "races": 2,
+        "horses": 6,
+        "top3": 0,
+        "rate_pct": 0.0,
+        "market_expected": 1.184,
+        "actual_over_market": 0.0
+      },
+      "turf_minus_dirt_rate_pp": 0.0,
+      "ci95_pp": [
+        null,
+        null
+      ],
+      "usable_both_10plus_races": false
+    },
+    {
+      "venue": "中京",
+      "distance": 1400,
+      "turf": {
+        "races": 12,
+        "horses": 45,
+        "top3": 5,
+        "rate_pct": 11.11,
+        "market_expected": 8.076,
+        "actual_over_market": 0.619
+      },
+      "dirt": {
+        "races": 15,
+        "horses": 48,
+        "top3": 2,
+        "rate_pct": 4.17,
+        "market_expected": 7.04,
+        "actual_over_market": 0.284
+      },
+      "turf_minus_dirt_rate_pp": 6.94,
+      "ci95_pp": [
+        -2.38,
+        17.89
+      ],
+      "usable_both_10plus_races": true
+    },
+    {
+      "venue": "中山",
+      "distance": 1200,
+      "turf": {
+        "races": 24,
+        "horses": 80,
+        "top3": 3,
+        "rate_pct": 3.75,
+        "market_expected": 10.655,
+        "actual_over_market": 0.282
+      },
+      "dirt": {
+        "races": 29,
+        "horses": 103,
+        "top3": 10,
+        "rate_pct": 9.71,
+        "market_expected": 12.066,
+        "actual_over_market": 0.829
+      },
+      "turf_minus_dirt_rate_pp": -5.96,
+      "ci95_pp": [
+        -12.83,
+        0.7
+      ],
+      "usable_both_10plus_races": true
+    },
+    {
+      "venue": "中山",
+      "distance": 1800,
+      "turf": {
+        "races": 18,
+        "horses": 59,
+        "top3": 1,
+        "rate_pct": 1.69,
+        "market_expected": 7.532,
+        "actual_over_market": 0.133
+      },
+      "dirt": {
+        "races": 33,
+        "horses": 114,
+        "top3": 9,
+        "rate_pct": 7.89,
+        "market_expected": 13.398,
+        "actual_over_market": 0.672
+      },
+      "turf_minus_dirt_rate_pp": -6.2,
+      "ci95_pp": [
+        -12.85,
+        0.03
+      ],
+      "usable_both_10plus_races": true
+    },
+    {
+      "venue": "京都",
+      "distance": 1200,
+      "turf": {
+        "races": 18,
+        "horses": 65,
+        "top3": 1,
+        "rate_pct": 1.54,
+        "market_expected": 7.687,
+        "actual_over_market": 0.13
+      },
+      "dirt": {
+        "races": 26,
+        "horses": 90,
+        "top3": 8,
+        "rate_pct": 8.89,
+        "market_expected": 12.484,
+        "actual_over_market": 0.641
+      },
+      "turf_minus_dirt_rate_pp": -7.35,
+      "ci95_pp": [
+        -13.19,
+        -1.47
+      ],
+      "usable_both_10plus_races": true
+    },
+    {
+      "venue": "京都",
+      "distance": 1400,
+      "turf": {
+        "races": 21,
+        "horses": 80,
+        "top3": 7,
+        "rate_pct": 8.75,
+        "market_expected": 11.091,
+        "actual_over_market": 0.631
+      },
+      "dirt": {
+        "races": 20,
+        "horses": 66,
+        "top3": 8,
+        "rate_pct": 12.12,
+        "market_expected": 8.471,
+        "actual_over_market": 0.944
+      },
+      "turf_minus_dirt_rate_pp": -3.37,
+      "ci95_pp": [
+        -13.3,
+        6.28
+      ],
+      "usable_both_10plus_races": true
+    },
+    {
+      "venue": "京都",
+      "distance": 1800,
+      "turf": {
+        "races": 8,
+        "horses": 28,
+        "top3": 2,
+        "rate_pct": 7.14,
+        "market_expected": 5.248,
+        "actual_over_market": 0.381
+      },
+      "dirt": {
+        "races": 26,
+        "horses": 82,
+        "top3": 1,
+        "rate_pct": 1.22,
+        "market_expected": 10.703,
+        "actual_over_market": 0.093
+      },
+      "turf_minus_dirt_rate_pp": 5.92,
+      "ci95_pp": [
+        -2.22,
+        14.81
+      ],
+      "usable_both_10plus_races": false
+    },
+    {
+      "venue": "新潟",
+      "distance": 1200,
+      "turf": {
+        "races": 1,
+        "horses": 3,
+        "top3": 0,
+        "rate_pct": 0.0,
+        "market_expected": 0.18,
+        "actual_over_market": 0.0
+      },
+      "dirt": {
+        "races": 8,
+        "horses": 27,
+        "top3": 2,
+        "rate_pct": 7.41,
+        "market_expected": 3.445,
+        "actual_over_market": 0.581
+      },
+      "turf_minus_dirt_rate_pp": -7.41,
+      "ci95_pp": [
+        null,
+        null
+      ],
+      "usable_both_10plus_races": false
+    },
+    {
+      "venue": "新潟",
+      "distance": 1800,
+      "turf": {
+        "races": 8,
+        "horses": 26,
+        "top3": 2,
+        "rate_pct": 7.69,
+        "market_expected": 4.402,
+        "actual_over_market": 0.454
+      },
+      "dirt": {
+        "races": 12,
+        "horses": 39,
+        "top3": 3,
+        "rate_pct": 7.69,
+        "market_expected": 7.098,
+        "actual_over_market": 0.423
+      },
+      "turf_minus_dirt_rate_pp": 0.0,
+      "ci95_pp": [
+        -11.9,
+        11.53
+      ],
+      "usable_both_10plus_races": false
+    },
+    {
+      "venue": "東京",
+      "distance": 1400,
+      "turf": {
+        "races": 25,
+        "horses": 91,
+        "top3": 11,
+        "rate_pct": 12.09,
+        "market_expected": 14.343,
+        "actual_over_market": 0.767
+      },
+      "dirt": {
+        "races": 25,
+        "horses": 86,
+        "top3": 5,
+        "rate_pct": 5.81,
+        "market_expected": 12.773,
+        "actual_over_market": 0.391
+      },
+      "turf_minus_dirt_rate_pp": 6.28,
+      "ci95_pp": [
+        -1.25,
+        13.2
+      ],
+      "usable_both_10plus_races": true
+    },
+    {
+      "venue": "東京",
+      "distance": 1600,
+      "turf": {
+        "races": 27,
+        "horses": 100,
+        "top3": 5,
+        "rate_pct": 5.0,
+        "market_expected": 14.903,
+        "actual_over_market": 0.336
+      },
+      "dirt": {
+        "races": 33,
+        "horses": 111,
+        "top3": 13,
+        "rate_pct": 11.71,
+        "market_expected": 16.297,
+        "actual_over_market": 0.798
+      },
+      "turf_minus_dirt_rate_pp": -6.71,
+      "ci95_pp": [
+        -13.64,
+        0.94
+      ],
+      "usable_both_10plus_races": true
+    },
+    {
+      "venue": "阪神",
+      "distance": 1200,
+      "turf": {
+        "races": 7,
+        "horses": 21,
+        "top3": 1,
+        "rate_pct": 4.76,
+        "market_expected": 2.354,
+        "actual_over_market": 0.425
+      },
+      "dirt": {
+        "races": 13,
+        "horses": 45,
+        "top3": 2,
+        "rate_pct": 4.44,
+        "market_expected": 5.748,
+        "actual_over_market": 0.348
+      },
+      "turf_minus_dirt_rate_pp": 0.32,
+      "ci95_pp": [
+        -8.89,
+        13.41
+      ],
+      "usable_both_10plus_races": false
+    },
+    {
+      "venue": "阪神",
+      "distance": 1400,
+      "turf": {
+        "races": 10,
+        "horses": 43,
+        "top3": 2,
+        "rate_pct": 4.65,
+        "market_expected": 5.351,
+        "actual_over_market": 0.374
+      },
+      "dirt": {
+        "races": 19,
+        "horses": 55,
+        "top3": 6,
+        "rate_pct": 10.91,
+        "market_expected": 7.582,
+        "actual_over_market": 0.791
+      },
+      "turf_minus_dirt_rate_pp": -6.26,
+      "ci95_pp": [
+        -16.3,
+        3.53
+      ],
+      "usable_both_10plus_races": true
+    },
+    {
+      "venue": "阪神",
+      "distance": 1800,
+      "turf": {
+        "races": 7,
+        "horses": 19,
+        "top3": 2,
+        "rate_pct": 10.53,
+        "market_expected": 2.288,
+        "actual_over_market": 0.874
+      },
+      "dirt": {
+        "races": 18,
+        "horses": 61,
+        "top3": 3,
+        "rate_pct": 4.92,
+        "market_expected": 8.762,
+        "actual_over_market": 0.342
+      },
+      "turf_minus_dirt_rate_pp": 5.61,
+      "ci95_pp": [
+        -6.56,
+        18.81
+      ],
+      "usable_both_10plus_races": false
+    },
+    {
+      "venue": "阪神",
+      "distance": 2000,
+      "turf": {
+        "races": 10,
+        "horses": 32,
+        "top3": 2,
+        "rate_pct": 6.25,
+        "market_expected": 4.137,
+        "actual_over_market": 0.483
+      },
+      "dirt": {
+        "races": 9,
+        "horses": 29,
+        "top3": 2,
+        "rate_pct": 6.9,
+        "market_expected": 3.565,
+        "actual_over_market": 0.561
+      },
+      "turf_minus_dirt_rate_pp": -0.65,
+      "ci95_pp": [
+        -11.54,
+        9.68
+      ],
+      "usable_both_10plus_races": false
+    }
+  ],
+  "cautions": [
+    "Current 4C position is observed only after the race; cannot use this result to automatically remove a horse before start.",
+    "Course-level danger category is frozen from H013 2016-23, not tuned to 2024-26.",
+    "Closing odds PL probability is retrospective market reference, not bettable quote.",
+    "Same venue turf vs dirt comparisons include different distances, race conditions and field composition.",
+    "Prior studies repeatedly examined evaluation years, thus these are historical exploration, not independent future validation."
+  ]
+}
