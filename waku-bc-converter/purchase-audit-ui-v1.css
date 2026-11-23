@@ -1,0 +1,28 @@
+/* P3-74: read-only buy/skip research panel. Independent of official ticket cards. */
+#rsaPurchaseAudit.rpa{margin:12px 0;border:1px solid #47778b;border-radius:13px;background:#102630;color:#ecfaff;padding:10px 12px;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN",sans-serif;font-size:13px;line-height:1.55}
+#rsaPurchaseAudit>summary{font-size:14px;cursor:pointer;font-weight:850;line-height:1.6;color:#f3fff9}
+#rsaPurchaseAudit>summary small{display:block;color:#bbd8e0;font-size:10px;font-weight:500}
+#rsaPurchaseAudit .rpaBody{padding-top:8px}
+#rsaPurchaseAudit .rpaIntro,#rsaPurchaseAudit .rpaFoot{font-size:11px;color:#c1d5e0;line-height:1.65}
+#rsaPurchaseAudit .rpaField{padding:9px 10px;margin:9px 0;border:1px solid #315a6e;background:#0c3442;border-radius:10px}
+#rsaPurchaseAudit h4{margin:0 0 6px;font-size:13px;font-weight:800;color:#f4fffa}
+#rsaPurchaseAudit p{margin:6px 0;font-size:11px;line-height:1.6}
+#rsaPurchaseAudit label{font-weight:650;display:block;font-size:11px;margin:7px 0 3px;color:#e5f8f9}
+#rsaPurchaseAudit input[type=text],#rsaPurchaseAudit input[type=number],#rsaPurchaseAudit input[type=datetime-local],#rsaPurchaseAudit select,#rsaPurchaseAudit textarea{display:block;box-sizing:border-box;width:100%;max-width:100%;font-family:inherit;font-size:13px;line-height:1.5;border:1px solid #8da9b5;border-radius:7px;color:#123543;background:#fafefd;padding:8px;min-height:35px}
+#rsaPurchaseAudit textarea{min-height:55px;resize:vertical}
+#rsaPurchaseAudit .rpaCheck{display:flex;gap:8px;align-items:flex-start;line-height:1.5;font-size:12px}
+#rsaPurchaseAudit .rpaCheck input{width:17px;height:17px;flex:none;accent-color:#3e9897}
+#rsaPurchaseAudit button{background:#146e81;color:#fff;border:1px solid #69bcc0;font-size:12px;font-weight:800;border-radius:8px;padding:9px 11px;cursor:pointer}
+#rsaPurchaseAudit button.rpaSub{background:#26465b;border-color:#5d8295}
+#rsaPurchaseAudit button:focus-visible{outline:3px solid #a0e9dc;outline-offset:2px}
+#rsaPurchaseAudit .rpaHorse{margin:7px 0;padding:8px;border:1px solid #3d6879;border-radius:8px;background:#102d3a}
+#rsaPurchaseAudit .rpaHorse b{font-size:12px}
+#rsaPurchaseAudit .rpaHorse small{display:block;font-size:10px;color:#c8dbe1}
+#rsaPurchaseAudit .rpaActions{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}
+#rsaPurchaseAudit .rpaResult{padding:12px;border:1px solid #55798a;background:#173744;border-radius:9px}
+#rsaPurchaseAudit .rpaResult h4{font-size:14px}
+#rsaPurchaseAudit .rpaResult ol{padding-left:22px;margin:8px 0;font-size:11px}
+#rsaPurchaseAudit .rpaResult li{margin-bottom:4px}
+#rsaPurchaseAudit .rpaOfficial{border-left:3px solid #9abed1;padding:5px 8px;background:#294351}
+#rsaPurchaseAudit .rpaOfficial small{display:block;color:#d2e3ee;overflow-wrap:anywhere}
+#rsaPurchaseAudit .rpaWarn{border:1px dashed #a38d54;color:#ffe4a0;padding:7px;border-radius:5px}
