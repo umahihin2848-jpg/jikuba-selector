@@ -1,7 +1,7 @@
 {
   "schema": "rsa-research-history-registry-v1",
   "created_on": "2026-11-23",
-  "entry_count": 55,
+  "entry_count": 56,
   "scope": "review of available GitHub docs, PR descriptions, archived conversation and supplied source files",
   "not_exhaustive_of_private_unretrieved_attachments": true,
   "source_text_sha256": "9521c4061a015341e658d434fdb70768800091499fc96d3b853a708e6c76fb16",
@@ -672,6 +672,26 @@
       ],
       "aggregate": "validation/h017/H017_RESULT_AGGREGATE_20261123.json",
       "dedupKey": "H017|national86 4corner 4-zone multi p versus conditional finish + LOO opponents front reserve|2022-23 fit 2024-26 historical 977R|H013 598 flagged sensitivity"
+    },
+    {
+      "id": "H018",
+      "title": "All-field, no-duplicate 1..N fourth-corner position allocation from frozen four-band H017 probabilities",
+      "population": "Previously frozen H017 historical evaluation 2024-26/10/04 977R/14876 runners, 86 venue/surface/distance profiles after excluding Niigata turf1000",
+      "new_vs_prior": "H017 independently assigned each horse four C4 band probabilities, leading to inconsistent band occupancies; H018 projects full field jointly to capacity-constrained four band predictions, expands to doubly stochastic N-rank matrix, Hungarian unique-rank assignment, tests stage metrics and H013 danger flags without refitting H017.",
+      "method": "KL IPF projection of horse p(zone) with row sum1 and columns fixed by 1..N rank-band capacities; rank expansion to N×N bistochastic matrix; Hungarian assignment. H013 2016–23 zone success rates with fixed 30 pseudo-runner shrink used ONLY as approximate downstream finish sensitivity, NOT a full H017 conditional reimplementation.",
+      "results": "Raw expected band count deviated from physically unique capacity >1 horse in 398/977R; >2 in 15; joint mismatch0/977 and duplicate MAP ranks0/977. Four-band Brier .16597893→.16583293, zone accuracy .43150→.43432, backhalf AUC .77010→.77280, cluster CI band Brier gain [-.0000958,+.0004574] spans0; stage logloss 1.215184→1.214788 CI spans0. Fixed finish sensitivity Brier .14420984→.14409474, top3 hits1117→1122; 2024/2025/2026 Brier all improved, but prior repeatedly mined and sensitivity only.",
+      "critical_measurement_gap": "Actual TARGET C4 recorded four zone occupancy differs from hypothetical strict 1..N rank-bin capacity in 827/977R, likely passing-order tie and position documentation; latent unique ordering is NOT actual unique observed C4, exact intra-zone ranks arbitrary. On 150 consistent races Brier stage .167374→.164910; evaluated separately.",
+      "surface": "Turf stage Brier .166864→.166456 improves; dirt stage .164604→.164865 worsens, so no surface-wide generalization proof.",
+      "risk_safety": "H013 frozen previously flagged598 (61 top3), H017 last-25>=.5 plus top3<=.1 flagged137 top3=7 closing expected9.48; H018 projected same thresholds flags203 top3=10 closing expected13.52; new-only68 top3=4 expected4.14; market q>=.15 still6 flagged with2 actual top3. NO automatic exclusion or betting EV gain.",
+      "status": "EXPLORATORY_FOURTH_CORNER_JOINT_CAPACITY_VALIDATED_BUT_PREDICTIVE_INCREMENT_UNPROVEN",
+      "modelImpact": "No official Ability C M3 P10 M4 axis BUY/PASS changes",
+      "leakage": "Only frozen H017 as-of per-horse predicted 4-zone probability and H013 2016-23 profile zone propensity for downstream; test true C4, top3, late race time, closing market not predictor. Label-swap invariant. 2024-26 already mined in H004–H017, no fresh holdout.",
+      "tests": "10 synthetic unit tests PASS. 977/977 rank maps assign one different 1..N rank per runner; JS viewer syntax node check PASS; ZIP CRC verified.",
+      "private_artifacts": "Local self-contained 977 race browser viewer and 14876 horse private CSV plus H017/H013 inputs distributed only conversation ZIP, not public GitHub",
+      "source": "validation/h018/H018_REPORT_20261124.md",
+      "code": "validation/h018/h018_joint_rank.py",
+      "aggregation": "validation/h018/H018_AGGREGATE.json",
+      "dedupKey": "H018|frozen H017 stage probabilities KL joint occupancy 977R|no duplicate MAP unique rank|H013 frozen course zone finish sensitivity|2024-26 exploratory"
     }
   ],
   "new_protocols": [
@@ -810,10 +830,13 @@
     {
       "id": "H018",
       "title": "Course-conditional simultaneous 4C rank probability allocations with occupancy constraints and pairwise finishability residual",
-      "state": "proposed_not_executed",
+      "state": "COMPLETED_EXPLORATORY_RESEARCH_HOLD",
       "new_vs_prior": "H017 independent multinomial probabilities for each horse do not ensure 1–N ranks jointly; H018 would test constrained matching vs independent p and downstream finish probabilities",
       "blockers": "Need N001 exact five-unique-history browser parity and M4/P10/3C4C official output; independently adjudicated course inside/outside; historical labels as train only",
-      "safety": "No automatic betting veto or T-15 EV claim from final odds, no current C4 outcome as pre-race feature"
+      "safety": "No automatic betting veto or T-15 EV claim from final odds, no current C4 outcome as pre-race feature",
+      "findings": "977R no capacity violations, slight zone Brier gain CI zero crosses, downstream sensitivity 1117->1122 but market unbeaten and 2024-26 already mined; 827/977 recorded C4 capacities not strict rank-unique",
+      "report": "validation/h018/H018_REPORT_20261124.md",
+      "next": "Audit c4 ties and proper simultaneous rank outcome targets; N001 JS pipeline parity, first-corner/3C->4C dynamic transitions before production."
     }
   ]
 }
