@@ -1,0 +1,506 @@
+{
+  "schema": "h008e_individual_response_v1",
+  "run_date": "2026-11-23",
+  "hypothesis": "Individual past 3F and c3/c4/finish movement conditioned on as-of race-wide full lap shape predict today better than generic response alone.",
+  "definition": {
+    "lookback_unique_starts": 15,
+    "stage_weights": {
+      "c4_to_finish": 0.4,
+      "own_last3f_vs_historical_race_fastest": 0.3,
+      "minus600_actual_leader_gap": 0.2,
+      "c3_to_c4": 0.1
+    },
+    "lap_match_bandwidth_sec_per200m": 0.5,
+    "half_life_factor_per_older_start": 0.9,
+    "minimum_observations": 3,
+    "no_horse_individual_200m_sectional_claim": true,
+    "train": "2024",
+    "evaluate": "2025-2026-10-04 historically used (not pristine)"
+  },
+  "audit": {
+    "history": {
+      "raw": 439416,
+      "valid_unique": 67167,
+      "no_valid_lap": 3053,
+      "bad_id_or_date": 1482,
+      "nonflat_or_abnormal": 402,
+      "invalid_result_or_conditions": 3566,
+      "duplicate": 363746
+    },
+    "history_years": {
+      "2026": 6418,
+      "2025": 11615,
+      "2024": 12890,
+      "2023": 12990,
+      "2022": 9759,
+      "2021": 6901,
+      "2020": 3776,
+      "2019": 1716,
+      "2018": 716,
+      "2017": 270,
+      "2016": 87,
+      "2015": 25,
+      "2014": 4
+    },
+    "own_coverage": {
+      "attached": 67167,
+      "valid_c4_to_finish": 67167,
+      "valid_last3f_vs_fastest": 67153,
+      "valid_actual_gap600": 67167,
+      "valid_c3_to_c4": 66656
+    },
+    "target_issues": {},
+    "rejected": {
+      "missing_or_mixed_turn": 26
+    }
+  },
+  "coefficients": {
+    "market_M3_baseline": [
+      -0.07736367826594608,
+      0.26537242910411374,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "H008D_lap_fit_baseline": [
+      -0.07736367826594608,
+      0.26537242910411374,
+      0.7974964330967976,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "plus_generic_horse_response": [
+      -0.07736367826594608,
+      0.26537242910411374,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      -0.3982029273306249,
+      0.0
+    ],
+    "plus_generic_and_lap_conditioned_horse_response": [
+      -0.07736367826594608,
+      0.26537242910411374,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      -0.3982029273306249,
+      0.0
+    ],
+    "H008D_plus_lap_conditioned_horse_response": [
+      -0.07736367826594608,
+      0.26537242910411374,
+      0.7974964330967976,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "results": {
+    "train2024": {
+      "market_M3_baseline": {
+        "races": 328,
+        "horses": 4992,
+        "brier": 0.131452768042922,
+        "top3_hits": 465,
+        "winner_in_top3": 194
+      },
+      "H008D_lap_fit_baseline": {
+        "races": 328,
+        "horses": 4992,
+        "brier": 0.13141955323822704,
+        "top3_hits": 464,
+        "winner_in_top3": 193
+      },
+      "plus_generic_horse_response": {
+        "races": 328,
+        "horses": 4992,
+        "brier": 0.13141983379122543,
+        "top3_hits": 464,
+        "winner_in_top3": 195
+      },
+      "plus_generic_and_lap_conditioned_horse_response": {
+        "races": 328,
+        "horses": 4992,
+        "brier": 0.13141983379122543,
+        "top3_hits": 464,
+        "winner_in_top3": 195
+      },
+      "H008D_plus_lap_conditioned_horse_response": {
+        "races": 328,
+        "horses": 4992,
+        "brier": 0.13141955323822704,
+        "top3_hits": 464,
+        "winner_in_top3": 193
+      }
+    },
+    "2025_26": {
+      "market_M3_baseline": {
+        "races": 553,
+        "horses": 8454,
+        "brier": 0.13258873264029036,
+        "top3_hits": 753,
+        "winner_in_top3": 310
+      },
+      "H008D_lap_fit_baseline": {
+        "races": 553,
+        "horses": 8454,
+        "brier": 0.13257659893009394,
+        "top3_hits": 749,
+        "winner_in_top3": 310
+      },
+      "plus_generic_horse_response": {
+        "races": 553,
+        "horses": 8454,
+        "brier": 0.13256811184810668,
+        "top3_hits": 747,
+        "winner_in_top3": 311
+      },
+      "plus_generic_and_lap_conditioned_horse_response": {
+        "races": 553,
+        "horses": 8454,
+        "brier": 0.13256811184810668,
+        "top3_hits": 747,
+        "winner_in_top3": 311
+      },
+      "H008D_plus_lap_conditioned_horse_response": {
+        "races": 553,
+        "horses": 8454,
+        "brier": 0.13257659893009394,
+        "top3_hits": 749,
+        "winner_in_top3": 310
+      }
+    },
+    "2025": {
+      "market_M3_baseline": {
+        "races": 320,
+        "horses": 4867,
+        "brier": 0.13308894344597627,
+        "top3_hits": 440,
+        "winner_in_top3": 185
+      },
+      "H008D_lap_fit_baseline": {
+        "races": 320,
+        "horses": 4867,
+        "brier": 0.13307640682253863,
+        "top3_hits": 437,
+        "winner_in_top3": 185
+      },
+      "plus_generic_horse_response": {
+        "races": 320,
+        "horses": 4867,
+        "brier": 0.1330591916367581,
+        "top3_hits": 436,
+        "winner_in_top3": 185
+      },
+      "plus_generic_and_lap_conditioned_horse_response": {
+        "races": 320,
+        "horses": 4867,
+        "brier": 0.1330591916367581,
+        "top3_hits": 436,
+        "winner_in_top3": 185
+      },
+      "H008D_plus_lap_conditioned_horse_response": {
+        "races": 320,
+        "horses": 4867,
+        "brier": 0.13307640682253863,
+        "top3_hits": 437,
+        "winner_in_top3": 185
+      }
+    },
+    "2026": {
+      "market_M3_baseline": {
+        "races": 233,
+        "horses": 3587,
+        "brier": 0.13190174784278186,
+        "top3_hits": 313,
+        "winner_in_top3": 125
+      },
+      "H008D_lap_fit_baseline": {
+        "races": 233,
+        "horses": 3587,
+        "brier": 0.1318901674898266,
+        "top3_hits": 312,
+        "winner_in_top3": 125
+      },
+      "plus_generic_horse_response": {
+        "races": 233,
+        "horses": 3587,
+        "brier": 0.1318936675031777,
+        "top3_hits": 311,
+        "winner_in_top3": 126
+      },
+      "plus_generic_and_lap_conditioned_horse_response": {
+        "races": 233,
+        "horses": 3587,
+        "brier": 0.1318936675031777,
+        "top3_hits": 311,
+        "winner_in_top3": 126
+      },
+      "H008D_plus_lap_conditioned_horse_response": {
+        "races": 233,
+        "horses": 3587,
+        "brier": 0.1318901674898266,
+        "top3_hits": 312,
+        "winner_in_top3": 125
+      }
+    }
+  },
+  "paired": {
+    "train2024": {
+      "raw_over_market_M3": {
+        "gain_brier": 3.2934251696589115e-05,
+        "CI95_gain_brier": [
+          -0.00011703625960877713,
+          0.00017856931418112857
+        ],
+        "hit_gain": -1,
+        "CI95_total_hit_gain_boot": [
+          -6.0,
+          4.0
+        ],
+        "changed_candidate_races": 38,
+        "better_races": 3,
+        "worse_races": 4
+      },
+      "condition_over_generic": {
+        "gain_brier": 0.0,
+        "CI95_gain_brier": [
+          0.0,
+          0.0
+        ],
+        "hit_gain": 0,
+        "CI95_total_hit_gain_boot": [
+          0.0,
+          0.0
+        ],
+        "changed_candidate_races": 0,
+        "better_races": 0,
+        "worse_races": 0
+      },
+      "conditional_over_lap_fit": {
+        "gain_brier": 0.0,
+        "CI95_gain_brier": [
+          0.0,
+          0.0
+        ],
+        "hit_gain": 0,
+        "CI95_total_hit_gain_boot": [
+          0.0,
+          0.0
+        ],
+        "changed_candidate_races": 0,
+        "better_races": 0,
+        "worse_races": 0
+      }
+    },
+    "2025_26": {
+      "raw_over_market_M3": {
+        "gain_brier": 2.062079218370653e-05,
+        "CI95_gain_brier": [
+          -8.744429594665095e-05,
+          0.0001284256088475534
+        ],
+        "hit_gain": -6,
+        "CI95_total_hit_gain_boot": [
+          -14.0,
+          2.0
+        ],
+        "changed_candidate_races": 65,
+        "better_races": 5,
+        "worse_races": 11
+      },
+      "condition_over_generic": {
+        "gain_brier": 0.0,
+        "CI95_gain_brier": [
+          0.0,
+          0.0
+        ],
+        "hit_gain": 0,
+        "CI95_total_hit_gain_boot": [
+          0.0,
+          0.0
+        ],
+        "changed_candidate_races": 0,
+        "better_races": 0,
+        "worse_races": 0
+      },
+      "conditional_over_lap_fit": {
+        "gain_brier": 0.0,
+        "CI95_gain_brier": [
+          0.0,
+          0.0
+        ],
+        "hit_gain": 0,
+        "CI95_total_hit_gain_boot": [
+          0.0,
+          0.0
+        ],
+        "changed_candidate_races": 0,
+        "better_races": 0,
+        "worse_races": 0
+      }
+    },
+    "2025": {
+      "raw_over_market_M3": {
+        "gain_brier": 2.9751809218183148e-05,
+        "CI95_gain_brier": [
+          -0.0001181403166851833,
+          0.00017457783314269086
+        ],
+        "hit_gain": -4,
+        "CI95_total_hit_gain_boot": [
+          -11.0,
+          3.0
+        ],
+        "changed_candidate_races": 36,
+        "better_races": 4,
+        "worse_races": 8
+      },
+      "condition_over_generic": {
+        "gain_brier": 0.0,
+        "CI95_gain_brier": [
+          0.0,
+          0.0
+        ],
+        "hit_gain": 0,
+        "CI95_total_hit_gain_boot": [
+          0.0,
+          0.0
+        ],
+        "changed_candidate_races": 0,
+        "better_races": 0,
+        "worse_races": 0
+      },
+      "conditional_over_lap_fit": {
+        "gain_brier": 0.0,
+        "CI95_gain_brier": [
+          0.0,
+          0.0
+        ],
+        "hit_gain": 0,
+        "CI95_total_hit_gain_boot": [
+          0.0,
+          0.0
+        ],
+        "changed_candidate_races": 0,
+        "better_races": 0,
+        "worse_races": 0
+      }
+    },
+    "2026": {
+      "raw_over_market_M3": {
+        "gain_brier": 8.08033960416783e-06,
+        "CI95_gain_brier": [
+          -0.00015307727720158176,
+          0.00017164536608871834
+        ],
+        "hit_gain": -2,
+        "CI95_total_hit_gain_boot": [
+          -6.0,
+          2.0
+        ],
+        "changed_candidate_races": 29,
+        "better_races": 1,
+        "worse_races": 3
+      },
+      "condition_over_generic": {
+        "gain_brier": 0.0,
+        "CI95_gain_brier": [
+          0.0,
+          0.0
+        ],
+        "hit_gain": 0,
+        "CI95_total_hit_gain_boot": [
+          0.0,
+          0.0
+        ],
+        "changed_candidate_races": 0,
+        "better_races": 0,
+        "worse_races": 0
+      },
+      "conditional_over_lap_fit": {
+        "gain_brier": 0.0,
+        "CI95_gain_brier": [
+          0.0,
+          0.0
+        ],
+        "hit_gain": 0,
+        "CI95_total_hit_gain_boot": [
+          0.0,
+          0.0
+        ],
+        "changed_candidate_races": 0,
+        "better_races": 0,
+        "worse_races": 0
+      }
+    }
+  },
+  "coverage": {
+    "train2024": {
+      "rows": 4992,
+      "has_4_responses": 4935,
+      "has_2plus_responses": 4935,
+      "no_response": 57,
+      "own_n_ge10": 4220,
+      "raw_std": 0.10941847202428984,
+      "condition_std": 0.005960409263365392
+    },
+    "2025_26": {
+      "rows": 8454,
+      "has_4_responses": 8386,
+      "has_2plus_responses": 8386,
+      "no_response": 68,
+      "own_n_ge10": 7176,
+      "raw_std": 0.10494931723448045,
+      "condition_std": 0.006121344458315182
+    },
+    "2025": {
+      "rows": 4867,
+      "has_4_responses": 4814,
+      "has_2plus_responses": 4814,
+      "no_response": 53,
+      "own_n_ge10": 4120,
+      "raw_std": 0.10554112161982457,
+      "condition_std": 0.0062105918815233115
+    },
+    "2026": {
+      "rows": 3587,
+      "has_4_responses": 3572,
+      "has_2plus_responses": 3572,
+      "no_response": 15,
+      "own_n_ge10": 3056,
+      "raw_std": 0.10414079563580439,
+      "condition_std": 0.005995169038352231
+    }
+  },
+  "caveats": [
+    "H008-D 2025-26 cohort is not unused; exploratory only",
+    "Uses final closing win odds (not T-15)",
+    "Ability C and full browser JS not reproduced",
+    "Horse own last3F is historical actual 600m interval, never eight 200m individual splits",
+    "Some historical 3C/4C/gap/3F are missing; per-coordinate missingness and shrinking audited",
+    "Current target race actual gap/laps/individual finishing3F are not input",
+    "No production model change"
+  ]
+}
