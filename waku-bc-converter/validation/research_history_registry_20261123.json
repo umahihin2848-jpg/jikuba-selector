@@ -1,7 +1,7 @@
 {
   "schema": "rsa-research-history-registry-v1",
   "created_on": "2026-11-23",
-  "entry_count": 57,
+  "entry_count": 58,
   "scope": "review of available GitHub docs, PR descriptions, archived conversation and supplied source files",
   "not_exhaustive_of_private_unretrieved_attachments": true,
   "source_text_sha256": "9521c4061a015341e658d434fdb70768800091499fc96d3b853a708e6c76fb16",
@@ -719,6 +719,24 @@
       ],
       "privacy": "User-only standalone 203 horse viewer and per-horse 9464 predictor audit in ZIP; no horse-level names/records sent to GitHub",
       "dedupKey": "H019|H018 fixed 203 risk asof|current actual 3C4Cfinish escape postrace audit|2024 train pre5 same-surface push 2025/26 test|negative incremental result"
+    },
+    {
+      "id": "H020",
+      "title": "As-of fourth-corner rear finishing rescue and opponent-front survival, separate individual conditional late form from rival stamina proxies",
+      "population": "H018/H019 fixed nationwide 86 corner-course profiles, 977 R/14876 runners 2024-26/10/04; 2024 fit356R/5412, 2025-26 test621R/9464; prior unique 71780 TARGET horse-run records with exact date<RID. Risk group H018 203/10 total; historical test period flags123/9.",
+      "new_vs_prior": "H019 prior 3C→4C position advance did not improve proper-score. H020 adds strictly earlier same-surface max5 C4-rear finishing-rank recovery, earlier 3F delta to race-best, past 3C→4C/1C→3C, front survival; and leave-one-out predicted-other-front historical hold/fade, compares six frozen train/model alternatives.",
+      "results": "2025-26 621R baseline refit H018 Brier .144870/top3 hits693, +rear last-3F/history .144727/677, +stage .144734/680, +LOO opponent only .144878/692, +late and rival .144759/673, all .144811/678. Final closing market .132052/842. Rear ability delta horse-weight +.000144, race-cluster bootstrap gain CI[-.0001515,+.0004617] spans zero, so no reliable improvement; opponent power does not improve.",
+      "risk_cohort": "2024 train H018 flagged80/1 vs retrospective closing market expected5.65; test 2025-26 H018 flagged123/9 vs market expectation7.87. 2025-26 current C3 back→C4 front 5/3 and back→back96/6 (postrace diagnosis only). In flagged test historical rear closing gain above 2024 train 75th percentile8/2 vs closing market expected0.88; too sparse to use as rescue rule. H018 full203 flags 10 vs q expected13.52; strong year instability.",
+      "method": "Features strict historical date<target, same turf/dirt, max 5 distinct 16-digit race IDs after name+RID dedup; recent rear C4 closing gains and valid fastest3F gaps, no imputed first turn where unavailable. LOO front probability weight p(C4 front quartile)+.5*p(2nd quartile) from frozen H018 joint probabilities. Additional coefficients only fitted in 2024; test labels and final odds excluded from input. Race-normalized PL budget sum exactly3.",
+      "limits": "M3/M4/P10/Ability C production JavaScript parity not yet proven, only H018 study prediction reference. Final odds q retrospective not entry price, 2024–2026 repeatedly mined and subgroup threshold exploratory. Individual GPS splits/energy not recorded; observed rank-movement is proxy, no causal stamina or betting EV guarantee.",
+      "status": "COMPLETE_RESEARCH_ONLY_NO_NEW_RELIABLE_INCREMENT_NO_AUTOMATIC_BETTING_VETO",
+      "modelImpact": "None – no production Ability C, M3, M4, P10, axis, risk veto or buy/pass code changes",
+      "tests": "10 synthetic tests pass; separate from raw TARGET, 14876-row strictly-asof feature-table refit recreates 6 model test Brier and top3 hit totals exactly; JS viewer syntax node --check; ZIP CRC verified",
+      "public_report": "validation/h020/H020_REPORT_20261124.md",
+      "public_code": "validation/h020/h020_asof_rescue.py",
+      "public_aggregate": "validation/h020/H020_RESULTS.json",
+      "privacy": "H020 14876 as-of feature rows, 9464 test rows, 123 flagged names/results, and standalone mobile HTML kept only in conversation ZIP, not committed to GitHub",
+      "dedupKey": "H020|H019 203 dangerous cohort two rescue routes|asof previous rear finish vs LOO other-front stay|2024 train / 2025-26 621R repeated historic test|negative stage/rival increment"
     }
   ],
   "new_protocols": [
@@ -868,11 +886,13 @@
     {
       "id": "H020",
       "title": "As-of early-turn position × 3C position × C4 movement × individual remaining endgame conditional on rival front survival",
-      "state": "CONCEPT_RESEARCH_NOT_STARTED",
+      "state": "COMPLETED_RESEARCH_ONLY_HOLD",
       "new_vs_prior": "H019 current stage mechanism observed but prior 3C->4C movement summary does not improve predictions; H020 requires more detailed cause-aware first position and contemporaneous pacing without postrace leakage",
       "needed": "N001 official browser P10/M4/3C4C/M3/Ability C parity; historical recorded first turn only where present; valid course geometry and front stamina conditional on asof field lineup",
       "privacy": "No private horse-level exports on public GitHub",
-      "caveat": "Do not select arbitrary 3C movement and ROI thresholds on previously mined 2024-26 as if pristine validation"
+      "caveat": "Do not select arbitrary 3C movement and ROI thresholds on previously mined 2024-26 as if pristine validation",
+      "report": "validation/h020/H020_REPORT_20261124.md",
+      "findings": "Historical rear late-stage proxy modest Brier improvement but top3 ranking decreases; LOO opponent hold null. H018 risk flagged2025-26 123/9 vs market expected7.87; no safe rescue/scratch."
     }
   ]
 }
