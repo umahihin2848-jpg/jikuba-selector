@@ -146,3 +146,15 @@
 - 検証の保存先： [m3_target_history_duplicate_input_audit_20261123.md](m3_target_history_duplicate_input_audit_20261123.md)。会話ZIP：`M3過去走重複_位置予測入力監査_20261123.zip`。ZIP内に監査再現Python/馬別CSV/年次CI・レポートを収録。巨大な元TARGETは非同梱・GitHub未公開。
 - **追加：発走前の本番計算参照値を研究JSONへ保存。** `race-position-competition-v1.js`の`position_rank_*.json`に全頭の先行モデル`ValidatedQueueState`、残600m `Remaining600ValidatedState`、M3のスコア・コア特徴量`Finish600State`を馬番＋馬名照合付き`liveModelReference`として出力。モデルバージョン・解析世代も保存。正式モデルには書き込まない。研究パネル版`20261123rpc7`、模擬ブラウザ16頭でJSONを確認、Safari実機E2Eは未確認。
 - **次の必須作業：** 現行`ShapeCore`、`ValidatedQueueState`、`Remaining600ValidatedState`、`Finish600State`を同一のブラウザCSVで各段階スナップショット化し、レース単位重複除去を別のシャドーパスで比較。将来レースの予測を発走前に固定してM3/3着内Brier・実際の締切前馬券オッズのROIまで検証する。いきなり本番M3の履歴解釈を置換しない。
+
+
+## 15. 2026-11-23追記：位置取りの不確実性を研究UIへ追加（P3-66）
+
+- **ユーザー方針:** 当面は位置取り精度に集中し、M3好走率・BUY/PASS・券種ロジックを変更しない。
+- 2025年398R/5,595頭で設定選択・学習→2026年292R/4,139頭で3角・4角・残600mのRidgeとCatBoostを比較。3角MAE .198745→.198082、4角 .203730→.202891 と微小改善だがレースCIゼロ含み、残600mは .370723→.376079 と悪化。**非線形点予測は不採用**。2026年は既探索。
+- P3-65の実アプリJSの保存結果から、確定馬番のズレがない2025年144R/2,171頭の残600m予測誤差を**予測位置の3帯**で80%分位点較正し、2026年111R/1,667頭で参考検証。旧履歴方式の2026捕捉率**82.78%／区間平均幅1.220秒**、重複除去研究方式は**81.52%／1.155秒**。新旧の捕捉率差CIはゼロ含み。個別馬の80%保証ではない。
+- 2025年の前半93R学習→後半51R検証で、JS修正後の600m予測に歴史の移動・近隣馬などの残差補正を追加する案は**補正係数0が最良**。点予測の自動修正なし。
+- **実装（mainの既存研究パネルのみ）:** `race-position-600m-band-v1.js`（バージョン別較正）と `race-position-competition-v1.js` の折りたたみ「残り600mの予測位置と80%参考範囲（全頭）」。JSONにも`gap80ResearchBand`と較正メタデータを追加。元の全頭順位抽選・ValidatedQueue・Remaining600・Finish600・M3・Ability C/P10/馬券は**一切変更なし**。パーサー版不明時は非表示。
+- 合成16頭で表示・JSON保存・版違いでの非表示・既存計算状態不変を確認。独立GitHub Actions [P3-66 run 45111215874](https://github.com/umahihin2848-jpg/jikuba-selector/actions/runs/45111215874) **SUCCESS**、GitHub Pages buildもSUCCESS。既存の別Smoke CIはUIテキストの旧期待等でFAIL継続、iPhone Safari実機E2E未確認。
+- 公開研究文書： [p3_66_position_600m_range_calibration_20261123.md](p3_66_position_600m_range_calibration_20261123.md)。ユーザーのローカル再現ZIP：`位置取り予測改善_3角4角_残600m80%範囲_20261123.zip`。馬名入りas-of CSVと本番JSの馬別出力、再現Python4本、結果JSON等を同梱。**GitHubには実馬名・TARGET原本を置かない。**
+- 次：レース前に残600m区間・初位置・通過角位置を固定し、将来未使用年の予測範囲の較正と点誤差を評価。2016〜2018の過去走履歴は疎、同一条件での11年分モデル評価は未了。新たなモデル係数への切替は急がない。
