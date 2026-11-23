@@ -1,0 +1,255 @@
+{
+  "schema": "rsa-h005-20261123-shadow-v1",
+  "as_of_rule": "strict_date_before_target_and_name_16char_rid_dedup",
+  "source_main_finish600_model_sha": "7539949515b072ea69c87486385235e83fd8fd94",
+  "source_main_finish600_js_sha": "1f1178e3003b6162243ea7286a2d859325ff9d9a",
+  "baseline": "5 distinct valid prior starts, direct formula reconstruction",
+  "intervention": "remaining600 pred_gap scalar only",
+  "constant": "core_m3 19 feature values, coefficients, field, gate, prior 5 rows, and M3 rank logic",
+  "candidate": "0.8 decay all/same-surface gap over 5 vs 10 distinct dated starts; no model refit",
+  "eval_years": "2024 through 2026-10-04, previously researched",
+  "prediction_outcome": "M3 top3 membership 3-place actual, not price/probability/ROI",
+  "browser_parity": "NOT TESTED, JS production parser uses rows until PR7; Python as-of reconstruction",
+  "summary": {
+    "2024": {
+      "races": 338,
+      "horses": 5126,
+      "old5_med__all10_decay": {
+        "races": 338,
+        "switch_races": 122,
+        "old_hits": 348,
+        "new_hits": 334,
+        "hit_difference": -14,
+        "delta_per_race": -0.04142011834319527,
+        "ci95_delta_per_race": [
+          -0.08875739644970414,
+          0.0029585798816568047
+        ],
+        "improved_races": 22,
+        "worse_races": 35,
+        "equal_races": 281,
+        "candidate_win_in_top3_old": 119,
+        "candidate_win_in_top3_new": 126
+      },
+      "all5_decay__all10_decay": {
+        "races": 338,
+        "switch_races": 74,
+        "old_hits": 342,
+        "new_hits": 334,
+        "hit_difference": -8,
+        "delta_per_race": -0.023668639053254437,
+        "ci95_delta_per_race": [
+          -0.05621301775147929,
+          0.008875739644970414
+        ],
+        "improved_races": 12,
+        "worse_races": 20,
+        "equal_races": 306,
+        "candidate_win_in_top3_old": 122,
+        "candidate_win_in_top3_new": 126
+      },
+      "same5_decay__same10_decay": {
+        "races": 338,
+        "switch_races": 70,
+        "old_hits": 340,
+        "new_hits": 331,
+        "hit_difference": -9,
+        "delta_per_race": -0.026627218934911243,
+        "ci95_delta_per_race": [
+          -0.05621301775147929,
+          0.0029585798816568047
+        ],
+        "improved_races": 9,
+        "worse_races": 18,
+        "equal_races": 311,
+        "candidate_win_in_top3_old": 120,
+        "candidate_win_in_top3_new": 121
+      },
+      "all10_gap_horses": 4435,
+      "same10_gap_horses": 3951
+    },
+    "2025": {
+      "races": 330,
+      "horses": 5008,
+      "old5_med__all10_decay": {
+        "races": 330,
+        "switch_races": 123,
+        "old_hits": 297,
+        "new_hits": 305,
+        "hit_difference": 8,
+        "delta_per_race": 0.024242424242424242,
+        "ci95_delta_per_race": [
+          -0.015151515151515152,
+          0.06363636363636363
+        ],
+        "improved_races": 27,
+        "worse_races": 19,
+        "equal_races": 284,
+        "candidate_win_in_top3_old": 109,
+        "candidate_win_in_top3_new": 109
+      },
+      "all5_decay__all10_decay": {
+        "races": 330,
+        "switch_races": 61,
+        "old_hits": 307,
+        "new_hits": 305,
+        "hit_difference": -2,
+        "delta_per_race": -0.006060606060606061,
+        "ci95_delta_per_race": [
+          -0.03333333333333333,
+          0.024242424242424242
+        ],
+        "improved_races": 11,
+        "worse_races": 13,
+        "equal_races": 306,
+        "candidate_win_in_top3_old": 111,
+        "candidate_win_in_top3_new": 109
+      },
+      "same5_decay__same10_decay": {
+        "races": 330,
+        "switch_races": 62,
+        "old_hits": 308,
+        "new_hits": 304,
+        "hit_difference": -4,
+        "delta_per_race": -0.012121212121212121,
+        "ci95_delta_per_race": [
+          -0.03939393939393939,
+          0.015151515151515152
+        ],
+        "improved_races": 10,
+        "worse_races": 14,
+        "equal_races": 306,
+        "candidate_win_in_top3_old": 111,
+        "candidate_win_in_top3_new": 109
+      },
+      "all10_gap_horses": 4336,
+      "same10_gap_horses": 3853
+    },
+    "2026": {
+      "races": 239,
+      "horses": 3668,
+      "old5_med__all10_decay": {
+        "races": 239,
+        "switch_races": 87,
+        "old_hits": 207,
+        "new_hits": 214,
+        "hit_difference": 7,
+        "delta_per_race": 0.029288702928870293,
+        "ci95_delta_per_race": [
+          -0.012552301255230125,
+          0.07531380753138076
+        ],
+        "improved_races": 19,
+        "worse_races": 12,
+        "equal_races": 208,
+        "candidate_win_in_top3_old": 73,
+        "candidate_win_in_top3_new": 72
+      },
+      "all5_decay__all10_decay": {
+        "races": 239,
+        "switch_races": 45,
+        "old_hits": 212,
+        "new_hits": 214,
+        "hit_difference": 2,
+        "delta_per_race": 0.008368200836820083,
+        "ci95_delta_per_race": [
+          -0.02510460251046025,
+          0.04184100418410042
+        ],
+        "improved_races": 9,
+        "worse_races": 7,
+        "equal_races": 223,
+        "candidate_win_in_top3_old": 74,
+        "candidate_win_in_top3_new": 72
+      },
+      "same5_decay__same10_decay": {
+        "races": 239,
+        "switch_races": 48,
+        "old_hits": 215,
+        "new_hits": 217,
+        "hit_difference": 2,
+        "delta_per_race": 0.008368200836820083,
+        "ci95_delta_per_race": [
+          -0.02510460251046025,
+          0.04184100418410042
+        ],
+        "improved_races": 9,
+        "worse_races": 7,
+        "equal_races": 223,
+        "candidate_win_in_top3_old": 75,
+        "candidate_win_in_top3_new": 73
+      },
+      "all10_gap_horses": 3181,
+      "same10_gap_horses": 2838
+    },
+    "2025_2026": {
+      "races": 569,
+      "horses": 8676,
+      "old5_med__all10_decay": {
+        "races": 569,
+        "switch_races": 210,
+        "old_hits": 504,
+        "new_hits": 519,
+        "hit_difference": 15,
+        "delta_per_race": 0.026362038664323375,
+        "ci95_delta_per_race": [
+          -0.0035149384885764497,
+          0.056239015817223195
+        ],
+        "improved_races": 46,
+        "worse_races": 31,
+        "equal_races": 492,
+        "candidate_win_in_top3_old": 182,
+        "candidate_win_in_top3_new": 181
+      },
+      "all5_decay__all10_decay": {
+        "races": 569,
+        "switch_races": 106,
+        "old_hits": 519,
+        "new_hits": 519,
+        "hit_difference": 0,
+        "delta_per_race": 0.0,
+        "ci95_delta_per_race": [
+          -0.022847100175746926,
+          0.0210896309314587
+        ],
+        "improved_races": 20,
+        "worse_races": 20,
+        "equal_races": 529,
+        "candidate_win_in_top3_old": 185,
+        "candidate_win_in_top3_new": 181
+      },
+      "same5_decay__same10_decay": {
+        "races": 569,
+        "switch_races": 110,
+        "old_hits": 523,
+        "new_hits": 521,
+        "hit_difference": -2,
+        "delta_per_race": -0.0035149384885764497,
+        "ci95_delta_per_race": [
+          -0.024648506151142363,
+          0.01757469244288225
+        ],
+        "improved_races": 19,
+        "worse_races": 21,
+        "equal_races": 529,
+        "candidate_win_in_top3_old": 186,
+        "candidate_win_in_top3_new": 182
+      },
+      "all10_gap_horses": 7517,
+      "same10_gap_horses": 6691
+    }
+  },
+  "source_rows": {
+    "raw_rows": 439416,
+    "bad_history": 425,
+    "duplicate_rows": 364692,
+    "unique_valid": 74299
+  },
+  "target_stats": {
+    "2024_2026_rows": 20005,
+    "incomplete_cards": 134,
+    "tie_or_bad_result": 6,
+    "full_races": 1012
+  }
+}
