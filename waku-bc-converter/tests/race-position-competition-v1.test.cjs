@@ -52,6 +52,26 @@ test('conditional missed-front scenario contains only ranks outside top k',()=>{
   }
  }
 });
+test('front-middle-rear shares and every rank column are jointly coherent',()=>{
+ const z=core.simulate(lineup(),{count:4096,seed:17});
+ assert.equal(z.k,4);assert.equal(z.kMiddle,10);
+ assert.ok(Math.abs(z.totalFrontShare-4)<1e-10);
+ assert.ok(Math.abs(z.totalMiddleShare-6)<1e-10);
+ assert.ok(Math.abs(z.totalRearShare-6)<1e-10);
+ for(const r of z.rows){
+  assert.equal(r.rankProbabilities.length,16);
+  assert.ok(Math.abs(r.rankProbabilities.reduce((a,b)=>a+b,0)-1)<1e-12);
+  assert.ok(Math.abs(r.frontShare+r.middleShare+r.rearShare-1)<1e-12);
+ }
+ for(let rank=0;rank<z.n;rank++)
+  assert.ok(Math.abs(z.rows.reduce((sum,h)=>sum+h.rankProbabilities[rank],0)-1)<1e-12);
+});
+test('research panel includes explicit uncalibrated JSON export without production writes',()=>{
+ assert.match(code,/rsarpcExport/);
+ assert.match(code,/calibrated:false/);
+ assert.match(code,/rankProbabilities:/);
+ assert.doesNotMatch(code,/\.(finishRank|score|predGap|axisNo|partnerNos|betEligible|odds)\s*=/);
+});
 test('research code does not overwrite official M3, betting state, odds or selection',()=>{
  assert.doesNotMatch(code,/\.(finishRank|score|predGap|axisNo|partnerNos|betEligible|odds)\s*=/);
  assert.match(code,/productionImpact:false/);
