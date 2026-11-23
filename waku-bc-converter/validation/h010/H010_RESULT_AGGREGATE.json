@@ -1,0 +1,345 @@
+{
+  "schema": "H010_course_horse_interactions_v1",
+  "run_date": "2026-11-23",
+  "feature_definitions": [
+    "horse_past_c3_frontness",
+    "horse_past_relative_late3f",
+    "horse_past_c4_to_finish_gain",
+    "horse_frontness_x_corner_load",
+    "horse_late3f_x_course_gear_shift",
+    "horse_gain_x_course_attrition"
+  ],
+  "training": "2024 only (previously explored)",
+  "test": "2025-2026/10/04 (previously explored, NOT pristine)",
+  "freeze": "2024 normalize course-demand means/scales, M3 baseline from H008-D frozen coefficients",
+  "pre_race_input": "strictly prior horse performance and prior same course-average lap/turn, not current race actuals",
+  "sample_audit": {
+    "hist_unique": 67167,
+    "target_rejected": {
+      "course_ambiguous_or_missing": 26
+    },
+    "train_races": 328,
+    "test_races": 553,
+    "horse_total": 13446,
+    "horses_ge5_prior": 13218,
+    "course_ge12_prior": 13251
+  },
+  "frozen_scaler": {
+    "mean": [
+      0.2136858186451076,
+      0.9438644093437011
+    ],
+    "std": [
+      0.2256947673404832,
+      0.565641474589439
+    ]
+  },
+  "fit_stage_main": {
+    "success": true,
+    "objective": 0.13038879574878573,
+    "coef": [
+      0.23289709311640386,
+      -0.11886838207413561,
+      -0.0353639205888327
+    ],
+    "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
+  },
+  "fit_structure": {
+    "success": true,
+    "objective": 0.13028628680286858,
+    "coef": [
+      -0.25829757918226026,
+      -0.07283287885738393,
+      0.24431940511431233
+    ],
+    "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
+  },
+  "coefficients": {
+    "market_only": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "market_plus_M3_shadow": [
+      -0.07736367826594608,
+      0.26537242910411374,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "plus_horse_stage_main_effects": [
+      -0.07736367826594608,
+      0.26537242910411374,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.23289709311640386,
+      -0.11886838207413561,
+      -0.0353639205888327,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "plus_course_structure_interactions": [
+      -0.07736367826594608,
+      0.26537242910411374,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.23289709311640386,
+      -0.11886838207413561,
+      -0.0353639205888327,
+      -0.25829757918226026,
+      -0.07283287885738393,
+      0.24431940511431233
+    ]
+  },
+  "results": {
+    "train2024": {
+      "market_only": {
+        "races": 328,
+        "horses": 4992,
+        "brier": 0.13157379012354037,
+        "top3_hits": 452,
+        "winner_in_top3": 187
+      },
+      "market_plus_M3_shadow": {
+        "races": 328,
+        "horses": 4992,
+        "brier": 0.131452768042922,
+        "top3_hits": 465,
+        "winner_in_top3": 194
+      },
+      "plus_horse_stage_main_effects": {
+        "races": 328,
+        "horses": 4992,
+        "brier": 0.13137103963162522,
+        "top3_hits": 462,
+        "winner_in_top3": 194
+      },
+      "plus_course_structure_interactions": {
+        "races": 328,
+        "horses": 4992,
+        "brier": 0.1312298356023839,
+        "top3_hits": 465,
+        "winner_in_top3": 196
+      }
+    },
+    "test2025_26": {
+      "market_only": {
+        "races": 553,
+        "horses": 8454,
+        "brier": 0.13250191657136703,
+        "top3_hits": 755,
+        "winner_in_top3": 314
+      },
+      "market_plus_M3_shadow": {
+        "races": 553,
+        "horses": 8454,
+        "brier": 0.13258873264029036,
+        "top3_hits": 753,
+        "winner_in_top3": 310
+      },
+      "plus_horse_stage_main_effects": {
+        "races": 553,
+        "horses": 8454,
+        "brier": 0.13253858268474514,
+        "top3_hits": 754,
+        "winner_in_top3": 313
+      },
+      "plus_course_structure_interactions": {
+        "races": 553,
+        "horses": 8454,
+        "brier": 0.13249567234086213,
+        "top3_hits": 754,
+        "winner_in_top3": 310
+      }
+    },
+    "test2025": {
+      "market_only": {
+        "races": 320,
+        "horses": 4867,
+        "brier": 0.13292899954327836,
+        "top3_hits": 441,
+        "winner_in_top3": 187
+      },
+      "market_plus_M3_shadow": {
+        "races": 320,
+        "horses": 4867,
+        "brier": 0.13308894344597627,
+        "top3_hits": 440,
+        "winner_in_top3": 185
+      },
+      "plus_horse_stage_main_effects": {
+        "races": 320,
+        "horses": 4867,
+        "brier": 0.1330138913581676,
+        "top3_hits": 440,
+        "winner_in_top3": 187
+      },
+      "plus_course_structure_interactions": {
+        "races": 320,
+        "horses": 4867,
+        "brier": 0.133045822636769,
+        "top3_hits": 439,
+        "winner_in_top3": 184
+      }
+    },
+    "test2026": {
+      "market_only": {
+        "races": 233,
+        "horses": 3587,
+        "brier": 0.1319153648502871,
+        "top3_hits": 314,
+        "winner_in_top3": 127
+      },
+      "market_plus_M3_shadow": {
+        "races": 233,
+        "horses": 3587,
+        "brier": 0.13190174784278186,
+        "top3_hits": 313,
+        "winner_in_top3": 125
+      },
+      "plus_horse_stage_main_effects": {
+        "races": 233,
+        "horses": 3587,
+        "brier": 0.13188579824055982,
+        "top3_hits": 314,
+        "winner_in_top3": 126
+      },
+      "plus_course_structure_interactions": {
+        "races": 233,
+        "horses": 3587,
+        "brier": 0.13174010111901577,
+        "top3_hits": 315,
+        "winner_in_top3": 126
+      }
+    }
+  },
+  "paired": {
+    "market_plus_M3_shadow_to_plus_horse_stage_main_effects": {
+      "n_races": 553,
+      "mean_gain": 5.0149955545231974e-05,
+      "ci95": [
+        -0.0001229258350976528,
+        0.00022922065313614074
+      ],
+      "changed_top3_races": 90,
+      "delta_top3_hits": 1,
+      "better_brier_races": 282,
+      "worse_brier_races": 271
+    },
+    "plus_horse_stage_main_effects_to_plus_course_structure_interactions": {
+      "n_races": 553,
+      "mean_gain": 4.291034388301831e-05,
+      "ci95": [
+        -0.00013013974672462835,
+        0.00021341061409441362
+      ],
+      "changed_top3_races": 91,
+      "delta_top3_hits": 0,
+      "better_brier_races": 268,
+      "worse_brier_races": 285
+    },
+    "market_plus_M3_shadow_to_plus_course_structure_interactions": {
+      "n_races": 553,
+      "mean_gain": 9.306029942825028e-05,
+      "ci95": [
+        -9.212509227901452e-05,
+        0.00028454773747181486
+      ],
+      "changed_top3_races": 90,
+      "delta_top3_hits": 1,
+      "better_brier_races": 293,
+      "worse_brier_races": 260
+    },
+    "market_only_to_plus_course_structure_interactions": {
+      "n_races": 553,
+      "mean_gain": 6.244230504895647e-06,
+      "ci95": [
+        -0.00024107959819290347,
+        0.00026370711924046685
+      ],
+      "changed_top3_races": 127,
+      "delta_top3_hits": -1,
+      "better_brier_races": 284,
+      "worse_brier_races": 269
+    }
+  },
+  "strata": {
+    "turf": {
+      "n_races": 316,
+      "mean_gain": -7.346196963935224e-05,
+      "ci95": [
+        -0.0002422347917431671,
+        9.903973686798307e-05
+      ],
+      "hits_before": 431,
+      "hits_after": 429
+    },
+    "dirt": {
+      "n_races": 237,
+      "mean_gain": 0.0001980734285795124,
+      "ci95": [
+        -0.00013167194956501213,
+        0.0005151858836695072
+      ],
+      "hits_before": 323,
+      "hits_after": 325
+    },
+    "Tokyo_Nakayama_turf": {
+      "n_races": 116,
+      "mean_gain": -6.346708205648057e-05,
+      "ci95": [
+        -0.00038360573952417234,
+        0.0002714210716597858
+      ],
+      "hits_before": 163,
+      "hits_after": 165
+    },
+    "Tokyo_Nakayama_turf1600_1800_2000": {
+      "n_races": 63,
+      "mean_gain": -3.232927561268196e-05,
+      "ci95": [
+        -0.0005253359439508045,
+        0.0004580028664842289
+      ],
+      "hits_before": 88,
+      "hits_after": 87
+    }
+  },
+  "caveats": [
+    "no official Ability C / live JS M3 parity",
+    "not untouched test years",
+    "final closing win odds are post-race (not T-15)",
+    "course turn inferred from old records, not full inner-outer lane/first-turn geometry",
+    "aggregate leader laps not individual 200m times",
+    "horse own 3C index for 2C/4C courses not same physical point"
+  ]
+}
