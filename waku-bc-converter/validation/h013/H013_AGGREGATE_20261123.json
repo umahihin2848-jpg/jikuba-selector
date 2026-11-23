@@ -1,0 +1,221 @@
+{
+  "train_n_races": 2576,
+  "test_n_races": 990,
+  "test_n_horses": 15089,
+  "severe_course_count": 13,
+  "severe_courses": [
+    "中京ダ1800m",
+    "中京芝1200m",
+    "中京芝2000m",
+    "中山ダ1800m",
+    "中山芝1200m",
+    "中山芝1600m",
+    "中山芝1800m",
+    "京都ダ1800m",
+    "東京ダ1400m",
+    "東京芝2000m",
+    "阪神ダ1200m",
+    "阪神芝1200m",
+    "阪神芝2000m"
+  ],
+  "actual_back_4c": {
+    "label": "actual_back4_OBSERVATIONAL_POSTRACE",
+    "horses": 6933,
+    "races": 990,
+    "actual_top3": 738,
+    "expected_market_top3": 1090.3069,
+    "actual_minus_expected": -352.3069,
+    "actual_rate": 0.1064,
+    "expected_rate": 0.1573,
+    "ratio_actual_to_expected": 0.6769,
+    "race_cluster_residual_sum_ci95": [
+      -396.39405247994193,
+      -307.20999735179754
+    ]
+  },
+  "predicted_risk_all": {
+    "label": "high_pback_course_severe_all",
+    "horses": 598,
+    "races": 213,
+    "actual_top3": 61,
+    "expected_market_top3": 72.7103,
+    "actual_minus_expected": -11.7103,
+    "actual_rate": 0.102,
+    "expected_rate": 0.1216,
+    "ratio_actual_to_expected": 0.8389,
+    "race_cluster_residual_sum_ci95": [
+      -24.627151909213048,
+      2.286976257075037
+    ]
+  },
+  "predicted_risk_strong": {
+    "label": "high_pback_course_severe_market_q>=.15",
+    "horses": 144,
+    "races": 104,
+    "actual_top3": 40,
+    "expected_market_top3": 41.0197,
+    "actual_minus_expected": -1.0197,
+    "actual_rate": 0.2778,
+    "expected_rate": 0.2849,
+    "ratio_actual_to_expected": 0.9751,
+    "race_cluster_residual_sum_ci95": [
+      -11.121429597447497,
+      9.570902474769293
+    ]
+  },
+  "nonrisk_strong_same_severe_courses": {
+    "label": "nonrisk_strong_on_same_severe_courses",
+    "horses": 1517,
+    "races": 234,
+    "actual_top3": 528,
+    "expected_market_top3": 509.2626,
+    "actual_minus_expected": 18.7374,
+    "actual_rate": 0.3481,
+    "expected_rate": 0.3357,
+    "ratio_actual_to_expected": 1.0368,
+    "race_cluster_residual_sum_ci95": [
+      -3.2593525796462592,
+      39.963133821740385
+    ]
+  },
+  "all_strong": {
+    "label": "all_market_q>=.15",
+    "horses": 7037,
+    "races": 990,
+    "actual_top3": 2379,
+    "expected_market_top3": 2314.6434,
+    "actual_minus_expected": 64.3566,
+    "actual_rate": 0.3381,
+    "expected_rate": 0.3289,
+    "ratio_actual_to_expected": 1.0278,
+    "race_cluster_residual_sum_ci95": [
+      26.37954032878747,
+      102.80587311753975
+    ]
+  },
+  "risk_top4_odds_proxy": {
+    "label": "risk_odds<=12.0",
+    "horses": 91,
+    "races": 73,
+    "actual_top3": 27,
+    "expected_market_top3": 31.4346,
+    "actual_minus_expected": -4.4346,
+    "actual_rate": 0.2967,
+    "expected_rate": 0.3454,
+    "ratio_actual_to_expected": 0.8589,
+    "race_cluster_residual_sum_ci95": [
+      -12.148592431094954,
+      3.6671414431980027
+    ]
+  },
+  "coverage": {
+    "with_any": 25477,
+    "with_3": 24127
+  },
+  "history_audit": {
+    "invalid_numbers": 354,
+    "abnormal": 48,
+    "invalid_range": 167,
+    "names": 4269,
+    "unique_hist_entries": 73619
+  },
+  "by_year": {
+    "2024": {
+      "flagged_strong": {
+        "label": "2024",
+        "horses": 59,
+        "races": 40,
+        "actual_top3": 18,
+        "expected_market_top3": 16.1983,
+        "actual_minus_expected": 1.8017,
+        "actual_rate": 0.3051,
+        "expected_rate": 0.2745,
+        "ratio_actual_to_expected": 1.1112,
+        "race_cluster_residual_sum_ci95": [
+          -5.3323623431000655,
+          9.505954487696064
+        ]
+      },
+      "flagged_all": {
+        "label": "2024",
+        "horses": 226,
+        "races": 82,
+        "actual_top3": 21,
+        "expected_market_top3": 27.5441,
+        "actual_minus_expected": -6.5441,
+        "actual_rate": 0.0929,
+        "expected_rate": 0.1219,
+        "ratio_actual_to_expected": 0.7624,
+        "race_cluster_residual_sum_ci95": [
+          -14.685744010621027,
+          1.9532040626223368
+        ]
+      }
+    },
+    "2025": {
+      "flagged_strong": {
+        "label": "2025",
+        "horses": 49,
+        "races": 37,
+        "actual_top3": 12,
+        "expected_market_top3": 13.9619,
+        "actual_minus_expected": -1.9619,
+        "actual_rate": 0.2449,
+        "expected_rate": 0.2849,
+        "ratio_actual_to_expected": 0.8595,
+        "race_cluster_residual_sum_ci95": [
+          -7.022940611938197,
+          3.6549799668411302
+        ]
+      },
+      "flagged_all": {
+        "label": "2025",
+        "horses": 217,
+        "races": 78,
+        "actual_top3": 24,
+        "expected_market_top3": 25.8964,
+        "actual_minus_expected": -1.8964,
+        "actual_rate": 0.1106,
+        "expected_rate": 0.1193,
+        "ratio_actual_to_expected": 0.9268,
+        "race_cluster_residual_sum_ci95": [
+          -9.979525398767162,
+          6.804267616386749
+        ]
+      }
+    },
+    "2026": {
+      "flagged_strong": {
+        "label": "2026",
+        "horses": 36,
+        "races": 27,
+        "actual_top3": 10,
+        "expected_market_top3": 10.8594,
+        "actual_minus_expected": -0.8594,
+        "actual_rate": 0.2778,
+        "expected_rate": 0.3017,
+        "ratio_actual_to_expected": 0.9209,
+        "race_cluster_residual_sum_ci95": [
+          -5.526878518320038,
+          4.274359665007484
+        ]
+      },
+      "flagged_all": {
+        "label": "2026",
+        "horses": 155,
+        "races": 53,
+        "actual_top3": 16,
+        "expected_market_top3": 19.2698,
+        "actual_minus_expected": -3.2698,
+        "actual_rate": 0.1032,
+        "expected_rate": 0.1243,
+        "ratio_actual_to_expected": 0.8303,
+        "race_cluster_residual_sum_ci95": [
+          -8.941217837454907,
+          3.084392042159932
+        ]
+      }
+    }
+  },
+  "note": "All severity scores are past-course diagnostic post-4C outcome ratios to closing market proxy, NOT causal proof; risk flagged pre-race using past-only horse C4. 2024-26 historically mined years; no exact live M3 Ability comparison. Strong group market q based on postrace closing odds used only to audit value, NOT a usable T-15 filter."
+}
