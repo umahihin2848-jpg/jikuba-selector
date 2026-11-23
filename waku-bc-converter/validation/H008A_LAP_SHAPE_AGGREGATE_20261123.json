@@ -1,0 +1,209 @@
+{
+  "coverage": {
+    "lap_rows": 35857,
+    "result_unique_races": 5368,
+    "joined_exact": 4912,
+    "eligible_matched": 1670,
+    "valid_splits": 1670,
+    "main_profiles_races": 631
+  },
+  "table": [
+    {
+      "profile": "東京芝1600",
+      "races": 109,
+      "mean_middle_over_early": 0.5678899082568806,
+      "mean_middle_over_late": 0.3220183486238531,
+      "mean_lull_index": 0.4449541284403667,
+      "lull_fraction": 0.3761467889908257,
+      "early2": 11.229357798165138,
+      "middle": 11.79724770642202,
+      "late3": 11.475229357798165,
+      "final_furlong_slow": 0.3894495412844037
+    },
+    {
+      "profile": "東京芝1800",
+      "races": 80,
+      "mean_middle_over_early": 0.4979166666666666,
+      "mean_middle_over_late": 0.5129166666666667,
+      "mean_lull_index": 0.5054166666666666,
+      "lull_fraction": 0.5125,
+      "early2": 11.49625,
+      "middle": 11.994166666666667,
+      "late3": 11.48125,
+      "final_furlong_slow": 0.3393750000000001
+    },
+    {
+      "profile": "東京芝2000",
+      "races": 72,
+      "mean_middle_over_early": 0.4083333333333333,
+      "mean_middle_over_late": 0.4488425925925925,
+      "mean_lull_index": 0.42858796296296287,
+      "lull_fraction": 0.4027777777777778,
+      "early2": 11.631250000000001,
+      "middle": 12.039583333333333,
+      "late3": 11.59074074074074,
+      "final_furlong_slow": 0.3659722222222223
+    },
+    {
+      "profile": "中山芝1200",
+      "races": 108,
+      "mean_middle_over_early": null,
+      "mean_middle_over_late": null,
+      "mean_lull_index": null,
+      "lull_fraction": null,
+      "early2": 10.790740740740741,
+      "middle": null,
+      "late3": 11.54320987654321,
+      "final_furlong_slow": 0.5393518518518519
+    },
+    {
+      "profile": "中山芝1600",
+      "races": 126,
+      "mean_middle_over_early": 0.36269841269841274,
+      "mean_middle_over_late": -0.07460317460317464,
+      "mean_lull_index": 0.14404761904761906,
+      "lull_fraction": 0.15079365079365079,
+      "early2": 11.307936507936507,
+      "middle": 11.670634920634921,
+      "late3": 11.745238095238095,
+      "final_furlong_slow": 0.325
+    },
+    {
+      "profile": "中山芝1800",
+      "races": 65,
+      "mean_middle_over_early": -0.055384615384615137,
+      "mean_middle_over_late": 0.020512820512820877,
+      "mean_lull_index": -0.017435897435897237,
+      "lull_fraction": 0.06153846153846154,
+      "early2": 11.998461538461537,
+      "middle": 11.943076923076925,
+      "late3": 11.922564102564102,
+      "final_furlong_slow": 0.3723076923076921
+    },
+    {
+      "profile": "中山芝2000",
+      "races": 71,
+      "mean_middle_over_early": 0.42464788732394365,
+      "mean_middle_over_late": 0.3044600938967134,
+      "mean_lull_index": 0.36455399061032867,
+      "lull_fraction": 0.39436619718309857,
+      "early2": 11.73380281690141,
+      "middle": 12.158450704225352,
+      "late3": 11.853990610328639,
+      "final_furlong_slow": 0.21056338028168994
+    }
+  ],
+  "bootstrap": {
+    "all": {
+      "lull_index": {
+        "Tokyo_minus_Nakayama": 0.5228525641025639,
+        "CI95": [
+          0.4295428685897436,
+          0.6153982371794867
+        ],
+        "nTokyo": 80,
+        "nNakayama": 65
+      },
+      "lull_both_0p3": {
+        "Tokyo_minus_Nakayama": 0.4509615384615384,
+        "CI95": [
+          0.3269230769230769,
+          0.5721153846153846
+        ],
+        "nTokyo": 80,
+        "nNakayama": 65
+      },
+      "middle_over_late": {
+        "Tokyo_minus_Nakayama": 0.4924038461538458,
+        "CI95": [
+          0.34756009615384564,
+          0.6392668269230763
+        ],
+        "nTokyo": 80,
+        "nNakayama": 65
+      }
+    },
+    "graded": {
+      "lull_index": {
+        "Tokyo_minus_Nakayama": 0.4993357487922704,
+        "CI95": [
+          0.3713357991143313,
+          0.6327103462157808
+        ],
+        "nTokyo": 46,
+        "nNakayama": 36
+      },
+      "lull_both_0p3": {
+        "Tokyo_minus_Nakayama": 0.4444444444444444,
+        "CI95": [
+          0.28019323671497587,
+          0.6026570048309179
+        ],
+        "nTokyo": 46,
+        "nNakayama": 36
+      },
+      "middle_over_late": {
+        "Tokyo_minus_Nakayama": 0.5508454106280188,
+        "CI95": [
+          0.3632427536231881,
+          0.7491193639291462
+        ],
+        "nTokyo": 46,
+        "nNakayama": 36
+      }
+    },
+    "3win_open_L": {
+      "lull_index": {
+        "Tokyo_minus_Nakayama": 0.5516396213657874,
+        "CI95": [
+          0.4214731237322513,
+          0.6840303837052057
+        ],
+        "nTokyo": 34,
+        "nNakayama": 29
+      },
+      "lull_both_0p3": {
+        "Tokyo_minus_Nakayama": 0.460446247464503,
+        "CI95": [
+          0.268762677484787,
+          0.6470588235294118
+        ],
+        "nTokyo": 34,
+        "nNakayama": 29
+      },
+      "middle_over_late": {
+        "Tokyo_minus_Nakayama": 0.4171737660581471,
+        "CI95": [
+          0.201519607843138,
+          0.6436536511156186
+        ],
+        "nTokyo": 34,
+        "nNakayama": 29
+      }
+    }
+  },
+  "lap_1800_mean_200m_seconds": {
+    "中山芝1800": [
+      12.6292,
+      11.8354,
+      12.1615,
+      12.1092,
+      11.8262,
+      11.8938,
+      11.9138,
+      11.6831,
+      12.1708
+    ],
+    "東京芝1800": [
+      12.7313,
+      11.2375,
+      11.755,
+      12.0825,
+      11.98,
+      11.92,
+      11.3837,
+      11.3525,
+      11.7075
+    ]
+  }
+}
