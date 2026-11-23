@@ -31,8 +31,20 @@ function simulate(input,options={}){
  const out=rows.map((r,i)=>{
   let total=0;const probs=hist[i].map((v,j)=>(total+=v,j)),front=hist[i].slice(0,k).reduce((a,b)=>a+b,0);
   const percentile=t=>hist[i].reduce((z,x,j)=>z===null&&probs[j]>=Math.ceil(count*t)?j+1:z,null)||n;
+  // Conditional on missing a top-k place *inside this hypothetical contest*.
+  // This is NOT learned from the 2025-26 fallback outcome model, which did not improve errors.
+  const fallbackCount=count-front;
+  const fallbackMeanRank=fallbackCount?hist[i].reduce((a,v,j)=>j>=k?a+v*(j+1):a,0)/fallbackCount:null;
+  const fallbackPercentile=t=>{
+   if(!fallbackCount)return null;
+   let seen=0;const target=Math.ceil(t*fallbackCount);
+   for(let j=k;j<n;j++){seen+=hist[i][j];if(seen>=target)return j+1;}
+   return n;
+  };
   return{...r,rank10:percentile(.1),rank90:percentile(.9),meanRank:hist[i].reduce((a,v,j)=>a+v*(j+1),0)/count,
-   frontCount:front,frontShare:front/count};
+   frontCount:front,frontShare:front/count,fallbackCount,
+   fallbackShare:fallbackCount/count,fallbackMeanRank,
+   fallbackRank10:fallbackPercentile(.1),fallbackRank90:fallbackPercentile(.9)};
  });
  totalRankTop=out.reduce((a,r)=>a+r.frontCount,0);
  return{ready:true,version:VERSION,n,k,count,dispersion,rows:out,totalFrontCount:totalRankTop,totalFrontShare:totalRankTop/count,
@@ -75,7 +87,7 @@ function render(){const c=context();if(!c)return;css();const signature=c.sig+'|'
   body+='<table class="rsarpcTable"><thead><tr><th>馬</th><th>既存の初位置</th><th>前方枠の抽選割合</th><th>順位の10–90%範囲</th></tr></thead><tbody>';
   for(const r of [...result.rows].sort((a,b)=>b.frontShare-a.frontShare))body+='<tr><td>'+esc(r.no)+'番 '+esc(r.name)+'</td>'+
    '<td>'+r.expectedRank.toFixed(1)+'番手</td><td>'+(100*r.frontShare).toFixed(0)+'%<div class="rsarpcBar"><i style="width:'+(100*r.frontShare).toFixed(1)+'%"></i></div></td>'+
-   '<td>'+r.rank10+'〜'+r.rank90+'位</td></tr>';
+   '<td>'+r.rank10+'〜'+r.rank90+'位'+(r.fallbackCount?'<div class="rsarpcQuiet">前方に入れない試行：平均'+r.fallbackMeanRank.toFixed(1)+'番手／'+r.fallbackRank10+'〜'+r.fallbackRank90+'位</div>':'')+'</td></tr>';
   body+='</tbody></table><p class="rsarpcQuiet">全馬の前方枠シェア合計は'+result.totalFrontShare.toFixed(0)+'枠（整合性チェック）。この割合は予測確率として較正されていないので馬券期待値へ入力しないでください。</p>';
  }
  body+='<p class="rsarpcMini">研究のみ：Ability、M3、P10、公式軸・相手、オッズ、BUY/PASSを変更しません。枠の確定馬番とTARGET仮番号の照合が必要です。</p></div>';
