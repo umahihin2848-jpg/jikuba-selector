@@ -6,6 +6,7 @@ on:
       - 'waku-bc-converter/race-position-competition-v1.js'
       - 'waku-bc-converter/tests/race-position-600m-band-v1.test.cjs'
       - 'waku-bc-converter/tests/race-position-peer-pressure-v1.test.cjs'
+      - 'waku-bc-converter/tests/race-position-adjacent-pairs-v1.test.cjs'
       - 'waku-bc-converter/v3.html'
       - '.github/workflows/p3-66-position-600m-band.yml'
   push:
@@ -15,6 +16,7 @@ on:
       - 'waku-bc-converter/race-position-competition-v1.js'
       - 'waku-bc-converter/tests/race-position-600m-band-v1.test.cjs'
       - 'waku-bc-converter/tests/race-position-peer-pressure-v1.test.cjs'
+      - 'waku-bc-converter/tests/race-position-adjacent-pairs-v1.test.cjs'
       - 'waku-bc-converter/v3.html'
       - '.github/workflows/p3-66-position-600m-band.yml'
   workflow_dispatch:
@@ -29,4 +31,4 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test waku-bc-converter/tests/race-position-600m-band-v1.test.cjs waku-bc-converter/tests/race-position-competition-v1.test.cjs waku-bc-converter/tests/race-position-peer-pressure-v1.test.cjs
+      - run: node --test waku-bc-converter/tests/race-position-600m-band-v1.test.cjs waku-bc-converter/tests/race-position-competition-v1.test.cjs waku-bc-converter/tests/race-position-peer-pressure-v1.test.cjs waku-bc-converter/tests/race-position-adjacent-pairs-v1.test.cjs
