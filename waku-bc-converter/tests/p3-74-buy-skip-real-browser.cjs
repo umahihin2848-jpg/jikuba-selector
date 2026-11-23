@@ -36,7 +36,8 @@ const server=http.createServer((req,res)=>{const f=path.resolve(app,'.'+decodeUR
    document.body.classList.add('rsaFocusedThreeTabs');
    window.RSAPurchaseAuditUIV1.refresh();
   });
-  await page.locator('#rsaPurchaseAudit > summary').click();
+  console.log('P374 visibility diagnostics',JSON.stringify(await page.evaluate(()=>{const e=document.getElementById('rsaPurchaseAudit'),s=e.querySelector('summary'),m=document.querySelector('main.view');return{panelCss:getComputedStyle(e).display,summaryCss:getComputedStyle(s).display,mainCss:getComputedStyle(m).display,parent:e.parentElement?.id||e.parentElement?.className,ancestor:[e,e.parentElement,m,document.body,document.documentElement].map(x=>({tag:x?.tagName,id:x?.id,display:x?getComputedStyle(x).display:null,visibility:x?getComputedStyle(x).visibility:null})),gate:document.documentElement.dataset.raceGate,skipKind:document.documentElement.dataset.raceSkipKind,focus:document.body.className}})));
+  await page.locator('#rsaPurchaseAudit > summary').click({timeout:6000});
   assert.equal(await page.locator('#rsaPurchaseAudit').isVisible(),true,'must be visible while official race gate skips');
   await page.locator('#rpaFillRoster').click();
   await page.locator('#rpaRosterSource').fill('Synthetic official card verified manually');
