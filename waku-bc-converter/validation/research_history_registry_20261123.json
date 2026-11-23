@@ -1,7 +1,7 @@
 {
   "schema": "rsa-research-history-registry-v1",
   "created_on": "2026-11-23",
-  "entry_count": 45,
+  "entry_count": 46,
   "scope": "review of available GitHub docs, PR descriptions, archived conversation and supplied source files",
   "not_exhaustive_of_private_unretrieved_attachments": true,
   "source_text_sha256": "9521c4061a015341e658d434fdb70768800091499fc96d3b853a708e6c76fb16",
@@ -496,6 +496,26 @@
       "private_artifacts": "Local ZIP contains horse-level 8454-row historic research index and offline HTML viewer; intentionally not published to GitHub.",
       "tests": "15 synthetic date/course/lap/PL/projector tests all passed; 87 course chart row count and 8454 horse rows checked",
       "dedupKey": "H008-D|2014-2026 asof 15 distinct history laps|eight-moving-section plus first split|5 conditional pace-demand proxies|2024 fit 2025-26 test|market plus m3 shadow top3"
+    },
+    {
+      "id": "H008-E",
+      "title": "Horse's own historic closing 3F, -600m gap, 3C/4C/finish position changes conditioned on complete race-lap morphology",
+      "population": "67,167 distinct historic valid horse-runs from 439,416 rows; 2024 328R/4992 horses fitted additional coefficients, 2025-26/10/04 553R/8454 horses historically evaluated",
+      "new_vs_prior": "H008-D condition similarity used past finishing vs popularity only; E adds 4 measured individual historic response proxies and tests additional generic/pace-conditioned effect with fixed H008-D M3 and market weights",
+      "results": "2025/26 market+M3 shadow Brier .132588733 and top3 753; +generic historic individual response .132568112 and top3 747, paired race CI of gain [-.00008744,+.00012843]; +lap-conditional extra coefficient selected 0 by 2024 and same 747; closing final-odds market only .132501917 and top3 755",
+      "status": "COMPLETED_EXPLORATORY_HOLD_NO_RELIABLE_GAIN",
+      "modelImpact": "No production Ability C, M3, P10, axis, BUY/PASS, or betting changes",
+      "asof": "Prior unique horse+16-digit race ID with strictly prior date; individual preceding race 3F and 3C/4C/finish and historic leader gap only, target race laps/positions/finishes excluded; 2024 fit, 2025/26 test but already explored",
+      "coverage": "Individual response valid historical rows C4-finish 67167, fastest3F 67153, gap600 67167, C3-C4 66656. In test 8386/8454 horses with 4 types; 68 neutral. 11 unit tests pass.",
+      "caveats": "No exact horse 200m split or GPS; H008D M3 Python shadow not exact official browser C/M3, closing odds are not actual T-15 quotes, held-out years previously mined; zero coefficient indicates no *incremental model contribution*, not nonexistence of aptitude",
+      "artifacts": [
+        "validation/h008e/H008E_REPORT_20261123.md",
+        "validation/h008e/h008e_individual_response.py",
+        "validation/h008e/test_h008e_individual_response.py",
+        "validation/h008e/H008E_RESULTS.json"
+      ],
+      "privacy": "Per-horse 8454 rows and viewer kept only in conversation-local ZIP, not public GitHub",
+      "dedupKey": "H008-E|asof historical horse closing3F, gap600, C3C4 C4finish + full-lap matching|2024 fixed coefficients / 2025-26 553R Brier top3|conditional slope 0"
     }
   ],
   "new_protocols": [
@@ -564,10 +584,13 @@
     {
       "id": "H008-E",
       "title": "Horse individual finishing 3F × race lap phase demands × corner position, with as-of course geometry and official C/M3 parity",
-      "state": "proposed_not_started",
+      "state": "COMPLETED_EXPLORATORY_HOLD",
       "new_vs_prior": "H008-D modeled race-wide lap similarity only and found no robust gain; E uses horse-specific own 3F and relative gap and stage positioning, avoiding inferred 200m individual times",
       "needed": "N001 exact parser/production M3+Ability C parity, as-of prior 3F, -600m lead gap, 3C/4C, verified course physical map",
-      "claim_limit": "No current race actual lap or horse current pace result as pre-race input; 2024-26 already mined, require forward test to adopt"
+      "claim_limit": "No current race actual lap or horse current pace result as pre-race input; 2024-26 already mined, require forward test to adopt",
+      "findings": "2025-26 553R 8454 horses, +generic individual proxy Brier +.00002062 CI zero crosses and top3 hit -6; lap conditional incremental 2024 coefficient 0; no reliable gain",
+      "report": "validation/h008e/H008E_REPORT_20261123.md",
+      "next": "Prioritize N001 exact as-of input integrity and full official Ability C/M3 parity before any new horse-conditioned full-lap gate or production weight."
     }
   ]
 }
