@@ -1,0 +1,30 @@
+name: P3-66 position 600m uncertainty (research only)
+on:
+  pull_request:
+    paths:
+      - 'waku-bc-converter/race-position-600m-band-v1.js'
+      - 'waku-bc-converter/race-position-competition-v1.js'
+      - 'waku-bc-converter/tests/race-position-600m-band-v1.test.cjs'
+      - 'waku-bc-converter/v3.html'
+      - '.github/workflows/p3-66-position-600m-band.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'waku-bc-converter/race-position-600m-band-v1.js'
+      - 'waku-bc-converter/race-position-competition-v1.js'
+      - 'waku-bc-converter/tests/race-position-600m-band-v1.test.cjs'
+      - 'waku-bc-converter/v3.html'
+      - '.github/workflows/p3-66-position-600m-band.yml'
+  workflow_dispatch:
+jobs:
+  position-gap-uncertainty:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test waku-bc-converter/tests/race-position-600m-band-v1.test.cjs waku-bc-converter/tests/race-position-competition-v1.test.cjs
