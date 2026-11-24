@@ -24,6 +24,9 @@ function riskFor(row,n,pressure){
  if(!risks.length)risks.push("位置取り面の明確な警戒材料は未特定（安全保証ではない）");
  return risks.join("／");
 }
+function isForecastReady(focused,dirty,rosterCount){
+ return focused&&focused.analysisReady===true&&dirty!==true&&rosterCount>=12&&rosterCount<=18;
+}
 function rosterRows(){
  var s=root.Finish600State;
  return s&&s.ready&&Array.isArray(s.rows)?s.rows.map(function(h){
@@ -55,7 +58,7 @@ function context(){
   surface:surface,distance:distance,grade:String($("grade")&&$("grade").value||""),
   route:String(route||""),turn:turn};
  var key=[race.date,race.venue,race.name,race.surface,race.distance,race.grade,race.route,roster.map(function(x){return x.no+":"+x.name}).join(",")].join("|");
- var ready=focused.analysisReady===true&&roster.length>=12&&roster.length<=18;
+ var ready=isForecastReady(focused,root.RSAFocusedThreeTabsV1&&root.RSAFocusedThreeTabsV1.dirty,roster.length);
  return {race:race,key:key,roster:roster,names:names,queue:queue,byNo:byNo,axis:axis,partners:partners,pmap:pmap,
   pressure:pressure,ready:ready,researchAxis:!focused.axisNo&&!!focused.researchAxisNo,focused:focused,marketReady:ref.ready===true};
 }
@@ -261,10 +264,13 @@ function renderWorkspace(force){
  }
  updateQuoteHint(m);
  decorateAnalysisTabs(m);
+ if($("rfwLock"))$("rfwLock").disabled=(!m.ready||Boolean(draft&&draft.locked));
+ if(!m.ready)message("レース条件またはCSVの変更後は再解析が必要です。古い隊列・軸のまま予想を固定できません。",true);
  if(draft&&draft.locked)message("固定済み："+String(draft.fixedAt||"")+"（オッズ・根拠・馬番は保存時のスナップショット）");
 }
 function renderFormation(){
- var el=$("rsafFormation"),m=context();if(!el||el.hidden||!m.ready)return;
+ var el=$("rsafFormation"),m=context();if(!el||el.hidden)return;
+ if(!m.ready){if(el.querySelector(".rfw-course-map"))el.innerHTML='<div class="rfw-uncertain">レースを再解析すると全頭隊列を表示します。前のレースの隊列は表示しません。</div>';el.dataset.rfwSignature="";return}
  var base=[m.race.date,m.race.venue,m.race.surface,m.race.distance,m.race.route].join("|");
  if(base!==lastRaceBase){lastRaceBase=base;turnOverride=""}
  var turn=turnOverride||m.race.turn;
@@ -290,7 +296,8 @@ function snapshot(){
 function freeze(){
  if(!draft||draft.locked)return;
  capture();
- var m=lastData||context();
+ var m=context();
+ if(!m.ready||m.key!==raceKey){message("レース条件またはCSVが変更されています。再解析後に予想を固定してください。",true);return}
  if(!(draft.notes&&String(draft.notes.final||"").trim())){message("買う・見送る最終理由を入力してください。",true);return}
  if(draft.decision==="buy"&&(!m.axis||m.researchAxis||m.partners.indexOf(draft.partnerNo)<0)){message("本番軸と相手3頭の選択がないためBUY候補は固定できません。PASSを検討してください。",true);return}
  if(draft.decision==="buy"&&(!String(draft.notes.axis||"").trim()||!String(draft.notes.partner||"").trim())){message("BUY候補では軸と相手を選んだ根拠を記載してください。",true);return}
@@ -321,8 +328,8 @@ function getPostraceContext(){
 }
 function refresh(){renderWorkspace(false);renderFormation()}
 function start(){ensure();refresh();setTimeout(refresh,500);setTimeout(refresh,1500)}
-if(!root.document||typeof root.addEventListener!=="function"){root.RSAForecastWorkflowCoreV1=Object.freeze({version:VERSION,turnForVenue:turnForVenue,riskFor:riskFor,positionSlots:positionSlots,formationSVG:formationSVG});return}
-root.RSAForecastWorkflowCoreV1=Object.freeze({version:VERSION,turnForVenue:turnForVenue,riskFor:riskFor,positionSlots:positionSlots,formationSVG:formationSVG});
+if(!root.document||typeof root.addEventListener!=="function"){root.RSAForecastWorkflowCoreV1=Object.freeze({version:VERSION,turnForVenue:turnForVenue,riskFor:riskFor,positionSlots:positionSlots,formationSVG:formationSVG,isForecastReady:isForecastReady});return}
+root.RSAForecastWorkflowCoreV1=Object.freeze({version:VERSION,turnForVenue:turnForVenue,riskFor:riskFor,positionSlots:positionSlots,formationSVG:formationSVG,isForecastReady:isForecastReady});
 root.RSAForecastWorkflowV1=Object.freeze({version:VERSION,getPostraceContext:getPostraceContext});
 root.document.addEventListener("click",function(e){
  var b=e.target.closest&&e.target.closest("[data-rfw-turn]");
