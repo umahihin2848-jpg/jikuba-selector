@@ -31,6 +31,10 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: ability-c-frozen-elo
-          path: elo_frozen_reference.json
+          path: |
+            elo_frozen_reference.json
+            waku-bc-converter/ability-c-grade-v1.js
+            waku-bc-converter/data/ability_model_v1.json
+            waku-bc-converter/data/finish600_model_v1.json
           if-no-files-found: error
           retention-days: 1
