@@ -23,7 +23,7 @@ assert(f.includes("fact('M3'")&&f.includes("fact('P10'"),'partner cards must sho
 assert(!view.cMarketRank(roster,api.buildMarket('1 2.2',roster),cState,model.models['2026']).ready,'odds incomplete');
 assert(!view.cMarketRank(roster,mk,{...cState,activeModel:'v1'},model.models['2026']).ready,'no C fallback proxy');
 const header=fs.readFileSync(__dirname+'/../waku-bc-converter/v3.html','utf8');
-assert(header.includes('mobile-focused-3tabs-v1.js?v=20261124fourtab1'));
+assert(header.includes('mobile-focused-3tabs-v1.js?v=20261124skiponly1'));
 assert(header.includes(':not(#rsaFocusedView)'),'race gate must not hide focused four-tab wrapper');
 const gateCss=fs.readFileSync(__dirname+'/../waku-bc-converter/axis-access-gate-v1.css','utf8');
 assert(gateCss.includes(':not(#axisAccessScreen):not(#rsaFocusedView)'),'axis-access gate CSS must not hide focused view');
