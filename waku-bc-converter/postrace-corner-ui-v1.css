@@ -26,3 +26,6 @@
 .rfw-corner-stage-heading{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:9px;font-size:12px;color:#edf9f1}
 .rfw-corner-stage-heading small{font-size:10px;color:#a0bcc8}
 #rfwCornerActualStage .rfw-course-map svg{width:100%;max-height:none;height:auto;display:block}
+
+.rfw-corner-confirm{display:flex!important;align-items:flex-start;gap:8px;margin:8px 0 4px;color:#e6d7ae!important;font-size:11px!important;line-height:1.5}
+.rfw-corner-confirm input{width:18px!important;height:18px!important;min-height:18px!important;flex-shrink:0;margin:1px 0 0}
