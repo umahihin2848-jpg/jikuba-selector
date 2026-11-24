@@ -83,3 +83,22 @@ body.iosMobileShellV2.rsaFocusedThreeTabs #rsaFocusedView{display:block!importan
 #rsafAxis .rfw-axis-risk,#rsafPartners .rfw-partner-assist{border:1px solid #58705b;background:#1c3030;color:#ebd6ad;border-radius:9px;margin-top:9px;padding:9px 10px;font-size:11px;line-height:1.6}
 #rsafPartners .rfw-partner-assist strong{color:#bbebd9}
 @media(max-width:390px){#rsafTabs button{font-size:10.5px!important;padding:7px 1px!important;min-height:48px!important}}
+
+/* No confirmed axis: present a single definitive skip verdict, no horse or queue analysis.
+ * Scope, pending and data-edit states are handled in the JS presentation gate. */
+#rsafSkipScreen[hidden],#rsafTabs[hidden]{display:none!important}
+#rsafSkipScreen{border:1px solid #7b6264;background:#1d2530;border-radius:18px;padding:27px 17px;margin:12px 0 17px;text-align:center;color:#f4f7f8}
+#rsafSkipScreen .rsaf-skip-symbol{width:56px;height:56px;border-radius:50%;border:2px solid #957376;margin:0 auto 11px;display:grid;place-items:center;color:#ffc7c9;font-size:29px;font-weight:800}
+#rsafSkipScreen h3{font-size:clamp(29px,7vw,38px);color:#fff0f1;margin:6px 0 14px;letter-spacing:.07em}
+#rsafSkipScreen p{font-size:13px;color:#ebd8d9;margin:0 auto 12px;line-height:1.8;max-width:560px;overflow-wrap:anywhere}
+#rsafSkipScreen small{display:block;color:#b3c3cd;font-size:11px;line-height:1.65}
+#rsafSkipScreen button{margin-top:20px;min-height:44px!important;border-radius:10px!important;border:1px solid #68869a!important;background:#163648!important;color:#e2f4fb!important;padding:10px 16px!important;font-weight:800!important}
+body.rsaFocusedNoAxisSkip #rsaFocusedView #rsafTabs,
+body.rsaFocusedNoAxisSkip #rsaFocusedView #rsafAxis,
+body.rsaFocusedNoAxisSkip #rsaFocusedView #rsafPartners,
+body.rsaFocusedNoAxisSkip #rsaFocusedView #rsafFormation,
+body.rsaFocusedNoAxisSkip #rsaFocusedView #rsafDecision,
+body.rsaFocusedNoAxisSkip #rsaFocusedView #rsafReceiptTools,
+body.rsaFocusedNoAxisSkip #rsaAnalysisFeedback,
+body.rsaFocusedNoAxisSkip #rsaPurchaseAudit,
+body.rsaFocusedNoAxisSkip #mobilePredictionLedger{display:none!important}

@@ -42,8 +42,8 @@ jobs:
         run: node tests/postrace-corner-audit-v1.cjs
       - name: Verify standalone read-only UI integration
         run: |
-          grep -F 'mobile-focused-3tabs-v1.js?v=20261124fourtab1' waku-bc-converter/v3.html
-          grep -F 'mobile-focused-3tabs-v1.css?v=20261124fourtab1' waku-bc-converter/v3.html
+          grep -F 'mobile-focused-3tabs-v1.js?v=20261124skiponly1' waku-bc-converter/v3.html
+          grep -F 'mobile-focused-3tabs-v1.css?v=20261124skiponly1' waku-bc-converter/v3.html
           grep -F 'mobile-forecast-workflow-v1.js?v=20261124fourtab1' waku-bc-converter/v3.html
           grep -F 'mobile-forecast-workflow-v1.css?v=20261124p3wf1' waku-bc-converter/v3.html
           grep -F 'postrace-corner-core-v1.js?v=20261124corner1' waku-bc-converter/v3.html

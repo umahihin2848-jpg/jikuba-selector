@@ -23,7 +23,7 @@ assert(f.includes("fact('M3'")&&f.includes("fact('P10'"),'partner cards must sho
 assert(!view.cMarketRank(roster,api.buildMarket('1 2.2',roster),cState,model.models['2026']).ready,'odds incomplete');
 assert(!view.cMarketRank(roster,mk,{...cState,activeModel:'v1'},model.models['2026']).ready,'no C fallback proxy');
 const header=fs.readFileSync(__dirname+'/../waku-bc-converter/v3.html','utf8');
-assert(header.includes('mobile-focused-3tabs-v1.js?v=20261124fourtab1'));
+assert(header.includes('mobile-focused-3tabs-v1.js?v=20261124skiponly1'));
 assert(header.includes(':not(#rsaFocusedView)'),'race gate must not hide focused four-tab wrapper');
 const gateCss=fs.readFileSync(__dirname+'/../waku-bc-converter/axis-access-gate-v1.css','utf8');
 assert(gateCss.includes(':not(#axisAccessScreen):not(#rsaFocusedView)'),'axis-access gate CSS must not hide focused view');
@@ -81,4 +81,25 @@ assert.strictEqual(view.researchAxisChoice(reviewState,{ready:false,rows:referen
 assert.strictEqual(view.researchAxisChoice(reviewState,{ready:true,rows:[{no:'3',name:'bad',p3:NaN},...referenceRanked.rows.slice(1)]}),null,'invalid predicted probability not permitted');
 assert.strictEqual(view.selectVisiblePartners({ready:true,rows:referenceRanked.rows}, {no:'3'},3).length,3);
 assert(f.includes('研究用の0.60基準は、購入の期待値') && f.includes('betEligible:false'),'research reference cannot unlock purchases');
+const skipBase={analyzed:true,dirty:false,transitionStatus:'ready',gateStatus:'checking',officialAxis:false};
+assert.strictEqual(view.skipOnlyState({...skipBase,code:'no_auto_axis'}),'skip','confirmed no-axis is skip even without market odds');
+assert.strictEqual(view.skipOnlyState({...skipBase,code:'validated_stop'}),'skip','ability3 reject is skip');
+assert.strictEqual(view.skipOnlyState({...skipBase,code:'double',kind:'double',gateStatus:'pair'}),'skip','pair without certified solo axis hides analysis');
+assert.strictEqual(view.skipOnlyState({...skipBase,code:'scope_out'}),'skip','out of scope is skip');
+assert.strictEqual(view.skipOnlyState({...skipBase,code:'ability_rank_tie',gateStatus:'skip'}),'skip','authoritative gate skip wins');
+assert.strictEqual(view.skipOnlyState({...skipBase,code:'A1_high',officialAxis:true,gateStatus:'pass'}),'analysis','valid solo axis continues four-tab analysis');
+assert.strictEqual(view.skipOnlyState({...skipBase,code:'A1_high',officialAxis:true,gateStatus:'market'}),'analysis','odds missing does not falsely skip a confirmed axis');
+assert.strictEqual(view.skipOnlyState({...skipBase,code:'ability_c_wait'}),'pending','Ability C model pending is not definitive skip');
+assert.strictEqual(view.skipOnlyState({...skipBase,code:'m3_rank_tie'}),'pending','rank calculation pending is not a confirmed skip');
+assert.strictEqual(view.skipOnlyState({...skipBase,code:'no_auto_axis',dirty:true,gateStatus:'skip'}),'pending','changing race clears old skip message');
+assert.strictEqual(view.skipOnlyState({...skipBase,code:'no_auto_axis',transitionStatus:'running',gateStatus:'skip'}),'pending','reanalysis must not show stale skip');
+assert.strictEqual(view.skipOnlyState({...skipBase,analyzed:false,code:'no_auto_axis',transitionStatus:'idle'}),'pending','startup must not prematurely skip');
+assert.strictEqual(view.skipOnlyState({...skipBase,analyzed:false,code:'scope_out',gateStatus:'skip',transitionStatus:'idle'}),'pending','startup scope validation is not a completed result');
+assert.strictEqual(view.skipOnlyState({...skipBase,analyzed:false,code:'scope_out',gateStatus:'skip',transitionStatus:'ready'}),'skip','completed out-of-scope race is hidden');
+assert.strictEqual(view.skipReason({structure:{code:'no_auto_axis',reason:'M3とAbilityに一致なし'}},{},{}),'M3とAbilityに一致なし');
+assert.ok(view.skipReason({structure:{kind:'double',code:'double'}},{},{}).includes('単独'));
+assert(f.includes('id="rsafSkipScreen"')&&f.includes("panel.dataset.rsafVerdict=skipped?'skip':verdict"),'skip card must be mounted before other panels');
+assert(f.includes("$('rsafTabs').hidden=skipped"),'all four tabs must hide when the race is skipped');
+assert(f.includes("analysisReady:r.analyzed&&!STORE.dirty&&!skipped"),'downstream analytics must be disabled for skipped races');
+
 assert(f.includes('const visibleAxis=official||researchAxis;'),'research reference should use 3 different partners');
