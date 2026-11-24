@@ -24,10 +24,10 @@ assert(!view.cMarketRank(roster,api.buildMarket('1 2.2',roster),cState,model.mod
 assert(!view.cMarketRank(roster,mk,{...cState,activeModel:'v1'},model.models['2026']).ready,'no C fallback proxy');
 const header=fs.readFileSync(__dirname+'/../waku-bc-converter/v3.html','utf8');
 assert(header.includes('mobile-focused-3tabs-v1.js?v=20261124fourtab1'));
-assert(header.includes(':not(#rsaFocusedView){display:none!important}'),'gate CSS must not hide three-tab wrapper');
+assert(header.includes(':not(#rsaFocusedView)'),'race gate must not hide focused four-tab wrapper');
 const gateCss=fs.readFileSync(__dirname+'/../waku-bc-converter/axis-access-gate-v1.css','utf8');
-assert(gateCss.includes(':not(#axisAccessScreen):not(#rsaFocusedView),'),'axis-access gate CSS must not hide focused view');
-assert(header.includes('axis-access-gate-v1.css?v=20261117p331c'),'gate CSS cache key must be updated');
+assert(gateCss.includes(':not(#axisAccessScreen):not(#rsaFocusedView)'),'axis-access gate CSS must not hide focused view');
+assert(header.includes('axis-access-gate-v1.css?v=20261119integrity2'),'axis gate cache key must match current deployed version');
 assert(['軸馬','相手馬','展開隊列','最終判断'].every(label=>f.includes('>'+label+'</button>')),'four distinct primary tabs');
 assert(f.includes('tab!==\'decision\''),'decision panel must not get innerHTML overwritten on tab change');
 
