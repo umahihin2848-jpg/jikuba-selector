@@ -23,12 +23,13 @@ assert(f.includes('M3展開順位')&&f.includes('V3能力順位'),'selected part
 assert(!view.cMarketRank(roster,api.buildMarket('1 2.2',roster),cState,model.models['2026']).ready,'odds incomplete');
 assert(!view.cMarketRank(roster,mk,{...cState,activeModel:'v1'},model.models['2026']).ready,'no C fallback proxy');
 const header=fs.readFileSync(__dirname+'/../waku-bc-converter/v3.html','utf8');
-assert(header.includes('mobile-focused-3tabs-v1.js?v=20261117p338a'));
+assert(header.includes('mobile-focused-3tabs-v1.js?v=20261124fourtab1'));
 assert(header.includes(':not(#rsaFocusedView){display:none!important}'),'gate CSS must not hide three-tab wrapper');
 const gateCss=fs.readFileSync(__dirname+'/../waku-bc-converter/axis-access-gate-v1.css','utf8');
 assert(gateCss.includes(':not(#axisAccessScreen):not(#rsaFocusedView),'),'axis-access gate CSS must not hide focused view');
 assert(header.includes('axis-access-gate-v1.css?v=20261117p331c'),'gate CSS cache key must be updated');
-assert(f.includes('軸馬情報')&&f.includes('相手馬情報')&&f.includes('展開隊列'));
+assert(['軸馬','相手馬','展開隊列','最終判断'].every(label=>f.includes('>'+label+'</button>')),'four distinct primary tabs');
+assert(f.includes('tab!==\'decision\''),'decision panel must not get innerHTML overwritten on tab change');
 
 const pick={analyzed:true,code:'no_auto_axis',finalCode:'no_auto_axis',marketComplete:true,marketP:0.67};
 const diag=view.skipDiagnosis(pick);
