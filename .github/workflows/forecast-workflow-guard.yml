@@ -7,6 +7,10 @@ on:
       - 'waku-bc-converter/mobile-pair-probability-reference-v1.js'
       - 'waku-bc-converter/v3.html'
       - 'tests/mobile-forecast-workflow-v1.cjs'
+      - 'waku-bc-converter/postrace-corner-core-v1.js'
+      - 'waku-bc-converter/postrace-corner-ui-v1.js'
+      - 'waku-bc-converter/postrace-corner-ui-v1.css'
+      - 'tests/postrace-corner-audit-v1.cjs'
       - '.github/workflows/forecast-workflow-guard.yml'
   push:
     paths:
@@ -15,6 +19,10 @@ on:
       - 'waku-bc-converter/mobile-pair-probability-reference-v1.js'
       - 'waku-bc-converter/v3.html'
       - 'tests/mobile-forecast-workflow-v1.cjs'
+      - 'waku-bc-converter/postrace-corner-core-v1.js'
+      - 'waku-bc-converter/postrace-corner-ui-v1.js'
+      - 'waku-bc-converter/postrace-corner-ui-v1.css'
+      - 'tests/postrace-corner-audit-v1.cjs'
       - '.github/workflows/forecast-workflow-guard.yml'
 jobs:
   orientation:
@@ -25,9 +33,15 @@ jobs:
         run: |
           node --check waku-bc-converter/mobile-forecast-workflow-v1.js
           node --check waku-bc-converter/mobile-pair-probability-reference-v1.js
+          node --check waku-bc-converter/postrace-corner-core-v1.js
+          node --check waku-bc-converter/postrace-corner-ui-v1.js
       - name: Verify whole-field map, left/right, no arrows and unknown positions
         run: node tests/mobile-forecast-workflow-v1.cjs
+      - name: Verify postrace result parsing, ties and frozen-only comparison
+        run: node tests/postrace-corner-audit-v1.cjs
       - name: Verify standalone read-only UI integration
         run: |
           grep -F 'mobile-forecast-workflow-v1.js?v=20261124p3wf1' waku-bc-converter/v3.html
           grep -F 'mobile-forecast-workflow-v1.css?v=20261124p3wf1' waku-bc-converter/v3.html
+          grep -F 'postrace-corner-core-v1.js?v=20261124corner1' waku-bc-converter/v3.html
+          grep -F 'postrace-corner-ui-v1.js?v=20261124corner1' waku-bc-converter/v3.html
