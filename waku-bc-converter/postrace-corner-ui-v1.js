@@ -31,6 +31,7 @@ function ensure(){
  '<div><label for="rfwFirstCorner">最初に記録されている角</label><select id="rfwFirstCorner"><option value="1">1角</option><option value="2">2角</option><option value="3">3角</option><option value="4">4角</option></select></div>'+
  '<div><label for="rfwCornerPaste">全頭結果（馬番 初角 3角 4角）</label><textarea id="rfwCornerPaste" rows="7" spellcheck="false" placeholder="1 3 4 5&#10;2 1 1 2&#10;3 - 9 8"></textarea>'+
  '<p class="rfw-small">半角スペース・カンマ・タブ区切り。記録されない角は「-」。TARGETの同順位はそのまま入力。最初の記録が3角の場合、初角と3角は同一の順位です。</p></div>'+
+ '<label class="rfw-corner-confirm"><input type="checkbox" id="rfwCornerNumbers"> TARGET実測の公式馬番とCSVの仮馬番・馬名が全頭一致することを確認</label>'+ 
  '<button type="button" id="rfwCornerSave">レース後の結果を固定保存</button></div>'+
  '<p id="rfwCornerMessage" class="rfw-small" aria-live="polite"></p><div id="rfwCornerResults"></div>'+
  '<div class="rfw-actions"><button type="button" id="rfwCornerExport" disabled>結果・予想のJSONを出力</button></div>';
@@ -106,6 +107,7 @@ function save(){
  const ctx=loadContext();if(!ctx)return status("レース解析がまだ完了していません",true);
  if(record)return status("結果は既に固定済みのため上書きできません",true);
  if(ctx.turn==="straight")return status("直線コースはコーナーがありません",true);
+ if($("rfwCornerNumbers")?.checked!==true)return status("公式馬番とCSVの仮馬番・馬名の照合を確認してください",true);
  const parsed=C().parse($("rfwCornerPaste").value,ctx.roster,$("rfwFirstCorner").value);
  if(!parsed.ok)return status(parsed.errors.slice(0,5).join("／"),true);
  const day=Date.parse(ctx.race.date+"T00:00:00");
