@@ -287,8 +287,8 @@ function exportJSON(){
 }
 function refresh(){renderWorkspace(false);renderFormation()}
 function start(){ensure();refresh();setTimeout(refresh,500);setTimeout(refresh,1500)}
-if(!root.document||typeof root.addEventListener!=="function"){root.RSAForecastWorkflowCoreV1=Object.freeze({version:VERSION,turnForVenue:turnForVenue});return}
-root.RSAForecastWorkflowCoreV1=Object.freeze({version:VERSION,turnForVenue:turnForVenue,riskFor:riskFor});
+if(!root.document||typeof root.addEventListener!=="function"){root.RSAForecastWorkflowCoreV1=Object.freeze({version:VERSION,turnForVenue:turnForVenue,riskFor:riskFor,positionSlots:positionSlots,formationSVG:formationSVG});return}
+root.RSAForecastWorkflowCoreV1=Object.freeze({version:VERSION,turnForVenue:turnForVenue,riskFor:riskFor,positionSlots:positionSlots,formationSVG:formationSVG});
 root.document.addEventListener("click",function(e){
  var b=e.target.closest&&e.target.closest("[data-rfw-turn]");
  if(!b)return;
