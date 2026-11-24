@@ -244,6 +244,7 @@ function renderFormation(){
  var sig=JSON.stringify([turn,m.axis,m.partners,m.roster,m.queue&&m.queue.at,m.queue&&m.queue.rows&&m.queue.rows.map(function(h){return [h.no,h.expectedRank,h.laneIdx,h.validated]})]);
  if(el.dataset.rfwSignature===sig&&el.querySelector(".rfw-course-map"))return;
  el.dataset.rfwSignature=sig;el.innerHTML=mapHtml(m,turn);
+ root.dispatchEvent(new root.CustomEvent('rsa-forecast-formation-rendered',{detail:{turn:turn}}));
 }
 function snapshot(){
  var m=lastData||context(),chosen=String(draft&&draft.partnerNo||"");
@@ -285,10 +286,16 @@ function exportJSON(){
  root.document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},1500);
  message("JSONを書き出しました。発走前の自己申告記録として保管してください。");
 }
+function getPostraceContext(){
+ var m=context(),same=raceKey===m.key;
+ return {key:m.key,race:m.race,roster:m.roster,axis:m.axis,partners:m.partners,turn:turnOverride||m.race.turn,
+  ready:m.ready,frozen:same&&draft&&draft.locked===true?draft.snapshot:null};
+}
 function refresh(){renderWorkspace(false);renderFormation()}
 function start(){ensure();refresh();setTimeout(refresh,500);setTimeout(refresh,1500)}
 if(!root.document||typeof root.addEventListener!=="function"){root.RSAForecastWorkflowCoreV1=Object.freeze({version:VERSION,turnForVenue:turnForVenue,riskFor:riskFor,positionSlots:positionSlots,formationSVG:formationSVG});return}
 root.RSAForecastWorkflowCoreV1=Object.freeze({version:VERSION,turnForVenue:turnForVenue,riskFor:riskFor,positionSlots:positionSlots,formationSVG:formationSVG});
+root.RSAForecastWorkflowV1=Object.freeze({version:VERSION,getPostraceContext:getPostraceContext});
 root.document.addEventListener("click",function(e){
  var b=e.target.closest&&e.target.closest("[data-rfw-turn]");
  if(!b)return;
