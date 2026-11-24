@@ -291,6 +291,7 @@ function snapshot(){
    formation:m.roster.map(function(h){var q=m.byNo[h.no]||{};return {no:h.no,name:h.name,expectedRank:Number.isFinite(num(q.expectedRank))?num(q.expectedRank):null,laneIdx:Number.isFinite(num(q.laneIdx))?num(q.laneIdx):null,validated:q.validated===true}}),
    notes:draft.notes,quote:draft.quote||null,stake:Number(draft.stake)||100,
    conditionalWideResearch:root.RSAValueTicketLabV1&&typeof root.RSAValueTicketLabV1.getSnapshot==="function"?root.RSAValueTicketLabV1.getSnapshot():null,
+   conditionalWideAutoResearch:root.RSAConditionalWideAutoV1&&typeof root.RSAConditionalWideAutoV1.getSnapshot==="function"?root.RSAConditionalWideAutoV1.getSnapshot():null,
    decision:draft.decision,locked:!!draft.locked,fixedAt:draft.fixedAt||null,
    disclaimer:"Reference model market-derived, not an independent positive EV or purchase recommendation."};
 }
