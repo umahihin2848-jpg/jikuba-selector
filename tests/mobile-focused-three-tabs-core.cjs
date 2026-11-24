@@ -94,7 +94,7 @@ assert.strictEqual(view.skipOnlyState({...skipBase,code:'m3_rank_tie'}),'pending
 assert.strictEqual(view.skipOnlyState({...skipBase,code:'no_auto_axis',dirty:true,gateStatus:'skip'}),'pending','changing race clears old skip message');
 assert.strictEqual(view.skipOnlyState({...skipBase,code:'no_auto_axis',transitionStatus:'running',gateStatus:'skip'}),'pending','reanalysis must not show stale skip');
 assert.strictEqual(view.skipOnlyState({...skipBase,analyzed:false,code:'no_auto_axis',transitionStatus:'idle'}),'pending','startup must not prematurely skip');
-assert.strictEqual(view.skipOnlyState({...skipBase,analyzed:false,code:'scope_out',gateStatus:'skip'}),'pending','startup scope validation is not a completed result');
+assert.strictEqual(view.skipOnlyState({...skipBase,analyzed:false,code:'scope_out',gateStatus:'skip',transitionStatus:'idle'}),'pending','startup scope validation is not a completed result');
 assert.strictEqual(view.skipOnlyState({...skipBase,analyzed:false,code:'scope_out',gateStatus:'skip',transitionStatus:'ready'}),'skip','completed out-of-scope race is hidden');
 assert.strictEqual(view.skipReason({structure:{code:'no_auto_axis',reason:'M3とAbilityに一致なし'}},{},{}),'M3とAbilityに一致なし');
 assert.ok(view.skipReason({structure:{kind:'double',code:'double'}},{},{}).includes('単独'));
