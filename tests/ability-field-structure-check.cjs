@@ -44,11 +44,11 @@ ok(mobile.includes('<span>Ability指数</span>'),'Expanded horse card must show 
 ok(mobile.includes('abilityIndexVisible:true'),'Mobile UI state must declare Ability index visibility');
 ok(mobile.includes('productionImpact:false'),'Mobile Ability index display must remain display-only');
 ok(!mobile.includes('setInterval('),'Mobile Ability index display must not add polling loops');
-ok(html.includes('ability-field-structure-v1.js?v=20261101ability2'),'Ability structure script not wired into v3');
-ok(html.includes('opponent-ranking-display-v1.js?v=20261102review1'),'Reviewed legacy opponent diagnostic not wired into v3');
-ok(html.includes('mobile-product-ui-v1.js?v=20261101ability3'),'Mobile Ability index cache key not wired into v3');
-ok(html.includes("window.RSA_BUILD='20261101ability2'"),'v3 build marker mismatch');
-ok(loader.includes("const BUILD='20261101ability2'"),'addon loader build marker mismatch');
+ok(html.includes('ability-field-structure-v1.js?v=20261120audit1'),'Ability structure script not wired into current v3');
+ok(!html.includes('opponent-ranking-display-v1.js'),'Legacy opponent diagnostic must remain out of the active four-tab UI');
+ok(html.includes('mobile-product-ui-v1.js?v=20261120audit1'),'Mobile Ability index cache key not wired into v3');
+ok(html.includes("window.RSA_BUILD='20261120audit1'"),'v3 build marker mismatch');
+ok(loader.includes("const BUILD='20261120audit1'"),'addon loader build marker mismatch');
 const totalN=Object.values(validation.same_grade_field_strength.baseline_2025_2026).reduce((s,x)=>s+x.n,0);
 ok(totalN===700,'Same-grade field-strength baseline must sum to 700 races');
 console.log(JSON.stringify({ok:true,displayBytes:Buffer.byteLength(display),opponentBytes:Buffer.byteLength(opponent),mobileBytes:Buffer.byteLength(mobile),baselineRaces:validation.source.races,fullLadder:true,abilityIndexVisible:true,legacyDiagnostic:true,autoVeto:false,productionImpact:false},null,2));
