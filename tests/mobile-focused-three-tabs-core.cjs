@@ -30,6 +30,12 @@ assert(gateCss.includes(':not(#axisAccessScreen):not(#rsaFocusedView)'),'axis-ac
 assert(header.includes('axis-access-gate-v1.css?v=20261119integrity2'),'axis gate cache key must match current deployed version');
 assert(['軸馬','相手馬','展開隊列','最終判断'].every(label=>f.includes('>'+label+'</button>')),'four distinct primary tabs');
 assert(f.includes('tab!==\'decision\''),'decision panel must not get innerHTML overwritten on tab change');
+const workflowSrc=fs.readFileSync(__dirname+'/../waku-bc-converter/mobile-forecast-workflow-v1.js','utf8');
+assert(f.includes("rsa-focused-partner-user-choice"),'partner tab must notify final decision of manual choice');
+assert(workflowSrc.includes('root.addEventListener("rsa-focused-partner-user-choice"'),'decision tab must receive selected partner');
+assert(!workflowSrc.includes('draft.partnerNo=m.partners[0]'),'final decision must not preselect the first candidate');
+assert(workflowSrc.includes('var target=$("rsafDecision")'),'decision notes must mount inside the fourth tab');
+assert(workflowSrc.includes('if(el.parentElement!==target)target.appendChild(el);return el;'),'existing note DOM must survive tab refresh');
 
 const pick={analyzed:true,code:'no_auto_axis',finalCode:'no_auto_axis',marketComplete:true,marketP:0.67};
 const diag=view.skipDiagnosis(pick);
