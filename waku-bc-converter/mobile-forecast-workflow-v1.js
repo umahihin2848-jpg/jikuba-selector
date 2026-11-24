@@ -17,7 +17,7 @@ function pairKey(a,b){return [Number(a),Number(b)].sort(function(x,y){return x-y
 function riskFor(row,n,pressure){
  if(!row)return "位置取り予測が未取得。過去走の内容を要確認";
  var risks=[],rank=num(row.expectedRank),lane=num(row.laneIdx);
- if(row.validated===false||!Number.isFinite(rank))risks.push("位置取り履歴不足・想定番手は参考");
+ if(row.validated!==true||!Number.isFinite(rank))risks.push("位置取り履歴不足・想定番手は参考");
  if(Number.isFinite(rank)&&rank>n*0.7)risks.push("後方想定で進路と差し届きに注意");
  if(Number.isFinite(lane)&&lane>=3)risks.push("外を回る進路の可能性（実測ではない）");
  if(Number.isFinite(rank)&&rank<=n*0.3&&pressure==="高")risks.push("先行争いが激化した場合の負荷");
@@ -64,7 +64,7 @@ function positionSlots(m){
  m.roster.forEach(function(h){
   var q=m.byNo[h.no],rank=num(q&&q.expectedRank),lane=num(q&&q.laneIdx);
   if(!Number.isFinite(rank)||!Number.isFinite(lane)||lane<0||lane>3){unknown.push(h);return}
-  known.push({no:h.no,name:h.name,rank:Math.max(1,Math.min(n,rank)),lane:Math.floor(lane),validated:q.validated!==false});
+  known.push({no:h.no,name:h.name,rank:Math.max(1,Math.min(n,rank)),lane:Math.floor(lane),validated:q.validated===true});
  });
  for(var lane=0;lane<4;lane++){
   var subset=known.filter(function(h){return h.lane===lane}).sort(function(a,b){return a.rank-b.rank||Number(a.no)-Number(b.no)});
