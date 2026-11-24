@@ -8,7 +8,7 @@ const {chromium}=require('playwright');
   await page.waitForSelector('#rsaFocusedView',{state:'attached',timeout:30000});
   await page.waitForFunction(()=>document.body.classList.contains('rsaFocusedThreeTabs')&&Boolean(document.querySelector('#rsafAxis .rsaf-alert, #rsafAxis .rsaf-decision')),{timeout:30000});
   const labels=await page.locator('#rsafTabs [role=tab]').allTextContents();
-  assert.deepEqual(labels.map(x=>x.trim()),['軸馬情報','相手馬情報','展開隊列']);
+  assert.deepEqual(labels.map(x=>x.trim()),['軸馬','相手馬','展開隊列','最終判断']);
   // Diagnose any inherited race-gate or startup visibility restrictions.
   await page.waitForTimeout(4200);
   const diagnostic=await page.evaluate(()=>{
@@ -28,6 +28,19 @@ const {chromium}=require('playwright');
   await page.locator('[data-rsaf-tab="formation"]').click();
   assert.equal(await page.locator('#rsafFormation').isVisible(),true);
   assert.equal(await page.locator('#rsafPartners').isVisible(),false);
-  console.log('P3-31 three-tab iPhone smoke PASS',labels);
+  await page.locator('[data-rsaf-tab="decision"]').click();
+  assert.equal(await page.locator('#rsafDecision').isVisible(),true);
+  assert.equal(await page.locator('#rsafFormation').isVisible(),false);
+  assert.equal(await page.locator('#rsaForecastWorkflowV1').isVisible(),true);
+  assert.equal(await page.locator('#rsaForecastWorkflowV1').evaluate(el=>el.parentElement.id),'rsafDecision');
+  await page.locator('#rfwWhyAxis').fill('4タブの切替でもメモを保持');
+  await page.locator('#rfwPaceNote').fill('隊列のメモも保持');
+  await page.locator('[data-rsaf-tab="axis"]').click();
+  assert.equal(await page.locator('#rsafDecision').isVisible(),false);
+  await page.locator('[data-rsaf-tab="decision"]').click();
+  assert.equal(await page.locator('#rfwWhyAxis').inputValue(),'4タブの切替でもメモを保持');
+  assert.equal(await page.locator('#rfwPaceNote').inputValue(),'隊列のメモも保持');
+  assert.equal(await page.locator('#rsafDecision #rfwCornerAuditV1').count(),1,'result form stays in final tab');
+  console.log('P3-45 four-tab iPhone smoke PASS',labels);
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exit(1)});

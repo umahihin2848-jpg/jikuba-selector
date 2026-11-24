@@ -147,23 +147,21 @@ function partnersHtml(m){
  }).join("");
 }
 function content(){
- return '<div class="rfw-kicker">RACE DECISION WORKFLOW｜研究用</div>'+
-  '<h2 class="rfw-heading">自分の予想から、買う・見送るまで</h2>'+
-  '<div class="rfw-flow"><span>① 軸の確認</span><span>② 相手3頭</span><span>③ 全頭隊列</span><span>④ レース解説</span><span>⑤ 価格</span><span>⑥ BUY / PASS</span></div>'+
-  '<div id="rfwDynamicAxis"></div>'+
-  '<div class="rfw-card"><h3>② 相手3頭｜軸とのワイド1点の参考確率</h3><div id="rfwDynamicPartners" class="rfw-compare"></div><p class="rfw-small">市場の最終オッズ由来の確率は同じ市場価格と独立していないため、これだけでプラス期待値・BUYとは判定できません。</p></div>'+
-  '<div class="rfw-card"><h3>③ 全頭隊列</h3><p class="rfw-dim">上の「展開隊列」タブに全頭・右回り／左回りを反映。矢印は表示しません。</p><p id="rfwFormationHint" class="rfw-small"></p></div>'+
-  '<div class="rfw-card"><h3>④ 自分のレース解説</h3><div class="rfw-fields">'+
+ return '<div class="rfw-kicker">FINAL DECISION｜研究用</div>'+
+  '<h2 class="rfw-heading">自分の解説から購入判断へ</h2>'+
+  '<p class="rfw-small">軸馬・相手3頭・隊列を確認したうえで、最後に買う根拠と価格を整理します。</p>'+
+  '<div id="rfwDecisionRecap" class="rfw-decision-recap"></div>'+
+  '<div class="rfw-card"><h3>① 自分のレース解説</h3><div class="rfw-fields">'+
    '<div><label for="rfwWhyAxis">軸馬を選ぶ根拠</label><textarea id="rfwWhyAxis" placeholder="能力・近走・条件適性、確認した事実と推測を分けて記録"></textarea></div>'+
    '<div><label for="rfwPaceNote">想定隊列とペース</label><textarea id="rfwPaceNote" placeholder="どの馬が前に出るか、内外、展開が変わる条件"></textarea></div>'+
    '<div><label for="rfwWhyPartner">ワイドの相手に選ぶ根拠</label><textarea id="rfwWhyPartner" placeholder="候補3頭を比較して採用・不採用の理由"></textarea></div>'+
    '<div><label for="rfwWeakness">この予想が外れるとしたら</label><textarea id="rfwWeakness" placeholder="スタート、折合い、枠、馬場変化、ペースの想定違い"></textarea></div>'+
    '</div></div>'+
-  '<div class="rfw-card"><h3>⑤ ワイド1点の購入条件（手入力）</h3><div class="rfw-fields">'+
+  '<div class="rfw-card"><h3>② ワイド1点の購入条件（手入力）</h3><div class="rfw-fields">'+
    '<div><label for="rfwQuote">検討時点のワイド最低オッズ（任意）</label><input id="rfwQuote" inputmode="decimal" type="number" min="1" step=".1" placeholder="例：8.5"></div>'+
    '<div><label for="rfwStake">仮購入額（円）</label><input id="rfwStake" inputmode="numeric" type="number" min="100" step="100" value="100"></div>'+
    '</div><p id="rfwQuoteHint" class="rfw-small">実際の購入時点のオッズを記録。購入推奨や期待利益の保証はしません。</p></div>'+
-  '<div class="rfw-card"><h3>⑥ 自分の最終判断</h3><div class="rfw-final">'+
+  '<div class="rfw-card"><h3>③ 自分の最終判断</h3><div class="rfw-final">'+
    '<label><input type="radio" name="rfwDecision" value="buy"> BUY候補</label>'+
    '<label><input type="radio" name="rfwDecision" value="pass" checked> PASS</label>'+
    '</div><div class="rfw-fields" style="margin-top:10px"><div><label for="rfwFinalReason">買う・見送る最終理由（必須）</label><textarea id="rfwFinalReason" placeholder="なぜ買う／なぜ見送るか。見送りの理由も記録"></textarea></div></div>'+
@@ -174,8 +172,9 @@ function content(){
 function ensure(){
  if(!root.document||!root.document.body||!root.document.body.classList.contains("rsaFocusedThreeTabs"))return null;
  var parent=$("rsaFocusedView");if(!parent)return null;
- var el=$("rsaForecastWorkflowV1");if(el)return el;
- el=root.document.createElement("section");el.id="rsaForecastWorkflowV1";parent.insertAdjacentElement("afterend",el);el.innerHTML=content();
+ var target=$("rsafDecision");if(!target)return null;
+ var el=$("rsaForecastWorkflowV1");if(el){if(el.parentElement!==target)target.appendChild(el);return el;}
+ el=root.document.createElement("section");el.id="rsaForecastWorkflowV1";target.appendChild(el);el.innerHTML=content();
  el.addEventListener("click",function(e){
   var choice=e.target.closest&&e.target.closest("[data-rfw-choice]");
   if(choice){if(draft&&!draft.locked){draft.partnerNo=String(choice.dataset.rfwChoice);saveDraft();renderWorkspace(true)}return}
@@ -214,6 +213,37 @@ function updateQuoteHint(m){
  if(Number.isFinite(quote)&&quote>=1)msg+=" 記録オッズ "+quote.toFixed(1)+"倍。";
  el.textContent=msg+" この確率は市場情報に依存するため、数式上の比較だけで購入期待値がプラスと認定しません。";
 }
+function decisionRecap(m){
+ if(!m.ready)return '<b>解析結果待ち</b><p>軸馬・相手馬・隊列の解析が完了すると要点が表示されます。</p>';
+ const axis=m.roster.find(h=>h.no===m.axis);
+ if(!axis)return '<b>軸馬が未確定</b><p>無理に軸を選ばず、PASSを検討してください。予想メモは記録できます。</p>';
+ const chosen=m.partners.find(no=>no===String(draft?.partnerNo||""));
+ const label=chosen?chosen+"番 "+(m.names[chosen]||""):"相手未選択（相手馬タブで選択してください）";
+ const p=chosen?modelProb(m,chosen):NaN;
+ return '<b>軸 '+esc(axis.no+"番 "+axis.name)+' × '+esc(label)+'</b><p>'+
+  (m.researchAxis?'研究用軸のため本番BUY条件には使えません。':"本番軸の候補。")+
+  (Number.isFinite(p)?" ワイド参考的中確率 "+(100*p).toFixed(1)+"%。":"")+
+  '相手候補の評価は「相手馬」タブ、全頭隊列は「展開隊列」タブで確認してください。</p>';
+}
+function decorateAnalysisTabs(m){
+ if(!m.ready)return;
+ const axis=$("rsafAxis")?.querySelector(".rsaf-axis");
+ if(axis&&m.axis){
+  let box=axis.querySelector(".rfw-axis-risk");
+  if(!box){box=root.document.createElement("div");box.className="rfw-axis-risk";axis.appendChild(box)}
+  box.textContent="位置取りの懸念｜"+riskFor(m.byNo[m.axis],m.roster.length,m.pressure);
+ }
+ const panel=$("rsafPartners");
+ if(!panel||panel.hidden||!m.axis)return;
+ const cards=panel.querySelectorAll(".rsaf-pick-card");
+ cards.forEach((card,i)=>{
+  const no=m.partners[i];if(!no)return;
+  let extra=card.querySelector(".rfw-partner-assist");
+  if(!extra){extra=root.document.createElement("div");extra.className="rfw-partner-assist";const btn=card.querySelector(".rsaf-pick-action");if(btn)card.insertBefore(extra,btn);else card.appendChild(extra)}
+  const p=modelProb(m,no);
+  extra.textContent="ワイド参考同時的中率 "+(Number.isFinite(p)?(100*p).toFixed(1)+"%":"未取得")+"｜位置取りの懸念："+riskFor(m.byNo[no],m.roster.length,m.pressure);
+ });
+}
 function renderWorkspace(force){
  var node=ensure();if(!node)return;
  var m=context();lastData=m;
@@ -221,18 +251,16 @@ function renderWorkspace(force){
  var key=m.key;
  if(raceKey!==key){
   raceKey=key;draft=draftFor(key)||{version:VERSION,locked:false,partnerNo:"",decision:"pass",quote:"",stake:"100",notes:{},race:m.race};
-  if(!draft.partnerNo&&m.partners.length===3)draft.partnerNo=m.partners[0];
   turnOverride="";
   applyDraft();force=true;lastPanelSig="";
  }
  var sig=JSON.stringify([m.ready,m.axis,m.partners,m.marketReady,m.pmap,m.queue&&m.queue.at,m.pressure,m.roster.map(function(h){return [h.no,h.name]}),draft&&draft.partnerNo]);
  if(force||sig!==lastPanelSig){
   lastPanelSig=sig;
-  $("rfwDynamicAxis").innerHTML=infoHtml(m);
-  $("rfwDynamicPartners").innerHTML=partnersHtml(m);
-  $("rfwFormationHint").textContent=(m.race.turn==="straight"?"直線コース":m.race.turn==="left"?"左回り":m.race.turn==="right"?"右回り":"回り方向未判定")+"｜初角予測の配置を参考に、ほかの逃げ・先行候補との位置争いを確認。";
+  $("rfwDecisionRecap").innerHTML=decisionRecap(m);
  }
  updateQuoteHint(m);
+ decorateAnalysisTabs(m);
  if(draft&&draft.locked)message("固定済み："+String(draft.fixedAt||"")+"（オッズ・根拠・馬番は保存時のスナップショット）");
 }
 function renderFormation(){
@@ -304,6 +332,14 @@ root.document.addEventListener("click",function(e){
 ["rsa-focused-partner-ready","validated-queue-ready","mobile-pair-probability-reference-ready",
  "mobile-race-map-pace-ready","course-geometry-ready","rsa-analysis-complete","production-decision-pipeline-ready"].forEach(function(name){
  root.addEventListener(name,function(){setTimeout(refresh,30)});
+});
+root.addEventListener("rsa-focused-partner-user-choice",function(event){
+ if(!draft||draft.locked||!lastData)return;
+ const no=String(event.detail&&event.detail.no||"");
+ if(no&&!lastData.partners.includes(no))return;
+ draft.partnerNo=no;
+ saveDraft();
+ renderWorkspace(true);
 });
 root.addEventListener("rsa-analysis-start",function(){lastPanelSig="";setTimeout(refresh,45)});
 root.document.addEventListener("change",function(e){

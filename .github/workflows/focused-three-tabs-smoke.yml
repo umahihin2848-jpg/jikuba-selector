@@ -1,10 +1,19 @@
-name: Focused three-tab iPhone smoke
+name: Focused four-tab iPhone smoke
 on:
+  pull_request:
+    paths:
+      - 'waku-bc-converter/mobile-focused-3tabs-v1.js'
+      - 'waku-bc-converter/mobile-focused-3tabs-v1.css'
+      - 'waku-bc-converter/mobile-forecast-workflow-v1.js'
+      - 'waku-bc-converter/v3.html'
+      - 'tests/mobile-focused-three-tabs-browser.cjs'
+      - 'tests/mobile-focused-three-tabs-core.cjs'
   push:
     branches: [main]
     paths:
       - 'waku-bc-converter/mobile-focused-3tabs-v1.js'
       - 'waku-bc-converter/mobile-focused-3tabs-v1.css'
+      - 'waku-bc-converter/mobile-forecast-workflow-v1.js'
       - 'waku-bc-converter/v3.html'
       - 'tests/mobile-focused-three-tabs-browser.cjs'
       - 'tests/mobile-focused-three-tabs-core.cjs'
