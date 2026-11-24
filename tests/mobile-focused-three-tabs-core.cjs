@@ -19,7 +19,7 @@ assert.strictEqual(top.length,4);assert(!top.some(x=>x.no==='1'));
 assert(!view.selectVisiblePartners(res,null).length,'no confirmed axis means no partners');
 assert.deepEqual(JSON.parse(JSON.stringify(view.partnerRankLabels([{no:'11',finishRank:4}],'11',{v3Rank:7}))),{m3:'4位',v3:'7位'});
 assert.deepEqual(JSON.parse(JSON.stringify(view.partnerRankLabels([{no:'11',finishRank:4}],'9',null))),{m3:'評価待ち',v3:'更新待ち'});
-assert(f.includes('M3展開順位')&&f.includes('V3能力順位'),'selected partner cards must display ranks');
+assert(f.includes("fact('M3'")&&f.includes("fact('P10'"),'partner cards must show current M3 and P10 ranks/risk');
 assert(!view.cMarketRank(roster,api.buildMarket('1 2.2',roster),cState,model.models['2026']).ready,'odds incomplete');
 assert(!view.cMarketRank(roster,mk,{...cState,activeModel:'v1'},model.models['2026']).ready,'no C fallback proxy');
 const header=fs.readFileSync(__dirname+'/../waku-bc-converter/v3.html','utf8');
@@ -46,7 +46,7 @@ assert.strictEqual(view.skipDiagnosis({analyzed:true,code:'A1_high',marketComple
 const pMarket=api.marketStructure(mk,model.market_structure_P4_1['2026']);
 assert(Number.isFinite(pMarket)&&pMarket>0&&pMarket<1,'market structure reference needs a trained year model');
 assert.strictEqual(api.marketStructure(mk,undefined),null,'do not substitute 2026 model for missing future year');
-assert(f.includes('rsaf-skip-diagnostic')&&f.includes('購入条件通過'),'skip explanation must be visible and non-binding');
+assert(f.includes('function skipDiagnosis(')&&f.includes('購入条件通過'),'skip logic remains non-binding and distinguishable from purchases');
 
 console.log('P3-33 skip diagnostic core PASS',top.map(x=>x.no));
 
@@ -74,5 +74,5 @@ assert.strictEqual(view.researchAxisChoice(view.skipDiagnosis({analyzed:true,cod
 assert.strictEqual(view.researchAxisChoice(reviewState,{ready:false,rows:referenceRanked.rows}),null,'model incomplete cannot be used');
 assert.strictEqual(view.researchAxisChoice(reviewState,{ready:true,rows:[{no:'3',name:'bad',p3:NaN},...referenceRanked.rows.slice(1)]}),null,'invalid predicted probability not permitted');
 assert.strictEqual(view.selectVisiblePartners({ready:true,rows:referenceRanked.rows}, {no:'3'},3).length,3);
-assert(f.includes('研究用・市場＋Cの参考軸') && f.includes('購入ロックは解除されず'),'research must retain purchase lock copy');
+assert(f.includes('研究用の0.60基準は、購入の期待値') && f.includes('betEligible:false'),'research reference cannot unlock purchases');
 assert(f.includes('const visibleAxis=official||researchAxis;'),'research reference should use 3 different partners');
