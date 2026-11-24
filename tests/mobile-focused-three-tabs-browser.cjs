@@ -41,6 +41,32 @@ const {chromium}=require('playwright');
   assert.equal(await page.locator('#rfwWhyAxis').inputValue(),'4タブの切替でもメモを保持');
   assert.equal(await page.locator('#rfwPaceNote').inputValue(),'隊列のメモも保持');
   assert.equal(await page.locator('#rsafDecision #rfwCornerAuditV1').count(),1,'result form stays in final tab');
+  // Synthetic no-axis fixture: test UI visibility only, not model accuracy.
+  await page.evaluate(()=>{
+   const rows=Array.from({length:16},(_,i)=>({no:String(i+1),name:'検証馬'+(i+1),finishRank:i+1}));
+   window.Finish600State={ready:true,rows};
+   window.M3PureAbilityState={ready:true,activeModel:'C',rows:rows.map(h=>({no:h.no,name:h.name,abilityRank:h.finishRank}))};
+   window.DecisionShellV2State={ready:true,at:Date.now(),structure:{code:'no_auto_axis',level:'neutral',reason:'軸馬が成立しない検証ケース',axis:null,candidates:[]},final:{code:'no_auto_axis',level:'neutral'},market:{complete:false}};
+   window.AxisAccessGateV1State={status:'skip',reason:'軸馬が成立しない検証ケース'};
+   window.RSAAnalysisTransitionState={status:'ready'};
+   window.RSAFocusedThreeTabsV1.dirty=false;
+   window.dispatchEvent(new CustomEvent('decision-shell-v2-ready'));
+  });
+  await page.locator('#rsafSkipScreen').waitFor({state:'visible',timeout:12000});
+  assert.match(await page.locator('#rsafSkipScreen').innerText(),/見送り/);
+  assert.match(await page.locator('#rsafSkipScreen').innerText(),/軸馬が成立しない/);
+  assert.equal(await page.locator('#rsafTabs').isVisible(),false,'tabs hidden when no axis');
+  assert.equal(await page.locator('#rsafAxis').isVisible(),false,'axis analysis hidden');
+  assert.equal(await page.locator('#rsafPartners').isVisible(),false,'partner analysis hidden');
+  assert.equal(await page.locator('#rsafFormation').isVisible(),false,'formation hidden');
+  assert.equal(await page.locator('#rsafDecision').isVisible(),false,'final purchase decision hidden');
+  assert.equal(await page.locator('#rsaFocusedView').isVisible(),true,'skip message must remain visible');
+  assert.equal(await page.evaluate(()=>window.RSAFocusedThreeTabsState.skipOnly),true,'published state is skip-only');
+  // An edited race must not inherit the previous no-axis verdict.
+  await page.locator('#raceName').fill('別のレース');
+  await page.locator('#rsafTabs').waitFor({state:'visible',timeout:12000});
+  assert.equal(await page.locator('#rsafSkipScreen').isVisible(),false,'changing race hides previous skip verdict');
+  console.log('P3 no-axis skip-only screen and recovery PASS');
   console.log('P3-45 four-tab iPhone smoke PASS',labels);
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exit(1)});
