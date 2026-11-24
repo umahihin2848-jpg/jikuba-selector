@@ -25,7 +25,7 @@ function riskFor(row,n,pressure){
  return risks.join("／");
 }
 function isForecastReady(focused,dirty,rosterCount){
- return focused&&focused.analysisReady===true&&dirty!==true&&rosterCount>=12&&rosterCount<=18;
+ return Boolean(focused&&focused.analysisReady===true&&dirty!==true&&rosterCount>=12&&rosterCount<=18);
 }
 function rosterRows(){
  var s=root.Finish600State;
