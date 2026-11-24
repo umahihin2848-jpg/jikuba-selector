@@ -1,0 +1,28 @@
+/* Postrace actual corner audit panel. Extra display only. */
+#rfwCornerAuditV1{margin-top:12px;border-color:#537267;background:#0c2930}
+#rfwCornerAuditV1 h3{color:#e4f8f1;font-size:13px;line-height:1.5;margin:0 0 8px}
+#rfwCornerEntry[hidden],#rfwCornerActualStage[hidden],#rfwCornerAuditV1[hidden],#rsafFormation .rfw-course-map[hidden]{display:none!important}
+#rfwCornerEntry label{font-size:11px;color:#c4d8e1;display:block;margin-bottom:4px}
+#rfwCornerEntry select,#rfwCornerEntry textarea{width:100%;font-size:12px!important;box-sizing:border-box;border:1px solid #416775!important;border-radius:10px!important;background:#091b28!important;color:#e8f7f7!important;padding:10px!important}
+#rfwCornerEntry textarea{min-height:142px;resize:vertical;line-height:1.5}
+#rfwCornerSave{width:100%;font-size:12px!important;font-weight:800!important;min-height:44px!important;border-radius:10px!important;background:#1f5846!important;color:#e6f9ed!important;border:1px solid #558f72!important}
+#rfwCornerMessage{color:#accfd0;margin:10px 0;font-size:11px;line-height:1.6}
+#rfwCornerExport{min-height:44px!important;border-radius:10px!important;background:#1a3d4f!important;border:1px solid #4d7b87!important;color:#f2fbfc!important;font-size:12px!important}
+#rfwCornerExport:disabled{opacity:.45}
+.rfw-corner-summary{border:1px solid #416a75;border-radius:10px;background:#142f39;padding:10px;font-size:11px;line-height:1.65;margin:9px 0}
+.rfw-corner-summary b{font-size:12px;color:#d5f4eb}
+.rfw-corner-summary p{margin:5px 0}
+.rfw-corner-scroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:11px;border:1px solid #395665}
+.rfw-corner-scroll table{border-collapse:collapse;min-width:560px;width:100%;color:#cde0e7;font-size:10px}
+.rfw-corner-scroll th,.rfw-corner-scroll td{border-bottom:1px solid #2f4e5a;padding:9px 6px;text-align:center;white-space:nowrap}
+.rfw-corner-scroll th:first-child{text-align:left;position:sticky;left:0;background:#122c39;z-index:1;min-width:100px}
+.rfw-corner-scroll thead th{color:#d8f6e9;background:#163745;font-size:10px}
+.rfw-corner-scroll tbody tr:nth-child(even){background:#0c2430}
+.rfw-corner-scroll tbody th small{color:#f2cc94}
+.rfw-corner-tabs{display:flex;align-items:center;gap:6px;flex-wrap:wrap;background:#102837;border:1px solid #38596c;padding:9px;border-radius:12px;margin:9px 0}
+.rfw-corner-tabs b{width:100%;font-size:12px;color:#dceef3}
+.rfw-corner-tabs button{flex:1 1 39%;min-width:0;min-height:39px!important;padding:6px!important;border-radius:9px!important;background:#152c3b!important;border:1px solid #3e6274!important;color:#bfd7df!important;font-size:11px!important;font-weight:800!important}
+.rfw-corner-tabs button[aria-pressed="true"]{background:#245646!important;color:#f1fff9!important;border-color:#78b49d!important}
+.rfw-corner-stage-heading{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:9px;font-size:12px;color:#edf9f1}
+.rfw-corner-stage-heading small{font-size:10px;color:#a0bcc8}
+#rfwCornerActualStage .rfw-course-map svg{width:100%;max-height:none;height:auto;display:block}
