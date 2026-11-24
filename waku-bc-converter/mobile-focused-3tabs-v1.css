@@ -12,11 +12,12 @@ body.iosMobileShellV2.rsaFocusedThreeTabs #rsaFocusedView{display:block!importan
 .rsaf-head h2{font-size:18px;line-height:1.35;margin:4px 0;color:#f0f8fc}
 .rsaf-head p{font-size:11px;color:#93b0bd;margin:0;line-height:1.5}
 .rsaf-status{border:1px solid #547182;padding:5px 8px;border-radius:999px;color:#b6d4dc;background:#142d3c;font-size:10px;white-space:nowrap}
-#rsafTabs{position:sticky;top:max(0px,env(safe-area-inset-top));z-index:36;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;padding:5px 0 9px;background:#07131f}
+#rsafTabs{position:sticky;top:max(0px,env(safe-area-inset-top));z-index:36;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;padding:5px 0 9px;background:#07131f}
 #rsafTabs button{min-height:51px!important;min-width:0!important;background:#0c1d2b!important;color:#a4bcc9!important;border:1px solid #375467!important;border-radius:12px!important;font-size:12px!important;font-weight:850!important;white-space:nowrap!important;padding:8px 2px!important;box-shadow:none!important}
 #rsafTabs button[aria-selected="true"]{background:#163e37!important;color:#ddfff0!important;border-color:#568b77!important}
 #rsafAxis,#rsafPartners,#rsafFormation{display:grid;gap:10px}
-#rsafAxis[hidden],#rsafPartners[hidden],#rsafFormation[hidden]{display:none!important}
+#rsafDecision{min-width:0}
+#rsafAxis[hidden],#rsafPartners[hidden],#rsafFormation[hidden],#rsafDecision[hidden]{display:none!important}
 .rsaf-decision{border:1px solid #6c6544;background:#2a251c;border-radius:14px;padding:13px}
 .rsaf-decision p{font-size:11px;color:#d4c4a3;margin:7px 0 0;line-height:1.65}
 .rsaf-badge{font-size:10px;font-weight:800;border:1px solid #647687;border-radius:99px;padding:4px 8px;color:#bed5e0;display:inline-flex;line-height:1.6;white-space:nowrap}
@@ -73,3 +74,12 @@ body.iosMobileShellV2.rsaFocusedThreeTabs #rsaFocusedView{display:block!importan
 .rsaf-horse.rsaf-research-axis{background:linear-gradient(150deg,#332b18,#132532);border-color:#a88a53}
 .rsaf-research-axis .rsaf-horse-no{background:#5a4722;border-color:#ae8e4c}
 .rsaf-research-axis .rsaf-horse-main small{color:#f2ce93}
+
+/* Four primary tabs. Final decision retains the same DOM across tab changes. */
+#rsafDecision #rsaForecastWorkflowV1{margin:0 0 15px}
+#rsafDecision .rfw-decision-recap{padding:11px 12px;background:#102d3b;border:1px solid #41636e;border-radius:11px;margin-bottom:12px}
+#rsafDecision .rfw-decision-recap b{color:#d6f5e7;font-size:12px}
+#rsafDecision .rfw-decision-recap p{font-size:11px;line-height:1.6;color:#aecbd2;margin:6px 0 0}
+#rsafAxis .rfw-axis-risk,#rsafPartners .rfw-partner-assist{border:1px solid #58705b;background:#1c3030;color:#ebd6ad;border-radius:9px;margin-top:9px;padding:9px 10px;font-size:11px;line-height:1.6}
+#rsafPartners .rfw-partner-assist strong{color:#bbebd9}
+@media(max-width:390px){#rsafTabs button{font-size:10.5px!important;padding:7px 1px!important;min-height:48px!important}}
