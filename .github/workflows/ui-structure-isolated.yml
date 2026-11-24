@@ -1,5 +1,10 @@
 name: UI structure isolated
 on:
+  pull_request:
+    paths:
+      - 'waku-bc-converter/**'
+      - 'tests/ui-structure-policy-smoke.cjs'
+      - '.github/workflows/ui-structure-isolated.yml'
   push:
     branches: [main]
     paths:

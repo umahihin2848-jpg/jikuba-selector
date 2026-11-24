@@ -39,6 +39,8 @@ for(let n=12;n<=18;n++){
   assert.ok(!r.svg.includes("marker-end")&&!l.svg.includes("marker-end"));
   const cx=s=>Number(s.match(/<title>7番 [^<]+<\/title><circle cx="([\d.]+)"/)[1]);
   assert.ok(Math.abs(cx(r.svg)+cx(l.svg)-360)<0.03,"mirror and readable horse number");
+  assert.ok(r.svg.includes('<text x="283" y="23" font-size="12" fill="#ffffff">先頭側</text>'),"right course rank1 is right: label must agree");
+  assert.ok(l.svg.includes('<text x="15" y="23" font-size="12" fill="#ffffff">先頭側</text>'),"left course rank1 is left: label must agree");
  }
  const tied=roster.map((h,i)=>[h.no,1,1,1].join(" ")).join("\n");
  const q=A.parse(tied,roster,"1");assert.equal(q.ok,true,"recorded shared ranks allowed");

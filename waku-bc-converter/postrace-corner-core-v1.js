@@ -88,8 +88,8 @@ function actualMap(ctx,result,stage,turn){
  const height=Math.max(151,Math.max(0,...known.map(h=>h.y))+40);
  let svg='<svg viewBox="0 0 360 '+height+'" role="img" aria-label="'+E("実測"+(stage==="initial"?label(result.firstCorner):stage==="c3"?"3角":"4角")+"、内外は実測なし")+'">';
  svg+='<rect x="2" y="2" width="356" height="'+(height-4)+'" rx="12" fill="#245039"/>';
- svg+='<text x="'+(turn==="left"?285:16)+'" y="23" font-size="12" fill="#ffffff">先頭側</text>';
- svg+='<text x="'+(turn==="left"?15:283)+'" y="23" font-size="12" fill="#ffffff">後方側</text>';
+ svg+='<text x="'+(turn==="left"?15:283)+'" y="23" font-size="12" fill="#ffffff">先頭側</text>';
+ svg+='<text x="'+(turn==="left"?285:16)+'" y="23" font-size="12" fill="#ffffff">後方側</text>';
  for(const h of known){
   const x=turn==="left"?360-h.x:h.x,role=h.no===ctx.axis?"axis":ctx.partners.includes(h.no)?"partner":"other";
   const fill=role==="axis"?"#7358c5":role==="partner"?"#0c968b":"#edf3ed";
