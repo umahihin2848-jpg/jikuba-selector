@@ -72,10 +72,11 @@ const productionMust=[
 for(const s of productionMust)if(!mobileCore.includes(s))throw new Error(`Production opponent guard missing: ${s}`);
 
 if(!loader.includes('market-ability-opponent-shadow-v1.js?v=20261102review1'))throw new Error('mobile loader not wired to reviewed Shadow build');
-if(!v3.includes('v3-addons-loader-p.js?v=20261102review1'))throw new Error('v3 mobile loader cache key not updated');
+if(!v3.includes('v3-addons-loader-p.js?v=20261124buildsync1'))throw new Error('v3 loader cache key is stale');
 if(!v3.includes('mobile-opponent-core-v1.js?v=20261102review1'))throw new Error('Production opponent core cache key not updated');
-if(!v3.includes('opponent-ranking-display-v1.js?v=20261102review1'))throw new Error('legacy diagnostic cache key not updated');
-if(!v3.includes("window.RSA_BUILD='20261101ability2'"))throw new Error('global Production build marker changed unexpectedly');
+if(v3.includes('opponent-ranking-display-v1.js'))throw new Error('legacy diagnostic must not be reactivated in the current focused UI');
+if(!v3.includes("window.RSA_BUILD='20261120audit1'"))throw new Error('global Production build marker mismatch');
+if(!loader.includes("const BUILD='20261120audit1'"))throw new Error('loader and production build marker disagree');
 
 // Legacy formulas remain available only as diagnostic comparisons.
 if(!old.includes("V='opponent-ranking-display-v1.4-legacy-diagnostic'"))throw new Error('legacy diagnostic version missing');
