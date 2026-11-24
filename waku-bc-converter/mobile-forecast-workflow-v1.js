@@ -68,10 +68,10 @@ function positionSlots(m){
  });
  for(var lane=0;lane<4;lane++){
   var subset=known.filter(function(h){return h.lane===lane}).sort(function(a,b){return a.rank-b.rank||Number(a.no)-Number(b.no)});
-  var last=Infinity;
+  var last=Infinity,gap=Math.min(31,250/Math.max(subset.length-1,1));
   subset.forEach(function(h){
    var ideal=291-(h.rank-1)*250/Math.max(n-1,1);
-   h.x=Math.min(ideal,last-31);last=h.x;
+   h.x=Math.min(ideal,last-gap);last=h.x;
   });
   if(subset.length&&subset[subset.length-1].x<34){
    var shift=34-subset[subset.length-1].x;
