@@ -8,13 +8,13 @@ const norm=v=>String(v??'').normalize('NFKC').trim();
 const E=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const $=id=>root.document?.getElementById(id);
 const key=(a,b)=>[Number(a),Number(b)].sort((x,y)=>x-y).join('-');
-const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const blank=reason=>({ready:false,reason,version:VERSION});
 function compute(input){
  const {axisNo,partnerNos,ability,shadow,market}=input||{};
  const axis=String(axisNo||''),opp=(partnerNos||[]).map(String);
  if(!/^\d+$/.test(axis)||opp.length!==3||new Set([axis,...opp]).size!==4)return blank('公式軸または相手3頭が未確定');
  if(!ability?.ready||!Array.isArray(ability.rows)||!shadow?.ready||shadow.marketIndependent!==true)return blank('市場非依存Abilityモデルの計算待ち');
+ if(valid(ability.at)&&valid(shadow.at)&&N(shadow.at)<N(ability.at))return blank('最新のAbility計算と同時確率の同期待ち');
  const roster=ability.rows,hs=shadow.horses;
  if(!Array.isArray(hs)||hs.length!==roster.length||hs.length<12||hs.length>18||Number(shadow.field)!==hs.length)return blank('レース全頭の整合性確認待ち');
  const orig=new Map(roster.map(r=>[String(r.no),norm(r.name)])),pred=new Map(hs.map(r=>[String(r.no),r]));
@@ -65,7 +65,6 @@ if(!root.document?.createElement||typeof root.addEventListener!=='function')retu
 const state={raceKey:'',quote:{},open:false,signature:''};
 const pct=p=>valid(p)?(N(p)*100).toFixed(1)+'%':'—';
 const odds=p=>valid(p)?N(p).toFixed(2)+'倍':'—';
-const quoteText=()=>'(入力したワイド下限でのみ仮計算)';
 function context(){
  const st=root.RSAFocusedThreeTabsState||{},fr=root.Finish600State||{};
  if(!st.analysisReady||root.RSAFocusedThreeTabsV1?.dirty||!st.axisNo||
