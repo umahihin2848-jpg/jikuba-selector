@@ -133,6 +133,7 @@ function ensure(){if(!isMobile())return null;let x=$('rsaFocusedView');if(x)retu
   if(!btn||!x.contains(btn))return;
   const ctx=decisionContext();
   STORE.selectedPartnerNo=manualPartnerChoice(STORE.selectedPartnerNo,btn.dataset.rsafPickNo,ctx.partners,ctx.official?.no);
+  root.dispatchEvent(new CustomEvent('rsa-focused-partner-user-choice',{detail:{no:STORE.selectedPartnerNo}}));
   render(true);
  });
  loadModel();return x;
