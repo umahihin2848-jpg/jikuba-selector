@@ -63,6 +63,8 @@ const {chromium}=require('playwright');
   assert.equal(await page.locator('#rsaFocusedView').isVisible(),true,'skip message must remain visible');
   assert.equal(await page.evaluate(()=>window.RSAFocusedThreeTabsState.skipOnly),true,'published state is skip-only');
   // An edited race must not inherit the previous no-axis verdict.
+  await page.locator('[data-rsaf-new-race]').click();
+  await page.locator('#raceName').waitFor({state:'visible',timeout:10000});
   await page.locator('#raceName').fill('別のレース');
   await page.locator('#rsafTabs').waitFor({state:'visible',timeout:12000});
   assert.equal(await page.locator('#rsafSkipScreen').isVisible(),false,'changing race hides previous skip verdict');
