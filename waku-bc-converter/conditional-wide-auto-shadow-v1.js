@@ -117,12 +117,12 @@ function render(){
  root.RSAConditionalWideAutoV1State={...m,raceKey:c.race,at:Date.now()};
 }
 function getSnapshot(){
- const c=context();if(!c||c.race!==state.raceKey||!c.model.ready)return null;
- const m=c.model;
+ const c=context();if(!c||!c.model.ready)return null;
+ const m=c.model,quotes=c.race===state.raceKey?state.quote:{};
  return{version:VERSION,raceKey:c.race,researchOnly:true,productionImpact:false,betEligible:false,
   axisNo:m.axisNo,axisTop3:m.axisTop3,abilityModel:m.abilityModel,abilityCUncalibrated:m.abilityCUncalibrated,
   probabilityProvenance:'ability_market_independent_maxent_shadow',comparisonProvenance:m.marketAvailable?'market_derived_reference_only':null,
-  partners:m.partners.map(p=>{const pr=price(p.joint,state.quote[p.no]);return{no:p.no,name:p.name,
+  partners:m.partners.map(p=>{const pr=price(p.joint,quotes[p.no]);return{no:p.no,name:p.name,
    conditionalOnAxisTop3:p.conditional,jointTop3:p.joint,marketJointTop3:p.market?.joint??null,
    marketConditionalOnAxisTop3:p.market?.conditional??null,
    userQuotedWideLower:pr.ready?pr.odds:null,researchExpectedReturnRatio:pr.ready?pr.researchRoi:null}}),
