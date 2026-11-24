@@ -1,0 +1,36 @@
+name: Research export frozen Ability C Elo shards
+on:
+  push:
+    branches: [research/ability-c-elo-archive-20261124]
+  workflow_dispatch:
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify exact model manifest and shard count
+        run: |
+          python - <<'PY'
+          import json,pathlib,hashlib
+          d=pathlib.Path('waku-bc-converter/data')
+          m=json.loads((d/'opponent_race_strength_v1_manifest.json').read_text())
+          assert m['version']=='opponent_race_strength_v1'
+          assert len(m['shards'])==8
+          allvals={}
+          for n in m['shards']:
+              v=json.loads((d/n).read_text())
+              assert set(allvals).isdisjoint(v)
+              allvals.update(v)
+          assert len(allvals)==m['coverage']['keys']==4986
+          (pathlib.Path('elo_frozen_reference.json')).write_text(json.dumps(allvals,sort_keys=True,separators=(',',':')))
+          print('CHECKED_REFERENCE',len(allvals),hashlib.sha256(pathlib.Path('elo_frozen_reference.json').read_bytes()).hexdigest())
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ability-c-frozen-elo
+          path: elo_frozen_reference.json
+          if-no-files-found: error
+          retention-days: 1
