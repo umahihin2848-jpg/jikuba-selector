@@ -1,0 +1,47 @@
+/* P3 forecast workflow: shadow/read-only analysis + user-authored lock, no production gate edits */
+#rsaForecastWorkflowV1{color:#e6f3f8;margin:12px 0 24px;background:#091b29;border:1px solid #315064;border-radius:15px;padding:13px;font-size:12px;line-height:1.6}
+#rsaForecastWorkflowV1[hidden]{display:none!important}
+.rfw-kicker{font-size:10px;font-weight:800;letter-spacing:.15em;color:#85aebc}
+.rfw-heading{font-size:17px;color:#eff9fb;margin:3px 0 6px}
+.rfw-flow{display:flex;flex-wrap:wrap;gap:5px;margin:10px 0 15px}
+.rfw-flow span{font-size:10px;color:#b6d1dd;background:#142c3b;border:1px solid #355264;border-radius:9px;padding:5px 7px}
+.rfw-card{border:1px solid #315265;border-radius:12px;background:#0e2533;padding:12px;margin:10px 0}
+.rfw-card h3{font-size:13px;margin:0 0 9px;color:#dceef4}
+.rfw-dim{font-size:11px;color:#9fb9c6;margin:5px 0}
+.rfw-small{font-size:10px;line-height:1.5;color:#8fb0c0}
+.rfw-risk{color:#e8c99b;font-size:11px;line-height:1.55}
+.rfw-compare{display:grid;gap:7px}
+.rfw-candidate{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;align-items:start;border:1px solid #375667;border-radius:10px;background:#0a1d2b;padding:10px}
+.rfw-candidate b{font-size:12px;color:#f4fafa}
+.rfw-candidate small{display:block;font-size:10px;color:#9db5c3;line-height:1.5}
+.rfw-candidate .rfw-risk{display:block;color:#dbb789}
+.rfw-prob{font-size:15px;font-weight:900;text-align:right;white-space:nowrap;color:#c8f0df}
+.rfw-pick{min-height:37px!important;padding:5px 9px!important;border:1px solid #477d77!important;border-radius:9px!important;background:#173c3b!important;color:#dcf8ee!important;font-size:11px!important;white-space:nowrap}
+.rfw-pick[aria-pressed=true]{background:#2c6656!important;border-color:#96d4b0!important}
+.rfw-fields{display:grid;gap:9px}
+.rfw-fields label{display:block;color:#b7d1dc;font-weight:750;font-size:11px;margin-bottom:3px}
+.rfw-fields textarea,#rsaForecastWorkflowV1 input,#rsaForecastWorkflowV1 select{width:100%;box-sizing:border-box;min-height:42px;background:#091b28!important;color:#effbff!important;border:1px solid #3a5d6e!important;border-radius:9px!important;font-size:13px!important;padding:9px!important;box-shadow:none!important}
+.rfw-fields textarea{min-height:68px!important;resize:vertical;line-height:1.5}
+.rfw-fields textarea:disabled,#rsaForecastWorkflowV1 input:disabled,#rsaForecastWorkflowV1 select:disabled{opacity:.65}
+.rfw-final{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.rfw-final label{background:#122b37;border:1px solid #3f5c6a;border-radius:11px;display:flex;align-items:center;gap:7px;padding:12px;font-size:12px;font-weight:800}
+.rfw-final input{width:auto!important;min-height:0!important}
+.rfw-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.rfw-actions button{min-height:44px!important;border-radius:10px!important;font-size:12px!important;font-weight:800!important;padding:8px 12px!important}
+#rfwLock{background:#1d5746!important;color:white!important;border:1px solid #5b9980!important}
+#rfwExport{background:#193447!important;color:#dcecf5!important;border:1px solid #416779!important}
+#rfwMessage{font-size:11px;color:#a9daca;line-height:1.6;min-height:18px}
+.rfw-badge{border:1px solid #3c6e68;padding:2px 7px;border-radius:20px;background:#163d36;color:#bdebd8;font-size:10px;font-weight:800}
+#rsafFormation .rfw-course-map{background:#0a2230;border:1px solid #355566;border-radius:13px;padding:10px;margin:9px 0}
+.rfw-map-head{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.rfw-map-head b{color:#eff8fc;font-size:13px}
+.rfw-turn-controls{display:flex;gap:5px}
+.rfw-turn-controls button{min-height:34px!important;padding:5px 9px!important;background:#163140!important;color:#a9cbd9!important;border:1px solid #426276!important;border-radius:8px!important;font-size:11px!important}
+.rfw-turn-controls button[aria-pressed=true]{background:#26604a!important;color:#e9ffef!important;border-color:#7bb79b!important}
+#rsafFormation .rfw-course-map svg{display:block;width:100%;height:auto;max-height:290px}
+.rfw-map-legend{display:flex;gap:10px;flex-wrap:wrap;font-size:10px;color:#b6cfda;margin-top:7px}
+.rfw-dot{width:11px;height:11px;display:inline-block;border-radius:100%;vertical-align:middle;margin-right:4px}
+.rfw-roster{margin-top:9px;display:flex;gap:7px;flex-wrap:wrap;font-size:10px;color:#c1d5df}
+.rfw-roster span{border:1px solid #365566;border-radius:7px;padding:3px 6px}
+.rfw-uncertain{padding:7px 9px;margin:8px 0;background:#293023;border:1px solid #716c41;border-radius:8px;font-size:11px;color:#eed8a2}
+@media(max-width:420px){#rsaForecastWorkflowV1{padding:10px}.rfw-candidate{grid-template-columns:1fr auto}.rfw-prob{font-size:14px}.rfw-actions button{flex:1}}

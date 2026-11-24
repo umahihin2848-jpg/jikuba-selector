@@ -1,0 +1,33 @@
+name: Forecast workflow orientation guard
+on:
+  pull_request:
+    paths:
+      - 'waku-bc-converter/mobile-forecast-workflow-v1.js'
+      - 'waku-bc-converter/mobile-forecast-workflow-v1.css'
+      - 'waku-bc-converter/mobile-pair-probability-reference-v1.js'
+      - 'waku-bc-converter/v3.html'
+      - 'tests/mobile-forecast-workflow-v1.cjs'
+      - '.github/workflows/forecast-workflow-guard.yml'
+  push:
+    paths:
+      - 'waku-bc-converter/mobile-forecast-workflow-v1.js'
+      - 'waku-bc-converter/mobile-forecast-workflow-v1.css'
+      - 'waku-bc-converter/mobile-pair-probability-reference-v1.js'
+      - 'waku-bc-converter/v3.html'
+      - 'tests/mobile-forecast-workflow-v1.cjs'
+      - '.github/workflows/forecast-workflow-guard.yml'
+jobs:
+  orientation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check JavaScript syntax
+        run: |
+          node --check waku-bc-converter/mobile-forecast-workflow-v1.js
+          node --check waku-bc-converter/mobile-pair-probability-reference-v1.js
+      - name: Verify whole-field map, left/right, no arrows and unknown positions
+        run: node tests/mobile-forecast-workflow-v1.cjs
+      - name: Verify standalone read-only UI integration
+        run: |
+          grep -F 'mobile-forecast-workflow-v1.js?v=20261124p3wf1' waku-bc-converter/v3.html
+          grep -F 'mobile-forecast-workflow-v1.css?v=20261124p3wf1' waku-bc-converter/v3.html
