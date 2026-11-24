@@ -7,6 +7,9 @@ on:
       - 'waku-bc-converter/mobile-pair-probability-reference-v1.js'
       - 'waku-bc-converter/v3.html'
       - 'tests/mobile-forecast-workflow-v1.cjs'
+      - 'tests/value-ticket-conditional-v1.cjs'
+      - 'waku-bc-converter/value-ticket-lab-v1.js'
+      - 'waku-bc-converter/value-ticket-lab-v1.css'
       - 'waku-bc-converter/postrace-corner-core-v1.js'
       - 'waku-bc-converter/postrace-corner-ui-v1.js'
       - 'waku-bc-converter/postrace-corner-ui-v1.css'
@@ -19,6 +22,9 @@ on:
       - 'waku-bc-converter/mobile-pair-probability-reference-v1.js'
       - 'waku-bc-converter/v3.html'
       - 'tests/mobile-forecast-workflow-v1.cjs'
+      - 'tests/value-ticket-conditional-v1.cjs'
+      - 'waku-bc-converter/value-ticket-lab-v1.js'
+      - 'waku-bc-converter/value-ticket-lab-v1.css'
       - 'waku-bc-converter/postrace-corner-core-v1.js'
       - 'waku-bc-converter/postrace-corner-ui-v1.js'
       - 'waku-bc-converter/postrace-corner-ui-v1.css'
@@ -33,6 +39,8 @@ jobs:
         run: |
           node --check waku-bc-converter/mobile-focused-3tabs-v1.js
           node --check waku-bc-converter/mobile-forecast-workflow-v1.js
+          node --check waku-bc-converter/value-ticket-lab-v1.js
+          node tests/value-ticket-conditional-v1.cjs
           node --check waku-bc-converter/mobile-pair-probability-reference-v1.js
           node --check waku-bc-converter/postrace-corner-core-v1.js
           node --check waku-bc-converter/postrace-corner-ui-v1.js
