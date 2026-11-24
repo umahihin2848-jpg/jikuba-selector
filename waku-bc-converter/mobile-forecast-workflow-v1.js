@@ -218,7 +218,7 @@ function decisionRecap(m){
  const axis=m.roster.find(h=>h.no===m.axis);
  if(!axis)return '<b>軸馬が未確定</b><p>無理に軸を選ばず、PASSを検討してください。予想メモは記録できます。</p>';
  const chosen=m.partners.find(no=>no===String(draft?.partnerNo||""));
- const label=chosen?chosen+"番 "+(m.names[chosen]||""):"相手未選択";
+ const label=chosen?chosen+"番 "+(m.names[chosen]||""):"相手未選択（相手馬タブで選択してください）";
  const p=chosen?modelProb(m,chosen):NaN;
  return '<b>軸 '+esc(axis.no+"番 "+axis.name)+' × '+esc(label)+'</b><p>'+
   (m.researchAxis?'研究用軸のため本番BUY条件には使えません。':"本番軸の候補。")+
@@ -251,7 +251,6 @@ function renderWorkspace(force){
  var key=m.key;
  if(raceKey!==key){
   raceKey=key;draft=draftFor(key)||{version:VERSION,locked:false,partnerNo:"",decision:"pass",quote:"",stake:"100",notes:{},race:m.race};
-  if(!draft.partnerNo&&m.partners.length===3)draft.partnerNo=m.partners[0];
   turnOverride="";
   applyDraft();force=true;lastPanelSig="";
  }
@@ -333,6 +332,14 @@ root.document.addEventListener("click",function(e){
 ["rsa-focused-partner-ready","validated-queue-ready","mobile-pair-probability-reference-ready",
  "mobile-race-map-pace-ready","course-geometry-ready","rsa-analysis-complete","production-decision-pipeline-ready"].forEach(function(name){
  root.addEventListener(name,function(){setTimeout(refresh,30)});
+});
+root.addEventListener("rsa-focused-partner-user-choice",function(event){
+ if(!draft||draft.locked||!lastData)return;
+ const no=String(event.detail&&event.detail.no||"");
+ if(no&&!lastData.partners.includes(no))return;
+ draft.partnerNo=no;
+ saveDraft();
+ renderWorkspace(true);
 });
 root.addEventListener("rsa-analysis-start",function(){lastPanelSig="";setTimeout(refresh,45)});
 root.document.addEventListener("change",function(e){
