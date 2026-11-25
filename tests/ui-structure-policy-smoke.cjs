@@ -8,7 +8,7 @@ const UA='Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605
   const page=await context.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto(BASE,{waitUntil:'domcontentloaded',timeout:30000});
-  await page.waitForSelector('#rsaFocusedView',{state:'visible',timeout:15000});
+  await page.waitForSelector('#axis8Primary',{state:'visible',timeout:15000});
   await page.waitForFunction(()=>window.RSAAddonHealth?.ready===true,null,{timeout:25000});
   const s=await page.evaluate(()=>({
     shellFlag:Boolean(window.__IOS_MOBILE_SHELL_V2),
@@ -27,13 +27,16 @@ const UA='Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605
   assert(/iosMobileShellV2/.test(s.bodyClass),'mobile shell body class missing');
   assert.deepStrictEqual(s.tabs.map(x=>x.key),['axis','partners','formation','decision'],'expected four focused tabs');
   assert.deepStrictEqual(s.tabs.map(x=>x.label),['軸馬','相手馬','展開隊列','最終判断']);
-  assert.strictEqual(s.tabs[0].selected,'true','axis must start selected');
+  assert.strictEqual(await page.locator('#rsaFocusedView').isVisible(),false,'legacy focused view is hidden');
   assert.strictEqual(s.originalShellHidden,true,'old mobile shell should be hidden by new focused view');
-  await page.locator('[data-rsaf-tab="decision"]').click();
-  assert.strictEqual(await page.locator('#rsafDecision').isVisible(),true,'final decision visible in WebKit');
-  assert.strictEqual(await page.locator('#rsaForecastWorkflowV1').isVisible(),true,'forecast note mounted in WebKit');
-  await page.locator('[data-rsaf-tab="formation"]').click();
-  assert.strictEqual(await page.locator('#rsafFormation').isVisible(),true,'formation visible in WebKit');
+  assert.strictEqual(await page.locator('#axis8Result').isVisible(),true,'new verdict visible');
+  assert.strictEqual(await page.locator('#axis8Controls').isVisible(),false,'no unconfirmed predictions');
+  await page.locator('#axis8Ledger > summary').click();
+  assert.strictEqual(await page.locator('#a8LedgerFreeze').isDisabled(),true,'cannot save incomplete prediction');
+  assert.strictEqual(await page.locator('#a8LedgerExport').isVisible(),true,'ledger visible');
+  await page.evaluate(()=>{for(let i=0;i<100;i++)window.dispatchEvent(new CustomEvent('validated-queue-ready'))});
+  await page.waitForFunction(()=>window.RSAAxis8SnapshotV1?.diagnostics().pendingTimer===false);
+  assert.strictEqual(await page.locator('#axis8Primary').isVisible(),true,'new panel remains visible after burst');
   assert.strictEqual(s.mobileLean,true,'iPhone must use lean runtime');
   assert.strictEqual(s.addonMobileLean,true,'addon runtime must report mobileLean');
   assert.deepStrictEqual(s.failures,[],'mobile addon load failures');
@@ -41,6 +44,6 @@ const UA='Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605
   assert.strictEqual(s.prospectiveLoaded,false,'desktop prospective ledger must not load in mobile lean');
   assert.strictEqual(s.prospectivePolicy,false,'desktop ProspectiveLedgerPolicy must not be required on mobile lean');
   assert.deepStrictEqual(errors,[],`page errors: ${errors.join(' | ')}`);
-  console.log('PASS WebKit iPhone four tabs + mobile lean runtime and Shadow wiring');
+  console.log('PASS WebKit iPhone axis8 view, ledger, event burst + mobile lean runtime and Shadow wiring');
   await browser.close();
 })().catch(e=>{console.error(e);process.exit(1)});
