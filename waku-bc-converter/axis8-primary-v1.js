@@ -1,5 +1,6 @@
 /* Phase 3/5 axis8 replacement candidate. No ticket selection. */
 (function(root){'use strict';
+if(root.RSAAxis8Core)return;
 const C=(function axis8Core(){
  const V="axis8-primary-20261125-v1";
  const grades=["3勝","G1","G2","G3","L","OP"];
@@ -86,7 +87,7 @@ const C=(function axis8Core(){
 (function ui(root,C){
  if(!root.document)return;
  const D=root.document,$=id=>D.getElementById(id),esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])),pct=x=>Number.isFinite(x)?(x*100).toFixed(1)+"%":"—";
- let dirty=true,started=0,timer=0,signature="",target=.75,metric="w",pairText="",pairKey="",latest=null,confirmed=false;
+ let dirty=true,started=0,timer=0,signature="",target=.75,metric="w",pairText="",pairKey="",latest=null,confirmed=false,snapshot=null,snapshotSig="",renderCount=0;
  function ensure(){
   let el=$("axis8Primary");if(el)return el;
   const host=D.querySelector("main.view");if(!host)return null;
@@ -105,18 +106,33 @@ const C=(function axis8Core(){
   if(!confirmed)return {ready:false,status:"hold",reason:"CSVの仮馬番と確定馬番を照合してチェックしてください"};
   return C.compute({grade:$("grade")?.value,field:Number($("fieldSize")?.value),surface:$("surface")?.value,name:$("raceName")?.value,ability:a,finish:f,odds:$("oddsPaste")?.value});
  }
+ function publishSnapshot(next){
+  snapshot=next;const sig=JSON.stringify(next);
+  if(sig===snapshotSig)return;
+  snapshotSig=sig;
+  root.dispatchEvent(new root.CustomEvent("axis8-snapshot-changed"));
+ }
+ function currentSnapshot(){
+  if(!snapshot||dirty||!confirmed||root.RSAAnalysisTransitionState?.status!=="ready"||snapshot.generation!==root.RSAAnalysisTransitionState?.generation||snapshot.winInput!==String($("oddsPaste")?.value||"")||pairText!==String($("axis8Pairs")?.value||""))return null;
+  return JSON.parse(JSON.stringify(snapshot));
+ }
+ root.RSAAxis8SnapshotV1=Object.freeze({getSnapshot:currentSnapshot,diagnostics:()=>({renderCount,pendingTimer:Boolean(timer),ready:Boolean(currentSnapshot())})});
  function render(force=false){
   if(!ensure())return;$("axis8ConfirmLabel").hidden=dirty||!started||root.RSAAnalysisTransitionState?.status!=="ready";$("axis8Confirm").checked=confirmed;const x=read();latest=x;root.RSAAxis8PrimaryState={...x,at:Date.now(),ticketDecision:false};
   const key=x.ready?JSON.stringify([started,x.axis.no,x.rows.map(h=>[h.no,h.name,h.od])]):"";
   if(key!==pairKey){pairKey=key;pairText="";$("axis8Pairs").value="";}
-  const sig=JSON.stringify([x,target,metric,pairText,root.PositionRiskState?.at,root.ValidatedQueueState?.at,root.MobileAnalysisCoreState?.at,root.RSAAnalysisTransitionState?.generation,Boolean(root.RSAForecastWorkflowCoreV1)]);if(!force&&signature===sig)return;signature=sig;
+  const sig=JSON.stringify([x,target,metric,pairText,root.PositionRiskState?.at,root.ValidatedQueueState?.at,root.MobileAnalysisCoreState?.at,root.RSAAnalysisTransitionState?.generation,Boolean(root.RSAForecastWorkflowCoreV1)]);if(!force&&signature===sig&&(!x.ready||snapshot))return;signature=sig;renderCount++;
   $("axis8Controls").hidden=!x.ready;$("axis8Result").innerHTML=x.ready?'<h3>'+esc(x.tier+"｜"+({S:"高信頼",A:"分析対象",B:"条件付き",C:"見送り"}[x.tier]))+'</h3><p>'+esc(x.reason)+' ｜ '+esc(x.structure==="none"?"一致なし":x.structure)+'</p><p><b>◎ '+esc(x.axis.no+"番 "+x.axis.name)+'</b> ｜ '+esc(x.axis.pop+"番人気・Ability "+x.axis.ar+"位・M3 "+x.axis.mr+"位")+'</p><p>勝率 '+pct(x.calibrated[0])+' ／ 連対率 '+pct(x.calibrated[1])+' ／ 3着内率 <b>'+pct(x.calibrated[2])+'</b></p><small>2026年固定の長期代理モデル較正。軸の個別推定値であり、全馬較正確率の整合性は未検証。馬券購入は自身で判断。</small>':'<h3>'+esc(x.status==="out"?"対象外":"判定保留")+'</h3><p>'+esc(x.reason)+'</p>';
-  if(!x.ready){$("axis8Opp").textContent="";$("axis8Field").textContent="";$("axis8FormationBody").textContent="";return;}
+  if(!x.ready){$("axis8Opp").textContent="";$("axis8Field").textContent="";$("axis8FormationBody").textContent="";publishSnapshot(null);return;}
   const d=C.direct(pairText,x),rows=C.coverage(d||x.others,target,metric),sel=rows.filter(h=>h.selected);
   const label=d?"券種別実オッズ・Phase 4直接条件付きモデル":"単勝PL参考値（75%方式の検証と異なる入力）";
   $("axis8Opp").innerHTML='<h3>相手候補 '+sel.length+'頭 ｜ '+pct(sel.at(-1)?.coverage)+'</h3><p>'+esc(label)+(pairText&&!d?" ／ 入力不完全・不整合":"")+'</p><p>軸好走時の相手の条件付き確率。カバー率は的中確率ではありません。</p>'+rows.map((h,i)=>(i===sel.length?'<hr><b>参考馬</b>':i===0?'<b>候補（上位3頭を強調）</b>':'')+'<div class="a8row'+(h.selected&&i<3?' a8strong':'')+'"><span>'+esc(h.no+"番 "+h.name)+'</span><small>連対 '+pct(h.q)+' ／ 3着内 '+pct(h.w)+'</small></div>').join("");
   const formation=C.formation(x,sel,root.ValidatedQueueState,root.PositionRiskState,root.MobileAnalysisCoreState,root.RSAAnalysisTransitionState,started);
   paintFormation(formation);
+  const meta=Object.fromEntries(["raceDate","venue","raceName","grade","surface","distance","going","fieldSize"].map(id=>[id,String($(id)?.value||"")]));
+  const recordFormation=formation.ready?{pace:formation.pace,pressure:formation.pressure,rows:formation.roster.map(h=>{const q=formation.byNo[h.no];return {no:h.no,name:h.name,expectedRank:q.expectedRank,laneIdx:q.laneIdx,frontness:Number.isFinite(q.frontness5)?q.frontness5:null,pursuit:q.pursuitGrade||null};}),axisP10:formation.p10}:null;
+  publishSnapshot({version:C.V,generation:root.RSAAnalysisTransitionState?.generation,meta,structure:x.structure,tier:x.tier,reason:x.reason,axis:{...x.axis},calibrated:x.calibrated.slice(),target,metric,source:d?"direct_cond":"win_PL_reference",coverage:sel.at(-1)?.coverage??0,partners:rows.map(h=>({no:h.no,name:h.name,selected:h.selected,q:h.q,w:h.w,coverage:h.coverage})),roster:x.rows.map(h=>({...h})),formation:recordFormation,winInput:String($("oddsPaste")?.value||""),pairInput:pairText,numberMappingConfirmed:true});
+
   const p=formation.ready&&root.PositionRiskState?.ready&&Number(root.PositionRiskState?.at)>=started?Object.fromEntries(x.rows.filter(h=>String(root.PositionRiskState?.byNo?.[h.no]?.name??"").normalize("NFKC").trim()===h.name).map(h=>[h.no,root.PositionRiskState.byNo[h.no]])):{},q=formation.ready?formation.byNo:{};
   $("axis8Field").innerHTML=x.rows.map(h=>'<div class="a8row"><span>'+esc(h.no+"番 "+h.name)+'</span><small>'+esc("Ability "+h.ar+" / M3 "+h.mr+" / 人気 "+h.pop)+" / P10 "+pct(Number.isFinite(Number(p[h.no]?.p10))&&p[h.no]?.p10!=null?Number(p[h.no].p10):NaN)+" / 初角 "+esc(q[h.no]?.expectedRank??"—")+'</small></div>').join("");
  }
@@ -137,13 +153,13 @@ const C=(function axis8Core(){
    (plot.unknown.length?'<p>位置未確定：'+plot.unknown.map(h=>esc(h.no+"番 "+h.name)).join("、")+'</p>':'')+
    '<p>軸の初角：'+(m.axisRank==null?"—":m.axisRank.toFixed(1)+"番手")+' ／ P10 '+pct(m.p10)+' ／ 先行力 '+pct(m.frontness)+' ／ 追走 '+esc(m.pursuit||"—")+'</p><p>'+esc(risk)+'</p><details><summary>全頭の予測番手・進路・先行力</summary>'+list+'</details><small>既存隊列モデルの参考予測です。実際の進路・着順は保証しません。レースランクは隊列情報で変更しません。</small>';
  }
- function schedule(){clearTimeout(timer);timer=setTimeout(()=>render(),100);}
- function invalidate(){dirty=true;started=0;confirmed=false;pairText="";pairKey="";const el=$("axis8FormationBody");if(el)el.textContent="";schedule();}
+ function schedule(){clearTimeout(timer);timer=setTimeout(()=>{timer=0;render();},100);}
+ function invalidate(){dirty=true;started=0;confirmed=false;pairText="";pairKey="";publishSnapshot(null);const el=$("axis8FormationBody");if(el)el.textContent="";schedule();}
  const inputs=["raceDate","venue","surface","distance","grade","going","fieldSize","raceName","csvFile"];
- D.addEventListener("input",e=>{if(inputs.includes(e.target.id))invalidate();if(e.target.id==="oddsPaste")schedule();},true);
+ D.addEventListener("input",e=>{if(inputs.includes(e.target.id))invalidate();if(e.target.id==="oddsPaste"){publishSnapshot(null);schedule();}if(e.target.id==="axis8Pairs")root.dispatchEvent(new root.CustomEvent("axis8-snapshot-changed"));},true);
  D.addEventListener("change",e=>{if(inputs.includes(e.target.id))invalidate();},true);
- D.addEventListener("click",e=>{if(e.target.id==="analyzeBtn"){dirty=false;confirmed=false;started=Date.now();schedule();}if(["applyOddsBtn","clearOddsBtn"].includes(e.target.id))schedule();if(e.target.id==="clearCsvBtn")invalidate();},true);
- root.addEventListener("rsa-analysis-start",()=>{dirty=false;confirmed=false;started=Number(root.RSAAnalysisTransitionState?.startedWall)||Date.now();const el=$("axis8FormationBody");if(el)el.textContent="";schedule();});
+ D.addEventListener("click",e=>{if(e.target.id==="analyzeBtn"){dirty=false;confirmed=false;started=Date.now();publishSnapshot(null);schedule();}if(["applyOddsBtn","clearOddsBtn"].includes(e.target.id)){publishSnapshot(null);schedule();}if(e.target.id==="clearCsvBtn")invalidate();},true);
+ root.addEventListener("rsa-analysis-start",()=>{dirty=false;confirmed=false;publishSnapshot(null);started=Number(root.RSAAnalysisTransitionState?.startedWall)||Date.now();const el=$("axis8FormationBody");if(el)el.textContent="";schedule();});
  for(const e of ["rsa-analysis-complete","rsa-analysis-error","m3-pure-ability-ready","finish600-ready","position-risk-ready","validated-queue-ready","decision-shell-v2-ready","mobile-analysis-core-ready","mobile-race-map-pace-ready","rsa-addons-ready"])root.addEventListener(e,schedule);
  if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",schedule,{once:true});else schedule();
 })(root,C);
