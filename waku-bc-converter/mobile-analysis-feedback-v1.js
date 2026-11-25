@@ -83,10 +83,10 @@ function render(){
  const timing=clicked&&clickAt?Math.round((Date.now()-clickAt)/1000)+'秒':'—';
  box.innerHTML='<h3 class="'+((t.status==='error'||errorMessage)?'rafError':full?'rafOk':'rafWait')+'">'+esc(head)+'</h3>'+
  '<p>'+esc(lead)+'</p>'+baseContent(x)+
- (baseReady?'<p>本番軸：'+axis+'。'+(gate.status==='skip'?'軸は見送り。'+esc(reason):gate.status==='open'?'軸の条件を通過。':'判定待ち（購入は未判定）。')+'</p>':'')+
+ (baseReady?'<p>最終軸・レース判定は下の新版「軸馬」タブで確認してください。</p>':'')+
  partialHorses(x)+
  '<details><summary>計算状況・不具合の確認</summary>'+
- '<div>'+diag+'</div><div>経過時間 '+esc(timing)+' / 処理 '+esc(t.status||'未起動')+' / 見送り判定 '+esc(gate.status||'未起動')+'</div>'+
+ '<div>'+diag+'</div><div>経過時間 '+esc(timing)+' / 処理 '+esc(t.status||'未起動')+'</div>'+
  (srcError?'<p class="rafError">'+esc(srcError)+'</p>':'')+
  (x.addons?.criticalFailures?.length?'<p class="rafError">必須アドオン読込失敗：'+esc(x.addons.criticalFailures.join('、'))+'</p>':'')+
  '</details>';

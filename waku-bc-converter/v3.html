@@ -63,6 +63,13 @@ body.rsaFocusedThreeTabs main.view > #rsaFocusedView{display:none!important}
    Old modules remain available internally until dependent recording modules migrate. */
 html body #axis8Primary{display:block!important;max-width:1060px;margin:14px auto 20px;padding:16px;order:99}
 html body #axis8Primary [hidden]{display:none!important}
+html body #axis8Primary .a8tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin:12px 0 15px}
+html body #axis8Primary .a8tabs button{min-width:0;width:100%;padding:9px 3px;font-size:clamp(11px,3.4vw,14px);white-space:nowrap;border:1px solid #3f6278;border-radius:8px;background:#142c3d;color:#d8e8f2;min-height:44px}
+html body #axis8Primary .a8tabs button[aria-selected="true"]{background:#28667a;color:white;border-color:#7bb8c5;font-weight:700}
+html body #axis8Primary #axis8ConfirmLabel{display:flex;align-items:flex-start;gap:8px;font-size:.85rem;line-height:1.5}
+html body #axis8Primary #axis8Confirm{width:20px;height:20px;flex:0 0 20px;margin:2px 0}
+html body #axis8Primary #axis8Ledger{margin-top:8px}
+body.rsaFocusedThreeTabs main.view > #rsaPurchaseAudit{display:none!important}
 html body #axis8Primary .a8row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(128,128,128,.22);flex-wrap:wrap}
 html body #axis8Primary .a8strong{font-weight:700}
 html body #axis8Primary small{font-size:.84rem}
@@ -96,7 +103,7 @@ html body #rsaFocusedView,html body #raceSkipCard,html body #axisAccessScreen,ht
 <script src="race-quality-two-axis-v1.js?v=20261109axis1"></script>
 <script src="corner34-formation-shadow-v1.js?v=20261108corner34v1"></script>
 <script src="mineta-position-study-v1.js?v=20261110minetaH3a"></script>
-<script src="mobile-analysis-feedback-v1.js?v=20261109diagnostic2"></script>
+<script src="mobile-analysis-feedback-v1.js?v=20261125tabs1"></script>
 <script src="axis-access-gate-v1.js?v=20261120audit1"></script>
 <link rel="stylesheet" href="ability-v3-forward-receipt-v1.css?v=20261117p328a"><script src="ability-v3-auto-native-v1.js?v=20261117p330"></script>
 <script src="ability-v3-research-mode-v1.js?v=20261117p330"></script>
@@ -119,6 +126,6 @@ html body #rsaFocusedView,html body #raceSkipCard,html body #axisAccessScreen,ht
 <link rel="stylesheet" href="purchase-audit-ui-v1.css?v=p374a"><script src="purchase-audit-core-v1.js?v=p374a"></script><script src="purchase-audit-ui-v1.js?v=p374a"></script><script src="prediction-accuracy-core-v1.js?v=20261120audit1"></script><script src="prediction-benchmark-audit-v1.js?v=20261120audit1"></script><script src="prediction-accuracy-notebook-v1.js?v=20261122pair1"></script>
 <script src="partner-total-shadow-v1.js?v=20261119shadow2"></script>
 <script src="prediction-reliability-shadow-v1.js?v=20261119weekend1"></script>
-<script src="axis8-primary-v1.js?v=20261125pre1"></script>
-<script src="axis8-ledger-v1.js?v=20261125axis8d"></script>
+<script src="axis8-primary-v1.js?v=20261125tabs1"></script>
+<script src="axis8-ledger-v1.js?v=20261125tabs1"></script>
 </body></html>
