@@ -117,7 +117,7 @@ const C=(function axis8Core(){
   $("axis8Opp").innerHTML='<h3>相手候補 '+sel.length+'頭 ｜ '+pct(sel.at(-1)?.coverage)+'</h3><p>'+esc(label)+(pairText&&!d?" ／ 入力不完全・不整合":"")+'</p><p>軸好走時の相手の条件付き確率。カバー率は的中確率ではありません。</p>'+rows.map((h,i)=>(i===sel.length?'<hr><b>参考馬</b>':i===0?'<b>候補（上位3頭を強調）</b>':'')+'<div class="a8row'+(h.selected&&i<3?' a8strong':'')+'"><span>'+esc(h.no+"番 "+h.name)+'</span><small>連対 '+pct(h.q)+' ／ 3着内 '+pct(h.w)+'</small></div>').join("");
   const formation=C.formation(x,sel,root.ValidatedQueueState,root.PositionRiskState,root.MobileAnalysisCoreState,root.RSAAnalysisTransitionState,started);
   paintFormation(formation);
-  const p=formation.ready&&Number(root.PositionRiskState?.at)>=started?root.PositionRiskState?.byNo||{}:{},q=formation.ready?formation.byNo:{};
+  const p=formation.ready&&root.PositionRiskState?.ready&&Number(root.PositionRiskState?.at)>=started?Object.fromEntries(x.rows.filter(h=>String(root.PositionRiskState?.byNo?.[h.no]?.name??"").normalize("NFKC").trim()===h.name).map(h=>[h.no,root.PositionRiskState.byNo[h.no]])):{},q=formation.ready?formation.byNo:{};
   $("axis8Field").innerHTML=x.rows.map(h=>'<div class="a8row"><span>'+esc(h.no+"番 "+h.name)+'</span><small>'+esc("Ability "+h.ar+" / M3 "+h.mr+" / 人気 "+h.pop)+" / P10 "+pct(Number.isFinite(Number(p[h.no]?.p10))&&p[h.no]?.p10!=null?Number(p[h.no].p10):NaN)+" / 初角 "+esc(q[h.no]?.expectedRank??"—")+'</small></div>').join("");
  }
  function paintFormation(m){
@@ -143,7 +143,7 @@ const C=(function axis8Core(){
  D.addEventListener("input",e=>{if(inputs.includes(e.target.id))invalidate();if(e.target.id==="oddsPaste")schedule();},true);
  D.addEventListener("change",e=>{if(inputs.includes(e.target.id))invalidate();},true);
  D.addEventListener("click",e=>{if(e.target.id==="analyzeBtn"){dirty=false;confirmed=false;started=Date.now();schedule();}if(["applyOddsBtn","clearOddsBtn"].includes(e.target.id))schedule();if(e.target.id==="clearCsvBtn")invalidate();},true);
- root.addEventListener("rsa-analysis-start",()=>{dirty=false;confirmed=false;started=Number(root.RSAAnalysisTransitionState?.startedWall)||Date.now();schedule();});
+ root.addEventListener("rsa-analysis-start",()=>{dirty=false;confirmed=false;started=Number(root.RSAAnalysisTransitionState?.startedWall)||Date.now();const el=$("axis8FormationBody");if(el)el.textContent="";schedule();});
  for(const e of ["rsa-analysis-complete","rsa-analysis-error","m3-pure-ability-ready","finish600-ready","position-risk-ready","validated-queue-ready","decision-shell-v2-ready","mobile-analysis-core-ready","mobile-race-map-pace-ready","rsa-addons-ready"])root.addEventListener(e,schedule);
  if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",schedule,{once:true});else schedule();
 })(root,C);
