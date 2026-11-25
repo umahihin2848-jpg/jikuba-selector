@@ -90,22 +90,34 @@ const C=(function axis8Core(){
  const ar=byNo[axis]||{},rr=risk?.byNo?.[axis],p10=axis&&risk?.ready&&N(risk.at)>=started&&norm(rr?.name)===norm(model.axis?.name)?N(rr.p10):NaN;
  return {ready:true,generation:transition.generation,roster,byNo,axis,partners,pace,pressure:String(a.pressure||""),axisRank:ar.expectedRank??null,frontness:N(ar.frontness5),pursuit:String(ar.pursuitGrade||""),p10:p10>=0&&p10<=1?p10:null,referenceOnly:model.tier==="C"};
 }
- return {V,preliminary,compute,pl,cal,rank,direct,coverage,formation};
+ function verticalFormation(m){
+ const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+ const known=[],unknown=[];
+ for(const h of m.roster){const q=m.byNo[h.no];if(!q||!Number.isFinite(q.expectedRank)||!Number.isInteger(q.laneIdx)||q.laneIdx<0||q.laneIdx>3){unknown.push(h);continue;}known.push({...h,rank:q.expectedRank,lane:q.laneIdx});}
+ known.sort((a,b)=>a.rank-b.rank||Number(a.no)-Number(b.no));
+ const height=96+known.length*25,xs=[60,104,148,192];
+ let svg='<svg viewBox="0 0 344 '+height+'" role="img" aria-label="初角予測。上が先頭、下が後方、左が内、右が外。縦の間隔は実距離ではありません。"><rect x="1" y="1" width="342" height="'+(height-2)+'" rx="12" fill="#183b30"/><path d="M39 45 V18 M32 25 L39 18 L46 25" fill="none" stroke="#dcefe1" stroke-width="2"/><text x="53" y="27" fill="#e4f4e9" font-size="12" font-weight="700">進行方向・先頭</text><text x="16" y="56" fill="#b6d2c1" font-size="10">番手</text>';
+ for(let i=0;i<4;i++){svg+='<rect x="'+(xs[i]-19)+'" y="65" width="38" height="'+(known.length*25+4)+'" rx="8" fill="'+(i%2===0?"#254b3c":"#214437")+'"/><text x="'+xs[i]+'" y="56" text-anchor="middle" font-size="11" fill="#d9eddf">'+["最内","内","中","外"][i]+'</text>';}
+ svg+='<path d="M39 65 V'+(height-27)+'" stroke="#b6d2c1" stroke-width="2"/><text x="218" y="56" font-size="11" fill="#d9eddf">馬名</text>';
+ for(let i=0;i<known.length;i++){const h=known[i],x=xs[h.lane],y=80+i*25,axis=h.no===m.axis,partner=m.partners.includes(h.no),fill=axis?"#7358c5":partner?"#0c968b":"#ebf3ed",name=Array.from(h.name),short=name.length>9?name.slice(0,8).join("")+"…":h.name;svg+='<g><title>'+esc(h.no+"番 "+h.name+"・予測 "+h.rank.toFixed(1)+"番手")+'</title><text x="31" y="'+(y+4)+'" text-anchor="end" font-size="10" fill="#d8e9dd">'+h.rank.toFixed(1)+'</text><circle cx="'+x+'" cy="'+y+'" r="10.5" fill="'+fill+'" stroke="'+(axis?"#d6c8ff":partner?"#a8f5dc":"#c5d3d0")+'" stroke-width="1.5"/><text x="'+x+'" y="'+(y+4)+'" text-anchor="middle" font-size="11" font-weight="800" fill="'+(axis||partner?"#fff":"#183b30")+'">'+esc(h.no)+'</text><text x="218" y="'+(y+4)+'" font-size="11" fill="'+(axis?"#e1d3ff":partner?"#a5f4e0":"#e4f4e9")+'">'+esc(short)+'</text></g>';}
+ return {svg:svg+'<text x="53" y="'+(height-9)+'" fill="#dcefe1" font-size="11">後方</text></svg>',known,unknown};
+}
+ return {V,preliminary,compute,pl,cal,rank,direct,coverage,formation,verticalFormation};
 })();root.RSAAxis8Core=C;
 (function ui(root,C){
  if(!root.document)return;
  const D=root.document,$=id=>D.getElementById(id),esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])),pct=x=>Number.isFinite(x)?(x*100).toFixed(1)+"%":"—";
  let activeTab="axis";
- const tabs=["axis","partners","formation","record"];
+ const tabs=["axis","partners","formation"];
  function selectTab(tab){if(!tabs.includes(tab))return;activeTab=tab;for(const key of tabs){const btn=$("a8Tab-"+key),panel=$("a8Panel-"+key);if(btn){btn.setAttribute?.("aria-selected",String(key===tab));btn.tabIndex=key===tab?0:-1;}if(panel)panel.hidden=key!==tab;}}
  let dirty=true,started=0,timer=0,signature="",target=.75,metric="w",pairText="",pairKey="",latest=null,confirmed=false,snapshot=null,snapshotSig="",renderCount=0;
  function ensure(){
   let el=$("axis8Primary");if(el)return el;
   const host=D.querySelector("main.view");if(!host)return null;
-  el=D.createElement("section");el.id="axis8Primary";el.className="card";el.innerHTML='<h2>レース分析｜8構造</h2><div class="a8tabs" role="tablist" aria-label="レース分析"><button type="button" id="a8Tab-axis" role="tab" aria-controls="a8Panel-axis" aria-selected="true">軸馬</button><button type="button" id="a8Tab-partners" role="tab" aria-controls="a8Panel-partners" aria-selected="false" tabindex="-1">相手馬</button><button type="button" id="a8Tab-formation" role="tab" aria-controls="a8Panel-formation" aria-selected="false" tabindex="-1">展開隊列</button><button type="button" id="a8Tab-record" role="tab" aria-controls="a8Panel-record" aria-selected="false" tabindex="-1">予想記録</button></div><section id="a8Panel-axis" role="tabpanel" aria-labelledby="a8Tab-axis"><label id="axis8ConfirmLabel" hidden><input type="checkbox" id="axis8Confirm"> CSVの馬番と確定馬番の対応を全頭確認した</label><div id="axis8Result" aria-live="polite"></div><div id="axis8Pre" hidden></div><div id="axis8Analysis" hidden><h3>全頭の能力・展開・位置取り</h3><div id="axis8Field"></div></div></section><section id="a8Panel-partners" role="tabpanel" aria-labelledby="a8Tab-partners" hidden><p id="a8PartnerWait">全頭の単勝オッズ・確定馬番確認後に相手確率を表示します。</p><div id="axis8Controls" hidden><details><summary>馬連・ワイドオッズ（相手確率の精密比較用・任意）</summary><p>1行：軸番 相手番 馬連 ワイド下限 ワイド上限。全相手を入力。未入力は単勝PL参考値。馬券購入判定には使いません。</p><textarea id="axis8Pairs" rows="4" placeholder="5 8 8.2 3.0 3.8"></textarea><button type="button" id="axis8Apply">相手オッズを反映</button></details><label>表示範囲 <select id="axis8Target"><option value=".65">65%</option><option value=".75" selected>75%</option><option value=".8">80%</option><option value=".9">90%</option></select></label> <label>並べ替え <select id="axis8Metric"><option value="w">3着内</option><option value="q">連対</option></select></label><div id="axis8Opp"></div></div></section><section id="a8Panel-formation" role="tabpanel" aria-labelledby="a8Tab-formation" hidden><h3>展開隊列</h3><p id="a8FormationWait">過去走CSVを解析すると隊列が表示されます。</p><div id="axis8Formation"><div id="axis8FormationBody" aria-live="polite"></div></div></section><section id="a8Panel-record" role="tabpanel" aria-labelledby="a8Tab-record" hidden></section>';
+  el=D.createElement("section");el.id="axis8Primary";el.className="card";el.innerHTML='<h2>レース分析｜8構造</h2><div class="a8tabs" role="tablist" aria-label="レース分析"><button type="button" id="a8Tab-axis" role="tab" aria-controls="a8Panel-axis" aria-selected="true">軸</button><button type="button" id="a8Tab-partners" role="tab" aria-controls="a8Panel-partners" aria-selected="false" tabindex="-1">相手候補</button><button type="button" id="a8Tab-formation" role="tab" aria-controls="a8Panel-formation" aria-selected="false" tabindex="-1">展開隊列</button></div><section id="a8Panel-axis" role="tabpanel" aria-labelledby="a8Tab-axis"><label id="axis8ConfirmLabel" hidden><input type="checkbox" id="axis8Confirm"> CSVの馬番と確定馬番の対応を全頭確認した</label><div id="axis8Result" aria-live="polite"></div><div id="axis8Pre" hidden></div><div id="a8RecordHost"></div></section><section id="a8Panel-partners" role="tabpanel" aria-labelledby="a8Tab-partners" hidden><p id="a8PartnerWait">全頭の単勝オッズ・確定馬番確認後に相手確率を表示します。</p><div id="axis8Controls" hidden><details><summary>馬連・ワイドオッズ（相手確率の精密比較用・任意）</summary><p>1行：軸番 相手番 馬連 ワイド下限 ワイド上限。全相手を入力。未入力は単勝PL参考値。馬券購入判定には使いません。</p><textarea id="axis8Pairs" rows="4" placeholder="5 8 8.2 3.0 3.8"></textarea><button type="button" id="axis8Apply">相手オッズを反映</button></details><label>表示範囲 <select id="axis8Target"><option value=".65">65%</option><option value=".75" selected>75%</option><option value=".8">80%</option><option value=".9">90%</option></select></label> <label>並べ替え <select id="axis8Metric"><option value="w">3着内</option><option value="q">連対</option></select></label><div id="axis8Opp"></div></div></section><section id="a8Panel-formation" role="tabpanel" aria-labelledby="a8Tab-formation" hidden><h3>展開隊列</h3><p id="a8FormationWait">過去走CSVを解析すると隊列が表示されます。</p><div id="axis8Formation"><div id="axis8FormationBody" aria-live="polite"></div></div><details id="axis8Analysis" hidden><summary>全頭の能力・展開・位置取り</summary><div id="axis8Field"></div></details></section>';
   host.appendChild(el);selectTab(activeTab);
   el.addEventListener("click",e=>{const id=e.target?.id||"";if(id.startsWith("a8Tab-"))selectTab(id.slice(6));});
-  el.addEventListener("keydown",e=>{const key=e.target?.id?.slice(6);if(!tabs.includes(key)||!["ArrowLeft","ArrowRight","Home","End"].includes(e.key))return;e.preventDefault();const i=tabs.indexOf(key),next=e.key==="Home"?tabs[0]:e.key==="End"?tabs.at(-1):tabs[(i+(e.key==="ArrowRight"?1:3))%4];selectTab(next);$("a8Tab-"+next)?.focus?.();});
+  el.addEventListener("keydown",e=>{const key=e.target?.id?.slice(6);if(!tabs.includes(key)||!["ArrowLeft","ArrowRight","Home","End"].includes(e.key))return;e.preventDefault();const i=tabs.indexOf(key),next=e.key==="Home"?tabs[0]:e.key==="End"?tabs.at(-1):tabs[(i+(e.key==="ArrowRight"?1:tabs.length-1))%tabs.length];selectTab(next);$("a8Tab-"+next)?.focus?.();});
   el.addEventListener("change",e=>{if(e.target.id==="axis8Confirm"){confirmed=e.target.checked;render(true);}if(e.target.id==="axis8Target"){target=+e.target.value;render(true);}if(e.target.id==="axis8Metric"){metric=e.target.value;render(true);}});
   $("axis8Apply").addEventListener("click",()=>{pairText=$("axis8Pairs").value;render(true);});
   return el;
@@ -154,7 +166,8 @@ const C=(function axis8Core(){
   $("axis8Pre").textContent="";
   const d=C.direct(pairText,x),rows=C.coverage(d||x.others,target,metric),sel=rows.filter(h=>h.selected);
   const label=d?"券種別実オッズ・Phase 4直接条件付きモデル":"単勝PL参考値（75%方式の検証と異なる入力）";
-  $("axis8Opp").innerHTML='<h3>相手候補 '+sel.length+'頭 ｜ '+pct(sel.at(-1)?.coverage)+'</h3><p>'+esc(label)+(pairText&&!d?" ／ 入力不完全・不整合":"")+'</p><p>軸好走時の相手の条件付き確率。カバー率は的中確率ではありません。</p>'+rows.map((h,i)=>(i===sel.length?'<hr><b>参考馬</b>':i===0?'<b>候補（上位3頭を強調）</b>':'')+'<div class="a8row'+(h.selected&&i<3?' a8strong':'')+'"><span>'+esc(h.no+"番 "+h.name)+'</span><small>連対 '+pct(h.q)+' ／ 3着内 '+pct(h.w)+'</small></div>').join("");
+  const oppCard=(h,i)=>'<div class="a8row'+(h.selected&&i<3?' a8strong':'')+'"><span>'+esc(h.no+"番 "+h.name)+'</span><small>連対 '+pct(h.q)+' ／ 3着内 '+pct(h.w)+'</small></div>';
+  $("axis8Opp").innerHTML='<div class="a8summary"><b>相手候補 '+sel.length+'頭</b><strong>'+pct(sel.at(-1)?.coverage)+'</strong><small>累積予測カバー率</small></div><p class="a8muted">'+esc(label)+(pairText&&!d?" ／ 入力不完全・不整合":"")+'</p>'+sel.map(oppCard).join("")+(rows.length>sel.length?'<details><summary>参考馬 '+(rows.length-sel.length)+'頭</summary>'+rows.slice(sel.length).map(oppCard).join("")+'</details>':'')+'<small>軸好走時の条件付き確率。カバー率は的中確率ではありません。</small>';
   const formation=C.formation(x,sel,root.ValidatedQueueState,root.PositionRiskState,root.MobileAnalysisCoreState,root.RSAAnalysisTransitionState,started);
   paintFormation(formation);
   const meta=Object.fromEntries(["raceDate","venue","raceName","grade","surface","distance","going","fieldSize"].map(id=>[id,String($(id)?.value||"")]));
@@ -176,20 +189,22 @@ const C=(function axis8Core(){
  }
  function paintFormation(m){
   const el=$("axis8FormationBody"),f=root.RSAForecastWorkflowCoreV1;
-  if(!m.ready||!f?.formationSVG||!f?.turnForVenue){el.textContent=m.reason||"既存の隊列表示モジュールを読込中";return;}
+  if(!m.ready||!f?.turnForVenue){el.textContent=m.reason||"既存の隊列表示モジュールを読込中";return;}
   const turn=f.turnForVenue($("venue")?.value,$("surface")?.value,$("distance")?.value,"");
   if(!turn){el.textContent="競馬場・回り方向を確認してください";return;}
-  const plot=f.formationSVG(m,turn);
+  const plot=C.verticalFormation(m);
   const labels=["強前傾","前傾","標準","スロー"];
-  const pace=m.pace?labels.map((label,i)=>'<span>'+label+' <b>'+pct(m.pace[i])+'</b></span>').join(""):"展開確率待ち";
+  const pace=m.pace?labels.map((label,i)=>'<span class="'+(m.pace[i]===Math.max(...m.pace)?"a8paceMain":"")+'"><small>'+label+'</small><b>'+pct(m.pace[i])+'</b></span>').join(""):"展開確率待ち";
   const risk=m.axis?f.riskFor(m.byNo[m.axis],m.roster.length,m.pressure):"";
   const list=m.roster.slice().sort((a,b)=>(m.byNo[a.no].expectedRank??Infinity)-(m.byNo[b.no].expectedRank??Infinity)||Number(a.no)-Number(b.no)).map(h=>{
    const q=m.byNo[h.no],mark=h.no===m.axis?"軸":m.partners.includes(h.no)?"相手":m.axis?"その他":"参考";
    return '<div class="a8row"><span>'+esc(mark+"｜"+h.no+"番 "+h.name)+'</span><small>'+esc(q.expectedRank==null?"位置未確定":q.expectedRank.toFixed(1)+"番手")+' ／ '+esc(q.expectedRank!=null&&q.laneIdx!=null?q.lane:"—")+' ／ 先行力 '+pct(q.frontness5)+' ／ 追走 '+esc(q.pursuitGrade||"—")+'</small></div>';
   }).join("");
-  el.innerHTML='<p>'+esc(turn==="left"?"左回り":turn==="right"?"右回り":"直線")+'｜全'+m.roster.length+'頭'+(m.referenceOnly?'｜C判定・参考軸のみ':!m.axis?'｜軸・相手未確定':'')+(!confirmed?'｜仮馬番による参考隊列':'')+'</p><div class="a8pace">'+pace+'</div><p>先行圧：'+esc(m.pressure||"—")+'</p><div class="a8map">'+plot.svg+'</div><div class="a8legend"><span><i style="background:#7358c5"></i>軸</span><span><i style="background:#0c968b"></i>相手 '+m.partners.length+'頭</span><span><i style="background:#ebf3ed"></i>その他</span></div>'+
-   (plot.unknown.length?'<p>位置未確定：'+plot.unknown.map(h=>esc(h.no+"番 "+h.name)).join("、")+'</p>':'')+
-   (m.axis?'<p>軸の初角：'+(m.axisRank==null?"—":m.axisRank.toFixed(1)+"番手")+' ／ P10 '+pct(m.p10)+' ／ 先行力 '+pct(m.frontness)+' ／ 追走 '+esc(m.pursuit||"—")+'</p><p>'+esc(risk)+'</p>':'<p>軸・相手の色分けは最終判定後に表示します。</p>')+'<details><summary>全頭の予測番手・進路・先行力</summary>'+list+'</details><small>既存隊列モデルの参考予測です。実際の進路・着順は保証しません。レースランクは隊列情報で変更しません。</small>';
+  el.innerHTML='<div class="a8formationHead"><b>'+esc(turn==="left"?"左回り":turn==="right"?"右回り":"直線")+'・'+m.roster.length+'頭</b><span>先行圧 '+esc(m.pressure||"—")+'</span></div><div class="a8pace">'+pace+'</div><p class="a8muted">'+(!confirmed?'仮馬番・参考隊列':!m.axis?'参考隊列（軸未確定）':m.referenceOnly?'C判定・参考軸':'初角予測')+'｜上が先頭・左が内</p><div class="a8map">'+plot.svg+'</div>'+
+   (m.axis?'<div class="a8legend"><span><i style="background:#7358c5"></i>軸</span><span><i style="background:#0c968b"></i>相手 '+m.partners.length+'頭</span><span><i style="background:#ebf3ed"></i>その他</span></div>':'')+
+   (plot.unknown.length?'<p class="a8muted">位置未確定：'+plot.unknown.map(h=>esc(h.no+"番 "+h.name)).join("、")+'</p>':'')+
+   (m.axis?'<details><summary>軸の展開リスク</summary><p>初角 '+(m.axisRank==null?"—":m.axisRank.toFixed(1)+"番手")+' ／ P10 '+pct(m.p10)+' ／ 先行力 '+pct(m.frontness)+' ／ 追走 '+esc(m.pursuit||"—")+'</p><p>'+esc(risk)+'</p></details>':'')+
+   '<details><summary>全頭の予測番手・進路・先行力</summary>'+list+'</details><small class="a8muted">予測番手順の模式図。間隔は実距離ではありません。</small>';
  }
  function schedule(){clearTimeout(timer);timer=setTimeout(()=>{timer=0;render();},100);}
  function invalidate(){selectTab("axis");dirty=true;started=0;confirmed=false;pairText="";pairKey="";root.RSAAxis8PrimaryState={ready:false,status:"hold",reason:"入力変更・再解析待ち",at:Date.now(),ticketDecision:false};publishSnapshot(null);const el=$("axis8FormationBody");if(el)el.textContent="";schedule();}
