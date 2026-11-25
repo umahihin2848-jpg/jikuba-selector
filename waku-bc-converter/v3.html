@@ -72,6 +72,15 @@ html body #axis8Primary #axis8Ledger{margin-top:16px;border-top:1px solid #38516
 html body #axis8Primary .a8stages{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:8px 0 12px}
 html body #axis8Primary .a8stages button{min-width:0;width:100%;padding:10px 3px;border:1px solid #3f6278;border-radius:8px;background:#142c3d;color:#d8e8f2;font-size:clamp(12px,3.6vw,15px);min-height:44px;white-space:nowrap}
 html body #axis8Primary .a8stages button[aria-pressed="true"]{background:#28667a;color:#fff;border-color:#7bb8c5;font-weight:700}
+html body #axis8Primary .a8closing{margin-top:10px;border-top:1px solid #466072;padding-top:8px}
+html body #axis8Primary .a8closingHistRow{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(36px,1fr) 66px;gap:5px;align-items:center;margin:6px 0;font-size:12px}
+html body #axis8Primary .a8closingHistRow b{text-align:right;white-space:nowrap}
+html body #axis8Primary .a8closingTrack{height:12px;background:rgba(128,148,165,.15);border-radius:4px;position:relative;overflow:hidden}
+html body #axis8Primary .a8closingTrack:after{content:"";position:absolute;left:50%;top:0;bottom:0;border-left:1px solid #8294a3}
+html body #axis8Primary .a8closingTrack i{position:absolute;top:1px;bottom:1px;border-radius:2px}
+html body #axis8Primary .a8closingTable>div{display:grid;grid-template-columns:minmax(80px,1fr) repeat(4,minmax(34px,auto));gap:4px;align-items:center;padding:7px 0;border-bottom:1px solid rgba(128,148,165,.2);font-size:12px}
+html body #axis8Primary .a8closingTable>div>*{min-width:0;text-align:right}
+html body #axis8Primary .a8closingTable>div>*:first-child{text-align:left;overflow-wrap:anywhere}
 html body #axis8Primary .a8formationHead{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14px}
 html body #axis8Primary .a8muted{color:#a9c0cd;font-size:12px;line-height:1.5}
 html body #axis8Primary .a8pace{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
@@ -161,6 +170,7 @@ html body #rsaFocusedView,html body #raceSkipCard,html body #axisAccessScreen,ht
 <link rel="stylesheet" href="purchase-audit-ui-v1.css?v=p374a"><script src="purchase-audit-core-v1.js?v=p374a"></script><script src="purchase-audit-ui-v1.js?v=p374a"></script><script src="prediction-accuracy-core-v1.js?v=20261120audit1"></script><script src="prediction-benchmark-audit-v1.js?v=20261120audit1"></script><script src="prediction-accuracy-notebook-v1.js?v=20261122pair1"></script>
 <script src="partner-total-shadow-v1.js?v=20261119shadow2"></script>
 <script src="prediction-reliability-shadow-v1.js?v=20261119weekend1"></script>
-<script src="axis8-primary-v1.js?v=20261125corner1"></script>
+<script src="closing-shadow-v1.js?v=20261126close1"></script>
+<script src="axis8-primary-v1.js?v=20261126close1"></script>
 <script src="axis8-ledger-v1.js?v=20261125tabs3"></script>
 </body></html>
