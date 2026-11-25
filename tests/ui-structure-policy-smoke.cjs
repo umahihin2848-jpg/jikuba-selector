@@ -31,12 +31,14 @@ const UA='Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605
   assert.strictEqual(s.originalShellHidden,true,'old mobile shell should be hidden by new focused view');
   assert.strictEqual(await page.locator('#axis8Result').isVisible(),true,'new verdict visible');
   assert.strictEqual(await page.locator('#axis8Controls').isVisible(),false,'no unconfirmed predictions');
-  assert.deepStrictEqual(await page.locator('#axis8Primary [role=tab]').allTextContents(),['軸馬','相手馬','展開隊列','予想記録']);
-  for(const key of ['partners','formation','record']){
+  assert.deepStrictEqual(await page.locator('#axis8Primary [role=tab]').allTextContents(),['軸','相手候補','展開隊列']);
+  for(const key of ['partners','formation']){
     await page.locator('#a8Tab-'+key).click();
     assert.strictEqual(await page.locator('#a8Panel-'+key).isVisible(),true,'visible '+key);
     assert.strictEqual(await page.locator('#a8Panel-axis').isVisible(),false,'axis panel hidden');
   }
+  await page.locator('#a8Tab-axis').click();
+  await page.locator('#axis8Ledger > summary').click();
   assert.strictEqual(await page.locator('#a8LedgerFreeze').isDisabled(),true,'cannot save incomplete prediction');
   assert.strictEqual(await page.locator('#a8LedgerExport').isVisible(),true,'ledger visible');
   await page.evaluate(()=>{for(let i=0;i<100;i++)window.dispatchEvent(new CustomEvent('validated-queue-ready'))});
