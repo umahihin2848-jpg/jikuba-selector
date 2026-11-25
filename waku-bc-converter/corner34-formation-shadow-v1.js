@@ -195,7 +195,7 @@ document.addEventListener('change',e=>{if(e.target?.id==='csvFile'||e.target?.da
 document.addEventListener('click',e=>{const cmd=e.target?.closest?.('[data-c34-action]')?.dataset?.c34Action;if(cmd==='save')save();else if(cmd==='export')exportData();else if(['analyzeBtn','applyOddsBtn','parseCsvBtn'].includes(e.target?.id))schedule(300)},true);
 document.addEventListener('input',e=>{if(['raceName','raceDate','venue','grade','surface','distance','fieldSize','oddsPaste'].includes(e.target?.id))schedule(150)},true);
 ['rsa-analysis-start','rsa-analysis-complete','validated-queue-ready','decision-shell-v2-ready','production-decision-pipeline-ready','rsa-addons-ready'].forEach(x=>addEventListener(x,()=>schedule(160)));
-window.RaceCorner34V1={version:VERSION,predict,render,exportData};
-fetch(MODEL_URL,{cache:'force-cache'}).then(r=>{if(!r.ok)throw new Error('corner34 model '+r.status);return r.json()}).then(m=>{model=m;schedule(100)}).catch(e=>{modelError='予測モデルを読み込めません：'+e.message;schedule(100)});
+window.RaceCorner34V1={version:VERSION,predict,render,exportData,modelStatus:()=>modelError?"error":model?"ready":"loading",predictCurrent:(q,meta)=>modelError?{ready:false,reason:modelError}:predict(q,meta,model)};
+fetch(MODEL_URL,{cache:'force-cache'}).then(r=>{if(!r.ok)throw new Error('corner34 model '+r.status);return r.json()}).then(m=>{model=m;window.dispatchEvent(new CustomEvent('axis8-corner-model-settled'));schedule(100)}).catch(e=>{modelError='予測モデルを読み込めません：'+e.message;window.dispatchEvent(new CustomEvent('axis8-corner-model-settled'));schedule(100)});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>schedule(220),{once:true});else schedule(170);
 })();

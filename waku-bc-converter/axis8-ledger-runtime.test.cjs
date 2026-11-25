@@ -3,6 +3,7 @@ const fs=require("node:fs"),path=require("node:path");const read=n=>fs.readFileS
 const regression=function regression(sources,html,css){
  const test=[];function check(n,b){if(!b)throw Error(n);test.push(n)}function reject(n,f){let thrown=false;try{f()}catch(e){thrown=true}check(n,thrown)}
  const core={};for(const s of sources.slice(0,3))new Function("window",s)(core);
+ const shadow=sources[3],mod=JSON.parse(sources[4]),predict=new Function("document",shadow.slice(shadow.indexOf("const VERSION="),shadow.indexOf("function style()"))+"\nreturn predict;")({});
  const C=core.RSAAxis8Core,L=core.RSAAxis8LedgerCore,rows=Array.from({length:16},(_,i)=>({no:String(i+1),name:"馬"+(i+1),abilityRank:i+1,finishRank:i+1}));
  const odds=rows.map((h,i)=>h.no+" "+(i+2)).join("\n"),x=C.compute({grade:"G3",field:16,surface:"芝",name:"試験",ability:{ready:true,activeModel:"C",rows},finish:{ready:true,rows},odds}),partners=C.coverage(x.others,.75,"w");
  const meta={raceDate:"2026-11-25",venue:"東京",raceName:"試験",grade:"G3",surface:"芝",distance:"1600",going:"良",fieldSize:"16"};
@@ -19,7 +20,7 @@ const regression=function regression(sources,html,css){
  const listeners=(map,name,fn)=>{if(!map.has(name))map.set(name,[]);map.get(name).push(fn)};
  function el(id=""){let v="",h="";return {id,value:"",checked:false,hidden:false,disabled:false,children:[],handlers:new Map(),addEventListener(n,f){listeners(this.handlers,n,f)},appendChild(n){this.children.push(n);if(n.id)els.set(n.id,n);return n},remove(){},get textContent(){return v},set textContent(s){v=String(s)},get innerHTML(){return h},set innerHTML(s){h=String(s);for(const m of h.matchAll(/id="([^"]+)"/g))if(!els.has(m[1]))els.set(m[1],el(m[1]))}}}
  const host=el("main"),doc={readyState:"complete",body:el("body"),getElementById:id=>els.get(id)||null,querySelector:s=>s==="main.view"?host:null,createElement:()=>el(),addEventListener:(n,f)=>listeners(devents,n,f)};
- const root={document:doc,addEventListener:(n,f)=>listeners(events,n,f),dispatchEvent(e){if(e.type==="axis8-snapshot-changed")notifications++;for(const f of events.get(e.type)||[])f(e)},CustomEvent:class{constructor(type){this.type=type}},localStorage:{getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v)},RSAForecastWorkflowCoreV1:core.RSAForecastWorkflowCoreV1};
+ const root={document:doc,addEventListener:(n,f)=>listeners(events,n,f),dispatchEvent(e){if(e.type==="axis8-snapshot-changed")notifications++;for(const f of events.get(e.type)||[])f(e)},CustomEvent:class{constructor(type){this.type=type}},localStorage:{getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v)},RSAForecastWorkflowCoreV1:core.RSAForecastWorkflowCoreV1,RaceCorner34V1:{modelStatus:()=>"ready",predictCurrent:(q,m)=>predict(q,m,mod)}};
  const fire=(name,id)=>{const target=els.get(id);for(const f of devents.get(name)||[])f({target});for(const parent of ["axis8Primary","axis8Ledger"])for(const f of els.get(parent)?.handlers.get(name)||[])f({target});};
  const tset=f=>{timers.set(++serial,f);return serial},tclear=id=>timers.delete(id),drain=()=>{let i=0;while(timers.size){if(++i>100)throw Error("timer loop");const [id,fn]=timers.entries().next().value;timers.delete(id);fn();ticks++}return i};
  for(const [id,v] of Object.entries({...meta,oddsPaste:"",analyzeBtn:"",applyOddsBtn:"",clearOddsBtn:"",csvFile:""})){els.set(id,el(id));els.get(id).value=v}
@@ -28,7 +29,7 @@ const regression=function regression(sources,html,css){
  const now=Date.now()+1000;els.get("oddsPaste").value="";
  root.RSAAnalysisTransitionState={status:"running",generation:1,startedWall:now};root.dispatchEvent({type:"rsa-analysis-start"});
  root.M3PureAbilityState={ready:true,activeModel:"C",rows,at:now+10};root.Finish600State={ready:true,generation:1,rows:rows.map(h=>({...h,sc:[{rank:2},{rank:4},{rank:3},{rank:8}]})),at:now+10};
- root.ValidatedQueueState={ready:true,generation:1,at:now+10,fieldSize:16,rows:rows.map((h,i)=>({...h,expectedRank:i+1,laneIdx:i%4,lane:"内",validated:true,frontness5:.7}))};
+ root.ValidatedQueueState={ready:true,generation:1,at:now+10,fieldSize:16,rows:rows.map((h,i)=>({...h,expectedRank:i+1,laneIdx:i%4,lane:"内",validated:true,frontness5:.7,hist_n:5,corner3N5:5,corner4N5:i===15?1:5,corner3Mean5:(i+1)/17,corner4Mean5:(i+2)/18,corner3Last5:(i+1)/17,corner4Last5:(i+2)/18,corner34DeltaMean5:.02,leadRate5:.1,corner4Std5:.18,earlyPosStd5:.2}))};
  root.MobileAnalysisCoreState={ready:true,generation:1,at:now+10,analysis:{pred:{p:[.1,.2,.4,.3]},pressure:"高"}};
  root.PositionRiskState={ready:true,at:now+10,byNo:{"1":{name:"馬1",p10:.2},"2":{name:"馬2",p10:0},"3":{name:"別馬",p10:.8}}};root.RSAAnalysisTransitionState.status="ready";root.dispatchEvent({type:"rsa-analysis-complete"});drain();
  check("three tabs mounted",["axis","partners","formation"].every(k=>els.has("a8Tab-"+k)&&els.has("a8Panel-"+k)));
@@ -42,6 +43,19 @@ const regression=function regression(sources,html,css){
  check("preliminary ranks",els.get("axis8Field").innerHTML.includes("Ability 1 / M3 1"));
  check("preliminary neutral formation",els.get("axis8FormationBody").innerHTML.includes("<svg")&&!els.get("axis8FormationBody").innerHTML.includes('fill="#7358c5"')&&!els.get("axis8FormationBody").innerHTML.includes('fill="#0c968b"'));
  check("preliminary axis detail",els.get("a8AxisDetails").innerHTML.includes("事前の軸候補")&&els.get("a8AxisDetails").innerHTML.includes("M4全展開の順位範囲"));
+ const rawForm=C.formation({ready:true,rows,axis:null},[],root.ValidatedQueueState,root.PositionRiskState,root.MobileAnalysisCoreState,root.RSAAnalysisTransitionState,now);
+ const corners=C.cornerProjection(rawForm,root.RaceCorner34V1,{venue:"東京",surface:"芝",distance:1600});
+ const exact=predict(root.ValidatedQueueState,{field:16,venue:"東京",surface:"芝",distance:1600},mod);
+ check("actual corner model reproduced",corners.ready&&corners.validCount===15&&corners.rows.every(h=>h.four===exact.rows.find(r=>r.no===h.no).four));
+ check("missing history withheld",corners.byNo["16"].four===null&&corners.byNo["16"].three===null);
+ check("straight race excluded",!C.cornerProjection(rawForm,root.RaceCorner34V1,{venue:"新潟",surface:"芝",distance:1000}).ready);
+ check("model failure held",!C.cornerProjection(rawForm,{predictCurrent:()=>{throw Error("bad")}},{}).ready);
+ check("name mismatch held",!C.cornerProjection(rawForm,{predictCurrent:()=>({...exact,rows:exact.rows.map((h,i)=>i===0?{...h,name:"別馬"}:h)})},{}).ready);
+ const beforeStage=root.RSAAxis8SnapshotV1.diagnostics().renderCount;
+ fire("click","a8Stage4");check("fourth corner view",els.get("axis8FormationBody").innerHTML.includes("4コーナー予測番手")&&els.get("axis8FormationBody").innerHTML.includes("内外不明")&&els.get("axis8FormationBody").innerHTML.includes("参考幅"));
+ fire("click","a8Stage3");check("third corner view",els.get("axis8FormationBody").innerHTML.includes("3コーナー予測番手"));
+ fire("click","a8Stage1");check("initial corner restored",els.get("axis8FormationBody").innerHTML.includes("左が内"));
+ check("stage switch no model render",root.RSAAxis8SnapshotV1.diagnostics().renderCount===beforeStage&&timers.size===0);
  check("preliminary not saveable",root.RSAAxis8SnapshotV1.getSnapshot()===null&&els.get("a8LedgerFreeze").disabled);
  els.get("axis8Confirm").checked=true;fire("change","axis8Confirm");drain();
  check("confirmed but no odds hold",root.RSAAxis8PrimaryState.status==="hold"&&!els.get("axis8Pre").hidden&&root.RSAAxis8SnapshotV1.getSnapshot()===null);
@@ -55,6 +69,7 @@ const regression=function regression(sources,html,css){
  check("three initial expanded details",(markup.match(/data-a8-horse="[^"]+" open/g)||[]).length===3);
  check("conditional labels",markup.includes("条件付き連対率")&&markup.includes("条件付き3着内率"));
  check("all detail labels",["Ability","M3","M4本線","M4全展開の順位範囲","P10","初角予測","予測進路","先行力","追走力"].every(t=>markup.includes(t)));
+ check("opponent position progression",markup.includes("位置取り推移（予測）")&&markup.includes("4角参考幅"));
  check("axis card also present",els.get("a8AxisDetails").innerHTML.includes("軸馬の詳細")&&els.get("a8AxisDetails").innerHTML.includes("20.0%"));
  check("zero P10 shown",markup.includes("0.0%"));
  check("mismatched P10 not shown",!markup.includes("80.0%")||!markup.includes("<small>P10</small><b>80.0%</b>"));
@@ -83,4 +98,4 @@ const regression=function regression(sources,html,css){
  check("legacy external CSS excludes new panel",css.includes("main.view > :not(#axis8Primary):not(#mpuSetup)"));
  return {passed:test.length,test,timerCallbacks:ticks,notifications,renderCount:root.RSAAxis8SnapshotV1.diagnostics().renderCount};
 };
-console.log(regression(["axis8-primary-v1.js","axis8-ledger-v1.js","mobile-forecast-workflow-v1.js"].map(read),read("v3.html"),read("axis-access-gate-v1.css")));
+console.log(regression(["axis8-primary-v1.js","axis8-ledger-v1.js","mobile-forecast-workflow-v1.js","corner34-formation-shadow-v1.js","data/corner34_position_ridge_v1.json"].map(read),read("v3.html"),read("axis-access-gate-v1.css")));
