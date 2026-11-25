@@ -31,12 +31,13 @@ const regression=function regression(sources,html,css){
  root.ValidatedQueueState={ready:true,generation:1,at:now+10,fieldSize:16,rows:rows.map((h,i)=>({...h,expectedRank:i+1,laneIdx:i%4,lane:"内",validated:true,frontness5:.7}))};
  root.MobileAnalysisCoreState={ready:true,generation:1,at:now+10,analysis:{pred:{p:[.1,.2,.4,.3]},pressure:"高"}};
  root.PositionRiskState={ready:true,at:now+10,byNo:{"1":{name:"馬1",p10:.2}}};root.RSAAnalysisTransitionState.status="ready";root.dispatchEvent({type:"rsa-analysis-complete"});drain();
- check("four tabs mounted",["axis","partners","formation","record"].every(k=>els.has("a8Tab-"+k)&&els.has("a8Panel-"+k)));
+ check("three tabs mounted",["axis","partners","formation"].every(k=>els.has("a8Tab-"+k)&&els.has("a8Panel-"+k)));
  check("axis selected initially",!els.get("a8Panel-axis").hidden&&els.get("a8Panel-formation").hidden);
  const beforeTabs=root.RSAAxis8SnapshotV1.diagnostics().renderCount;
- for(const key of ["partners","formation","record","axis"]){fire("click","a8Tab-"+key);check("tab "+key,["axis","partners","formation","record"].every(k=>els.get("a8Panel-"+k).hidden===(k!==key)));}
+ for(const key of ["partners","formation","axis"]){fire("click","a8Tab-"+key);check("tab "+key,["axis","partners","formation"].every(k=>els.get("a8Panel-"+k).hidden===(k!==key)));}
+ check("no fourth tab",!els.has("a8Tab-record")&&!els.has("a8Panel-record"));
  check("tab switching does not recalculate",root.RSAAxis8SnapshotV1.diagnostics().renderCount===beforeTabs&&timers.size===0);
- check("ledger inside record",els.get("a8Panel-record").children.some(x=>x.id==="axis8Ledger"));
+ check("ledger inside axis",els.get("a8RecordHost").children.some(x=>x.id==="axis8Ledger"));
  check("preliminary displayed",!els.get("axis8Pre").hidden&&!els.get("axis8Analysis").hidden&&els.get("axis8Controls").hidden);
  check("preliminary ranks",els.get("axis8Field").innerHTML.includes("Ability 1 / M3 1"));
  check("preliminary neutral formation",els.get("axis8FormationBody").innerHTML.includes("<svg")&&!els.get("axis8FormationBody").innerHTML.includes('fill="#7358c5"')&&!els.get("axis8FormationBody").innerHTML.includes('fill="#0c968b"'));

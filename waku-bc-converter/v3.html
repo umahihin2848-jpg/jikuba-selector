@@ -63,21 +63,32 @@ body.rsaFocusedThreeTabs main.view > #rsaFocusedView{display:none!important}
    Old modules remain available internally until dependent recording modules migrate. */
 html body #axis8Primary{display:block!important;max-width:1060px;margin:14px auto 20px;padding:16px;order:99}
 html body #axis8Primary [hidden]{display:none!important}
-html body #axis8Primary .a8tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin:12px 0 15px}
-html body #axis8Primary .a8tabs button{min-width:0;width:100%;padding:9px 3px;font-size:clamp(11px,3.4vw,14px);white-space:nowrap;border:1px solid #3f6278;border-radius:8px;background:#142c3d;color:#d8e8f2;min-height:44px}
+html body #axis8Primary .a8tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:12px 0 15px}
+html body #axis8Primary .a8tabs button{min-width:0;width:100%;padding:9px 3px;font-size:clamp(13px,3.8vw,15px);white-space:nowrap;border:1px solid #3f6278;border-radius:8px;background:#142c3d;color:#d8e8f2;min-height:44px}
 html body #axis8Primary .a8tabs button[aria-selected="true"]{background:#28667a;color:white;border-color:#7bb8c5;font-weight:700}
 html body #axis8Primary #axis8ConfirmLabel{display:flex;align-items:flex-start;gap:8px;font-size:.85rem;line-height:1.5}
 html body #axis8Primary #axis8Confirm{width:20px;height:20px;flex:0 0 20px;margin:2px 0}
-html body #axis8Primary #axis8Ledger{margin-top:8px}
+html body #axis8Primary #axis8Ledger{margin-top:16px;border-top:1px solid #385164;padding-top:12px}
+html body #axis8Primary .a8formationHead{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14px}
+html body #axis8Primary .a8muted{color:#a9c0cd;font-size:12px;line-height:1.5}
+html body #axis8Primary .a8pace{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+html body #axis8Primary .a8pace span{padding:7px 2px;text-align:center;min-width:0}
+html body #axis8Primary .a8pace small,html body #axis8Primary .a8pace b{display:block;font-size:clamp(10px,3.1vw,14px);white-space:nowrap}
+html body #axis8Primary .a8paceMain{background:#174b47;border-color:#70b9aa!important}
+html body #axis8Primary .a8summary{padding:12px;border:1px solid #3c6071;background:#142c3d;border-radius:10px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+html body #axis8Primary .a8summary strong{margin-left:auto;font-size:22px;color:#a8ead6}
+html body #axis8Primary .a8summary small{flex-basis:100%;text-align:right}
+html body #axis8Primary details{margin:10px 0}
+html body #axis8Primary .a8strong{border-left:3px solid #50a998;padding-left:8px}
 body.rsaFocusedThreeTabs main.view > #rsaPurchaseAudit{display:none!important}
 html body #axis8Primary .a8row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(128,128,128,.22);flex-wrap:wrap}
 html body #axis8Primary .a8strong{font-weight:700}
 html body #axis8Primary small{font-size:.84rem}
 html body #axis8Primary textarea{width:100%;box-sizing:border-box}
 html body #axis8Primary .a8map svg{display:block;width:100%;height:auto;max-width:740px;margin:0 auto}
-html body #axis8Primary .a8legend,html body #axis8Primary .a8pace{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:.85rem;margin:10px 0}
+html body #axis8Primary .a8legend{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:.85rem;margin:10px 0}
 html body #axis8Primary .a8legend i{display:inline-block;width:12px;height:12px;border:1px solid #8c9f95;border-radius:50%;margin-right:4px;vertical-align:middle}
-html body #axis8Primary .a8pace span{padding:5px 8px;border:1px solid rgba(128,128,128,.35);border-radius:7px}
+html body #axis8Primary .a8pace span{border:1px solid rgba(128,128,128,.35);border-radius:7px}
 html body #axis8Primary select{max-width:100%;margin:5px}
 html body #rsaFocusedView,html body #raceSkipCard,html body #axisAccessScreen,html body #rsaPurchaseAudit{display:none!important}
 </style>
@@ -103,7 +114,7 @@ html body #rsaFocusedView,html body #raceSkipCard,html body #axisAccessScreen,ht
 <script src="race-quality-two-axis-v1.js?v=20261109axis1"></script>
 <script src="corner34-formation-shadow-v1.js?v=20261108corner34v1"></script>
 <script src="mineta-position-study-v1.js?v=20261110minetaH3a"></script>
-<script src="mobile-analysis-feedback-v1.js?v=20261125tabs1"></script>
+<script src="mobile-analysis-feedback-v1.js?v=20261125tabs3"></script>
 <script src="axis-access-gate-v1.js?v=20261120audit1"></script>
 <link rel="stylesheet" href="ability-v3-forward-receipt-v1.css?v=20261117p328a"><script src="ability-v3-auto-native-v1.js?v=20261117p330"></script>
 <script src="ability-v3-research-mode-v1.js?v=20261117p330"></script>
@@ -126,6 +137,6 @@ html body #rsaFocusedView,html body #raceSkipCard,html body #axisAccessScreen,ht
 <link rel="stylesheet" href="purchase-audit-ui-v1.css?v=p374a"><script src="purchase-audit-core-v1.js?v=p374a"></script><script src="purchase-audit-ui-v1.js?v=p374a"></script><script src="prediction-accuracy-core-v1.js?v=20261120audit1"></script><script src="prediction-benchmark-audit-v1.js?v=20261120audit1"></script><script src="prediction-accuracy-notebook-v1.js?v=20261122pair1"></script>
 <script src="partner-total-shadow-v1.js?v=20261119shadow2"></script>
 <script src="prediction-reliability-shadow-v1.js?v=20261119weekend1"></script>
-<script src="axis8-primary-v1.js?v=20261125tabs1"></script>
-<script src="axis8-ledger-v1.js?v=20261125tabs1"></script>
+<script src="axis8-primary-v1.js?v=20261125tabs3"></script>
+<script src="axis8-ledger-v1.js?v=20261125tabs3"></script>
 </body></html>
