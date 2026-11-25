@@ -102,7 +102,7 @@ const C=(function axis8Core(){
   const a=root.M3PureAbilityState,f=root.Finish600State;
   if(!a?.ready||!f?.ready||Number(a.at)<started||Number(f.at)<started||!Number.isFinite(Number(a.at))||!Number.isFinite(Number(f.at)))return {ready:false,status:"hold",reason:"今回のAbility・M3計算を待っています"};
   if(!/^\d{4}-\d{2}-\d{2}$/.test($("raceDate")?.value||"")||!$("venue")?.value)return {ready:false,status:"hold",reason:"日付・競馬場を確認"};
-  if(root.RaceSkipLockV1State?.kind==="scope")return {ready:false,status:"out",reason:"対象外"};
+  // Scope is independently enforced in the new core; legacy axis lock is not authoritative.
   if(!confirmed)return {ready:false,status:"hold",reason:"CSVの仮馬番と確定馬番を照合してチェックしてください"};
   return C.compute({grade:$("grade")?.value,field:Number($("fieldSize")?.value),surface:$("surface")?.value,name:$("raceName")?.value,ability:a,finish:f,odds:$("oddsPaste")?.value});
  }
@@ -114,14 +114,15 @@ const C=(function axis8Core(){
  }
  function currentSnapshot(){
   if(!snapshot||dirty||!confirmed||root.RSAAnalysisTransitionState?.status!=="ready"||snapshot.generation!==root.RSAAnalysisTransitionState?.generation||snapshot.winInput!==String($("oddsPaste")?.value||"")||pairText!==String($("axis8Pairs")?.value||""))return null;
+  if(Object.entries(snapshot.meta).some(([id,value])=>String($(id)?.value||"")!==value))return null;
   return JSON.parse(JSON.stringify(snapshot));
  }
  root.RSAAxis8SnapshotV1=Object.freeze({getSnapshot:currentSnapshot,diagnostics:()=>({renderCount,pendingTimer:Boolean(timer),ready:Boolean(currentSnapshot())})});
  function render(force=false){
-  if(!ensure())return;$("axis8ConfirmLabel").hidden=dirty||!started||root.RSAAnalysisTransitionState?.status!=="ready";$("axis8Confirm").checked=confirmed;const x=read();latest=x;root.RSAAxis8PrimaryState={...x,at:Date.now(),ticketDecision:false};
+  if(!ensure())return;$("axis8ConfirmLabel").hidden=dirty||!started||root.RSAAnalysisTransitionState?.status!=="ready";$("axis8Confirm").checked=confirmed;const x=read();latest=x;
   const key=x.ready?JSON.stringify([started,x.axis.no,x.rows.map(h=>[h.no,h.name,h.od])]):"";
   if(key!==pairKey){pairKey=key;pairText="";$("axis8Pairs").value="";}
-  const sig=JSON.stringify([x,target,metric,pairText,root.PositionRiskState?.at,root.ValidatedQueueState?.at,root.MobileAnalysisCoreState?.at,root.RSAAnalysisTransitionState?.generation,Boolean(root.RSAForecastWorkflowCoreV1)]);if(!force&&signature===sig&&(!x.ready||snapshot))return;signature=sig;renderCount++;
+  const sig=JSON.stringify([x,target,metric,pairText,root.PositionRiskState?.at,root.ValidatedQueueState?.at,root.MobileAnalysisCoreState?.at,root.RSAAnalysisTransitionState?.generation,Boolean(root.RSAForecastWorkflowCoreV1)]);if(!force&&signature===sig&&(!x.ready||snapshot))return;signature=sig;renderCount++;root.RSAAxis8PrimaryState={...x,at:Date.now(),ticketDecision:false};
   $("axis8Controls").hidden=!x.ready;$("axis8Result").innerHTML=x.ready?'<h3>'+esc(x.tier+"｜"+({S:"高信頼",A:"分析対象",B:"条件付き",C:"見送り"}[x.tier]))+'</h3><p>'+esc(x.reason)+' ｜ '+esc(x.structure==="none"?"一致なし":x.structure)+'</p><p><b>◎ '+esc(x.axis.no+"番 "+x.axis.name)+'</b> ｜ '+esc(x.axis.pop+"番人気・Ability "+x.axis.ar+"位・M3 "+x.axis.mr+"位")+'</p><p>勝率 '+pct(x.calibrated[0])+' ／ 連対率 '+pct(x.calibrated[1])+' ／ 3着内率 <b>'+pct(x.calibrated[2])+'</b></p><small>2026年固定の長期代理モデル較正。軸の個別推定値であり、全馬較正確率の整合性は未検証。馬券購入は自身で判断。</small>':'<h3>'+esc(x.status==="out"?"対象外":"判定保留")+'</h3><p>'+esc(x.reason)+'</p>';
   if(!x.ready){$("axis8Opp").textContent="";$("axis8Field").textContent="";$("axis8FormationBody").textContent="";publishSnapshot(null);return;}
   const d=C.direct(pairText,x),rows=C.coverage(d||x.others,target,metric),sel=rows.filter(h=>h.selected);
@@ -154,12 +155,12 @@ const C=(function axis8Core(){
    '<p>軸の初角：'+(m.axisRank==null?"—":m.axisRank.toFixed(1)+"番手")+' ／ P10 '+pct(m.p10)+' ／ 先行力 '+pct(m.frontness)+' ／ 追走 '+esc(m.pursuit||"—")+'</p><p>'+esc(risk)+'</p><details><summary>全頭の予測番手・進路・先行力</summary>'+list+'</details><small>既存隊列モデルの参考予測です。実際の進路・着順は保証しません。レースランクは隊列情報で変更しません。</small>';
  }
  function schedule(){clearTimeout(timer);timer=setTimeout(()=>{timer=0;render();},100);}
- function invalidate(){dirty=true;started=0;confirmed=false;pairText="";pairKey="";publishSnapshot(null);const el=$("axis8FormationBody");if(el)el.textContent="";schedule();}
+ function invalidate(){dirty=true;started=0;confirmed=false;pairText="";pairKey="";root.RSAAxis8PrimaryState={ready:false,status:"hold",reason:"入力変更・再解析待ち",at:Date.now(),ticketDecision:false};publishSnapshot(null);const el=$("axis8FormationBody");if(el)el.textContent="";schedule();}
  const inputs=["raceDate","venue","surface","distance","grade","going","fieldSize","raceName","csvFile"];
  D.addEventListener("input",e=>{if(inputs.includes(e.target.id))invalidate();if(e.target.id==="oddsPaste"){publishSnapshot(null);schedule();}if(e.target.id==="axis8Pairs")root.dispatchEvent(new root.CustomEvent("axis8-snapshot-changed"));},true);
  D.addEventListener("change",e=>{if(inputs.includes(e.target.id))invalidate();},true);
  D.addEventListener("click",e=>{if(e.target.id==="analyzeBtn"){dirty=false;confirmed=false;started=Date.now();publishSnapshot(null);schedule();}if(["applyOddsBtn","clearOddsBtn"].includes(e.target.id)){publishSnapshot(null);schedule();}if(e.target.id==="clearCsvBtn")invalidate();},true);
- root.addEventListener("rsa-analysis-start",()=>{dirty=false;confirmed=false;publishSnapshot(null);started=Number(root.RSAAnalysisTransitionState?.startedWall)||Date.now();const el=$("axis8FormationBody");if(el)el.textContent="";schedule();});
+ root.addEventListener("rsa-analysis-start",()=>{dirty=false;confirmed=false;root.RSAAxis8PrimaryState={ready:false,status:"hold",reason:"解析中",at:Date.now(),ticketDecision:false};publishSnapshot(null);started=Number(root.RSAAnalysisTransitionState?.startedWall)||Date.now();const el=$("axis8FormationBody");if(el)el.textContent="";schedule();});
  for(const e of ["rsa-analysis-complete","rsa-analysis-error","m3-pure-ability-ready","finish600-ready","position-risk-ready","validated-queue-ready","decision-shell-v2-ready","mobile-analysis-core-ready","mobile-race-map-pace-ready","rsa-addons-ready"])root.addEventListener(e,schedule);
  if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",schedule,{once:true});else schedule();
 })(root,C);
