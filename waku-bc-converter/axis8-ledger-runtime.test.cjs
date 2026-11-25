@@ -1,0 +1,48 @@
+/* Run: node waku-bc-converter/axis8-ledger-runtime.test.cjs */
+const fs=require("node:fs"),path=require("node:path");const read=n=>fs.readFileSync(path.join(__dirname,n),"utf8");
+const regression=function regression(sources,html,css){
+ const test=[];function check(n,b){if(!b)throw Error(n);test.push(n)}function reject(n,f){let thrown=false;try{f()}catch(e){thrown=true}check(n,thrown)}
+ const core={};for(const s of sources.slice(0,3))new Function("window",s)(core);
+ const C=core.RSAAxis8Core,L=core.RSAAxis8LedgerCore,rows=Array.from({length:16},(_,i)=>({no:String(i+1),name:"馬"+(i+1),abilityRank:i+1,finishRank:i+1}));
+ const odds=rows.map((h,i)=>h.no+" "+(i+2)).join("\n"),x=C.compute({grade:"G3",field:16,surface:"芝",name:"試験",ability:{ready:true,activeModel:"C",rows},finish:{ready:true,rows},odds}),partners=C.coverage(x.others,.75,"w");
+ const meta={raceDate:"2026-11-25",venue:"東京",raceName:"試験",grade:"G3",surface:"芝",distance:"1600",going:"良",fieldSize:"16"};
+ const s={version:C.V,generation:1,meta,structure:x.structure,tier:x.tier,axis:x.axis,calibrated:x.calibrated,target:.75,metric:"w",source:"win_PL_reference",coverage:partners.filter(h=>h.selected).at(-1).coverage,partners,roster:x.rows,formation:{rows:rows.map((h,i)=>({...h,expectedRank:i+1}))},numberMappingConfirmed:true};
+ const nowISO="2026-11-25T00:00:00Z",r=L.freeze(s,[],"メモ",nowISO,true);
+ check("freeze",r.forecast.axis.no===x.axis.no);check("deep copy",r.forecast!==s&&r.forecast.partners!==s.partners);
+ reject("no attestation",()=>L.freeze(s,[],"",nowISO,false));reject("duplicate race",()=>L.freeze(s,[r],"",nowISO,true));reject("no mapping",()=>L.freeze({...s,numberMappingConfirmed:false},[],"",nowISO,true));reject("bad coverage",()=>L.freeze({...s,coverage:.01},[],"",nowISO,true));reject("wrong name",()=>L.freeze({...s,partners:s.partners.map((h,i)=>i?h:{...h,name:"違う"})},[],"",nowISO,true));
+ const chosen=partners.filter(h=>h.selected).map(h=>h.no),o=L.settle(r,[x.axis.no,...chosen.slice(0,2)].join(" "),rows.map(h=>h.no).join(" "),nowISO);
+ check("capture 2",o.outcome.conditionalCaptured===2&&o.outcome.axisWin&&o.outcome.axisTop2&&o.outcome.axisTop3&&o.outcome.quinellaPartnerCaptured);
+ check("corner error",o.outcome.cornerMAE===0&&o.outcome.cornerCount===16);check("immutable forecast",JSON.stringify(o.forecast)===JSON.stringify(r.forecast)&&r.outcome===null);
+ reject("settle twice",()=>L.settle(o,"1 2 3","",nowISO));reject("duplicate finish",()=>L.settle(r,"1 1 3","",nowISO));reject("unknown number",()=>L.settle(r,"1 2 99","",nowISO));reject("short corner",()=>L.settle(r,"1 2 3","1 2",nowISO));reject("invalid result date",()=>L.settle(r,"1 2 3","","invalid"));
+ const miss=L.settle(r,"2 3 4","",nowISO);check("axis miss conditional null",miss.outcome.conditionalCaptured===null&&miss.outcome.conditionalTarget===null&&miss.outcome.cornerMAE===null);
+ const events=new Map(),devents=new Map(),timers=new Map(),els=new Map(),storage=new Map();let ticks=0,serial=0,notifications=0;
+ const listeners=(map,name,fn)=>{if(!map.has(name))map.set(name,[]);map.get(name).push(fn)};
+ function el(id=""){let v="",h="";return {id,value:"",checked:false,hidden:false,disabled:false,children:[],handlers:new Map(),addEventListener(n,f){listeners(this.handlers,n,f)},appendChild(n){this.children.push(n);if(n.id)els.set(n.id,n);return n},remove(){},get textContent(){return v},set textContent(s){v=String(s)},get innerHTML(){return h},set innerHTML(s){h=String(s);for(const m of h.matchAll(/id="([^"]+)"/g))if(!els.has(m[1]))els.set(m[1],el(m[1]))}}}
+ const host=el("main"),doc={readyState:"complete",body:el("body"),getElementById:id=>els.get(id)||null,querySelector:s=>s==="main.view"?host:null,createElement:()=>el(),addEventListener:(n,f)=>listeners(devents,n,f)};
+ const root={document:doc,addEventListener:(n,f)=>listeners(events,n,f),dispatchEvent(e){if(e.type==="axis8-snapshot-changed")notifications++;for(const f of events.get(e.type)||[])f(e)},CustomEvent:class{constructor(type){this.type=type}},localStorage:{getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v)},RSAForecastWorkflowCoreV1:core.RSAForecastWorkflowCoreV1};
+ const fire=(name,id)=>{const target=els.get(id);for(const f of devents.get(name)||[])f({target});for(const parent of ["axis8Primary","axis8Ledger"])for(const f of els.get(parent)?.handlers.get(name)||[])f({target});};
+ const tset=f=>{timers.set(++serial,f);return serial},tclear=id=>timers.delete(id),drain=()=>{let i=0;while(timers.size){if(++i>100)throw Error("timer loop");const [id,fn]=timers.entries().next().value;timers.delete(id);fn();ticks++}return i};
+ for(const [id,v] of Object.entries({...meta,oddsPaste:"",analyzeBtn:"",applyOddsBtn:"",clearOddsBtn:"",csvFile:""})){els.set(id,el(id));els.get(id).value=v}
+ for(const source of sources.slice(0,2))new Function("window","setTimeout","clearTimeout",source)(root,tset,tclear);
+ drain();check("initial no snapshot",root.RSAAxis8SnapshotV1.getSnapshot()===null);
+ const now=Date.now()+1000;els.get("oddsPaste").value=odds;
+ root.RSAAnalysisTransitionState={status:"running",generation:1,startedWall:now};root.dispatchEvent({type:"rsa-analysis-start"});
+ root.M3PureAbilityState={ready:true,activeModel:"C",rows,at:now+10};root.Finish600State={ready:true,rows,at:now+10};
+ root.ValidatedQueueState={ready:true,generation:1,at:now+10,fieldSize:16,rows:rows.map((h,i)=>({...h,expectedRank:i+1,laneIdx:i%4,lane:"内",validated:true,frontness5:.7}))};
+ root.MobileAnalysisCoreState={ready:true,generation:1,at:now+10,analysis:{pred:{p:[.1,.2,.4,.3]},pressure:"高"}};
+ root.PositionRiskState={ready:true,at:now+10,byNo:{"1":{name:"馬1",p10:.2}}};root.RSAAnalysisTransitionState.status="ready";root.dispatchEvent({type:"rsa-analysis-complete"});drain();
+ els.get("axis8Confirm").checked=true;fire("change","axis8Confirm");drain();
+ check("snapshot ready",!!root.RSAAxis8SnapshotV1.getSnapshot());check("ledger ready",!!els.get("axis8Ledger"));
+ const first=root.RSAAxis8SnapshotV1.diagnostics().renderCount,nt=notifications;for(let i=0;i<100;i++)root.dispatchEvent({type:"validated-queue-ready"});
+ check("100 events coalesced",timers.size===1);drain();check("no repeated rendering",root.RSAAxis8SnapshotV1.diagnostics().renderCount===first);check("no repeated notification",notifications===nt);check("no pending timer",timers.size===0);
+ els.get("axis8Target").value=".9";fire("change","axis8Target");check("target changed",root.RSAAxis8SnapshotV1.getSnapshot().target===.9);
+ els.get("a8LedgerAttest").checked=true;fire("change","a8LedgerAttest");check("freeze enabled",!els.get("a8LedgerFreeze").disabled);fire("click","a8LedgerFreeze");check("saved once",JSON.parse([...storage.values()][0]).length===1);fire("click","a8LedgerFreeze");check("duplicate blocked",JSON.parse([...storage.values()][0]).length===1);
+ els.get("a8LedgerTop").value="1 2 3";fire("click","a8LedgerSettle");check("result saved",!!JSON.parse([...storage.values()][0])[0].outcome);
+ els.get("axis8Pairs").value="1 2 3 4 5";fire("input","axis8Pairs");check("unapplied pair blocks snapshot",root.RSAAxis8SnapshotV1.getSnapshot()===null);
+ els.get("axis8Pairs").value="";els.get("raceName").value="次のレース";check("live metadata mismatch blocks snapshot without event",root.RSAAxis8SnapshotV1.getSnapshot()===null);
+ fire("input","raceName");check("race change immediately blocks snapshot",root.RSAAxis8SnapshotV1.getSnapshot()===null);drain();check("old formation cleared",els.get("axis8FormationBody").textContent==="");check("no pending timer after change",timers.size===0);
+ check("legacy inline CSS excludes new panel",html.includes("main.view > :not(#axis8Primary):not(#raceCondCard)")&&html.includes("body.rsaFocusedThreeTabs main.view > #rsaFocusedView{display:none!important}"));
+ check("legacy external CSS excludes new panel",css.includes("main.view > :not(#axis8Primary):not(#mpuSetup)"));
+ return {passed:test.length,test,timerCallbacks:ticks,notifications,renderCount:root.RSAAxis8SnapshotV1.diagnostics().renderCount};
+};
+console.log(regression(["axis8-primary-v1.js","axis8-ledger-v1.js","mobile-forecast-workflow-v1.js"].map(read),read("v3.html"),read("axis-access-gate-v1.css")));
