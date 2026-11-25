@@ -25,13 +25,22 @@ const regression=function regression(sources,html,css){
  for(const [id,v] of Object.entries({...meta,oddsPaste:"",analyzeBtn:"",applyOddsBtn:"",clearOddsBtn:"",csvFile:""})){els.set(id,el(id));els.get(id).value=v}
  for(const source of sources.slice(0,2))new Function("window","setTimeout","clearTimeout",source)(root,tset,tclear);
  drain();check("initial no snapshot",root.RSAAxis8SnapshotV1.getSnapshot()===null);
- const now=Date.now()+1000;els.get("oddsPaste").value=odds;
+ const now=Date.now()+1000;els.get("oddsPaste").value="";
  root.RSAAnalysisTransitionState={status:"running",generation:1,startedWall:now};root.dispatchEvent({type:"rsa-analysis-start"});
  root.M3PureAbilityState={ready:true,activeModel:"C",rows,at:now+10};root.Finish600State={ready:true,rows,at:now+10};
  root.ValidatedQueueState={ready:true,generation:1,at:now+10,fieldSize:16,rows:rows.map((h,i)=>({...h,expectedRank:i+1,laneIdx:i%4,lane:"内",validated:true,frontness5:.7}))};
  root.MobileAnalysisCoreState={ready:true,generation:1,at:now+10,analysis:{pred:{p:[.1,.2,.4,.3]},pressure:"高"}};
  root.PositionRiskState={ready:true,at:now+10,byNo:{"1":{name:"馬1",p10:.2}}};root.RSAAnalysisTransitionState.status="ready";root.dispatchEvent({type:"rsa-analysis-complete"});drain();
+ check("preliminary displayed",!els.get("axis8Pre").hidden&&!els.get("axis8Analysis").hidden&&els.get("axis8Controls").hidden);
+ check("preliminary ranks",els.get("axis8Field").innerHTML.includes("Ability 1 / M3 1"));
+ check("preliminary neutral formation",els.get("axis8FormationBody").innerHTML.includes("<svg")&&!els.get("axis8FormationBody").innerHTML.includes('fill="#7358c5"')&&!els.get("axis8FormationBody").innerHTML.includes('fill="#0c968b"'));
+ check("preliminary not saveable",root.RSAAxis8SnapshotV1.getSnapshot()===null&&els.get("a8LedgerFreeze").disabled);
  els.get("axis8Confirm").checked=true;fire("change","axis8Confirm");drain();
+ check("confirmed but no odds hold",root.RSAAxis8PrimaryState.status==="hold"&&!els.get("axis8Pre").hidden&&root.RSAAxis8SnapshotV1.getSnapshot()===null);
+ els.get("oddsPaste").value=odds.split("\n").slice(0,8).join("\n");fire("input","oddsPaste");drain();
+ check("partial odds holds and preserves preview",root.RSAAxis8SnapshotV1.getSnapshot()===null&&!els.get("axis8Analysis").hidden);
+ els.get("oddsPaste").value=odds;fire("input","oddsPaste");drain();
+ check("final view switches",els.get("axis8Pre").hidden&&!els.get("axis8Controls").hidden);
  check("snapshot ready",!!root.RSAAxis8SnapshotV1.getSnapshot());check("ledger ready",!!els.get("axis8Ledger"));
  const first=root.RSAAxis8SnapshotV1.diagnostics().renderCount,nt=notifications;for(let i=0;i<100;i++)root.dispatchEvent({type:"validated-queue-ready"});
  check("100 events coalesced",timers.size===1);drain();check("no repeated rendering",root.RSAAxis8SnapshotV1.diagnostics().renderCount===first);check("no repeated notification",notifications===nt);check("no pending timer",timers.size===0);
@@ -41,6 +50,11 @@ const regression=function regression(sources,html,css){
  els.get("axis8Pairs").value="1 2 3 4 5";fire("input","axis8Pairs");check("unapplied pair blocks snapshot",root.RSAAxis8SnapshotV1.getSnapshot()===null);
  els.get("axis8Pairs").value="";els.get("raceName").value="次のレース";check("live metadata mismatch blocks snapshot without event",root.RSAAxis8SnapshotV1.getSnapshot()===null);
  fire("input","raceName");check("race change immediately blocks snapshot",root.RSAAxis8SnapshotV1.getSnapshot()===null);drain();check("old formation cleared",els.get("axis8FormationBody").textContent==="");check("no pending timer after change",timers.size===0);
+ const input={grade:"G3",field:16,surface:"芝",name:"試験",ability:{ready:true,activeModel:"C",rows},finish:{ready:true,rows},odds};
+ check("eight-structure preview preserves triple",C.preliminary(input).structure==="A1+A2+A3");
+ check("ties preserve rank preview but block final",C.preliminary({...input,finish:{...input.finish,m3Top3BoundaryAmbiguous:true}}).ready&&C.preliminary({...input,finish:{...input.finish,m3Top3BoundaryAmbiguous:true}}).structure===null&&!C.compute({...input,finish:{...input.finish,m3Top3BoundaryAmbiguous:true}}).ready);
+ check("out of scope not preview",C.preliminary({...input,field:11}).status==="out");
+ check("missing odds no tier",!C.compute({...input,odds:""}).ready);
  check("legacy inline CSS excludes new panel",html.includes("main.view > :not(#axis8Primary):not(#raceCondCard)")&&html.includes("body.rsaFocusedThreeTabs main.view > #rsaFocusedView{display:none!important}"));
  check("legacy external CSS excludes new panel",css.includes("main.view > :not(#axis8Primary):not(#mpuSetup)"));
  return {passed:test.length,test,timerCallbacks:ticks,notifications,renderCount:root.RSAAxis8SnapshotV1.diagnostics().renderCount};
