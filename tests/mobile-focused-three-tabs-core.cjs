@@ -27,7 +27,7 @@ assert(header.includes('mobile-focused-3tabs-v1.js?v=20261124skiponly1'));
 assert(header.includes(':not(#rsaFocusedView)'),'race gate must not hide focused four-tab wrapper');
 const gateCss=fs.readFileSync(__dirname+'/../waku-bc-converter/axis-access-gate-v1.css','utf8');
 assert(gateCss.includes(':not(#axisAccessScreen):not(#rsaFocusedView)'),'axis-access gate CSS must not hide focused view');
-assert(header.includes('axis-access-gate-v1.css?v=20261119integrity2'),'axis gate cache key must match current deployed version');
+assert(header.includes('axis-access-gate-v1.css?v=20261125axis8c'),'axis gate cache key must match current deployed version');
 assert(['軸馬','相手馬','展開隊列','最終判断'].every(label=>f.includes('>'+label+'</button>')),'four distinct primary tabs');
 assert(f.includes('tab!==\'decision\''),'decision panel must not get innerHTML overwritten on tab change');
 const workflowSrc=fs.readFileSync(__dirname+'/../waku-bc-converter/mobile-forecast-workflow-v1.js','utf8');
