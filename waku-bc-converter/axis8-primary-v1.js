@@ -110,7 +110,30 @@ const C=(function axis8Core(){
  const rr=fresh(risk)&&match(risk.byNo?.[h.no])?risk.byNo[h.no]:null,q=form?.ready&&form.generation===generation&&match(form.byNo?.[h.no])?form.byNo[h.no]:null;
  return {ability:rank(h.ar),m3:rank(h.mr),m4:valid&&band>=0?sc[band]:null,m4Range:valid?[Math.min(...sc),Math.max(...sc)]:null,m4Sc:valid?sc:null,band:band>=0?band:null,p10:prob(rr?.p10),position:rank(q?.expectedRank),lane:rank(q?.expectedRank)!=null&&Number.isInteger(q?.laneIdx)&&q.laneIdx>=0&&q.laneIdx<=3?["内ラチ","内","中","外"][q.laneIdx]:null,front:prob(q?.frontness5),pursuit:q?.pursuitApplicable===false?null:typeof q?.pursuitGrade==="string"&&q.pursuitGrade!=="—"?q.pursuitGrade:null,pop:rank(h.pop),odds:Number.isFinite(num(h.od))&&num(h.od)>=1?num(h.od):null};
 }
- return {V,preliminary,compute,pl,cal,rank,direct,coverage,formation,verticalFormation,horseDetail};
+ function cornerProjection(form,api,meta){
+ const bad=reason=>({ready:false,reason,rows:[]});
+ if(!form?.ready)return bad("初角の分析待ち");
+ if((meta.venue==="新潟"&&String(meta.surface).startsWith("芝")&&Number(meta.distance)===1000)||form.roster.every(h=>Number(form.byNo[h.no]?.noTurn)===1))return bad("直線コースのため3角・4角なし");
+ if(!api?.predictCurrent)return bad("3・4角モデルの読み込み待ち");
+ const q={ready:true,fieldSize:form.roster.length,rows:form.roster.map(h=>form.byNo[h.no])};
+ let result;try{result=api.predictCurrent(q,{...meta,field:q.fieldSize});}catch(e){return bad("3・4角モデルの計算エラー");}
+ if(!result?.ready||!Array.isArray(result.rows))return bad(result?.reason||"3・4角の予測待ち");
+ const map=new Map(result.rows.map(h=>[String(h.no),h])),n=q.fieldSize,norm=v=>String(v??"").normalize("NFKC").trim(),rank=v=>typeof v==="number"&&Number.isFinite(v)&&v>=1&&v<=n?v:null;
+ if(map.size!==n||result.rows.length!==n||form.roster.some(h=>norm(map.get(h.no)?.name)!==norm(h.name)))return bad("3・4角の馬番・馬名不一致");
+ const rows=form.roster.map(h=>{const r=map.get(h.no),three=r.valid?rank(r.three):null,four=r.valid?rank(r.four):null,range=four!==null&&Array.isArray(r.range)&&r.range.length===2&&r.range.every(v=>Number.isInteger(v)&&v>=1&&v<=n)&&r.range[0]<=four&&four<=r.range[1]?r.range:null;return {...h,three,four,range};});
+ return {ready:true,rows,byNo:Object.fromEntries(rows.map(h=>[h.no,h])),validation:result.modelValidation||{},validCount:rows.filter(h=>h.four!==null).length};
+}
+ function lateFormation(m,stage){
+ const E=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+ const field=stage==="3"?"three":"four",known=[],unknown=[];
+ for(const h of m.roster){const q=m.corners?.byNo?.[h.no],r=q?.[field];if(!Number.isFinite(r)){unknown.push(h);continue;}known.push({...h,rank:r,range:stage==="4"?q.range:null});}
+ known.sort((a,b)=>a.rank-b.rank||Number(a.no)-Number(b.no));
+ const height=92+known.length*29;
+ let svg='<svg viewBox="0 0 344 '+height+'" role="img" aria-label="'+stage+'コーナー予測番手。内外進路は不明。"><rect x="1" y="1" width="342" height="'+(height-2)+'" rx="12" fill="#183b30"/><path d="M37 42 V16 M30 23 L37 16 L44 23" stroke="#dcefe1" stroke-width="2" fill="none"/><text x="53" y="25" fill="#e4f4e9" font-size="12" font-weight="700">進行方向・先頭</text><text x="17" y="54" font-size="10" fill="#dcefe1">番手</text><text x="79" y="54" font-size="11" fill="#dcefe1">馬名（内外不明）</text>'+(stage==="4"?'<text x="330" y="54" text-anchor="end" font-size="10" fill="#dcefe1">参考幅</text>':'')+'<rect x="40" y="62" width="34" height="'+(known.length*29+4)+'" rx="7" fill="#254b3c"/>';
+ for(let i=0;i<known.length;i++){const h=known[i],y=77+i*29,axis=h.no===m.axis,partner=m.partners.includes(h.no),fill=axis?"#7358c5":partner?"#0c968b":"#ebf3ed",name=Array.from(h.name),short=name.length>13?name.slice(0,12).join("")+"…":h.name;svg+='<g><title>'+E(h.no+"番 "+h.name+"／"+h.rank.toFixed(1)+"番手")+'</title><text x="34" y="'+(y+4)+'" text-anchor="end" font-size="11" fill="#dcefe1">'+h.rank.toFixed(1)+'</text><circle cx="57" cy="'+y+'" r="11" fill="'+fill+'"/><text x="57" y="'+(y+4)+'" text-anchor="middle" font-size="11" font-weight="700" fill="'+(axis||partner?"#fff":"#183b30")+'">'+E(h.no)+'</text><text x="82" y="'+(y+4)+'" font-size="12" fill="#e4f4e9">'+E(short)+'</text>'+(h.range?'<text x="330" y="'+(y+4)+'" text-anchor="end" font-size="11" fill="#b9d4c5">'+h.range.join("〜")+'</text>':'')+'</g>';}
+ return {svg:svg+'<text x="53" y="'+(height-8)+'" font-size="11" fill="#dcefe1">後方</text></svg>',known,unknown};
+}
+ return {V,preliminary,compute,pl,cal,rank,direct,coverage,formation,verticalFormation,horseDetail,cornerProjection,lateFormation};
 })();root.RSAAxis8Core=C;
 (function ui(root,C){
  if(!root.document)return;
