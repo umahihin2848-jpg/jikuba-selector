@@ -83,7 +83,7 @@ function render(){
  const timing=clicked&&clickAt?Math.round((Date.now()-clickAt)/1000)+'秒':'—';
  box.innerHTML='<h3 class="'+((t.status==='error'||errorMessage)?'rafError':full?'rafOk':'rafWait')+'">'+esc(head)+'</h3>'+
  '<p>'+esc(lead)+'</p>'+baseContent(x)+
- (baseReady?'<p>最終軸・レース判定は下の新版「軸馬」タブで確認してください。</p>':'')+
+ (baseReady?'<p>最終軸・レース判定は下の新版「軸」タブで確認してください。</p>':'')+
  partialHorses(x)+
  '<details><summary>計算状況・不具合の確認</summary>'+
  '<div>'+diag+'</div><div>経過時間 '+esc(timing)+' / 処理 '+esc(t.status||'未起動')+'</div>'+
