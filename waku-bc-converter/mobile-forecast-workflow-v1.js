@@ -329,7 +329,9 @@ function getPostraceContext(){
   ready:m.ready,frozen:same&&draft&&draft.locked===true?draft.snapshot:null};
 }
 function refresh(){renderWorkspace(false);renderFormation()}
-function start(){ensure();refresh();setTimeout(refresh,500);setTimeout(refresh,1500)}
+var refreshTimer=0;
+function scheduleRefresh(ms){clearTimeout(refreshTimer);refreshTimer=setTimeout(function(){refreshTimer=0;refresh()},ms)}
+function start(){ensure();refresh();scheduleRefresh(500)}
 if(!root.document||typeof root.addEventListener!=="function"){root.RSAForecastWorkflowCoreV1=Object.freeze({version:VERSION,turnForVenue:turnForVenue,riskFor:riskFor,positionSlots:positionSlots,formationSVG:formationSVG,isForecastReady:isForecastReady});return}
 root.RSAForecastWorkflowCoreV1=Object.freeze({version:VERSION,turnForVenue:turnForVenue,riskFor:riskFor,positionSlots:positionSlots,formationSVG:formationSVG,isForecastReady:isForecastReady});
 root.RSAForecastWorkflowV1=Object.freeze({version:VERSION,getPostraceContext:getPostraceContext});
@@ -340,7 +342,7 @@ root.document.addEventListener("click",function(e){
 });
 ["rsa-focused-partner-ready","validated-queue-ready","mobile-pair-probability-reference-ready",
  "mobile-race-map-pace-ready","course-geometry-ready","rsa-analysis-complete","production-decision-pipeline-ready"].forEach(function(name){
- root.addEventListener(name,function(){setTimeout(refresh,30)});
+ root.addEventListener(name,function(){scheduleRefresh(30)});
 });
 root.addEventListener("rsa-focused-partner-user-choice",function(event){
  if(!draft||draft.locked||!lastData)return;
@@ -350,9 +352,9 @@ root.addEventListener("rsa-focused-partner-user-choice",function(event){
  saveDraft();
  renderWorkspace(true);
 });
-root.addEventListener("rsa-analysis-start",function(){lastPanelSig="";setTimeout(refresh,45)});
+root.addEventListener("rsa-analysis-start",function(){lastPanelSig="";scheduleRefresh(45)});
 root.document.addEventListener("change",function(e){
- if(["raceDate","venue","raceName","surface","distance","grade","courseRoute"].indexOf(e.target&&e.target.id)>=0){lastPanelSig="";setTimeout(refresh,70)}
+ if(["raceDate","venue","raceName","surface","distance","grade","courseRoute"].indexOf(e.target&&e.target.id)>=0){lastPanelSig="";scheduleRefresh(70)}
 },true);
 if(root.document.readyState==="loading")root.addEventListener("DOMContentLoaded",start,{once:true});else start();
 })(typeof window!=="undefined"?window:globalThis);
