@@ -13,7 +13,7 @@ const C=(function axis8Core(){
  const bad=(reason,status="hold")=>({ready:false,status,reason,version:V});
  function parseOdds(raw,rows){
   const map=new Map();
-  for(const line of norm(raw).split(/\r?\n/)){if(!line.trim())continue;const m=line.trim().match(/^(\d+)[,\s]+(\d+(?:\.\d+)?)$/);if(!m)return null;const no=String(+m[1]),o=+m[2];if(map.has(no)||!Number.isFinite(o)||o<=1)return null;map.set(no,o);}
+  for(const line of norm(raw).split(/\r?\n/)){if(!line.trim())continue;const m=line.trim().match(/^(\d+)[,\s]+(\d+(?:\.\d+)?)$/);if(!m)return null;const no=String(+m[1]),o=+m[2];if(map.has(no)||!Number.isFinite(o)||o<1)return null;map.set(no,o);}
   if(map.size!==rows.length||rows.some(r=>!map.has(r.no)))return null;
   return rows.map(r=>({...r,od:map.get(r.no)})).sort((a,b)=>a.od-b.od||+a.no-+b.no).map((r,i)=>({...r,pop:i+1}));
  }
@@ -70,13 +70,13 @@ const C=(function axis8Core(){
 (function ui(root,C){
  if(!root.document)return;
  const D=root.document,$=id=>D.getElementById(id),esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])),pct=x=>Number.isFinite(x)?(x*100).toFixed(1)+"%":"—";
- let dirty=true,started=0,timer=0,signature="",target=.75,metric="w",pairText="",pairKey="",latest=null;
+ let dirty=true,started=0,timer=0,signature="",target=.75,metric="w",pairText="",pairKey="",latest=null,confirmed=false;
  function ensure(){
   let el=$("axis8Primary");if(el)return el;
   const host=D.querySelector("main.view");if(!host)return null;
-  el=D.createElement("section");el.id="axis8Primary";el.className="card";el.innerHTML='<h2>新・レース判定｜8構造</h2><div id="axis8Result" aria-live="polite"></div><div id="axis8Controls" hidden><details><summary>馬連・ワイドオッズ（相手確率の精密比較用・任意）</summary><p>1行：軸番 相手番 馬連 ワイド下限 ワイド上限。全相手を入力。未入力は単勝PL参考値。馬券購入判定には使いません。</p><textarea id="axis8Pairs" rows="4" placeholder="5 8 8.2 3.0 3.8"></textarea><button type="button" id="axis8Apply">相手オッズを反映</button></details><label>表示範囲 <select id="axis8Target"><option value=".65">65%</option><option value=".75" selected>75%</option><option value=".8">80%</option><option value=".9">90%</option></select></label> <label>並べ替え <select id="axis8Metric"><option value="w">3着内</option><option value="q">連対</option></select></label><div id="axis8Opp"></div><details><summary>全頭の能力・展開・位置取り</summary><div id="axis8Field"></div></details></div>';
+  el=D.createElement("section");el.id="axis8Primary";el.className="card";el.innerHTML='<h2>新・レース判定｜8構造</h2><label id="axis8ConfirmLabel" hidden><input type="checkbox" id="axis8Confirm"> CSVの馬番と確定馬番の対応を全頭確認した</label><div id="axis8Result" aria-live="polite"></div><div id="axis8Controls" hidden><details><summary>馬連・ワイドオッズ（相手確率の精密比較用・任意）</summary><p>1行：軸番 相手番 馬連 ワイド下限 ワイド上限。全相手を入力。未入力は単勝PL参考値。馬券購入判定には使いません。</p><textarea id="axis8Pairs" rows="4" placeholder="5 8 8.2 3.0 3.8"></textarea><button type="button" id="axis8Apply">相手オッズを反映</button></details><label>表示範囲 <select id="axis8Target"><option value=".65">65%</option><option value=".75" selected>75%</option><option value=".8">80%</option><option value=".9">90%</option></select></label> <label>並べ替え <select id="axis8Metric"><option value="w">3着内</option><option value="q">連対</option></select></label><div id="axis8Opp"></div><details><summary>全頭の能力・展開・位置取り</summary><div id="axis8Field"></div></details></div>';
   host.appendChild(el);
-  el.addEventListener("change",e=>{if(e.target.id==="axis8Target"){target=+e.target.value;render(true);}if(e.target.id==="axis8Metric"){metric=e.target.value;render(true);}});
+  el.addEventListener("change",e=>{if(e.target.id==="axis8Confirm"){confirmed=e.target.checked;render(true);}if(e.target.id==="axis8Target"){target=+e.target.value;render(true);}if(e.target.id==="axis8Metric"){metric=e.target.value;render(true);}});
   $("axis8Apply").addEventListener("click",()=>{pairText=$("axis8Pairs").value;render(true);});
   return el;
  }
@@ -86,10 +86,11 @@ const C=(function axis8Core(){
   if(!a?.ready||!f?.ready||Number(a.at)<started||Number(f.at)<started||!Number.isFinite(Number(a.at))||!Number.isFinite(Number(f.at)))return {ready:false,status:"hold",reason:"今回のAbility・M3計算を待っています"};
   if(!/^\d{4}-\d{2}-\d{2}$/.test($("raceDate")?.value||"")||!$("venue")?.value)return {ready:false,status:"hold",reason:"日付・競馬場を確認"};
   if(root.RaceSkipLockV1State?.kind==="scope")return {ready:false,status:"out",reason:"対象外"};
+  if(!confirmed)return {ready:false,status:"hold",reason:"CSVの仮馬番と確定馬番を照合してチェックしてください"};
   return C.compute({grade:$("grade")?.value,field:Number($("fieldSize")?.value),surface:$("surface")?.value,name:$("raceName")?.value,ability:a,finish:f,odds:$("oddsPaste")?.value});
  }
  function render(force=false){
-  if(!ensure())return;const x=read();latest=x;root.RSAAxis8PrimaryState={...x,at:Date.now(),ticketDecision:false};
+  if(!ensure())return;$("axis8ConfirmLabel").hidden=dirty||!started||root.RSAAnalysisTransitionState?.status!=="ready";$("axis8Confirm").checked=confirmed;const x=read();latest=x;root.RSAAxis8PrimaryState={...x,at:Date.now(),ticketDecision:false};
   const key=x.ready?JSON.stringify([started,x.axis.no,x.rows.map(h=>[h.no,h.name,h.od])]):"";
   if(key!==pairKey){pairKey=key;pairText="";$("axis8Pairs").value="";}
   const sig=JSON.stringify([x,target,metric,pairText,root.PositionRiskState?.at,root.ValidatedQueueState?.at]);if(!force&&signature===sig)return;signature=sig;
@@ -102,12 +103,12 @@ const C=(function axis8Core(){
   $("axis8Field").innerHTML=x.rows.map(h=>'<div class="a8row"><span>'+esc(h.no+"番 "+h.name)+'</span><small>'+esc("Ability "+h.ar+" / M3 "+h.mr+" / 人気 "+h.pop)+" / P10 "+pct(Number.isFinite(Number(p[h.no]?.p10))&&p[h.no]?.p10!=null?Number(p[h.no].p10):NaN)+" / 初角 "+esc(q[h.no]?.expectedRank??"—")+'</small></div>').join("");
  }
  function schedule(){clearTimeout(timer);timer=setTimeout(()=>render(),100);}
- function invalidate(){dirty=true;started=0;pairText="";pairKey="";schedule();}
+ function invalidate(){dirty=true;started=0;confirmed=false;pairText="";pairKey="";schedule();}
  const inputs=["raceDate","venue","surface","distance","grade","going","fieldSize","raceName","csvFile"];
  D.addEventListener("input",e=>{if(inputs.includes(e.target.id))invalidate();if(e.target.id==="oddsPaste")schedule();},true);
  D.addEventListener("change",e=>{if(inputs.includes(e.target.id))invalidate();},true);
- D.addEventListener("click",e=>{if(e.target.id==="analyzeBtn"){dirty=false;started=Date.now();schedule();}if(["applyOddsBtn","clearOddsBtn"].includes(e.target.id))schedule();if(e.target.id==="clearCsvBtn")invalidate();},true);
- root.addEventListener("rsa-analysis-start",()=>{dirty=false;started=Number(root.RSAAnalysisTransitionState?.startedWall)||Date.now();schedule();});
+ D.addEventListener("click",e=>{if(e.target.id==="analyzeBtn"){dirty=false;confirmed=false;started=Date.now();schedule();}if(["applyOddsBtn","clearOddsBtn"].includes(e.target.id))schedule();if(e.target.id==="clearCsvBtn")invalidate();},true);
+ root.addEventListener("rsa-analysis-start",()=>{dirty=false;confirmed=false;started=Number(root.RSAAnalysisTransitionState?.startedWall)||Date.now();schedule();});
  for(const e of ["rsa-analysis-complete","rsa-analysis-error","m3-pure-ability-ready","finish600-ready","position-risk-ready","validated-queue-ready","decision-shell-v2-ready"])root.addEventListener(e,schedule);
  if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",schedule,{once:true});else schedule();
 })(root,C);
