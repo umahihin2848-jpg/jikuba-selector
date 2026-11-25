@@ -43,6 +43,19 @@ const regression=function regression(sources,html,css){
  check("preliminary ranks",els.get("axis8Field").innerHTML.includes("Ability 1 / M3 1"));
  check("preliminary neutral formation",els.get("axis8FormationBody").innerHTML.includes("<svg")&&!els.get("axis8FormationBody").innerHTML.includes('fill="#7358c5"')&&!els.get("axis8FormationBody").innerHTML.includes('fill="#0c968b"'));
  check("preliminary axis detail",els.get("a8AxisDetails").innerHTML.includes("事前の軸候補")&&els.get("a8AxisDetails").innerHTML.includes("M4全展開の順位範囲"));
+ const sw={};new Function("window",sources[5])(sw);const SC=sw.RSAClosingShadowCore,SM=JSON.parse(sources[6]);
+ const raw=rows.map((h,i)=>({馬名:h.name,"レースID(新)":"2026092606040811"+String(i+1).padStart(2,"0"),日付:"2026. 9.26","芝・ダート":"芝",クラス名:"3勝",頭数:"16",着順:String(i+1),距離:"1600",馬場状態:"重",コース区分:"C",タイム:"1381","Ave-3F":"36.72","上り3F":"36.9","上り3F順位":String(i+1),PCI:"49.5",RPCI:"49.7","上3F地点差":"1.2",通過2:"13",通過3:"12",通過4:"11"}));
+ const histories=SC.parse([...raw,raw[0]]),metaClose={date:"2026-11-25",surface:"芝",distance:"1600"},ref=SC.compute(SM,histories,rows,metaClose);
+ check("closing actual TARGET columns",Math.abs(ref.rows[0].history[0].early-36.72)<1e-8&&ref.rows[0].count===1);
+ check("closing duplicate conflict rejected",SC.parse([raw[0],{...raw[0],タイム:"1382"}]).get(rows[0].name).length===0);
+ check("closing cutoff held",!SC.compute(SM,histories,rows,{...metaClose,date:"2026-10-04"}).ready);
+ check("closing same surface enforced",SC.compute(SM,histories,rows,{...metaClose,surface:"ダ"}).eligible===0);
+ const partial=SC.compute(SM,SC.parse(raw.slice(0,15)),rows,metaClose);
+ check("closing no history missing rank",partial.eligible===15&&partial.rows[15].shadowRank===undefined);
+ check("closing full field",ref.eligible===16&&ref.rows.every(h=>Number.isFinite(h.shadowRank)&&Number.isFinite(h.baseRank)));
+ root.RSAClosingShadowV1={status:()=>1,read:(roster,meta)=>SC.compute(SM,histories,roster,meta)};
+ root.dispatchEvent({type:"closing-shadow-ready"});drain();
+ check("preliminary disagreement displayed",els.get("a8ClosingCompare").innerHTML.includes("本番M3との順位差")&&els.get("a8AxisDetails").innerHTML.includes("改良参考M3"));
  const rawForm=C.formation({ready:true,rows,axis:null},[],root.ValidatedQueueState,root.PositionRiskState,root.MobileAnalysisCoreState,root.RSAAnalysisTransitionState,now);
  const corners=C.cornerProjection(rawForm,root.RaceCorner34V1,{venue:"東京",surface:"芝",distance:1600});
  const exact=predict(root.ValidatedQueueState,{field:16,venue:"東京",surface:"芝",distance:1600},mod);
@@ -63,8 +76,8 @@ const regression=function regression(sources,html,css){
  check("partial odds holds and preserves preview",root.RSAAxis8SnapshotV1.getSnapshot()===null&&!els.get("axis8Analysis").hidden);
  els.get("oddsPaste").value=odds;fire("input","oddsPaste");drain();
  check("final view switches",els.get("axis8Pre").hidden&&!els.get("axis8Controls").hidden);
- check("snapshot ready",!!root.RSAAxis8SnapshotV1.getSnapshot());check("ledger ready",!!els.get("axis8Ledger"));
- const markup=els.get("axis8Opp").innerHTML;
+ check("snapshot ready",!!root.RSAAxis8SnapshotV1.getSnapshot());check("closing shadow captured independently",root.RSAAxis8SnapshotV1.getSnapshot().closingShadow?.rows.length===16);check("ledger ready",!!els.get("axis8Ledger"));
+ const markup=els.get("axis8Opp").innerHTML;check("closing details in partner cards",markup.includes("改良参考M3")&&markup.includes("負荷補正順位")&&markup.includes("過去走の負荷補正指数"));
  check("one card for each opponent",(markup.match(/<article class="a8horse/g)||[]).length===15);
  check("three initial expanded details",(markup.match(/data-a8-horse="[^"]+" open/g)||[]).length===3);
  check("conditional labels",markup.includes("条件付き連対率")&&markup.includes("条件付き3着内率"));
@@ -84,7 +97,7 @@ const regression=function regression(sources,html,css){
  const first=root.RSAAxis8SnapshotV1.diagnostics().renderCount,nt=notifications;for(let i=0;i<100;i++)root.dispatchEvent({type:"validated-queue-ready"});
  check("100 events coalesced",timers.size===1);drain();check("no repeated rendering",root.RSAAxis8SnapshotV1.diagnostics().renderCount===first);check("no repeated notification",notifications===nt);check("no pending timer",timers.size===0);
  els.get("axis8Target").value=".9";fire("change","axis8Target");check("target changed",root.RSAAxis8SnapshotV1.getSnapshot().target===.9);
- els.get("a8LedgerAttest").checked=true;fire("change","a8LedgerAttest");check("freeze enabled",!els.get("a8LedgerFreeze").disabled);fire("click","a8LedgerFreeze");check("saved once",JSON.parse([...storage.values()][0]).length===1);fire("click","a8LedgerFreeze");check("duplicate blocked",JSON.parse([...storage.values()][0]).length===1);
+ els.get("a8LedgerAttest").checked=true;fire("change","a8LedgerAttest");check("freeze enabled",!els.get("a8LedgerFreeze").disabled);fire("click","a8LedgerFreeze");check("saved once",JSON.parse([...storage.values()][0]).length===1);check("closing forecast frozen",JSON.parse([...storage.values()][0])[0].forecast.closingShadow?.eligible===16);fire("click","a8LedgerFreeze");check("duplicate blocked",JSON.parse([...storage.values()][0]).length===1);
  els.get("a8LedgerTop").value="1 2 3";fire("click","a8LedgerSettle");check("result saved",!!JSON.parse([...storage.values()][0])[0].outcome);
  els.get("axis8Pairs").value="1 2 3 4 5";fire("input","axis8Pairs");check("unapplied pair blocks snapshot",root.RSAAxis8SnapshotV1.getSnapshot()===null);
  els.get("axis8Pairs").value="";els.get("raceName").value="次のレース";check("live metadata mismatch blocks snapshot without event",root.RSAAxis8SnapshotV1.getSnapshot()===null);
@@ -98,4 +111,4 @@ const regression=function regression(sources,html,css){
  check("legacy external CSS excludes new panel",css.includes("main.view > :not(#axis8Primary):not(#mpuSetup)"));
  return {passed:test.length,test,timerCallbacks:ticks,notifications,renderCount:root.RSAAxis8SnapshotV1.diagnostics().renderCount};
 };
-console.log(regression(["axis8-primary-v1.js","axis8-ledger-v1.js","mobile-forecast-workflow-v1.js","corner34-formation-shadow-v1.js","data/corner34_position_ridge_v1.json"].map(read),read("v3.html"),read("axis-access-gate-v1.css")));
+console.log(regression(["axis8-primary-v1.js","axis8-ledger-v1.js","mobile-forecast-workflow-v1.js","corner34-formation-shadow-v1.js","data/corner34_position_ridge_v1.json","closing-shadow-v1.js","data/closing-shadow-frozen-v1.json"].map(read),read("v3.html"),read("axis-access-gate-v1.css")));
