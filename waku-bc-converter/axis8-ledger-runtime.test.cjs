@@ -24,11 +24,11 @@ const regression=function regression(sources,html,css){
  const fire=(name,id)=>{const target=els.get(id);for(const f of devents.get(name)||[])f({target});for(const parent of ["axis8Primary","axis8Ledger"])for(const f of els.get(parent)?.handlers.get(name)||[])f({target});};
  const tset=f=>{timers.set(++serial,f);return serial},tclear=id=>timers.delete(id),drain=()=>{let i=0;while(timers.size){if(++i>100)throw Error("timer loop");const [id,fn]=timers.entries().next().value;timers.delete(id);fn();ticks++}return i};
  for(const [id,v] of Object.entries({...meta,oddsPaste:"",analyzeBtn:"",applyOddsBtn:"",clearOddsBtn:"",csvFile:""})){els.set(id,el(id));els.get(id).value=v}
- for(const source of sources.slice(0,2))new Function("window","setTimeout","clearTimeout",source)(root,tset,tclear);
+ new Function("window",sources[7])(root);for(const source of sources.slice(0,2))new Function("window","setTimeout","clearTimeout",source)(root,tset,tclear);
  drain();check("initial no snapshot",root.RSAAxis8SnapshotV1.getSnapshot()===null);
  const now=Date.now()+1000;els.get("oddsPaste").value="";
  root.RSAAnalysisTransitionState={status:"running",generation:1,startedWall:now};root.dispatchEvent({type:"rsa-analysis-start"});
- root.M3PureAbilityState={ready:true,activeModel:"C",rows,at:now+10};root.Finish600State={ready:true,generation:1,rows:rows.map(h=>({...h,sc:[{rank:2},{rank:4},{rank:3},{rank:8}]})),at:now+10};
+ root.M3PureAbilityState={ready:true,activeModel:"C",abilityC:{active:true},rows:rows.map((h,i)=>({...h,v1Rank:16-i,v1Logit:i,logit:16-i})),at:now+10};root.Finish600State={ready:true,generation:1,rows:rows.map(h=>({...h,sc:[{rank:2},{rank:4},{rank:3},{rank:8}]})),at:now+10};
  root.ValidatedQueueState={ready:true,generation:1,at:now+10,fieldSize:16,rows:rows.map((h,i)=>({...h,expectedRank:i+1,laneIdx:i%4,lane:"内",validated:true,frontness5:.7,hist_n:5,corner3N5:5,corner4N5:i===15?1:5,corner3Mean5:(i+1)/17,corner4Mean5:(i+2)/18,corner3Last5:(i+1)/17,corner4Last5:(i+2)/18,corner34DeltaMean5:.02,leadRate5:.1,corner4Std5:.18,earlyPosStd5:.2}))};
  root.MobileAnalysisCoreState={ready:true,generation:1,at:now+10,analysis:{pred:{p:[.1,.2,.4,.3]},pressure:"高"}};
  root.PositionRiskState={ready:true,at:now+10,byNo:{"1":{name:"馬1",p10:.2},"2":{name:"馬2",p10:0},"3":{name:"別馬",p10:.8}}};root.RSAAnalysisTransitionState.status="ready";root.dispatchEvent({type:"rsa-analysis-complete"});drain();
@@ -56,6 +56,22 @@ const regression=function regression(sources,html,css){
  root.RSAClosingShadowV1={status:()=>1,read:(roster,meta)=>SC.compute(SM,histories,roster,meta)};
  root.dispatchEvent({type:"closing-shadow-ready"});drain();
  check("preliminary disagreement displayed",els.get("a8ClosingCompare").innerHTML.includes("本番M3との順位差")&&els.get("a8AxisDetails").innerHTML.includes("改良参考M3"));
+ const PC=root.RSAFourModelPatternV1,pm={grade:"G3",started:now},pa=root.M3PureAbilityState,roster=rows.map(h=>({...h,mr:h.finishRank})),patterns=PC.compute(roster,pa,ref,pm);
+ check("16 distinct pattern codes",new Set(Array.from({length:16},(_,i)=>PC.classify(i.toString(2).padStart(4,"0").split("").map(b=>b==="1"?2:5)).code)).size===16);
+ check("double upgrade label",PC.classify([6,2,7,1]).label==="二重浮上型");
+ check("double downgrade label",PC.classify([2,6,1,7]).label==="二重低下型");
+ check("pattern ready and full coverage",patterns.ready&&patterns.rows.every(h=>h.code?.length===4));
+ check("pattern invalid rank",PC.classify([0,1,2,3])===null);
+ check("C fallback withheld",!PC.compute(roster,{...pa,activeModel:"v1",abilityC:{active:false}},ref,pm).ready);
+ check("nongrade withheld",!PC.compute(roster,pa,ref,{...pm,grade:"OP"}).ready);
+ check("partial history withheld",!PC.compute(roster,pa,partial,pm).ready);
+ check("stale ability withheld",!PC.compute(roster,{...pa,at:now-1},ref,pm).ready);
+ check("roster mismatch withheld",!PC.compute(roster,{...pa,rows:pa.rows.map((h,i)=>i?h:{...h,name:"別馬"})},ref,pm).ready);
+ check("C boundary tie withheld",!PC.compute(roster,{...pa,top3BoundaryAmbiguous:true},ref,pm).ready);
+ check("V1 boundary tie withheld",!PC.compute(roster,{...pa,rows:pa.rows.map(h=>h.v1Rank===4?{...h,v1Logit:13}:h)},ref,pm).ready);
+ const bt=ref.rows.find(h=>h.baseRank===3).baseScore;
+ check("reference boundary tie withheld",!PC.compute(roster,pa,{...ref,rows:ref.rows.map(h=>h.baseRank===4?{...h,baseScore:bt}:h)},pm).ready);
+ check("preliminary pattern table and axis card",els.get("a8FourModelCompare").innerHTML.includes("全頭分類済み")&&els.get("a8AxisDetails").innerHTML.includes("a8patternCard"));
  const rawForm=C.formation({ready:true,rows,axis:null},[],root.ValidatedQueueState,root.PositionRiskState,root.MobileAnalysisCoreState,root.RSAAnalysisTransitionState,now);
  const corners=C.cornerProjection(rawForm,root.RaceCorner34V1,{venue:"東京",surface:"芝",distance:1600});
  const exact=predict(root.ValidatedQueueState,{field:16,venue:"東京",surface:"芝",distance:1600},mod);
@@ -76,8 +92,8 @@ const regression=function regression(sources,html,css){
  check("partial odds holds and preserves preview",root.RSAAxis8SnapshotV1.getSnapshot()===null&&!els.get("axis8Analysis").hidden);
  els.get("oddsPaste").value=odds;fire("input","oddsPaste");drain();
  check("final view switches",els.get("axis8Pre").hidden&&!els.get("axis8Controls").hidden);
- check("snapshot ready",!!root.RSAAxis8SnapshotV1.getSnapshot());check("closing shadow captured independently",root.RSAAxis8SnapshotV1.getSnapshot().closingShadow?.rows.length===16);check("ledger ready",!!els.get("axis8Ledger"));
- const markup=els.get("axis8Opp").innerHTML;check("closing details in partner cards",markup.includes("改良参考M3")&&markup.includes("負荷補正順位")&&markup.includes("過去走の負荷補正指数"));
+ check("snapshot ready",!!root.RSAAxis8SnapshotV1.getSnapshot());check("pattern record has all horses",root.RSAAxis8SnapshotV1.getSnapshot().fourModelPattern?.ready&&root.RSAAxis8SnapshotV1.getSnapshot().fourModelPattern.rows.length===16);check("production selection unchanged",root.RSAAxis8SnapshotV1.getSnapshot().axis.no===x.axis.no&&root.RSAAxis8SnapshotV1.getSnapshot().tier===x.tier&&JSON.stringify(root.RSAAxis8SnapshotV1.getSnapshot().calibrated)===JSON.stringify(x.calibrated)&&JSON.stringify(root.RSAAxis8SnapshotV1.getSnapshot().partners)===JSON.stringify(partners.map(h=>({no:h.no,name:h.name,selected:h.selected,q:h.q,w:h.w,coverage:h.coverage}))));check("closing shadow captured independently",root.RSAAxis8SnapshotV1.getSnapshot().closingShadow?.rows.length===16);check("ledger ready",!!els.get("axis8Ledger"));
+ const markup=els.get("axis8Opp").innerHTML;check("pattern on every partner card including nonselected",(markup.match(/class="a8patternCard"/g)||[]).length===15);check("closing details in partner cards",markup.includes("改良参考M3")&&markup.includes("負荷補正順位")&&markup.includes("過去走の負荷補正指数"));
  check("one card for each opponent",(markup.match(/<article class="a8horse/g)||[]).length===15);
  check("three initial expanded details",(markup.match(/data-a8-horse="[^"]+" open/g)||[]).length===3);
  check("conditional labels",markup.includes("条件付き連対率")&&markup.includes("条件付き3着内率"));
@@ -97,7 +113,7 @@ const regression=function regression(sources,html,css){
  const first=root.RSAAxis8SnapshotV1.diagnostics().renderCount,nt=notifications;for(let i=0;i<100;i++)root.dispatchEvent({type:"validated-queue-ready"});
  check("100 events coalesced",timers.size===1);drain();check("no repeated rendering",root.RSAAxis8SnapshotV1.diagnostics().renderCount===first);check("no repeated notification",notifications===nt);check("no pending timer",timers.size===0);
  els.get("axis8Target").value=".9";fire("change","axis8Target");check("target changed",root.RSAAxis8SnapshotV1.getSnapshot().target===.9);
- els.get("a8LedgerAttest").checked=true;fire("change","a8LedgerAttest");check("freeze enabled",!els.get("a8LedgerFreeze").disabled);fire("click","a8LedgerFreeze");check("saved once",JSON.parse([...storage.values()][0]).length===1);check("closing forecast frozen",JSON.parse([...storage.values()][0])[0].forecast.closingShadow?.eligible===16);fire("click","a8LedgerFreeze");check("duplicate blocked",JSON.parse([...storage.values()][0]).length===1);
+ els.get("a8LedgerAttest").checked=true;fire("change","a8LedgerAttest");check("freeze enabled",!els.get("a8LedgerFreeze").disabled);fire("click","a8LedgerFreeze");check("saved once",JSON.parse([...storage.values()][0]).length===1);check("pattern frozen",JSON.parse([...storage.values()][0])[0].forecast.fourModelPattern?.ready===true);check("closing forecast frozen",JSON.parse([...storage.values()][0])[0].forecast.closingShadow?.eligible===16);fire("click","a8LedgerFreeze");check("duplicate blocked",JSON.parse([...storage.values()][0]).length===1);
  els.get("a8LedgerTop").value="1 2 3";fire("click","a8LedgerSettle");check("result saved",!!JSON.parse([...storage.values()][0])[0].outcome);
  els.get("axis8Pairs").value="1 2 3 4 5";fire("input","axis8Pairs");check("unapplied pair blocks snapshot",root.RSAAxis8SnapshotV1.getSnapshot()===null);
  els.get("axis8Pairs").value="";els.get("raceName").value="次のレース";check("live metadata mismatch blocks snapshot without event",root.RSAAxis8SnapshotV1.getSnapshot()===null);
@@ -111,4 +127,4 @@ const regression=function regression(sources,html,css){
  check("legacy external CSS excludes new panel",css.includes("main.view > :not(#axis8Primary):not(#mpuSetup)"));
  return {passed:test.length,test,timerCallbacks:ticks,notifications,renderCount:root.RSAAxis8SnapshotV1.diagnostics().renderCount};
 };
-console.log(regression(["axis8-primary-v1.js","axis8-ledger-v1.js","mobile-forecast-workflow-v1.js","corner34-formation-shadow-v1.js","data/corner34_position_ridge_v1.json","closing-shadow-v1.js","data/closing-shadow-frozen-v1.json"].map(read),read("v3.html"),read("axis-access-gate-v1.css")));
+console.log(regression(["axis8-primary-v1.js","axis8-ledger-v1.js","mobile-forecast-workflow-v1.js","corner34-formation-shadow-v1.js","data/corner34_position_ridge_v1.json","closing-shadow-v1.js","data/closing-shadow-frozen-v1.json","four-model-pattern-v1.js"].map(read),read("v3.html"),read("axis-access-gate-v1.css")));
