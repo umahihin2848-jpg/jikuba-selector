@@ -57,7 +57,9 @@ function recalc(){
     return{no,name:r.h.name,hist_n:r.hist_n5,validated,posFrac,expectedRank,position:positionLabel(expectedRank,field),frontness5:r.frontness5,frontRate5:r.front_rate5,leadRate5:r.lead_rate5,frontPressure:x.front_pressure_loo,firstTurnDistance:ft,noTurn,turnUrgency:urgency,pursuitGrade:r.pursuitGrade,pursuitApplicable:r.pursuitApplicable,pursuitEvidence:r.pursuitEvidence,pursuitFastN:r.pursuitFastN,pursuitFastFront:r.pursuitFastFront,pursuitThreshold:r.pursuitThreshold,corner3Mean5:r.corner3Mean5,corner4Mean5:r.corner4Mean5,corner3Last5:r.corner3Last5,corner4Last5:r.corner4Last5,corner34DeltaMean5:r.corner34DeltaMean5,corner3N5:r.corner3N5,corner4N5:r.corner4N5,corner4Std5:r.corner4Std5,earlyPosStd5:r.frontness_std5,...lane};
   });
   const key=`${targetSurface}:${Math.round(targetDistance||0)}`,cfg=PURSUIT.conditions[key];
-  window.ValidatedQueueState={ready:true,version:MODEL.version,parsed,fieldSize:field,rows,byNo:Object.fromEntries(rows.map(x=>[String(x.no),x])),validation:MODEL.oos_validation,pursuitPolicy:{version:PURSUIT.version,key,evidence:cfg?.evidence||'none',fast3f:cfg?.fast3f??null,frontCut:PURSUIT.frontCut,maxHistory:PURSUIT.maxHistory,noPenaltyForBOrC:true}};
+  const current=window.MobileAnalysisCoreState,transition=window.RSAAnalysisTransitionState;
+  const generation=current?.analysis===analysis&&current?.generation===transition?.generation?current.generation:null;
+  window.ValidatedQueueState={ready:true,version:MODEL.version,parsed,fieldSize:field,generation,at:Date.now(),rows,byNo:Object.fromEntries(rows.map(x=>[String(x.no),x])),validation:MODEL.oos_validation,pursuitPolicy:{version:PURSUIT.version,key,evidence:cfg?.evidence||'none',fast3f:cfg?.fast3f??null,frontCut:PURSUIT.frontCut,maxHistory:PURSUIT.maxHistory,noPenaltyForBOrC:true}};
   window.dispatchEvent(new CustomEvent('validated-queue-ready'));
 }
 const old=C.analyze;C.analyze=function(meta,odds,horses,M){const a=old(meta,odds,horses,M);lastCtx={meta,analysis:a};setTimeout(recalc,0);return a};
