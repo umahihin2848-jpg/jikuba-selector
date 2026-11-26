@@ -59,6 +59,18 @@ body.rsaFocusedThreeTabs main.view > :not(#axis8Primary):not(#raceCondCard):not(
 body.rsaFocusedThreeTabs main.view > #rsaFocusedView{display:none!important}
 </style>
 <style id="axis8-primary-display">
+html body #axis8Primary[data-a8-locked="1"] .a8tabs,html body #axis8Primary[data-a8-locked="1"] #a8AxisDetails,html body #axis8Primary[data-a8-locked="1"] #a8FourModelCompare,html body #axis8Primary[data-a8-locked="1"] #a8ClosingCompare,html body #axis8Primary[data-a8-locked="1"] #a8RecordHost,html body #axis8Primary[data-a8-locked="1"] #abilityDCompare{display:none!important}
+html[data-axis8-verdict="skip"] body main.view > :not(#axis8Primary):not(#raceCondCard):not(#csvCard):not(#oddsCard):not(#mpuSetup):not(#analyzeBtn):not(#rsaAnalysisFeedback){display:none!important}
+html body #axis8Primary .a8verdict{--a8accent:#a8c4d5;border:1px solid #426073;background:#102638;border-radius:15px;padding:16px;margin:12px 0;color:#eef5fa}
+html body #axis8Primary .a8verdict[data-tier="S"]{--a8accent:#85e4bb}html body #axis8Primary .a8verdict[data-tier="A"]{--a8accent:#8bc8ff}html body #axis8Primary .a8verdict[data-tier="B"]{--a8accent:#ffd079}html body #axis8Primary .a8verdict[data-tier="C"]{--a8accent:#ffa5a5;text-align:center;padding:26px 12px}
+html body #axis8Primary .a8verdictTop{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}html body #axis8Primary .a8verdictTop b{font-size:21px;color:var(--a8accent)}
+html body #axis8Primary .a8heroHorse{font-size:clamp(23px,6.5vw,34px);line-height:1.25;margin:14px 0 5px;overflow-wrap:anywhere;color:#fff}html body #axis8Primary .a8heroHorse span{color:#ffa5a5}
+html body #axis8Primary .a8verdictMeta{font-size:13px;color:#c2d5df;margin:6px 0}
+html body #axis8Primary .a8heroProb{text-align:center;margin:18px 0 12px}html body #axis8Primary .a8heroProb small,html body #axis8Primary .a8heroProb strong{display:block}html body #axis8Primary .a8heroProb strong{font-size:clamp(38px,11vw,54px);line-height:1.2;color:var(--a8accent);font-variant-numeric:tabular-nums}
+html body #axis8Primary .a8heroTrack{height:8px;border-radius:8px;background:#294657;overflow:hidden;margin-top:8px}html body #axis8Primary .a8heroTrack i{display:block;height:100%;background:var(--a8accent)}
+html body #axis8Primary .a8heroOther{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}html body #axis8Primary .a8heroOther>div{background:#193447;border-radius:8px;padding:10px;text-align:center}html body #axis8Primary .a8heroOther small,html body #axis8Primary .a8heroOther b{display:block}html body #axis8Primary .a8heroOther b{font-size:24px;font-variant-numeric:tabular-nums}
+html body #axis8Primary .a8verdictReason{font-size:14px;line-height:1.5;margin:13px 0 8px}html body #axis8Primary .a8skipMark{font-size:48px;line-height:1;color:var(--a8accent)}html body #axis8Primary .a8verdict[data-tier="C"] h3{font-size:30px;color:var(--a8accent);margin:8px 0}
+
 /* The new user-facing verdict is independent of the legacy betting gate.
    Old modules remain available internally until dependent recording modules migrate. */
 html body #axis8Primary{display:block!important;max-width:1060px;margin:14px auto 20px;padding:16px;order:99}
@@ -199,7 +211,7 @@ html body #rsaFocusedView,html body #raceSkipCard,html body #axisAccessScreen,ht
 <script src="prediction-reliability-shadow-v1.js?v=20261119weekend1"></script>
 <script src="closing-shadow-v1.js?v=20261126close1"></script>
 <script src="four-model-pattern-v1.js?v=20261126four1"></script>
-<script src="axis8-primary-v1.js?v=20261126d2"></script>
+<script src="axis8-primary-v1.js?v=20261127verdict1"></script>
 <script src="ability-d-engine-v1.js?v=20261126d1"></script>
 <script src="ability-d-compare-v1.js?v=20261126db1"></script>
 <script src="axis8-ledger-v1.js?v=20261125tabs3"></script>
