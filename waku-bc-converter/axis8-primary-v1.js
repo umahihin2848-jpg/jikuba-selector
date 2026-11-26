@@ -138,10 +138,23 @@ const C=(function axis8Core(){
 (function ui(root,C){
  if(!root.document)return;
  const D=root.document,$=id=>D.getElementById(id),esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])),pct=x=>Number.isFinite(x)?(x*100).toFixed(1)+"%":"—";
- let activeTab="axis",stage="1",lastFormation=null;
+ let activeTab="axis",stage="1",lastFormation=null,analysisLocked=false;
  const tabs=["axis","partners","formation"];
- function selectTab(tab){if(!tabs.includes(tab))return;activeTab=tab;for(const key of tabs){const btn=$("a8Tab-"+key),panel=$("a8Panel-"+key);if(btn){btn.setAttribute?.("aria-selected",String(key===tab));btn.tabIndex=key===tab?0:-1;}if(panel)panel.hidden=key!==tab;}}
+ function selectTab(tab){if(!tabs.includes(tab))return;if(analysisLocked&&tab!=="axis")tab="axis";activeTab=tab;for(const key of tabs){const btn=$("a8Tab-"+key),panel=$("a8Panel-"+key);if(btn){btn.setAttribute?.("aria-selected",String(key===tab));btn.tabIndex=key===tab?0:-1;btn.disabled=analysisLocked&&key!=="axis";}if(panel)panel.hidden=key!==tab||(analysisLocked&&key!=="axis");}}
  let dirty=true,started=0,timer=0,signature="",target=.75,metric="w",pairText="",pairKey="",latest=null,confirmed=false,snapshot=null,snapshotSig="",renderCount=0;
+ function setAnalysisLock(locked){
+  analysisLocked=!!locked;const el=$("axis8Primary");if(el)el.dataset.a8Locked=locked?"1":"0";D.documentElement.dataset.axis8Verdict=locked?"skip":"open";
+  for(const id of ["a8AxisDetails","a8FourModelCompare","a8ClosingCompare","a8RecordHost","abilityDCompare"]){const item=$(id);if(item)item.hidden=locked;}
+  if(locked){activeTab="axis";lastFormation=null;}selectTab(activeTab);
+ }
+ function axisVerdict(x){
+  if(!x.ready)return '<div class="a8verdict"><h3>'+esc(x.status==="out"?"対象外":"判定保留")+'</h3><p>'+esc(x.reason)+'</p></div>';
+  if(x.tier==="C")return '<div class="a8verdict" data-tier="C"><div class="a8skipMark" aria-hidden="true">×</div><h3>C｜見送り</h3><p>このレースは分析対象外</p><p class="a8verdictReason">'+esc(x.reason)+'</p></div>';
+  const labels={S:"高信頼",A:"分析対象",B:"条件付き"},str=x.structure==="none"?"一致なし":x.structure;
+  const why=x.structure==="none"?"一致なし：Ability1位を採用":x.structure.includes("+")?"Ability・M3上位一致馬の中で最上位人気":"Ability・M3上位の単独一致馬を採用";
+  const metric=(label,value)=>'<div><small>'+esc(label)+'</small><b>'+pct(value)+'</b></div>';
+  return '<div class="a8verdict" data-tier="'+esc(x.tier)+'"><div class="a8verdictTop"><b>'+esc(x.tier+"｜"+labels[x.tier])+'</b><small>'+esc(str)+'構造</small></div><h3 class="a8heroHorse"><span aria-hidden="true">◎</span> '+esc(x.axis.no+"番 "+x.axis.name)+'</h3><p class="a8verdictMeta">'+esc(x.axis.pop+"番人気 ／ Ability "+x.axis.ar+"位 × M3 "+x.axis.mr+"位")+'</p><div class="a8heroProb"><small>較正3着内確率</small><strong>'+pct(x.calibrated[2])+'</strong><div class="a8heroTrack"><i style="width:'+(x.calibrated[2]*100).toFixed(1)+'%"></i></div></div><div class="a8heroOther">'+metric("勝率",x.calibrated[0])+metric("連対率",x.calibrated[1])+'</div><p class="a8verdictReason">採用理由：'+esc(why)+'</p><small class="a8muted">2026年固定の長期代理モデル較正。軸の個別推定値であり、全馬較正確率の整合性は未検証。</small></div>';
+ }
  function ensure(){
   let el=$("axis8Primary");if(el)return el;
   const host=D.querySelector("main.view");if(!host)return null;
@@ -175,7 +188,7 @@ const C=(function axis8Core(){
   const generation=root.RSAAnalysisTransitionState?.generation;
   const form=C.formation({ready:true,rows:pre.rows,axis:null},[],root.ValidatedQueueState,root.PositionRiskState,root.MobileAnalysisCoreState,root.RSAAnalysisTransitionState,started);
   // parseOdds is internal to C; obtain the validated market rows only through compute.
-  const x=confirmed?C.compute(state.input):null, m=x?.ready?C.pl(x.rows):null;
+  const x=confirmed?C.compute(state.input):null;if(x?.ready&&x.tier==="C")return {ready:false,reason:"見送り：能力比較を非表示"};const m=x?.ready?C.pl(x.rows):null;
   const byNo=m?Object.fromEntries(x.rows.map((h,i)=>[h.no,m.three[i]])):{};
   const meta=Object.fromEntries(["raceDate","venue","raceName","grade","surface","distance","going","fieldSize"].map(id=>[id,String($(id)?.value||"")]));
   return {ready:true,confirmed,generation,started,meta,activeModel:state.input.ability.activeModel,axisNo:x?.ready?x.axis.no:null,marketReady:!!m,rows:pre.rows.map(h=>{const d=C.horseDetail(h,pre.rows.length,state.input.finish,root.PositionRiskState,form,generation,started);return {no:h.no,name:h.name,ar:h.ar,mr:h.mr,m4:d.m4,m4Range:d.m4Range,market3:byNo[h.no]??null};})};
@@ -197,8 +210,9 @@ const C=(function axis8Core(){
   if(!ensure())return;$("axis8ConfirmLabel").hidden=dirty||!started||root.RSAAnalysisTransitionState?.status!=="ready";$("axis8Confirm").checked=confirmed;const x=read();latest=x;
   const key=x.ready?JSON.stringify([started,x.axis.no,x.rows.map(h=>[h.no,h.name,h.od])]):"";
   if(key!==pairKey){pairKey=key;pairText="";$("axis8Pairs").value="";}
-  const sig=JSON.stringify([x,confirmed,target,metric,pairText,root.Finish600State?.at,root.PositionRiskState?.at,root.ValidatedQueueState?.at,root.MobileAnalysisCoreState?.at,root.RSAAnalysisTransitionState?.generation,Boolean(root.RSAForecastWorkflowCoreV1),root.RaceCorner34V1?.modelStatus?.(),root.RSAClosingShadowV1?.status?.(),root.M3PureAbilityState?.at]);if(!force&&signature===sig&&(!x.ready||snapshot))return;signature=sig;renderCount++;root.RSAAxis8PrimaryState={...x,at:Date.now(),ticketDecision:false};root.dispatchEvent(new root.CustomEvent("axis8-comparison-changed"));
-  $("a8PartnerWait").hidden=x.ready;$("a8FormationWait").hidden=x.ready||!!x.pre?.ready;$("axis8Controls").hidden=!x.ready;$("axis8Pre").hidden=x.ready||!x.pre?.ready;$("axis8Analysis").hidden=!x.ready&&!x.pre?.ready;$("axis8Result").innerHTML=x.ready?'<h3>'+esc(x.tier+"｜"+({S:"高信頼",A:"分析対象",B:"条件付き",C:"見送り"}[x.tier]))+'</h3><p>'+esc(x.reason)+' ｜ '+esc(x.structure==="none"?"一致なし":x.structure)+'</p><p><b>◎ '+esc(x.axis.no+"番 "+x.axis.name)+'</b> ｜ '+esc(x.axis.pop+"番人気・Ability "+x.axis.ar+"位・M3 "+x.axis.mr+"位")+'</p><p>勝率 '+pct(x.calibrated[0])+' ／ 連対率 '+pct(x.calibrated[1])+' ／ 3着内率 <b>'+pct(x.calibrated[2])+'</b></p><small>2026年固定の長期代理モデル較正。軸の個別推定値であり、全馬較正確率の整合性は未検証。馬券購入は自身で判断。</small>':'<h3>'+esc(x.status==="out"?"対象外":"判定保留")+'</h3><p>'+esc(x.reason)+'</p>';
+  const sig=JSON.stringify([x,confirmed,target,metric,pairText,root.Finish600State?.at,root.PositionRiskState?.at,root.ValidatedQueueState?.at,root.MobileAnalysisCoreState?.at,root.RSAAnalysisTransitionState?.generation,Boolean(root.RSAForecastWorkflowCoreV1),root.RaceCorner34V1?.modelStatus?.(),root.RSAClosingShadowV1?.status?.(),root.M3PureAbilityState?.at]);if(!force&&signature===sig&&(!x.ready||x.tier==="C"||snapshot))return;signature=sig;renderCount++;root.RSAAxis8PrimaryState={...x,at:Date.now(),ticketDecision:false};root.dispatchEvent(new root.CustomEvent("axis8-comparison-changed"));
+  const skipped=x.ready&&x.tier==="C";setAnalysisLock(skipped||x.status==="out");$("a8PartnerWait").hidden=x.ready;$("a8FormationWait").hidden=x.ready||!!x.pre?.ready;$("axis8Controls").hidden=!x.ready||skipped;$("axis8Pre").hidden=x.ready||!x.pre?.ready;$("axis8Analysis").hidden=skipped||(!x.ready&&!x.pre?.ready);$("axis8Result").innerHTML=axisVerdict(x);
+  if(skipped||x.status==="out"){for(const id of ["axis8Opp","axis8Pre","a8AxisDetails","a8ClosingCompare","a8FourModelCompare","axis8Field","axis8FormationBody"])$(id).textContent="";publishSnapshot(null);return;}
   if(!x.ready){
    $("axis8Opp").textContent="";$("a8AxisDetails").textContent="";$("a8ClosingCompare").innerHTML="";$("a8FourModelCompare").innerHTML="";publishSnapshot(null);
    if(!x.pre?.ready){lastFormation=null;$("axis8Pre").textContent="";$("axis8Field").textContent="";$("axis8FormationBody").textContent="";return;}
