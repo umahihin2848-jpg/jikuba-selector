@@ -168,6 +168,19 @@ const C=(function axis8Core(){
   if(!confirmed)return {ready:false,status:"hold",reason:"確定馬番を照合すると最終判定できます",pre};
   return {...C.compute(state.input),pre};
  }
+ // Read-only research bridge. Does not change axis, tier, or partner logic.
+ function getAbilityComparison(){
+  const state=readInput();if(!state.input)return {ready:false,reason:state.reason};
+  const pre=C.preliminary(state.input);if(!pre.ready)return {ready:false,reason:pre.reason};
+  const generation=root.RSAAnalysisTransitionState?.generation;
+  const form=C.formation({ready:true,rows:pre.rows,axis:null},[],root.ValidatedQueueState,root.PositionRiskState,root.MobileAnalysisCoreState,root.RSAAnalysisTransitionState,started);
+  // parseOdds is internal to C; obtain the validated market rows only through compute.
+  const x=confirmed?C.compute(state.input):null, m=x?.ready?C.pl(x.rows):null;
+  const byNo=m?Object.fromEntries(x.rows.map((h,i)=>[h.no,m.three[i]])):{};
+  const meta=Object.fromEntries(["raceDate","venue","raceName","grade","surface","distance","going","fieldSize"].map(id=>[id,String($(id)?.value||"")]));
+  return {ready:true,confirmed,generation,started,meta,activeModel:state.input.ability.activeModel,axisNo:x?.ready?x.axis.no:null,marketReady:!!m,rows:pre.rows.map(h=>{const d=C.horseDetail(h,pre.rows.length,state.input.finish,root.PositionRiskState,form,generation,started);return {no:h.no,name:h.name,ar:h.ar,mr:h.mr,m4:d.m4,m4Range:d.m4Range,market3:byNo[h.no]??null};})};
+ }
+ root.RSAAxis8ComparisonV1=Object.freeze({getComparison:getAbilityComparison});
  function publishSnapshot(next){
   snapshot=next;const sig=JSON.stringify(next);
   if(sig===snapshotSig)return;
@@ -184,7 +197,7 @@ const C=(function axis8Core(){
   if(!ensure())return;$("axis8ConfirmLabel").hidden=dirty||!started||root.RSAAnalysisTransitionState?.status!=="ready";$("axis8Confirm").checked=confirmed;const x=read();latest=x;
   const key=x.ready?JSON.stringify([started,x.axis.no,x.rows.map(h=>[h.no,h.name,h.od])]):"";
   if(key!==pairKey){pairKey=key;pairText="";$("axis8Pairs").value="";}
-  const sig=JSON.stringify([x,confirmed,target,metric,pairText,root.Finish600State?.at,root.PositionRiskState?.at,root.ValidatedQueueState?.at,root.MobileAnalysisCoreState?.at,root.RSAAnalysisTransitionState?.generation,Boolean(root.RSAForecastWorkflowCoreV1),root.RaceCorner34V1?.modelStatus?.(),root.RSAClosingShadowV1?.status?.(),root.M3PureAbilityState?.at]);if(!force&&signature===sig&&(!x.ready||snapshot))return;signature=sig;renderCount++;root.RSAAxis8PrimaryState={...x,at:Date.now(),ticketDecision:false};
+  const sig=JSON.stringify([x,confirmed,target,metric,pairText,root.Finish600State?.at,root.PositionRiskState?.at,root.ValidatedQueueState?.at,root.MobileAnalysisCoreState?.at,root.RSAAnalysisTransitionState?.generation,Boolean(root.RSAForecastWorkflowCoreV1),root.RaceCorner34V1?.modelStatus?.(),root.RSAClosingShadowV1?.status?.(),root.M3PureAbilityState?.at]);if(!force&&signature===sig&&(!x.ready||snapshot))return;signature=sig;renderCount++;root.RSAAxis8PrimaryState={...x,at:Date.now(),ticketDecision:false};root.dispatchEvent(new root.CustomEvent("axis8-comparison-changed"));
   $("a8PartnerWait").hidden=x.ready;$("a8FormationWait").hidden=x.ready||!!x.pre?.ready;$("axis8Controls").hidden=!x.ready;$("axis8Pre").hidden=x.ready||!x.pre?.ready;$("axis8Analysis").hidden=!x.ready&&!x.pre?.ready;$("axis8Result").innerHTML=x.ready?'<h3>'+esc(x.tier+"｜"+({S:"高信頼",A:"分析対象",B:"条件付き",C:"見送り"}[x.tier]))+'</h3><p>'+esc(x.reason)+' ｜ '+esc(x.structure==="none"?"一致なし":x.structure)+'</p><p><b>◎ '+esc(x.axis.no+"番 "+x.axis.name)+'</b> ｜ '+esc(x.axis.pop+"番人気・Ability "+x.axis.ar+"位・M3 "+x.axis.mr+"位")+'</p><p>勝率 '+pct(x.calibrated[0])+' ／ 連対率 '+pct(x.calibrated[1])+' ／ 3着内率 <b>'+pct(x.calibrated[2])+'</b></p><small>2026年固定の長期代理モデル較正。軸の個別推定値であり、全馬較正確率の整合性は未検証。馬券購入は自身で判断。</small>':'<h3>'+esc(x.status==="out"?"対象外":"判定保留")+'</h3><p>'+esc(x.reason)+'</p>';
   if(!x.ready){
    $("axis8Opp").textContent="";$("a8AxisDetails").textContent="";$("a8ClosingCompare").innerHTML="";$("a8FourModelCompare").innerHTML="";publishSnapshot(null);
