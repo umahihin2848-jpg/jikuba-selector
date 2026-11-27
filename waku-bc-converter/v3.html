@@ -59,6 +59,29 @@ body.rsaFocusedThreeTabs main.view > :not(#axis8Primary):not(#raceCondCard):not(
 body.rsaFocusedThreeTabs main.view > #rsaFocusedView{display:none!important}
 </style>
 <style id="axis8-primary-display">
+html body #axis8Primary .a8fold,html body #axis8Primary #abilityDCompare{border:1px solid #3c586a;border-radius:10px;padding:10px 12px;margin:8px 0;background:#102638}
+html body #axis8Primary .a8fold>summary,html body #axis8Primary #abilityDCompare>summary{font-weight:700;font-size:14px;line-height:1.6;cursor:pointer;color:#d9e9f2}
+html body #axis8Primary .a8preCandidates{border-top:1px solid #39576a;padding-top:10px;margin-top:12px}
+html body #axis8Primary .a8preCandidates>div{padding:7px 0}
+html body #axis8Primary .a8preCandidates strong,html body #axis8Primary .a8preCandidates small{display:block}
+html body #axis8Primary .a8preCandidates strong{font-size:clamp(20px,5.8vw,28px);line-height:1.35;overflow-wrap:anywhere}
+html body #axis8Primary .a8preCandidates small{color:#b7ced9;font-size:12px}
+html body #axis8Primary .a8rankLine{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:8px 0}
+html body #axis8Primary .a8rankLine .a8fact{padding:6px 3px}
+html body #axis8Primary .a8researchHorse{border-top:1px solid #3c586a;padding-top:8px}
+html body #axis8Primary #axis8ConfirmLabel{margin:7px 0 10px}
+html body #axis8Primary .adcDbShort{display:inline-block;margin-left:6px;color:#b7cbd8;font-size:11px;font-weight:500}
+html body #axis8Primary .adcDbShort[data-ready="1"]{color:#a9ead9}
+html body #axis8Primary .adcSettings,html body #axis8Primary .adcExplain{border-top:1px solid #3c586a;padding:8px 0;margin:8px 0}
+html body #axis8Primary .adcSettings>summary,html body #axis8Primary .adcExplain>summary{font-size:13px;color:#c0d7e3}
+html body #axis8Primary .adcTableTools{font-size:12px;margin:8px 0}
+html body #axis8Primary .adcTableTools input{width:16px;height:16px;vertical-align:middle}
+html body #axis8Primary #abilityDCompare[data-extra="0"] .adcTable{min-width:0;table-layout:fixed;width:100%}
+html body #axis8Primary #abilityDCompare[data-extra="0"] .adcTable th:first-child,html body #axis8Primary #abilityDCompare[data-extra="0"] .adcTable td:first-child{width:48%;min-width:0;max-width:none;position:static}
+html body #axis8Primary #abilityDCompare[data-extra="0"] .adcTable th:nth-child(n+6),html body #axis8Primary #abilityDCompare[data-extra="0"] .adcTable td:nth-child(n+6){display:none}
+html body #axis8Primary #abilityDCompare[data-extra="0"] .adcTable th,html body #axis8Primary #abilityDCompare[data-extra="0"] .adcTable td{padding:7px 3px;font-size:12px}
+html body #axis8Primary[data-a8-locked="1"] #a8AxisDetailFold,html body #axis8Primary[data-a8-locked="1"] #a8ResearchFold{display:none!important}
+
 html body #axis8Primary .a8affinity[data-kind="w"]{--a8aff:#94e4c4}
 html body #axis8Primary .a8affinity[data-kind="q"]{--a8aff:#9cc9f2}
 html body #axis8Primary .a8horseProbs .a8affinity b{color:var(--a8aff);font-size:clamp(23px,6vw,30px);font-variant-numeric:tabular-nums}
@@ -219,8 +242,8 @@ html body #rsaFocusedView,html body #raceSkipCard,html body #axisAccessScreen,ht
 <script src="prediction-reliability-shadow-v1.js?v=20261119weekend1"></script>
 <script src="closing-shadow-v1.js?v=20261126close1"></script>
 <script src="four-model-pattern-v1.js?v=20261126four1"></script>
-<script src="axis8-primary-v1.js?v=20261127partner1"></script>
+<script src="axis8-primary-v1.js?v=20261127clean1"></script>
 <script src="ability-d-engine-v1.js?v=20261126d1"></script>
-<script src="ability-d-compare-v1.js?v=20261127auto1"></script>
+<script src="ability-d-compare-v1.js?v=20261127clean1"></script>
 <script src="axis8-ledger-v1.js?v=20261125tabs3"></script>
 </body></html>
