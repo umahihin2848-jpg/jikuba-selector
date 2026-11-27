@@ -59,6 +59,14 @@ body.rsaFocusedThreeTabs main.view > :not(#axis8Primary):not(#raceCondCard):not(
 body.rsaFocusedThreeTabs main.view > #rsaFocusedView{display:none!important}
 </style>
 <style id="axis8-primary-display">
+html body #axis8Primary .a8affinity[data-kind="w"]{--a8aff:#94e4c4}
+html body #axis8Primary .a8affinity[data-kind="q"]{--a8aff:#9cc9f2}
+html body #axis8Primary .a8horseProbs .a8affinity b{color:var(--a8aff);font-size:clamp(23px,6vw,30px);font-variant-numeric:tabular-nums}
+html body #axis8Primary .a8affinity>small:first-child{font-size:13px;font-weight:700;color:#e5eff5}
+html body #axis8Primary .a8affinityTrack{height:6px;background:#294657;border-radius:6px;overflow:hidden;margin:5px 3px 8px}
+html body #axis8Primary .a8affinityTrack i{height:100%;display:block;background:var(--a8aff)}
+html body #axis8Primary .a8affinity .a8affinityNote{font-size:11px;line-height:1.45;color:#c5d8e2;overflow-wrap:anywhere}
+
 html body #axis8Primary[data-a8-locked="1"] .a8tabs,html body #axis8Primary[data-a8-locked="1"] #a8AxisDetails,html body #axis8Primary[data-a8-locked="1"] #a8FourModelCompare,html body #axis8Primary[data-a8-locked="1"] #a8ClosingCompare,html body #axis8Primary[data-a8-locked="1"] #a8RecordHost,html body #axis8Primary[data-a8-locked="1"] #abilityDCompare{display:none!important}
 html[data-axis8-verdict="skip"] body main.view > :not(#axis8Primary):not(#raceCondCard):not(#csvCard):not(#oddsCard):not(#mpuSetup):not(#analyzeBtn):not(#rsaAnalysisFeedback){display:none!important}
 html body #axis8Primary .a8verdict{--a8accent:#a8c4d5;border:1px solid #426073;background:#102638;border-radius:15px;padding:16px;margin:12px 0;color:#eef5fa}
@@ -211,7 +219,7 @@ html body #rsaFocusedView,html body #raceSkipCard,html body #axisAccessScreen,ht
 <script src="prediction-reliability-shadow-v1.js?v=20261119weekend1"></script>
 <script src="closing-shadow-v1.js?v=20261126close1"></script>
 <script src="four-model-pattern-v1.js?v=20261126four1"></script>
-<script src="axis8-primary-v1.js?v=20261127verdict1"></script>
+<script src="axis8-primary-v1.js?v=20261127partner1"></script>
 <script src="ability-d-engine-v1.js?v=20261126d1"></script>
 <script src="ability-d-compare-v1.js?v=20261126db1"></script>
 <script src="axis8-ledger-v1.js?v=20261125tabs3"></script>
