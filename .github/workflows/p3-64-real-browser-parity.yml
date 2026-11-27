@@ -1,0 +1,49 @@
+name: P3-64 real Chromium initial / remaining600 / M3 parity (research)
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'tests/p3-64-real-chromium-m3-parity.cjs'
+      - '.github/workflows/p3-64-real-browser-parity.yml'
+      - 'waku-bc-converter/target-csv-compat-v1.js'
+      - 'waku-bc-converter/shape-core-v2.js'
+jobs:
+  chromium-parity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch current main as untouched old application
+        run: git fetch --no-tags origin main:refs/remotes/origin/main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install headless browser
+        run: |
+          npm install --no-save --no-package-lock playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Run same-race main/shadow Chromium E2E
+        run: node tests/p3-64-real-chromium-m3-parity.cjs
+      - name: Package public application sources for local private-data E2E
+        if: always()
+        run: |
+          mkdir -p p3-64-baseline
+          git show origin/main:waku-bc-converter/shape-core-v2.js > p3-64-baseline/shape-core-v2.js
+          git show origin/main:waku-bc-converter/target-csv-compat-v1.js > p3-64-baseline/target-csv-compat-v1.js
+          tar -czf p3-64-browser-sources.tar.gz waku-bc-converter p3-64-baseline
+      - name: Upload public app sources only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p3-64-browser-sources
+          path: p3-64-browser-sources.tar.gz
+          if-no-files-found: error
+      - name: Preserve synthetic comparisons
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p3-64-chromium-parity-synthetic
+          path: p3-64-real-chromium-results.json
+          if-no-files-found: ignore

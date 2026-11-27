@@ -1,0 +1,22 @@
+name: P3-63 history input parity (research only)
+
+on:
+  pull_request:
+    paths:
+      - 'waku-bc-converter/target-csv-compat-v1.js'
+      - 'waku-bc-converter/shape-core-v2.js'
+      - 'tests/p3-63-current-main-history-integrity.cjs'
+      - '.github/workflows/p3-63-history-input-parity.yml'
+  workflow_dispatch:
+
+jobs:
+  history-input-regression:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Node version
+        run: node --version
+      - name: Run synthetic-only input integrity parity
+        run: node tests/p3-63-current-main-history-integrity.cjs
